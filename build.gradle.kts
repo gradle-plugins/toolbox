@@ -1,0 +1,3 @@
+plugins {
+    dev.gradleplugins.ide
+}
