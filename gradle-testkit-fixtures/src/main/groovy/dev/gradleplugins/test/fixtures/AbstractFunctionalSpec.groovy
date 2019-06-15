@@ -16,6 +16,8 @@
 
 package dev.gradleplugins.test.fixtures
 
+import dev.gradleplugins.test.fixtures.file.TestFile
+import dev.gradleplugins.test.fixtures.file.TestNameTestDirectoryProvider
 import org.gradle.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.Rule
@@ -23,21 +25,23 @@ import spock.lang.Specification
 
 class AbstractFunctionalSpec extends Specification {
     @Rule
-    final dev.gradleplugins.test.fixtures.file.TestNameTestDirectoryProvider temporaryFolder = new dev.gradleplugins.test.fixtures.file.TestNameTestDirectoryProvider()
+    final TestNameTestDirectoryProvider temporaryFolder = new dev.gradleplugins.test.fixtures.file.TestNameTestDirectoryProvider()
 
-    File projectDir
-    File buildFile
-    File settingsFile
+    protected TestFile getProjectDir() {
+        return testDirectory
+    }
+
+    protected TestFile getBuildFile() {
+        return testDirectory.file(getBuildFileName())
+    }
+
+    protected File getSettingsFile() {
+        return testDirectory.file(getSettingsFileName())
+    }
 
     BuildResult result
 
     private boolean isBuildCacheEnabled = false
-
-    def setup() {
-        projectDir = temporaryFolder.testDirectory
-        buildFile = temporaryFolder.createFile(getBuildFileName())
-        settingsFile = temporaryFolder.createFile(getSettingsFileName())
-    }
 
     protected BuildResult build(String... arguments) {
         result = createAndConfigureGradleRunner(arguments).build()
@@ -86,11 +90,15 @@ class AbstractFunctionalSpec extends Specification {
         return file
     }
 
-    String getBuildFileName() {
+    protected String getBuildFileName() {
         return "build.gradle"
     }
 
-    String getSettingsFileName() {
+    protected String getSettingsFileName() {
         return "settings.gradle"
+    }
+
+    protected TestFile getTestDirectory() {
+        temporaryFolder.testDirectory
     }
 }

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package dev.gradleplugins.test.fixtures.file
+package dev.gradleplugins.test.fixtures.file;
+
+import java.io.File;
 
 /**
  * Implementations provide a working space to be used in tests.

@@ -1,5 +1,5 @@
 plugins {
-    `groovy`
+    groovy
     dev.gradleplugins.shaded
     dev.gradleplugins.artifacts
     dev.gradleplugins.publishing
@@ -15,9 +15,15 @@ repositories {
 }
 
 dependencies {
+    shaded("commons-io:commons-io:2.6")
+
+    // This is tricky as it's a API dependency but isn't published anywhere
+    //   Let's put the burden on the user to declare that as well
+    implementation(gradleTestKit())
+
+    // This is tricky as it's a API dependency but may work for other versions
+    //    Let's put the burden on the user to declare his requirements but also assume the code is compatible with older versions ;)
     implementation("org.spockframework:spock-core:1.2-groovy-2.5") {
         exclude(group = "org.codehaus.groovy")
     }
-    shaded("commons-io:commons-io:2.6")
-    implementation(gradleTestKit())
 }

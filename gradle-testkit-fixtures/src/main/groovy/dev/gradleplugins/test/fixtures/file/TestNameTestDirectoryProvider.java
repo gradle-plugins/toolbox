@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-package dev.gradleplugins.test.fixtures.file
+package dev.gradleplugins.test.fixtures.file;
 
-import org.junit.runners.model.FrameworkMethod
+import org.junit.runners.model.FrameworkMethod;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * A JUnit rule which provides a unique temporary folder for the test.
@@ -24,8 +27,7 @@ import org.junit.runners.model.FrameworkMethod
 public class TestNameTestDirectoryProvider extends AbstractTestDirectoryProvider {
     public TestNameTestDirectoryProvider() {
         // NOTE: the space in the directory name is intentional
-        root = createTemporaryFolderIn(null)
-//        root = new File("build/tmp/test files");
+        root = new TestFile(new File("build/tmp/test files"));
     }
 
     private File createTemporaryFolderIn(File parentFolder) throws IOException {
