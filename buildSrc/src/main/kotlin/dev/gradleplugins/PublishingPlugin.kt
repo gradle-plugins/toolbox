@@ -86,6 +86,7 @@ class PublishingPlugin : Plugin<Project> {
 
             pkg(closureOf<BintrayExtension.PackageConfig> {
                 repo = "maven"
+                userOrg = "gradle-plugins"
                 name = packageName
                 desc = project.description
                 websiteUrl = "https://github.com/gradle-plugins/${rootProject.name}"
@@ -101,15 +102,15 @@ class PublishingPlugin : Plugin<Project> {
                     vcsTag = "v${project.version}"
 
                     gpg(closureOf<BintrayExtension.GpgConfig> {
-                        sign = true
+                        sign = false
                         passphrase = resolveProperty("GPG_PASSPHRASE", "gpgPassphrase")
                     })
-                    mavenCentralSync(closureOf<BintrayExtension.MavenCentralSyncConfig> {
-                        sync = true
-                        user = resolveProperty("MAVEN_CENTRAL_USER_TOKEN", "mavenCentralUserToken")
-                        password = resolveProperty("MAVEN_CENTRAL_PASSWORD", "mavenCentralPassword")
-                        close = "1"
-                    })
+//                    mavenCentralSync(closureOf<BintrayExtension.MavenCentralSyncConfig> {
+//                        sync = true
+//                        user = resolveProperty("MAVEN_CENTRAL_USER_TOKEN", "mavenCentralUserToken")
+//                        password = resolveProperty("MAVEN_CENTRAL_PASSWORD", "mavenCentralPassword")
+//                        close = "1"
+//                    })
                 })
             })
         }

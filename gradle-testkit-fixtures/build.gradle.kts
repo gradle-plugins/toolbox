@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "dev.gradleplugins"
-version = "0.1.0-SNAPSHOT"
+version = "0.0.1"
 description = "Gradle TestKit fixtures for fast and efficient Gradle plugin development."
 
 repositories {
