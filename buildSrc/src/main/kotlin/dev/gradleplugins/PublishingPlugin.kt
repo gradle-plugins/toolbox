@@ -28,7 +28,7 @@ class PublishingPlugin : Plugin<Project> {
 
     private
     fun Project.configurePublishingExtension() {
-//        val shadowJar: ShadowJar by tasks
+        val shadowJar: ShadowJar by tasks
         val sourcesJar: Jar by tasks
         val groovydocJar: Jar by tasks
         val javadocJar: Jar by tasks
@@ -36,7 +36,7 @@ class PublishingPlugin : Plugin<Project> {
         configure<PublishingExtension> {
             publications {
                 create<MavenPublication>("mavenJava") {
-//                    artifact(shadowJar)
+                    artifact(shadowJar)
                     artifact(sourcesJar)
                     artifact(groovydocJar)
                     artifact(javadocJar)

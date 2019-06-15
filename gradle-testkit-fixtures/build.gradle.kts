@@ -1,5 +1,6 @@
 plugins {
     `groovy`
+    dev.gradleplugins.shaded
     dev.gradleplugins.artifacts
     dev.gradleplugins.publishing
 }
@@ -17,7 +18,6 @@ dependencies {
     implementation("org.spockframework:spock-core:1.2-groovy-2.5") {
         exclude(group = "org.codehaus.groovy")
     }
-    implementation("com.gradle.publish:plugin-publish-plugin:0.10.1")
-    implementation("commons-io:commons-io:2.6")
+    shaded("commons-io:commons-io:2.6")
     implementation(gradleTestKit())
 }
