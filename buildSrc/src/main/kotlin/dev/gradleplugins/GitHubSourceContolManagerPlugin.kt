@@ -44,6 +44,11 @@ class GitHubSourceContolManagerPlugin : Plugin<Project> {
                             connection.set(gitHub.sourceControlManagerUrl(GitHubSourceControlManagerExtension.SourceControlManagerProtocol.HTTPS).map { "scm:$it" })
                             developerConnection.set(gitHub.sourceControlManagerUrl(GitHubSourceControlManagerExtension.SourceControlManagerProtocol.GIT).map { "scm:$it" })
                         }
+
+                        issueManagement {
+                            system.set("GitHub")
+                            url.set(gitHub.gitHubIssueTrackerUrl.map { it.toString() })
+                        }
                     }
                 }
             }
