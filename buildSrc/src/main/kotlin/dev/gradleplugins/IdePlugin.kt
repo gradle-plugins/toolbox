@@ -2,7 +2,6 @@ package dev.gradleplugins
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.withType
 import org.gradle.plugins.ide.idea.IdeaPlugin
 import java.io.File
@@ -15,22 +14,23 @@ open class IdePlugin : Plugin<Project> {
 
     private
     fun Project.configureIdeaForRootProject() {
-        apply(plugin = "org.jetbrains.gradle.plugin.idea-ext")
-        tasks.named("idea") {
-            doFirst {
-                throw RuntimeException("To import in IntelliJ, please follow the instructions here: https://github.com/gradle/gradle/blob/master/CONTRIBUTING.md#intellij")
-            }
-        }
-
-        plugins.withType<IdeaPlugin> {
-            with(model) {
-                module {
-                    excludeDirs = excludeDirs + rootExcludeDirs
+        pluginManager.withPlugin("org.jetbrains.gradle.plugin.idea-ext") {
+            tasks.named("idea") {
+                doFirst {
+                    throw RuntimeException("To import in IntelliJ, please follow the instructions here: https://github.com/gradle/gradle/blob/master/CONTRIBUTING.md#intellij but use this repo ;-)")
                 }
+            }
 
-                project {
-                    jdkName = "8.0"
-                    wildcards.add("?*.gradle")
+            plugins.withType<IdeaPlugin> {
+                with(model) {
+                    module {
+                        excludeDirs = excludeDirs + rootExcludeDirs
+                    }
+
+                    project {
+                        jdkName = "8.0"
+                        wildcards.add("?*.gradle")
+                    }
                 }
             }
         }
