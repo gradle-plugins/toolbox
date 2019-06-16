@@ -73,7 +73,6 @@ class PublishingPlugin : Plugin<Project> {
                 repo = "maven"
                 name = packageName
                 desc = project.description
-//                setLicenses("Apache-2.0")
                 setLabels("gradle", "gradle-plugins")
                 publicDownloadNumbers = true
 
