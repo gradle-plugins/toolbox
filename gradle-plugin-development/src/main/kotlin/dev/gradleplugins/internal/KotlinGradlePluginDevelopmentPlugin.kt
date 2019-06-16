@@ -18,10 +18,17 @@ package dev.gradleplugins.internal
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.kotlin
 
 class KotlinGradlePluginDevelopmentPlugin : Plugin<Project> {
     override fun apply(project: Project): Unit = project.run {
-        project.pluginManager.apply(GradlePluginDevelopmentBasePlugin::class.java)
+        apply<GradlePluginDevelopmentBasePlugin>()
         project.pluginManager.apply("kotlin-dsl")
+
+        dependencies {
+            add("implementation", kotlin("gradle-plugin"))
+        }
     }
 }

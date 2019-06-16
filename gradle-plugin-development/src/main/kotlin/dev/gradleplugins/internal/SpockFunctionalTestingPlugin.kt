@@ -21,7 +21,10 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.GroovySourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.testing.Test
+import org.gradle.internal.impldep.org.bouncycastle.asn1.x500.style.RFC4519Style.description
 import org.gradle.kotlin.dsl.*
+import org.gradle.testkit.runner.internal.GradleProvider.uri
+import java.net.URL
 
 class SpockFunctionalTestingPlugin : Plugin<Project> {
     override fun apply(project: Project): Unit = project.run {
@@ -29,7 +32,7 @@ class SpockFunctionalTestingPlugin : Plugin<Project> {
         configureFunctionalTestingWithSpockAndTestKit(project)
     }
 
-    fun configureFunctionalTestingWithSpockAndTestKit(project: Project) {
+    private fun configureFunctionalTestingWithSpockAndTestKit(project: Project) {
         val sourceSets = project.extensions.getByType(SourceSetContainer::class.java)
 
         val functionalTestSourceSet = sourceSets.create("functionalTest") {
@@ -43,13 +46,31 @@ class SpockFunctionalTestingPlugin : Plugin<Project> {
             runtimeClasspath += output + compileClasspath
         }
 
+        val functionalTestFixtureConfiguration = project.configurations.create("functionalTestFixtureImplementation")
+        project.configurations.named("functionalTestImplementation") {
+            extendsFrom(functionalTestFixtureConfiguration)
+        }
+
         project.dependencies {
             add("functionalTestImplementation", "org.spockframework:spock-core:1.2-groovy-2.5") {
                 exclude(group = "org.codehaus.groovy")
             }
             add("functionalTestImplementation", gradleTestKit())
+            add("functionalTestFixtureImplementation", TestFixtures.notation)
+        }
 
-            // TODO: add current plugin artifact
+        if (TestFixtures.released) {
+            project.repositories.maven {
+                name = "Gradle Plugins Release"
+                url = project.uri("https://dl.bintray.com/gradle-plugins/maven")
+            }
+        } else {
+            project.repositories.maven {
+                name = "Gradle Plugins Snapshot"
+                url = project.uri("https://dl.bintray.com/gradle-plugins/maven-snapshot")
+            }
+            functionalTestFixtureConfiguration.resolutionStrategy.cacheChangingModulesFor(0, "seconds")
+            project.repositories.mavenLocal()
         }
 
         val functionalTest = project.tasks.register("functionalTest", Test::class) {
