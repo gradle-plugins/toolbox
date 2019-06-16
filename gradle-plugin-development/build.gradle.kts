@@ -9,7 +9,7 @@ plugins {
     `groovy`
     `maven-publish`
     `java-gradle-plugin`
-    id("com.gradle.plugin-publish") version("0.10.1")
+    id("com.gradle.plugin-publish")
 }
 
 // Supported by the development plugins
@@ -58,11 +58,9 @@ object TestFixtures {
 """)
     }
 }
-
 tasks.named<KotlinCompile>("compileKotlin") {
     dependsOn(generatorTask)
 }
-
 sourceSets.main.configure {
     withConvention(KotlinSourceSet::class) {
         kotlin.srcDir(project.layout.buildDirectory.dir("generatedSources"))
@@ -91,7 +89,6 @@ gradlePlugin {
 
 pluginBundle {
     website = "https://gradleplugins.dev/"
-    vcsUrl = "https://github.com/gradle-plugins/${rootProject.name}"
 //    description = "A sets of highly opinionated plugins to kick start any Gradle plugin project."
     tags = listOf("gradle", "gradle-plugins", "development")
 

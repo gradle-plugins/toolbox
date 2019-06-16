@@ -16,6 +16,7 @@
 
 package dev.gradleplugins
 
+import com.gradle.publish.PluginBundleExtension
 import com.jfrog.bintray.gradle.BintrayExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -25,6 +26,7 @@ import org.gradle.kotlin.dsl.closureOf
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.withType
 import org.gradle.plugins.ide.idea.IdeaPlugin
+import org.gradle.plugins.ide.idea.model.IdeaModel
 
 class GitHubSourceContolManagerPlugin : Plugin<Project> {
     override fun apply(project: Project): Unit = project.run {
@@ -70,10 +72,18 @@ class GitHubSourceContolManagerPlugin : Plugin<Project> {
             }
         }
 
-        plugins.withType<IdeaPlugin> {
-            with(model) {
+        pluginManager.withPlugin("org.jetbrains.gradle.plugin.idea-ext") {
+            configure<IdeaModel> {
                 project {
                     vcs = "Git"
+                }
+            }
+        }
+
+        pluginManager.withPlugin("com.gradle.plugin-publish") {
+            afterEvaluate {
+                configure<PluginBundleExtension> {
+                    vcsUrl = gitHub.gitHubWebsiteUrl.get().toString()
                 }
             }
         }
