@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package dev.gradleplugins.test.fixtures
+package dev.gradleplugins.integtests.fixtures
 
 import dev.gradleplugins.test.fixtures.file.TestFile
 import dev.gradleplugins.test.fixtures.file.TestNameTestDirectoryProvider
-import org.gradle.BuildResult
+import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
+import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Rule
 import spock.lang.Specification
 
 class AbstractFunctionalSpec extends Specification {
     @Rule
-    final TestNameTestDirectoryProvider temporaryFolder = new dev.gradleplugins.test.fixtures.file.TestNameTestDirectoryProvider()
+    final TestNameTestDirectoryProvider temporaryFolder = new TestNameTestDirectoryProvider()
 
     protected TestFile getProjectDir() {
         return testDirectory
@@ -47,6 +48,14 @@ class AbstractFunctionalSpec extends Specification {
         result = createAndConfigureGradleRunner(arguments).build()
         println(result.output)
         return result
+    }
+
+    protected BuildResult succeeds(String... arguments) {
+        return build(arguments)
+    }
+
+    protected BuildResult run(String... arguments) {
+        return build(arguments)
     }
 
     protected BuildResult buildAndFail(String... arguments) {
