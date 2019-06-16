@@ -19,6 +19,7 @@ package dev.gradleplugins;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.provider.ProviderFactory;
 
+import javax.inject.Inject;
 import java.net.URL;
 
 public class OpenSourceSoftwareLicenseExtension {
@@ -54,6 +55,7 @@ public class OpenSourceSoftwareLicenseExtension {
                 + "limitations under the License.");
     }
 
+    @Inject
     protected ProviderFactory getProviderFactory() {
         throw new UnsupportedOperationException();
     }
