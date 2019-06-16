@@ -37,5 +37,9 @@ gradlePlugin {
             id = "dev.gradleplugins.shaded-artifact"
             implementationClass = "dev.gradleplugins.ShadedArtifactPlugin"
         }
+        register("github-plugin") {
+            id = "dev.gradleplugins.scm.github"
+            implementationClass = "dev.gradleplugins.GitHubSourceControlManagerPlugin"
+        }
     }
 }

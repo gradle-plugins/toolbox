@@ -44,14 +44,7 @@ class PublishingPlugin : Plugin<Project> {
                     pom {
                         name.set("Gradle TestKit Fixtures")
                         description.set(project.provider { project.description })
-                        url.set("https://github.com/gradle-plugins/${rootProject.name}")
                         inceptionYear.set("2019")
-
-                        scm {
-                            url.set("https://github.com/gradle-plugins/${rootProject.name}")
-                            connection.set("scm:https://github.com/gradle-plugins/${rootProject.name}.git")
-                            developerConnection.set("scm:git://github.com/gradle-plugins/${rootProject.name}.git")
-                        }
 
                         licenses {
                             license {
@@ -89,13 +82,9 @@ class PublishingPlugin : Plugin<Project> {
                 userOrg = "gradle-plugins"
                 name = packageName
                 desc = project.description
-                websiteUrl = "https://github.com/gradle-plugins/${rootProject.name}"
-                issueTrackerUrl = "https://github.com/gradle-plugins/${rootProject.name}/issues"
-                vcsUrl = "https://github.com/gradle-plugins/${rootProject.name}.git"
                 setLicenses("Apache-2.0")
                 setLabels("gradle", "gradle-plugins")
                 publicDownloadNumbers = true
-                githubRepo = "gradle-plugins/${rootProject.name}"
 
                 version(closureOf<BintrayExtension.VersionConfig> {
                     released = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").format(Date())
