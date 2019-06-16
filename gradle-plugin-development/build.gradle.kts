@@ -5,9 +5,6 @@ plugins {
     id("com.gradle.plugin-publish") version("0.10.1")
 }
 
-group = "dev.gradleplugins"
-version = "0.1.0-SNAPSHOT"
-
 // Supported by the development plugins
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8

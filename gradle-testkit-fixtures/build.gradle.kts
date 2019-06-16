@@ -5,8 +5,6 @@ plugins {
     dev.gradleplugins.publishing
 }
 
-group = "dev.gradleplugins"
-version = "0.0.1"
 description = "Gradle TestKit fixtures for fast and efficient Gradle plugin development."
 
 java {
