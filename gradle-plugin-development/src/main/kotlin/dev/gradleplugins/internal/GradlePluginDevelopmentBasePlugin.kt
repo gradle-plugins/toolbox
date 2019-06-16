@@ -40,7 +40,7 @@ class GradlePluginDevelopmentBasePlugin : Plugin<Project> {
             targetCompatibility = JavaVersion.VERSION_1_8
         }
 
-        configure<GradlePluginDevelopmentExtension>() {
+        configure<GradlePluginDevelopmentExtension> {
             testSourceSets(project.the<SourceSetContainer>().getByName("functionalTest"))
         }
     }
