@@ -46,14 +46,6 @@ class PublishingPlugin : Plugin<Project> {
                         description.set(project.provider { project.description })
                         inceptionYear.set("2019")
 
-                        licenses {
-                            license {
-                                name.set("The Apache Software License, Version 2.0")
-                                url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
-                                distribution.set("repo")
-                            }
-                        }
-
                         developers {
                             developer {
                                 id.set("lacasseio")
@@ -82,7 +74,7 @@ class PublishingPlugin : Plugin<Project> {
                 userOrg = "gradle-plugins"
                 name = packageName
                 desc = project.description
-                setLicenses("Apache-2.0")
+//                setLicenses("Apache-2.0")
                 setLabels("gradle", "gradle-plugins")
                 publicDownloadNumbers = true
 
