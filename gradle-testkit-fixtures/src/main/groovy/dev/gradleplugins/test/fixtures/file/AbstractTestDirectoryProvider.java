@@ -16,13 +16,11 @@
 
 package dev.gradleplugins.test.fixtures.file;
 
-import org.apache.commons.io.FileUtils;
 import org.gradle.api.GradleException;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Random;
