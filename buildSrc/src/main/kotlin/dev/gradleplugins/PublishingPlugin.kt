@@ -61,37 +61,39 @@ class PublishingPlugin : Plugin<Project> {
 
     private
     fun Project.configureBintrayExtension() {
-        val packageName = "dev.gradleplugins:${project.name}"
+        afterEvaluate {
+            val packageName = "${project.group}:${project.name}"
 
-        configure<BintrayExtension> {
-            user = resolveProperty("BINTRAY_USER", "bintrayUser")
-            key = resolveProperty("BINTRAY_KEY", "bintrayKey")
-            setPublications("mavenJava")
-            publish = true
+            configure<BintrayExtension> {
+                user = resolveProperty("BINTRAY_USER", "bintrayUser")
+                key = resolveProperty("BINTRAY_KEY", "bintrayKey")
+                setPublications("mavenJava")
+                publish = true
 
-            pkg(closureOf<BintrayExtension.PackageConfig> {
-                repo = "maven"
-                name = packageName
-                desc = project.description
-                setLabels("gradle", "gradle-plugins")
-                publicDownloadNumbers = true
+                pkg(closureOf<BintrayExtension.PackageConfig> {
+                    repo = "maven" + (if (project.version.toString().contains("-SNAPSHOT")) "-snapshot" else "")
+                    name = packageName
+                    desc = project.description
+                    setLabels("gradle", "gradle-plugins")
+                    publicDownloadNumbers = true
 
-                version(closureOf<BintrayExtension.VersionConfig> {
-                    released = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").format(Date())
-                    vcsTag = "v${project.version}"
+                    version(closureOf<BintrayExtension.VersionConfig> {
+                        released = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").format(Date())
+                        vcsTag = "v${project.version}"
 
-                    gpg(closureOf<BintrayExtension.GpgConfig> {
-                        sign = false
-                        passphrase = resolveProperty("GPG_PASSPHRASE", "gpgPassphrase")
-                    })
+                        gpg(closureOf<BintrayExtension.GpgConfig> {
+                            sign = false
+                            passphrase = resolveProperty("GPG_PASSPHRASE", "gpgPassphrase")
+                        })
 //                    mavenCentralSync(closureOf<BintrayExtension.MavenCentralSyncConfig> {
 //                        sync = true
 //                        user = resolveProperty("MAVEN_CENTRAL_USER_TOKEN", "mavenCentralUserToken")
 //                        password = resolveProperty("MAVEN_CENTRAL_PASSWORD", "mavenCentralPassword")
 //                        close = "1"
 //                    })
+                    })
                 })
-            })
+            }
         }
     }
 
