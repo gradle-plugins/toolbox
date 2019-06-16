@@ -23,6 +23,8 @@ import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.kotlin.dsl.closureOf
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.withType
+import org.gradle.plugins.ide.idea.IdeaPlugin
 
 class GitHubSourceContolManagerPlugin : Plugin<Project> {
     override fun apply(project: Project): Unit = project.run {
@@ -59,6 +61,14 @@ class GitHubSourceContolManagerPlugin : Plugin<Project> {
 
                         githubRepo = gitHub.gitHubRepositorySlug.get()
                     })
+                }
+            }
+        }
+
+        plugins.withType<IdeaPlugin> {
+            with(model) {
+                project {
+                    vcs = "Git"
                 }
             }
         }
