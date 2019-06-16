@@ -18,9 +18,12 @@ package dev.gradleplugins
 
 import com.github.jengelman.gradle.plugins.shadow.ShadowPlugin
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import groovy.util.Node
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.*
@@ -32,6 +35,23 @@ class ShadedArtifactPlugin: Plugin<Project> {
         val shadedArtifact = createShadedExtension()
         val shadowJar = configureShadowJarTask(shadedConfiguration, shadedArtifact)
         wireShadowJarTaskInLifecycle(shadowJar)
+
+        pluginManager.withPlugin("maven-publish") {
+            configure<PublishingExtension> {
+                publications.withType(MavenPublication::class.java) {
+                    pom.withXml {
+                        val artifactIdsToRemove = shadedConfiguration.allDependencies.map { it.name }
+                        (asNode().get("dependencies") as List<Node>).forEach { dependencies ->
+                            dependencies.setValue((dependencies.value() as List<Node>).filter { dependency ->
+                                val artifactIdNode = (dependency.value() as List<Node>).find { it.name().toString().contains("artifactId") }
+
+                                !artifactIdsToRemove.contains((artifactIdNode!!.value() as List<String>).first())
+                            })
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private
