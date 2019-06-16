@@ -71,7 +71,6 @@ class PublishingPlugin : Plugin<Project> {
 
             pkg(closureOf<BintrayExtension.PackageConfig> {
                 repo = "maven"
-                userOrg = "gradle-plugins"
                 name = packageName
                 desc = project.description
 //                setLicenses("Apache-2.0")
