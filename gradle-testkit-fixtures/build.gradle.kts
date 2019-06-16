@@ -9,6 +9,11 @@ group = "dev.gradleplugins"
 version = "0.0.1"
 description = "Gradle TestKit fixtures for fast and efficient Gradle plugin development."
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
 repositories {
     jcenter()
     gradlePluginPortal()
