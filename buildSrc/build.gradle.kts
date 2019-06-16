@@ -34,8 +34,8 @@ gradlePlugin {
             implementationClass = "dev.gradleplugins.AdditionalArtifactsPlugin"
         }
         register("shaded-artifacts-plugin") {
-            id = "dev.gradleplugins.shaded"
-            implementationClass = "dev.gradleplugins.ShadedArtifactsPlugin"
+            id = "dev.gradleplugins.shaded-artifact"
+            implementationClass = "dev.gradleplugins.ShadedArtifactPlugin"
         }
     }
 }

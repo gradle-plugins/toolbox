@@ -25,17 +25,25 @@ import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.*
 
-class ShadedArtifactsPlugin: Plugin<Project> {
+class ShadedArtifactPlugin: Plugin<Project> {
     override fun apply(project: Project): Unit = project.run {
         applyShadowPlugin()
-        val shaded = createShadedConfiguration()
-        val shadowJar = configureShadowJarTask(shaded)
+        val shadedConfiguration = createShadedConfiguration()
+        val shadedArtifact = createShadedExtension()
+        val shadowJar = configureShadowJarTask(shadedConfiguration, shadedArtifact)
         wireShadowJarTaskInLifecycle(shadowJar)
     }
 
     private
     fun Project.applyShadowPlugin() {
         apply<ShadowPlugin>()
+    }
+
+    private fun Project.createShadedExtension(): ShadedArtifactExtension {
+        val result = extensions.create("shadedArtifact", ShadedArtifactExtension::class.java)
+        result.packagesToRelocate.empty()
+        result.relocatePackagePrefix.set(provider { "${group}.internal.impldep" })
+        return result
     }
 
     private
@@ -47,16 +55,13 @@ class ShadedArtifactsPlugin: Plugin<Project> {
     }
 
     private
-    fun Project.configureShadowJarTask(shaded: Configuration): TaskProvider<ShadowJar> {
-        val packagesToRelocate = listOf(
-                "org.apache.commons.io"
-        )
+    fun Project.configureShadowJarTask(shadedConfiguration: Configuration, shadedExtension: ShadedArtifactExtension): TaskProvider<ShadowJar> {
         return tasks.named<ShadowJar>("shadowJar") {
             classifier = null
-            configurations = listOf(shaded)
+            configurations = listOf(shadedConfiguration)
             mergeServiceFiles()
-            for (pkg in packagesToRelocate) {
-                relocate(pkg, "dev.gradleplugins.internal.impldep.$pkg")
+            for (pkg in shadedExtension.packagesToRelocate.get()) {
+                relocate(pkg, "${shadedExtension.relocatePackagePrefix.get()}.$pkg")
             }
         }
     }

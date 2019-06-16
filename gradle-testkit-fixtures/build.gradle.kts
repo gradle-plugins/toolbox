@@ -1,6 +1,6 @@
 plugins {
     groovy
-    dev.gradleplugins.shaded
+    dev.gradleplugins.`shaded-artifact`
     dev.gradleplugins.artifacts
     dev.gradleplugins.publishing
 }
@@ -26,4 +26,8 @@ dependencies {
     implementation("org.spockframework:spock-core:1.2-groovy-2.5") {
         exclude(group = "org.codehaus.groovy")
     }
+}
+
+shadedArtifact {
+    packagesToRelocate.set(listOf("org.apache.commons.io"))
 }
