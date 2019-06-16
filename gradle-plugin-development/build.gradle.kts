@@ -2,6 +2,9 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    dev.gradleplugins.`shaded-artifact`
+
+    // Supported by the development plugins
     `kotlin-dsl`
     `groovy`
     `java-gradle-plugin`
@@ -21,11 +24,7 @@ repositories {
 
 dependencies {
     implementation(kotlin("gradle-plugin"))
-    implementation("org.spockframework:spock-core:1.2-groovy-2.5") {
-        exclude(group = "org.codehaus.groovy")
-    }
-    implementation("com.gradle.publish:plugin-publish-plugin:0.10.1")
-    implementation("commons-io:commons-io:2.6")
+    shaded("com.gradle.publish:plugin-publish-plugin:0.10.1")
     implementation(gradleTestKit())
 }
 
@@ -92,4 +91,8 @@ pluginBundle {
             displayName = "Visual Studio Code Gradle Plugin"
         }
     }
+}
+
+shadedArtifact {
+    packagesToRelocate.set(listOf("com.gradle.publish"))
 }
