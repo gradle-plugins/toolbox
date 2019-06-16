@@ -1,5 +1,6 @@
 import dev.gradleplugins.GitHubSourceContolManagerPlugin
 import dev.gradleplugins.GitHubSourceControlManagerExtension
+import dev.gradleplugins.OpenSourceSoftwareLicensePlugin
 
 plugins {
     dev.gradleplugins.ide
@@ -13,4 +14,6 @@ allprojects {
     configure<GitHubSourceControlManagerExtension> {
         gitHubOrganization.set("gradle-plugins")
     }
+
+    apply<OpenSourceSoftwareLicensePlugin>()
 }

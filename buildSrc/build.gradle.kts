@@ -41,5 +41,9 @@ gradlePlugin {
             id = "dev.gradleplugins.scm.github"
             implementationClass = "dev.gradleplugins.GitHubSourceControlManagerPlugin"
         }
+        register("oss-license-plugin") {
+            id = "dev.gradleplugins.license"
+            implementationClass = "dev.gradleplugins.OpenSourceSoftwareLicensePlugin"
+        }
     }
 }
