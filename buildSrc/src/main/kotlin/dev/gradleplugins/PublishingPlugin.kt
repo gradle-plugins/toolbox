@@ -28,18 +28,18 @@ class PublishingPlugin : Plugin<Project> {
 
     private
     fun Project.configurePublishingExtension() {
-        val shadowJar: ShadowJar by tasks
-        val sourcesJar: Jar by tasks
-        val groovydocJar: Jar by tasks
-        val javadocJar: Jar by tasks
+        val shadowJar = tasks.named<ShadowJar>("shadowJar")
+        val sourcesJar = tasks.named<Jar>("sourcesJar")
+        val groovydocJar = tasks.named<Jar>("groovydocJar")
+        val javadocJar = tasks.named<Jar>("javadocJar")
 
         configure<PublishingExtension> {
             publications {
                 create<MavenPublication>("mavenJava") {
-                    artifact(shadowJar)
-                    artifact(sourcesJar)
-                    artifact(groovydocJar)
-                    artifact(javadocJar)
+                    artifact(shadowJar.get())
+                    artifact(sourcesJar.get())
+                    artifact(groovydocJar.get())
+                    artifact(javadocJar.get())
 
                     pom {
                         name.set("Gradle TestKit Fixtures")

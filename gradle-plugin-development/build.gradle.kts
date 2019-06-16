@@ -17,6 +17,9 @@ java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 }
+tasks.named("publishPlugins") {
+    dependsOn("shadowJar")
+}
 
 repositories {
     jcenter()
@@ -101,5 +104,5 @@ pluginBundle {
 }
 
 shadedArtifact {
-    packagesToRelocate.set(listOf("com.gradle.publish"))
+    packagesToRelocate.set(listOf("com.gradle", "org.apache.maven.model"))
 }

@@ -56,20 +56,29 @@ class ShadedArtifactPlugin: Plugin<Project> {
 
     private
     fun Project.configureShadowJarTask(shadedConfiguration: Configuration, shadedExtension: ShadedArtifactExtension): TaskProvider<ShadowJar> {
+        // TODO: Remove once we can properly differ, maybe use relocate(Relocator) with custom Relocator implementation
+        afterEvaluate {
+            tasks.named<ShadowJar>("shadowJar") {
+                for (pkg in shadedExtension.packagesToRelocate.get()) {
+                    relocate(pkg, "${shadedExtension.relocatePackagePrefix.get()}.$pkg")
+                }
+            }
+        }
+
         return tasks.named<ShadowJar>("shadowJar") {
             classifier = null
             configurations = listOf(shadedConfiguration)
             mergeServiceFiles()
-            for (pkg in shadedExtension.packagesToRelocate.get()) {
-                relocate(pkg, "${shadedExtension.relocatePackagePrefix.get()}.$pkg")
-            }
         }
     }
 
     private
     fun Project.wireShadowJarTaskInLifecycle(shadowJar: TaskProvider<ShadowJar>) {
-        val jar: Jar by tasks
-        jar.enabled = false
-        tasks["assemble"].dependsOn(shadowJar)
+        tasks.named<Jar>("jar") {
+            enabled = false
+        }
+        tasks.named("assemble") {
+            dependsOn(shadowJar)
+        }
     }
 }
