@@ -1,3 +1,6 @@
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     `kotlin-dsl`
     `groovy`
@@ -24,6 +27,32 @@ dependencies {
     implementation("com.gradle.publish:plugin-publish-plugin:0.10.1")
     implementation("commons-io:commons-io:2.6")
     implementation(gradleTestKit())
+}
+
+val generatorTask = tasks.register("createVersionInformation") {
+    outputs.dir(project.layout.buildDirectory.dir("generatedSources"))
+    inputs.property("version", project.version)
+    inputs.property("group", project.group)
+    inputs.property("name", project.project(":gradle-testkit-fixtures").name)
+    doLast {
+        project.layout.buildDirectory.file("generatedSources/TestFixtures.kt").get().asFile.writeText("""package dev.gradleplugins.internal
+
+object TestFixtures {
+    var released = ${!project.version.toString().contains("-SNAPSHOT")}
+    var notation = "${project.group}:${project.project(":gradle-testkit-fixtures").name}:${project.version}"
+}
+""")
+    }
+}
+
+tasks.named<KotlinCompile>("compileKotlin") {
+    dependsOn(generatorTask)
+}
+
+sourceSets.main.configure {
+    withConvention(KotlinSourceSet::class) {
+        kotlin.srcDir(project.layout.buildDirectory.dir("generatedSources"))
+    }
 }
 
 gradlePlugin {
