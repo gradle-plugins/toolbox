@@ -7,6 +7,7 @@ plugins {
     // Supported by the development plugins
     `kotlin-dsl`
     `groovy`
+    `maven-publish`
     `java-gradle-plugin`
     id("com.gradle.plugin-publish") version("0.10.1")
 }
