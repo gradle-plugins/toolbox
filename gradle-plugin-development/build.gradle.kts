@@ -60,36 +60,42 @@ gradlePlugin {
         create("javaGradlePluginDevelopment") {
             id = "dev.gradleplugins.java-gradle-plugin"
             implementationClass = "dev.gradleplugins.internal.JavaGradlePluginDevelopmentPlugin"
+            description = "Fast track development of Gradle plugins in Java"
         }
         create("groovyGradlePluginDevelopment") {
             id = "dev.gradleplugins.groovy-gradle-plugin"
             implementationClass = "dev.gradleplugins.internal.GroovyGradlePluginDevelopmentPlugin"
+            description = "Fast track development of Gradle plugins in Groovy"
         }
         create("kotlinGradlePluginDevelopment") {
             id = "dev.gradleplugins.kotlin-gradle-plugin"
             implementationClass = "dev.gradleplugins.internal.KotlinGradlePluginDevelopmentPlugin"
+            description = "Fast track development of Gradle plugins in Kotlin"
         }
     }
 }
 
 pluginBundle {
     website = "https://gradleplugins.dev/"
-    vcsUrl = "https://github.com/gradle-plugins/development-gradle-plugin"
-    description = "Sets of highly opinionated plugins to kick start any."
+    vcsUrl = "https://github.com/gradle-plugins/${rootProject.name}"
+//    description = "A sets of highly opinionated plugins to kick start any Gradle plugin project."
     tags = listOf("gradle", "gradle-plugins", "development")
 
     plugins {
         val javaGradlePluginDevelopment by existing {
             // id is captured from java-gradle-plugin configuration
-            displayName = "Visual Studio Code Gradle Plugin"
+            displayName = "Fast Gradle plugin development in Java"
+            tags = listOf("gradle", "gradle-plugins", "development", "java")
         }
         val groovyGradlePluginDevelopment by existing {
             // id is captured from java-gradle-plugin configuration
-            displayName = "Visual Studio Code Gradle Plugin"
+            displayName = "Fast Gradle plugin development in Groovy"
+            tags = listOf("gradle", "gradle-plugins", "development", "groovy")
         }
         val kotlinGradlePluginDevelopment by existing {
             // id is captured from java-gradle-plugin configuration
-            displayName = "Visual Studio Code Gradle Plugin"
+            displayName = "Fast Gradle plugin development in Kotlin"
+            tags = listOf("gradle", "gradle-plugins", "development", "kotlin")
         }
     }
 }
