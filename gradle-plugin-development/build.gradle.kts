@@ -100,3 +100,7 @@ pluginBundle {
         }
     }
 }
+
+tasks.register("release") {
+    dependsOn("publishPlugins")
+}

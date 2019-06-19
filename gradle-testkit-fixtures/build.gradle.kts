@@ -34,3 +34,7 @@ dependencies {
 shadedArtifact {
     packagesToRelocate.set(listOf("org.apache.commons.io"))
 }
+
+tasks.register("release") {
+    dependsOn("bintrayUpload")
+}
