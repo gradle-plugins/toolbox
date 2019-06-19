@@ -1,8 +1,8 @@
 plugins {
     groovy
-    dev.gradleplugins.`shaded-artifact`
-    dev.gradleplugins.artifacts
-    dev.gradleplugins.publishing
+    dev.gradleplugins.experimental.`shaded-artifact`
+    dev.gradleplugins.experimental.artifacts
+    dev.gradleplugins.experimental.publishing
 }
 
 description = "Gradle TestKit fixtures for fast and efficient Gradle plugin development."

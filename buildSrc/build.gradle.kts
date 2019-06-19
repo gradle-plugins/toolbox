@@ -23,27 +23,27 @@ dependencies {
 gradlePlugin {
     plugins {
         register("publishing-plugin") {
-            id = "dev.gradleplugins.publishing"
+            id = "dev.gradleplugins.experimental.publishing"
             implementationClass = "dev.gradleplugins.PublishingPlugin"
         }
         register("ide-plugin") {
-            id = "dev.gradleplugins.ide"
+            id = "dev.gradleplugins.experimental.ide"
             implementationClass = "dev.gradleplugins.IdePlugin"
         }
         register("additional-artifacts-plugin") {
-            id = "dev.gradleplugins.artifacts"
+            id = "dev.gradleplugins.experimental.artifacts"
             implementationClass = "dev.gradleplugins.AdditionalArtifactsPlugin"
         }
         register("shaded-artifacts-plugin") {
-            id = "dev.gradleplugins.shaded-artifact"
+            id = "dev.gradleplugins.experimental.shaded-artifact"
             implementationClass = "dev.gradleplugins.ShadedArtifactPlugin"
         }
         register("github-plugin") {
-            id = "dev.gradleplugins.scm.github"
+            id = "dev.gradleplugins.experimental.scm.github"
             implementationClass = "dev.gradleplugins.GitHubSourceControlManagerPlugin"
         }
         register("oss-license-plugin") {
-            id = "dev.gradleplugins.license"
+            id = "dev.gradleplugins.experimental.license"
             implementationClass = "dev.gradleplugins.OpenSourceSoftwareLicensePlugin"
         }
     }

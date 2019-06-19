@@ -3,7 +3,7 @@ import dev.gradleplugins.GitHubSourceControlManagerExtension
 import dev.gradleplugins.OpenSourceSoftwareLicensePlugin
 
 plugins {
-    dev.gradleplugins.ide
+    dev.gradleplugins.experimental.ide
 }
 
 allprojects {

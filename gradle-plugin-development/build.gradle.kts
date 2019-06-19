@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    dev.gradleplugins.`shaded-artifact`
+    dev.gradleplugins.experimental.`shaded-artifact`
 
     // Supported by the development plugins
     `kotlin-dsl`
