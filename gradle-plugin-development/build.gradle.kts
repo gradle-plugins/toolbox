@@ -39,6 +39,7 @@ repositories {
 
 dependencies {
     implementation(kotlin("gradle-plugin"))
+    implementation("org.gradle.kotlin:plugins:1.2.8")
     shaded("com.gradle.publish:plugin-publish-plugin:0.10.1")
     implementation(gradleTestKit())
 }

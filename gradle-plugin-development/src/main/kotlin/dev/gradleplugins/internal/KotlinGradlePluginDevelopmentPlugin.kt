@@ -25,7 +25,7 @@ import org.gradle.kotlin.dsl.kotlin
 class KotlinGradlePluginDevelopmentPlugin : Plugin<Project> {
     override fun apply(project: Project): Unit = project.run {
         apply<GradlePluginDevelopmentBasePlugin>()
-        project.pluginManager.apply("kotlin-dsl")
+        project.pluginManager.apply("org.gradle.kotlin.kotlin-dsl")
 
         dependencies {
             add("implementation", kotlin("gradle-plugin"))
