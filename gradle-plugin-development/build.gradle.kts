@@ -2,35 +2,25 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    id("dev.gradleplugins.kotlin-gradle-plugin")
     dev.gradleplugins.experimental.`shaded-artifact`
-
-    // Supported by the development plugins
-    `kotlin-dsl`
-    `groovy`
-    `maven-publish`
-    `java-gradle-plugin`
-    id("com.gradle.plugin-publish")
 }
 
 // Supported by the development plugins
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
 tasks.named("publishPlugins") {
     dependsOn("shadowJar")
 }
-afterEvaluate {
-    publishing {
-        publications {
-            withType<MavenPublication> {
-                if (name == "pluginMaven") {
-                    setArtifacts(listOf(tasks.getByName("shadowJar")))
-                }
-            }
-        }
-    }
-}
+//afterEvaluate {
+//    publishing {
+//        publications {
+//            withType<MavenPublication> {
+//                if (name == "pluginMaven") {
+//                    setArtifacts(listOf(tasks.getByName("shadowJar")))
+//                }
+//            }
+//        }
+//    }
+//}
 
 repositories {
     jcenter()
