@@ -16,6 +16,7 @@
 
 package dev.gradleplugins.internal
 
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
@@ -25,7 +26,18 @@ import org.gradle.kotlin.dsl.kotlin
 class KotlinGradlePluginDevelopmentPlugin : Plugin<Project> {
     override fun apply(project: Project): Unit = project.run {
         apply<GradlePluginDevelopmentBasePlugin>()
-        project.pluginManager.apply("org.gradle.kotlin.kotlin-dsl")
+        // There is no way to properly apply this plugin automatically
+        // project.pluginManager.apply("org.gradle.kotlin.kotlin-dsl")
+        // Instead we will crash the build if not applied manually
+        afterEvaluate {
+            if (pluginManager.findPlugin("org.gradle.kotlin.kotlin-dsl") == null) {
+                throw GradleException("""You need to manually apply the `kotlin-dsl` plugin inside the plugin block:
+                    |plugins {
+                    |    `kotlin-dsl`
+                    |}
+                """.trimMargin())
+            }
+        }
 
         dependencies {
             add("implementation", kotlin("gradle-plugin"))

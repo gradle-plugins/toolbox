@@ -29,7 +29,6 @@ repositories {
 
 dependencies {
     implementation(kotlin("gradle-plugin"))
-    implementation("org.gradle.kotlin:plugins:1.2.8")
     implementation("com.gradle.publish:plugin-publish-plugin:0.10.1")
 }
 
