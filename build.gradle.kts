@@ -4,6 +4,7 @@ import dev.gradleplugins.OpenSourceSoftwareLicensePlugin
 
 plugins {
     dev.gradleplugins.experimental.ide
+    //id("dev.gradleplugins.java-gradle-plugin") version "0.0.5" apply false
 }
 
 allprojects {
