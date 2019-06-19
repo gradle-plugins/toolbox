@@ -46,5 +46,9 @@ gradlePlugin {
             id = "dev.gradleplugins.experimental.license"
             implementationClass = "dev.gradleplugins.OpenSourceSoftwareLicensePlugin"
         }
+        register("setup-plugin") {
+            id = "dev.gradleplugins.experimental.setup"
+            implementationClass = "dev.gradleplugins.SetupProjectPlugin"
+        }
     }
 }
