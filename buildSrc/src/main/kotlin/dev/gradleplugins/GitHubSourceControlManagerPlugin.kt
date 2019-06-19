@@ -28,7 +28,7 @@ import org.gradle.kotlin.dsl.withType
 import org.gradle.plugins.ide.idea.IdeaPlugin
 import org.gradle.plugins.ide.idea.model.IdeaModel
 
-class GitHubSourceContolManagerPlugin : Plugin<Project> {
+open class GitHubSourceControlManagerPlugin : Plugin<Project> {
     override fun apply(project: Project): Unit = project.run {
         val gitHub = project.extensions.create("gitHub", GitHubSourceControlManagerExtension::class.java)
         gitHub.gitHubHostName.convention("github.com")
@@ -87,5 +87,7 @@ class GitHubSourceContolManagerPlugin : Plugin<Project> {
                 }
             }
         }
+
+        // TODO: Allow to configure the repository description/topic/website
     }
 }

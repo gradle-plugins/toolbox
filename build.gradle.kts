@@ -1,4 +1,4 @@
-import dev.gradleplugins.GitHubSourceContolManagerPlugin
+import dev.gradleplugins.GitHubSourceControlManagerPlugin
 import dev.gradleplugins.GitHubSourceControlManagerExtension
 import dev.gradleplugins.OpenSourceSoftwareLicensePlugin
 
@@ -10,7 +10,7 @@ allprojects {
     group = "dev.gradleplugins"
     version = "0.0.5-SNAPSHOT"
 
-    apply<GitHubSourceContolManagerPlugin>()
+    apply<GitHubSourceControlManagerPlugin>()
     configure<GitHubSourceControlManagerExtension> {
         gitHubOrganization.set("gradle-plugins")
     }
