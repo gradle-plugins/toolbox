@@ -21,9 +21,11 @@ open class IdePlugin : Plugin<Project> {
                 }
             }
 
+            // TODO: Prompt on `idea` plugin id, the type is outside of our boundary
             plugins.withType<IdeaPlugin> {
                 with(model) {
                     module {
+                        // TODO: Move to the .gitignore file setup
                         excludeDirs = excludeDirs + rootExcludeDirs
                     }
 
