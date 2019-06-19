@@ -26,6 +26,7 @@ import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.withType
 import org.gradle.plugins.ide.idea.IdeaPlugin
 import org.jetbrains.gradle.ext.ProjectSettings
+import java.net.URL
 
 class OpenSourceSoftwareLicensePlugin : Plugin<Project> {
     override fun apply(project: Project): Unit = project.run {
@@ -69,7 +70,26 @@ class OpenSourceSoftwareLicensePlugin : Plugin<Project> {
                 }
             }
         }
+
+        plugins.withType<SetupProjectPlugin> {
+            // TODO: Only in rootProject
+            if (isRootProject()) {
+                val generateLicenseFileTask = tasks.register("generateLicenseFile") {
+                    doLast {
+                        file("LICENSE").writeText(ossLicense.licenseUrl.get().readText())
+                    }
+                }
+
+                tasks.named("setup") {
+                    dependsOn(generateLicenseFileTask)
+                }
+            }
+        }
     }
+}
+
+private fun Project.isRootProject(): Boolean {
+    return project.parent == null
 }
 
 private
