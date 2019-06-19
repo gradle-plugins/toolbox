@@ -9,7 +9,7 @@ plugins {
 
 allprojects {
     group = "dev.gradleplugins"
-    version = "0.0.6"
+    version = "0.0.7-SNAPSHOT"
 
     apply<GitHubSourceControlManagerPlugin>()
     configure<GitHubSourceControlManagerExtension> {
