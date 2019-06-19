@@ -30,8 +30,7 @@ repositories {
 dependencies {
     implementation(kotlin("gradle-plugin"))
     implementation("org.gradle.kotlin:plugins:1.2.8")
-    shaded("com.gradle.publish:plugin-publish-plugin:0.10.1")
-    implementation(gradleTestKit())
+    implementation("com.gradle.publish:plugin-publish-plugin:0.10.1")
 }
 
 val generatorTask = tasks.register("createVersionInformation") {
@@ -100,8 +99,4 @@ pluginBundle {
             tags = listOf("gradle", "gradle-plugins", "development", "kotlin")
         }
     }
-}
-
-shadedArtifact {
-    packagesToRelocate.set(listOf("com.gradle", "org.apache.maven.model"))
 }
