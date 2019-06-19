@@ -21,10 +21,7 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.GroovySourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.testing.Test
-import org.gradle.internal.impldep.org.bouncycastle.asn1.x500.style.RFC4519Style.description
 import org.gradle.kotlin.dsl.*
-import org.gradle.testkit.runner.internal.GradleProvider.uri
-import java.net.URL
 
 class SpockFunctionalTestingPlugin : Plugin<Project> {
     override fun apply(project: Project): Unit = project.run {
