@@ -58,10 +58,16 @@ abstract class WellBehavedPluginTest extends AbstractFunctionalSpec {
             gradle.buildFinished {
                 def configuredTaskPaths = configuredTasks*.path
                 
-                assert configuredTaskPaths == [':help']
+                // TODO: Log warning if getRealizedTaskPaths() is different than ':help'
+                configuredTaskPaths.removeAll([${realizedTaskPaths.collect {"'$it'"}.join(", ")}])
+                assert configuredTaskPaths == []
             }
         """
         expect:
         succeeds("help")
+    }
+
+    Set<String> getRealizedTaskPaths() {
+        return [':help']
     }
 }
