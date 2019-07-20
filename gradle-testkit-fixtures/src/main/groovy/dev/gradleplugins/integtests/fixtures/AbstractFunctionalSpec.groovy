@@ -16,6 +16,7 @@
 
 package dev.gradleplugins.integtests.fixtures
 
+import dev.gradleplugins.test.fixtures.file.CleanupTestDirectory
 import dev.gradleplugins.test.fixtures.file.TestFile
 import dev.gradleplugins.test.fixtures.file.TestNameTestDirectoryProvider
 import org.gradle.testkit.runner.BuildResult
@@ -24,6 +25,7 @@ import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Rule
 import spock.lang.Specification
 
+@CleanupTestDirectory
 class AbstractFunctionalSpec extends Specification {
     @Rule
     final TestNameTestDirectoryProvider temporaryFolder = new TestNameTestDirectoryProvider()
