@@ -74,6 +74,13 @@ class AbstractFunctionalSpec extends Specification {
             args << "--build-cache"
         }
 
+        buildFile.text = """buildscript {
+    dependencies {
+        classpath files(${implementationClassPath.collect { "'$it'" }.join(', ')})
+    }
+}
+""" + buildFile.text
+
         if (!settingsFile.exists()) {
             settingsFile.createNewFile()
         }
@@ -82,6 +89,13 @@ class AbstractFunctionalSpec extends Specification {
                 .withArguments(args)
                 .withPluginClasspath()
                 .withDebug(true)
+    }
+
+    private static Iterable<File> getImplementationClassPath() {
+        def prop = new Properties()
+        prop.load(AbstractFunctionalSpec.getResourceAsStream("/plugin-under-test-metadata.properties"))
+        return prop.get("implementation-classpath").split(File.pathSeparator).collect { new File(it) }
+
     }
 
     void enableBuildCache() {
