@@ -94,8 +94,12 @@ class ShadedArtifactPlugin: Plugin<Project> {
 
     private
     fun Project.wireShadowJarTaskInLifecycle(shadowJar: TaskProvider<ShadowJar>) {
-        tasks.named<Jar>("jar") {
-            enabled = false
+        gradle.taskGraph.whenReady {
+            if (hasTask(tasks.getByName("assemble"))) {
+                tasks.named<Jar>("jar") {
+                    enabled = false
+                }
+            }
         }
         tasks.named("assemble") {
             dependsOn(shadowJar)
