@@ -31,6 +31,7 @@ repositories {
 dependencies {
     implementation(kotlin("gradle-plugin"))
     implementation("com.gradle.publish:plugin-publish-plugin:0.10.1")
+    functionalTestImplementation(project(":gradle-testkit-fixtures"))
 }
 
 val generatorTask = tasks.register("createVersionInformation") {
