@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("dev.gradleplugins.kotlin-gradle-plugin")
+    `kotlin-dsl`
     dev.gradleplugins.experimental.`shaded-artifact`
 }
 
