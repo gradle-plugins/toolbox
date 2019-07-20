@@ -6,7 +6,7 @@ plugins {
     id("com.gradle.build-scan") version "2.3"
     dev.gradleplugins.experimental.ide
     dev.gradleplugins.experimental.setup
-    id("dev.gradleplugins.java-gradle-plugin") version "0.0.7" apply false
+    id("dev.gradleplugins.kotlin-gradle-plugin") version "0.0.9" apply false
 }
 
 buildScan {
