@@ -73,6 +73,10 @@ class AbstractFunctionalSpec extends Specification {
         if (isBuildCacheEnabled) {
             args << "--build-cache"
         }
+
+        if (!settingsFile.exists()) {
+            settingsFile.createNewFile()
+        }
         return GradleRunner.create()
                 .withProjectDir(projectDir)
                 .withArguments(args)
