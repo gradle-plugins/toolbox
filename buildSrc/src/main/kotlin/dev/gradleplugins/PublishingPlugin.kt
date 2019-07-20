@@ -65,8 +65,8 @@ class PublishingPlugin : Plugin<Project> {
             val packageName = "${project.group}:${project.name}"
 
             configure<BintrayExtension> {
-                user = resolveProperty("BINTRAY_USER", "bintrayUser")
-                key = resolveProperty("BINTRAY_KEY", "bintrayKey")
+                user = resolveProperty("BINTRAY_USER", "dev.gradleplugins.bintrayUser")
+                key = resolveProperty("BINTRAY_KEY", "dev.gradleplugins.bintrayKey")
                 setPublications("mavenJava")
                 publish = true
 
