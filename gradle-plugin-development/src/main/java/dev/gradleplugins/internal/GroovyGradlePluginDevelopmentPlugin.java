@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright ${"$"}{today.year} the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package dev.gradleplugins.internal
+package dev.gradleplugins.internal;
 
-import org.gradle.api.Plugin
-import org.gradle.api.Project
-import org.gradle.kotlin.dsl.apply
+import org.gradle.api.Plugin;
+import org.gradle.api.Project;
 
-class JavaGradlePluginDevelopmentPlugin : Plugin<Project> {
-    override fun apply(project: Project): Unit = project.run {
-        apply<GradlePluginDevelopmentBasePlugin>()
+public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
+    @Override
+    public void apply(Project project) {
+        project.getPluginManager().apply(GradlePluginDevelopmentBasePlugin.class);
+        project.getPluginManager().apply("groovy");
     }
 }

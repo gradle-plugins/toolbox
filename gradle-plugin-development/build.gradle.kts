@@ -1,9 +1,5 @@
-import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
-    id("dev.gradleplugins.kotlin-gradle-plugin")
-    `kotlin-dsl`
+    id("dev.gradleplugins.java-gradle-plugin")
     dev.gradleplugins.experimental.`shaded-artifact`
 }
 
@@ -29,7 +25,6 @@ repositories {
 }
 
 dependencies {
-    implementation(kotlin("gradle-plugin"))
     implementation("com.gradle.publish:plugin-publish-plugin:0.10.1")
     functionalTestImplementation(project(":gradle-testkit-fixtures"))
 }
@@ -40,22 +35,20 @@ val generatorTask = tasks.register("createVersionInformation") {
     inputs.property("group", project.group)
     inputs.property("name", project.project(":gradle-testkit-fixtures").name)
     doLast {
-        project.layout.buildDirectory.file("generatedSources/TestFixtures.kt").get().asFile.writeText("""package dev.gradleplugins.internal
+        project.layout.buildDirectory.file("generatedSources/TestFixtures.java").get().asFile.writeText("""package dev.gradleplugins.internal;
 
-object TestFixtures {
-    var released = ${!project.version.toString().contains("-SNAPSHOT")}
-    var notation = "${project.group}:${project.project(":gradle-testkit-fixtures").name}:${project.version}"
+public class TestFixtures {
+    public static final boolean released = ${!project.version.toString().contains("-SNAPSHOT")};
+    public static final String notation = "${project.group}:${project.project(":gradle-testkit-fixtures").name}:${project.version}";
 }
 """)
     }
 }
-tasks.named<KotlinCompile>("compileKotlin") {
+tasks.named<JavaCompile>("compileJava") {
     dependsOn(generatorTask)
 }
 sourceSets.main.configure {
-    withConvention(KotlinSourceSet::class) {
-        kotlin.srcDir(project.layout.buildDirectory.dir("generatedSources"))
-    }
+    java.srcDir(project.layout.buildDirectory.dir("generatedSources"))
 }
 
 gradlePlugin {
