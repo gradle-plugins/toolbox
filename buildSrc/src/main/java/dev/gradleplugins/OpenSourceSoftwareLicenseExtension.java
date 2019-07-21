@@ -40,7 +40,7 @@ public class OpenSourceSoftwareLicenseExtension {
     }
 
     public Provider<String> getCopyrightFileHeader() {
-        return getProviderFactory().provider(() -> "Copyright ${\"$\"}{today.year} the original author or authors.\n"
+        return getProviderFactory().provider(() -> "Copyright $today.year the original author or authors.\n"
                 + "\n"
                 + "Licensed under the Apache License, Version 2.0 (the \"License\");\n"
                 + "you may not use this file except in compliance with the License.\n"
