@@ -53,6 +53,8 @@ public class TestFile extends File {
 
     /**
      * Recursively delete this directory, reporting all failed paths.
+     * @return this instance
+     * @throws IOException if unable to delete the directory
      */
     public TestFile forceDeleteDir() throws IOException {
         if (isDirectory()) {
