@@ -22,6 +22,7 @@ class PublishingPlugin : Plugin<Project> {
 
     private
     fun Project.applyPublishingPlugin() {
+        apply<PublishingBasePlugin>()
         apply<MavenPublishPlugin>()
         apply<BintrayPlugin>()
     }
@@ -65,46 +66,14 @@ class PublishingPlugin : Plugin<Project> {
             val packageName = "${project.group}:${project.name}"
 
             configure<BintrayExtension> {
-                user = resolveProperty("BINTRAY_USER", "dev.gradleplugins.bintrayUser")
-                key = resolveProperty("BINTRAY_KEY", "dev.gradleplugins.bintrayKey")
                 setPublications("mavenJava")
-                publish = true
 
                 pkg(closureOf<BintrayExtension.PackageConfig> {
-                    repo = "maven" + (if (project.version.toString().contains("-SNAPSHOT")) "-snapshot" else "")
                     name = packageName
-                    desc = project.description
                     setLabels("gradle", "gradle-plugins")
                     publicDownloadNumbers = true
-
-                    version(closureOf<BintrayExtension.VersionConfig> {
-                        released = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").format(Date())
-                        vcsTag = "v${project.version}"
-
-                        gpg(closureOf<BintrayExtension.GpgConfig> {
-                            sign = false
-                            passphrase = resolveProperty("GPG_PASSPHRASE", "gpgPassphrase")
-                        })
-//                    mavenCentralSync(closureOf<BintrayExtension.MavenCentralSyncConfig> {
-//                        sync = true
-//                        user = resolveProperty("MAVEN_CENTRAL_USER_TOKEN", "mavenCentralUserToken")
-//                        password = resolveProperty("MAVEN_CENTRAL_PASSWORD", "mavenCentralPassword")
-//                        close = "1"
-//                    })
-                    })
                 })
             }
         }
-    }
-
-    private
-    fun Project.resolveProperty(envVarKey: String, projectPropKey: String): String? {
-        val propValue = System.getenv()[envVarKey]
-
-        if(propValue != null) {
-            return propValue
-        }
-
-        return findProperty(projectPropKey).toString()
     }
 }

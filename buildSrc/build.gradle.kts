@@ -26,6 +26,10 @@ gradlePlugin {
             id = "dev.gradleplugins.experimental.publishing"
             implementationClass = "dev.gradleplugins.PublishingPlugin"
         }
+        register("publishing-base-plugin") {
+            id = "dev.gradleplugins.experimental.publishing-base"
+            implementationClass = "dev.gradleplugins.PublishingBasePlugin"
+        }
         register("ide-plugin") {
             id = "dev.gradleplugins.experimental.ide"
             implementationClass = "dev.gradleplugins.IdePlugin"
