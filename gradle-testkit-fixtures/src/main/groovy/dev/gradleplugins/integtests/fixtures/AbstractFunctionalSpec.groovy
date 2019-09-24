@@ -114,9 +114,8 @@ class AbstractFunctionalSpec extends Specification {
         }
     }
 
-    protected File file(String relativePath) {
-        File file = new File(projectDir, relativePath)
-        return file
+    protected TestFile file(String relativePath) {
+        return getTestDirectory().file(relativePath)
     }
 
     protected String getBuildFileName() {

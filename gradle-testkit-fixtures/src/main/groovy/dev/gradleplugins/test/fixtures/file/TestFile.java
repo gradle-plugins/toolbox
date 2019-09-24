@@ -17,6 +17,7 @@
 package dev.gradleplugins.test.fixtures.file;
 
 import org.apache.commons.io.FileUtils;
+import org.codehaus.groovy.runtime.ResourceGroovyMethods;
 
 import java.io.File;
 import java.io.IOException;
@@ -147,6 +148,16 @@ public class TestFile extends File {
             return current.getCanonicalFile();
         } catch (IOException e) {
             throw new RuntimeException(String.format("Could not canonicalise '%s'.", current), e);
+        }
+    }
+
+    public TestFile leftShift(Object content) {
+        getParentFile().mkdirs();
+        try {
+            ResourceGroovyMethods.leftShift(this, content);
+            return this;
+        } catch (IOException e) {
+            throw new RuntimeException(String.format("Could not append to test file '%s'", this), e);
         }
     }
 }
