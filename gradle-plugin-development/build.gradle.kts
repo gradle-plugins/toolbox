@@ -29,6 +29,10 @@ dependencies {
     functionalTestImplementation(project(":gradle-testkit-fixtures"))
 }
 
+fun withoutSnapshot(version: String): String {
+    return version.toString().replace("-SNAPSHOT", "")
+}
+
 val generatorTask = tasks.register("createVersionInformation") {
     outputs.dir(project.layout.buildDirectory.dir("generatedSources"))
     inputs.property("version", project.version)
@@ -40,6 +44,7 @@ val generatorTask = tasks.register("createVersionInformation") {
 public class TestFixtures {
     public static final boolean released = ${!project.version.toString().contains("-SNAPSHOT")};
     public static final String notation = "${project.group}:${project.project(":gradle-testkit-fixtures").name}:${project.version}";
+    public static final String currentVersion = "${withoutSnapshot(project.version.toString())}";
 }
 """)
     }

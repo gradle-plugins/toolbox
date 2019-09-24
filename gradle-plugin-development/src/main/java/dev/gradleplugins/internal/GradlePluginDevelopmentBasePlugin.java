@@ -24,11 +24,22 @@ import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 import org.gradle.plugin.devel.plugins.JavaGradlePluginPlugin;
+import dev.gradleplugins.internal.TestFixtures;
+
+import java.io.File;
 
 public class GradlePluginDevelopmentBasePlugin implements Plugin<Project> {
     @Override
     public void apply(Project project) {
         project.getPluginManager().apply(JavaGradlePluginPlugin.class); // For plugin development
+
+        project.getConfigurations().removeIf(it -> it.getName().equals("compile"));
+
+        if (!TestFixtures.released) {
+            project.getRepositories().mavenLocal();
+        }
+        project.getDependencies().add("implementation", "dev.gradleplugins:gradle-api:" + TestFixtures.currentVersion + "-5.6.2" + (TestFixtures.released ? "" : "-SNAPSHOT"));
+
         project.getPluginManager().apply(SpockFunctionalTestingPlugin.class);
         project.getPluginManager().apply(PublishPlugin.class); // For publishing
 
