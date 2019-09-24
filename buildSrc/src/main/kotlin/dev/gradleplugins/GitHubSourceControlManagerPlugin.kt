@@ -24,8 +24,6 @@ import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.kotlin.dsl.closureOf
 import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.withType
-import org.gradle.plugins.ide.idea.IdeaPlugin
 import org.gradle.plugins.ide.idea.model.IdeaModel
 
 open class GitHubSourceControlManagerPlugin : Plugin<Project> {
@@ -65,6 +63,8 @@ open class GitHubSourceControlManagerPlugin : Plugin<Project> {
                         websiteUrl = gitHub.gitHubWebsiteUrl.get().toString()
                         issueTrackerUrl = gitHub.gitHubIssueTrackerUrl.get().toString()
                         vcsUrl = gitHub.sourceControlManagerUrl(GitHubSourceControlManagerExtension.SourceControlManagerProtocol.HTTPS).get().toString()
+
+                        version.vcsTag = "v${project.version}"
 
                         githubRepo = gitHub.gitHubRepositorySlug.get()
                     })
