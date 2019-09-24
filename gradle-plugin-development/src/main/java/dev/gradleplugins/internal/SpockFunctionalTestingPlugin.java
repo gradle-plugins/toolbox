@@ -27,6 +27,7 @@ import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.testing.Test;
+import dev.gradleplugins.internal.TestFixtures;
 
 import java.util.HashMap;
 import java.util.Map;
