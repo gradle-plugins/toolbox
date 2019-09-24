@@ -66,6 +66,8 @@ public class SpockFunctionalTestingPlugin implements Plugin<Project> {
         project.getDependencies().add("functionalTestImplementation", project.getDependencies().gradleTestKit());
         project.getDependencies().add("functionalTestFixtureImplementation", TestFixtures.notation);
 
+        project.getRepositories().jcenter(); // for spock-core
+
         if (TestFixtures.released) {
             project.getRepositories().maven(it -> {
                 it.setName("Gradle Plugins Release");
