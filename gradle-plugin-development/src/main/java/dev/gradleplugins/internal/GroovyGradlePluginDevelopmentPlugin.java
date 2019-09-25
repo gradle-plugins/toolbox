@@ -17,14 +17,18 @@
 package dev.gradleplugins.internal;
 
 import dev.gradleplugins.GradlePlugin;
-import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 
 @GradlePlugin(id = "dev.gradleplugins.groovy-gradle-plugin")
-public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
+public class GroovyGradlePluginDevelopmentPlugin extends AbstractGradlePluginDevelopmentPlugin {
     @Override
-    public void apply(Project project) {
+    public void doApply(Project project) {
         project.getPluginManager().apply(GradlePluginDevelopmentBasePlugin.class);
         project.getPluginManager().apply("groovy");
+    }
+
+    @Override
+    protected String getPluginId() {
+        return "dev.gradleplugins.groovy-gradle-plugin";
     }
 }

@@ -31,7 +31,6 @@ import java.io.File;
 public class GradlePluginDevelopmentBasePlugin implements Plugin<Project> {
     @Override
     public void apply(Project project) {
-        // TODO: Print deprecation when java-gradle-plugin is already applied. This plugin should be the master of this plugin.
         project.getPluginManager().apply(JavaGradlePluginPlugin.class); // For plugin development
 
         // TODO: Check if we can remove the gradlePlugin extension as there is no more usage with the annotation

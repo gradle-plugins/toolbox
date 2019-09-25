@@ -14,20 +14,8 @@
  * limitations under the License.
  */
 
-package dev.gradleplugins.internal;
+package dev.gradleplugins
 
-import dev.gradleplugins.GradlePlugin;
-import org.gradle.api.Project;
-
-@GradlePlugin(id = "dev.gradleplugins.java-gradle-plugin")
-public class JavaGradlePluginDevelopmentPlugin extends AbstractGradlePluginDevelopmentPlugin {
-    @Override
-    public void doApply(Project project) {
-        project.getPluginManager().apply(GradlePluginDevelopmentBasePlugin.class);
-    }
-
-    @Override
-    protected String getPluginId() {
-        return "dev.gradleplugins.java-gradle-plugin";
-    }
+class JavaGradlePluginDevelopmentWellBehaveFunctionalTest extends WellBehaveGradlePluginDevelopmentPluginFunctionalTest {
+    final String pluginIdUnderTest = "dev.gradleplugins.java-gradle-plugin"
 }

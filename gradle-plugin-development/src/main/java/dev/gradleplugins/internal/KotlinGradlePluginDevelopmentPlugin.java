@@ -18,27 +18,33 @@ package dev.gradleplugins.internal;
 
 import dev.gradleplugins.GradlePlugin;
 import org.gradle.api.GradleException;
-import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 
 @GradlePlugin(id = "dev.gradleplugins.kotlin-gradle-plugin")
-public class KotlinGradlePluginDevelopmentPlugin implements Plugin<Project> {
+public class KotlinGradlePluginDevelopmentPlugin extends AbstractGradlePluginDevelopmentPlugin {
     @Override
-    public void apply(Project project) {
+    public void doApply(Project project) {
         project.getPluginManager().apply(GradlePluginDevelopmentBasePlugin.class);
-        // There is no way to properly apply this plugin automatically
-        // project.pluginManager.apply("org.gradle.kotlin.kotlin-dsl")
-        // Instead we will crash the build if not applied manually
-        project.afterEvaluate( proj -> {
-            if (project.getPluginManager().findPlugin("org.gradle.kotlin.kotlin-dsl") == null) {
-                throw new GradleException("You need to manually apply the `kotlin-dsl` plugin inside the plugin block:\n" +
-                        "plugins {\n" +
-                        "    `kotlin-dsl`\n" +
-                        "}");
-            }
-        });
+
+        // TODO: Not totally sure if this is required for building plugins in Kotlin
+//        // There is no way to properly apply this plugin automatically
+//        // project.pluginManager.apply("org.gradle.kotlin.kotlin-dsl")
+//        // Instead we will crash the build if not applied manually
+//        project.afterEvaluate( proj -> {
+//            if (project.getPluginManager().findPlugin("org.gradle.kotlin.kotlin-dsl") == null) {
+//                throw new GradleException("You need to manually apply the `kotlin-dsl` plugin inside the plugin block:\n" +
+//                        "plugins {\n" +
+//                        "    `kotlin-dsl`\n" +
+//                        "}");
+//            }
+//        });
 
         // TODO: I think this is added by the kotlin-dsl, we will leave it out for the next versions
 //        project.getDependencies().add("implementation", kotlin("gradle-plugin"));
+    }
+
+    @Override
+    protected String getPluginId() {
+        return "dev.gradleplugins.kotlin-gradle-plugin";
     }
 }

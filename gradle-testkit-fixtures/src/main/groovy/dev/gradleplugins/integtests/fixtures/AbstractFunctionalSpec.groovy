@@ -69,7 +69,7 @@ class AbstractFunctionalSpec extends Specification {
     private GradleRunner createAndConfigureGradleRunner(String... arguments) {
         def args = arguments.toList();
         args << "-s"
-        args << "-i"
+//        args << "-i"
         if (isBuildCacheEnabled) {
             args << "--build-cache"
         }
@@ -128,5 +128,14 @@ class AbstractFunctionalSpec extends Specification {
 
     protected TestFile getTestDirectory() {
         temporaryFolder.testDirectory
+    }
+
+    boolean outputContains(String string) {
+        assertHasResult()
+        return result.output.contains(string.trim())
+    }
+
+    private void assertHasResult() {
+        assert result != null
     }
 }
