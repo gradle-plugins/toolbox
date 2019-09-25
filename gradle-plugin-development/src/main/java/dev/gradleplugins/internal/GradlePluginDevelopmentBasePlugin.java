@@ -35,6 +35,7 @@ public class GradlePluginDevelopmentBasePlugin implements Plugin<Project> {
 
         // TODO: Check if we can remove the gradlePlugin extension as there is no more usage with the annotation
         // TODO: Print deprecation warning about using GradlePlugin the container for declaring plugin IDs
+        // TODO: Warn when calling gradleApi()
 
         project.getConfigurations().removeIf(it -> it.getName().equals("compile"));
 
