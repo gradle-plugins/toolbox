@@ -28,6 +28,8 @@ plugins {
     dev.gradleplugins.experimental.`publishing-base`
 }
 
+version = "0.0.12"
+
 val java = project.extensions.getByType(JavaPluginExtension::class.java)
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 java.targetCompatibility = JavaVersion.VERSION_1_8

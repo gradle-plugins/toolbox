@@ -44,7 +44,7 @@ val generatorTask = tasks.register("createVersionInformation") {
 public class TestFixtures {
     public static final boolean released = ${!project.version.toString().contains("-SNAPSHOT")};
     public static final String notation = "${project.group}:${project.project(":gradle-testkit-fixtures").name}:${project.version}";
-    public static final String currentVersion = "${withoutSnapshot(project.version.toString())}";
+    public static final String apiVersion = "0.0.12";
 }
 """)
     }

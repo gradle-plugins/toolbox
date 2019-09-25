@@ -38,7 +38,7 @@ public class GradlePluginDevelopmentBasePlugin implements Plugin<Project> {
         if (!TestFixtures.released) {
             project.getRepositories().mavenLocal();
         }
-        project.getDependencies().add("implementation", "dev.gradleplugins:gradle-api:" + TestFixtures.currentVersion + "-5.6.2" + (TestFixtures.released ? "" : "-SNAPSHOT"));
+        project.getDependencies().add("implementation", "dev.gradleplugins:gradle-api:" + TestFixtures.apiVersion + "-5.6.2");
 
         project.getPluginManager().apply(SpockFunctionalTestingPlugin.class);
         project.getPluginManager().apply(PublishPlugin.class); // For publishing
