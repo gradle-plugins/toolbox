@@ -27,6 +27,8 @@ repositories {
 dependencies {
     implementation("com.gradle.publish:plugin-publish-plugin:0.10.1")
     functionalTestImplementation(project(":gradle-testkit-fixtures"))
+    annotationProcessor(project(":gradle-plugin-development-processor"))
+    implementation(project(":gradle-plugin-development-annotation"))
 }
 
 fun withoutSnapshot(version: String): String {
@@ -45,6 +47,7 @@ public class TestFixtures {
     public static final boolean released = ${!project.version.toString().contains("-SNAPSHOT")};
     public static final String notation = "${project.group}:${project.project(":gradle-testkit-fixtures").name}:${project.version}";
     public static final String apiVersion = "0.0.12";
+    public static final String currentVersion = "${project.version}";
 }
 """)
     }
@@ -56,44 +59,27 @@ sourceSets.main.configure {
     java.srcDir(project.layout.buildDirectory.dir("generatedSources"))
 }
 
-gradlePlugin {
-    plugins {
-        create("javaGradlePluginDevelopment") {
-            id = "dev.gradleplugins.java-gradle-plugin"
-            implementationClass = "dev.gradleplugins.internal.JavaGradlePluginDevelopmentPlugin"
-            description = "Fast track development of Gradle plugins in Java"
-        }
-        create("groovyGradlePluginDevelopment") {
-            id = "dev.gradleplugins.groovy-gradle-plugin"
-            implementationClass = "dev.gradleplugins.internal.GroovyGradlePluginDevelopmentPlugin"
-            description = "Fast track development of Gradle plugins in Groovy"
-        }
-        create("kotlinGradlePluginDevelopment") {
-            id = "dev.gradleplugins.kotlin-gradle-plugin"
-            implementationClass = "dev.gradleplugins.internal.KotlinGradlePluginDevelopmentPlugin"
-            description = "Fast track development of Gradle plugins in Kotlin"
-        }
-    }
-}
-
 pluginBundle {
     website = "https://gradleplugins.dev/"
 //    description = "A sets of highly opinionated plugins to kick start any Gradle plugin project."
     tags = listOf("gradle", "gradle-plugins", "development")
 
     plugins {
-        val javaGradlePluginDevelopment by existing {
-            // id is captured from java-gradle-plugin configuration
+        val javaGradlePluginDevelopment by creating {
+            id = "dev.gradleplugins.java-gradle-plugin"
+            description = "Fast track development of Gradle plugins in Java"
             displayName = "Fast Gradle plugin development in Java"
             tags = listOf("gradle", "gradle-plugins", "development", "java")
         }
-        val groovyGradlePluginDevelopment by existing {
-            // id is captured from java-gradle-plugin configuration
+        val groovyGradlePluginDevelopment by creating {
+            id = "dev.gradleplugins.groovy-gradle-plugin"
+            description = "Fast track development of Gradle plugins in Groovy"
             displayName = "Fast Gradle plugin development in Groovy"
             tags = listOf("gradle", "gradle-plugins", "development", "groovy")
         }
-        val kotlinGradlePluginDevelopment by existing {
-            // id is captured from java-gradle-plugin configuration
+        val kotlinGradlePluginDevelopment by creating {
+            id = "dev.gradleplugins.kotlin-gradle-plugin"
+            description = "Fast track development of Gradle plugins in Kotlin"
             displayName = "Fast Gradle plugin development in Kotlin"
             tags = listOf("gradle", "gradle-plugins", "development", "kotlin")
         }

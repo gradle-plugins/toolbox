@@ -31,7 +31,11 @@ import java.io.File;
 public class GradlePluginDevelopmentBasePlugin implements Plugin<Project> {
     @Override
     public void apply(Project project) {
+        // TODO: Print deprecation when java-gradle-plugin is already applied. This plugin should be the master of this plugin.
         project.getPluginManager().apply(JavaGradlePluginPlugin.class); // For plugin development
+
+        // TODO: Check if we can remove the gradlePlugin extension as there is no more usage with the annotation
+        // TODO: Print deprecation warning about using GradlePlugin the container for declaring plugin IDs
 
         project.getConfigurations().removeIf(it -> it.getName().equals("compile"));
 
@@ -42,6 +46,10 @@ public class GradlePluginDevelopmentBasePlugin implements Plugin<Project> {
 
         project.getPluginManager().apply(SpockFunctionalTestingPlugin.class);
         project.getPluginManager().apply(PublishPlugin.class); // For publishing
+
+        // Configure annotation processor
+        project.getDependencies().add("annotationProcessor", "dev.gradleplugins:gradle-plugin-development-processor:" + TestFixtures.currentVersion);
+        project.getDependencies().add("implementation", "dev.gradleplugins:gradle-plugin-development-annotation:" + TestFixtures.currentVersion);
 
         // Force Java 8 version
         JavaPluginExtension java = project.getExtensions().getByType(JavaPluginExtension.class);

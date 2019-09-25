@@ -74,6 +74,7 @@ public class SpockFunctionalTestingPlugin implements Plugin<Project> {
                 it.setUrl(project.uri("https://dl.bintray.com/gradle-plugins/maven"));
             });
         } else {
+            // TODO: remove as bintray doesn't allow SNAPSHOT publication OR find a workaround
             project.getRepositories().maven(it -> {
                 it.setName("Gradle Plugins Snapshot");
                 it.setUrl(project.uri("https://dl.bintray.com/gradle-plugins/maven-snapshot"));

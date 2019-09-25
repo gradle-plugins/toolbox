@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package dev.gradleplugins.internal;
+plugins {
+    `java-library`
+    dev.gradleplugins.experimental.artifacts
+}
 
-import dev.gradleplugins.GradlePlugin;
-import org.gradle.api.Plugin;
-import org.gradle.api.Project;
+dependencies {
+    implementation(project(":gradle-plugin-development-annotation"))
+}
 
-@GradlePlugin(id = "dev.gradleplugins.java-gradle-plugin")
-public class JavaGradlePluginDevelopmentPlugin implements Plugin<Project> {
-    @Override
-    public void apply(Project project) {
-        project.getPluginManager().apply(GradlePluginDevelopmentBasePlugin.class);
-    }
+repositories {
+    mavenCentral()
 }

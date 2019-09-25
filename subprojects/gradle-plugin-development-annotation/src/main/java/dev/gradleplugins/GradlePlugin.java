@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package dev.gradleplugins.internal;
+package dev.gradleplugins;
 
-import dev.gradleplugins.GradlePlugin;
-import org.gradle.api.Plugin;
-import org.gradle.api.Project;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@GradlePlugin(id = "dev.gradleplugins.java-gradle-plugin")
-public class JavaGradlePluginDevelopmentPlugin implements Plugin<Project> {
-    @Override
-    public void apply(Project project) {
-        project.getPluginManager().apply(GradlePluginDevelopmentBasePlugin.class);
-    }
+@Retention(RetentionPolicy.SOURCE)
+@Target(ElementType.TYPE)
+public @interface GradlePlugin {
+    String id();
 }

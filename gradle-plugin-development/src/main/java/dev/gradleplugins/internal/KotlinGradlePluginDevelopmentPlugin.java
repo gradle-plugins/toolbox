@@ -16,10 +16,12 @@
 
 package dev.gradleplugins.internal;
 
+import dev.gradleplugins.GradlePlugin;
 import org.gradle.api.GradleException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 
+@GradlePlugin(id = "dev.gradleplugins.kotlin-gradle-plugin")
 public class KotlinGradlePluginDevelopmentPlugin implements Plugin<Project> {
     @Override
     public void apply(Project project) {
