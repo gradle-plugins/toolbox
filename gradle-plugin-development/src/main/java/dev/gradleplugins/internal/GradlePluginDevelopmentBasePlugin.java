@@ -42,7 +42,9 @@ public class GradlePluginDevelopmentBasePlugin implements Plugin<Project> {
         if (!TestFixtures.released) {
             project.getRepositories().mavenLocal();
         }
+        // TODO: Properly configure the POM of gradle-api per version to pull the right Groovy API
         project.getDependencies().add("implementation", "dev.gradleplugins:gradle-api:" + TestFixtures.apiVersion + "-5.6.2");
+        project.getDependencies().add("implementation", "org.codehaus.groovy:groovy:2.5.7"); // require jcenter()
 
         project.getPluginManager().apply(SpockFunctionalTestingPlugin.class);
         project.getPluginManager().apply(PublishPlugin.class); // For publishing
