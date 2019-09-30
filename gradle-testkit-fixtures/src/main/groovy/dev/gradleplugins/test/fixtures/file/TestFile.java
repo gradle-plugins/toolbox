@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -159,5 +160,14 @@ public class TestFile extends File {
         } catch (IOException e) {
             throw new RuntimeException(String.format("Could not append to test file '%s'", this), e);
         }
+    }
+
+    public TestFile write(Object content) {
+        try {
+            FileUtils.writeStringToFile(this, content.toString(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException(String.format("Could not write to test file '%s'", this), e);
+        }
+        return this;
     }
 }

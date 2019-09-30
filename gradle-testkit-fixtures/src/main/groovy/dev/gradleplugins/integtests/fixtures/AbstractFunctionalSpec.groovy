@@ -74,12 +74,12 @@ class AbstractFunctionalSpec extends Specification {
             args << "--build-cache"
         }
 
-        buildFile.text = """buildscript {
-    dependencies {
-        classpath files(${implementationClassPath.collect { "'$it'" }.join(', ')})
-    }
-}
-""" + buildFile.text
+//        buildFile.text = """buildscript {
+//    dependencies {
+//        classpath files(${implementationClassPath.collect { "'$it'" }.join(', ')})
+//    }
+//}
+//""" + buildFile.text
 
         if (!settingsFile.exists()) {
             settingsFile.createNewFile()
