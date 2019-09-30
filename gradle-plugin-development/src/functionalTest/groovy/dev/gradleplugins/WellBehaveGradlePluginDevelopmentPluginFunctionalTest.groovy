@@ -16,6 +16,7 @@
 
 package dev.gradleplugins
 
+import dev.gradleplugins.fixtures.SourceElement
 import dev.gradleplugins.integtests.fixtures.AbstractFunctionalSpec
 import org.junit.Assume
 import spock.lang.Unroll
@@ -24,6 +25,16 @@ import static org.hamcrest.CoreMatchers.equalTo
 import static org.hamcrest.CoreMatchers.not
 
 abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends AbstractFunctionalSpec {
+    def setup() {
+        settingsFile << """
+pluginManagement {
+    repositories {
+        mavenLocal()
+    }
+}
+"""
+    }
+
     def "warns when java-gradle-plugin core plugin is applied before dev.gradleplugins development plugin"() {
         given:
         buildFile << """
@@ -62,5 +73,24 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
         otherPluginId << ['dev.gradleplugins.java-gradle-plugin', 'dev.gradleplugins.groovy-gradle-plugin', 'dev.gradleplugins.kotlin-gradle-plugin']
     }
 
+    def "can build Gradle plugin"() {
+        given:
+        buildFile << """
+            plugins {
+                id("${pluginIdUnderTest}")
+            }
+        """
+        componentUnderTest.writeToProject(testDirectory)
+
+        when:
+        succeeds('build')
+
+        then:
+        assertTasksExecutedAndNotSkipped(':build')
+        // TODO: Valid the plugin is proper
+    }
+
     protected abstract String getPluginIdUnderTest()
+
+    protected abstract SourceElement getComponentUnderTest()
 }

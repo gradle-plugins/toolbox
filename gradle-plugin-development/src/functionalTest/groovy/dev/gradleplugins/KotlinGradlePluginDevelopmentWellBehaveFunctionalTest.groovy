@@ -16,6 +16,14 @@
 
 package dev.gradleplugins
 
+import dev.gradleplugins.fixtures.sample.KotlinBasicGradlePlugin
+import dev.gradleplugins.fixtures.SourceElement
+
 class KotlinGradlePluginDevelopmentWellBehaveFunctionalTest extends WellBehaveGradlePluginDevelopmentPluginFunctionalTest {
     final String pluginIdUnderTest = 'dev.gradleplugins.kotlin-gradle-plugin'
+
+    @Override
+    protected SourceElement getComponentUnderTest() {
+        return new KotlinBasicGradlePlugin()
+    }
 }

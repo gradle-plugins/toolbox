@@ -29,6 +29,10 @@ dependencies {
     functionalTestImplementation(project(":gradle-testkit-fixtures"))
     annotationProcessor(project(":gradle-plugin-development-processor"))
     implementation(project(":gradle-plugin-development-annotation"))
+
+    // TODO: should be inherited from implementation
+    functionalTestImplementation(project(":gradle-plugin-development-annotation"))
+//    functionalTestImplementation("com.gradle.publish:plugin-publish-plugin:0.10.1")
 }
 
 fun withoutSnapshot(version: String): String {
