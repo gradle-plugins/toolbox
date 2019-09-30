@@ -17,11 +17,11 @@
 package dev.gradleplugins
 
 import dev.gradleplugins.integtests.fixtures.AbstractFunctionalSpec
-import org.hamcrest.CoreMatchers
 import org.junit.Assume
 import spock.lang.Unroll
 
-import static org.hamcrest.CoreMatchers.*
+import static org.hamcrest.CoreMatchers.equalTo
+import static org.hamcrest.CoreMatchers.not
 
 abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends AbstractFunctionalSpec {
     def "warns when java-gradle-plugin core plugin is applied before dev.gradleplugins development plugin"() {

@@ -28,11 +28,9 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
     @Override
     public void apply(Project project) {
         getOtherGradlePluginDevelopmentPlugins().stream().filter(id -> project.getPluginManager().hasPlugin(id)).findAny().ifPresent(id -> {
-            // TODO: Maybe turn this into an exception
             project.getLogger().warn("The '" + getPluginId() + "' cannot be applied with '" + id + "', please apply just one of them.");
         });
         if (project.getPluginManager().hasPlugin("java-gradle-plugin")) {
-            // TODO: Maybe turn this into an exception
             project.getLogger().warn("The Gradle core plugin 'java-gradle-plugin' should not be applied within your build when using '" + getPluginId() + "'.");
         }
         doApply(project);

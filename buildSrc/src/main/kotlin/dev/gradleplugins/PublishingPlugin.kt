@@ -5,9 +5,11 @@ import com.jfrog.bintray.gradle.BintrayExtension
 import com.jfrog.bintray.gradle.BintrayPlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.*
 import java.text.SimpleDateFormat
@@ -29,17 +31,22 @@ class PublishingPlugin : Plugin<Project> {
 
     private
     fun Project.configurePublishingExtension() {
-        val shadowJar = tasks.named<ShadowJar>("shadowJar")
+//        var jarTask: TaskProvider<out Task> = tasks.named<Jar>("jar")
+//        if (project.pluginManager.hasPlugin("com.github.johnrengelman.shadow")) {
+//            jarTask = tasks.named<ShadowJar>("shadowJar")
+//        }
         val sourcesJar = tasks.named<Jar>("sourcesJar")
-        val groovydocJar = tasks.named<Jar>("groovydocJar")
         val javadocJar = tasks.named<Jar>("javadocJar")
 
         configure<PublishingExtension> {
             publications {
                 create<MavenPublication>("mavenJava") {
-                    artifact(shadowJar.get())
+//                    artifact(jarTask.get())
                     artifact(sourcesJar.get())
-                    artifact(groovydocJar.get())
+                    if (project.pluginManager.hasPlugin("groovy")) {
+                        val groovydocJar = tasks.named<Jar>("groovydocJar")
+                        artifact(groovydocJar.get())
+                    }
                     artifact(javadocJar.get())
 
                     pom {
