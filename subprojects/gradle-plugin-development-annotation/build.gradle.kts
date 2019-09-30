@@ -1,3 +1,5 @@
+import com.jfrog.bintray.gradle.BintrayExtension
+
 /*
  * Copyright 2019 the original author or authors.
  *
@@ -16,6 +18,23 @@
 
 plugins {
     `java-library`
+    `maven-publish`
     dev.gradleplugins.experimental.artifacts
+    dev.gradleplugins.experimental.publishing
 }
 
+configure<PublishingExtension> {
+    publications {
+        named<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
+    }
+}
+
+afterEvaluate {
+    configure<BintrayExtension> {
+        pkg(closureOf<BintrayExtension.PackageConfig> {
+            name = "" // TODO
+        })
+    }
+}
