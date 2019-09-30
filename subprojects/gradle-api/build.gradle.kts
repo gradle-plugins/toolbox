@@ -28,7 +28,7 @@ plugins {
     dev.gradleplugins.experimental.`publishing-base`
 }
 
-version = "0.0.12"
+version = "0.0.13"
 
 val java = project.extensions.getByType(JavaPluginExtension::class.java)
 java.sourceCompatibility = JavaVersion.VERSION_1_8
@@ -84,6 +84,13 @@ getAllGeneralAvailableVersion().forEach {
                             name.set("Gradle Inc.")
                             url.set("https://github.com/gradle")
                         }
+                    }
+                    withXml {
+                        val dependency = asNode().appendNode("dependencies").appendNode("dependency")
+                        dependency.appendNode("groupId", "org.codehaus.groovy")
+                        dependency.appendNode("artifactId", "groovy-all")
+                        dependency.appendNode("version", "2.5.4")
+                        dependency.appendNode("scope", "compile")
                     }
                 }
             }
