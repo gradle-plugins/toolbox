@@ -23,8 +23,11 @@ import org.gradle.api.Project;
 public class GroovyGradlePluginDevelopmentPlugin extends AbstractGradlePluginDevelopmentPlugin {
     @Override
     public void doApply(Project project) {
-        project.getPluginManager().apply(GradlePluginDevelopmentBasePlugin.class);
         project.getPluginManager().apply("groovy");
+        project.getPluginManager().apply(GradlePluginDevelopmentBasePlugin.class);
+
+        project.getRepositories().jcenter();
+        project.getDependencies().add("implementation", "org.codehaus.groovy:groovy-all:2.5.4"); // require jcenter()
     }
 
     @Override

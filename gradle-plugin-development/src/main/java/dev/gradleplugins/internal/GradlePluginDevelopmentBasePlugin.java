@@ -31,20 +31,25 @@ import java.io.File;
 public class GradlePluginDevelopmentBasePlugin implements Plugin<Project> {
     @Override
     public void apply(Project project) {
+        project.getConfigurations().matching(it -> it.getName().equals("compile")).all(configuration -> {
+            project.getDependencies().add("compile", "dev.gradleplugins:gradle-api:" + TestFixtures.apiVersion + "-5.6.2");
+        });
+
         project.getPluginManager().apply(JavaGradlePluginPlugin.class); // For plugin development
 
         // TODO: Check if we can remove the gradlePlugin extension as there is no more usage with the annotation
         // TODO: Print deprecation warning about using GradlePlugin the container for declaring plugin IDs
         // TODO: Warn when calling gradleApi()
 
-        project.getConfigurations().removeIf(it -> it.getName().equals("compile"));
+//        project.getConfigurations().removeIf(it -> it.getName().equals("compile"));
 
         if (!TestFixtures.released) {
             project.getRepositories().mavenLocal();
         }
         // TODO: Properly configure the POM of gradle-api per version to pull the right Groovy API
-        project.getDependencies().add("implementation", "dev.gradleplugins:gradle-api:" + TestFixtures.apiVersion + "-5.6.2");
-        project.getDependencies().add("implementation", "org.codehaus.groovy:groovy:2.5.7"); // require jcenter()
+//        project.getDependencies().add("compile", "dev.gradleplugins:gradle-api:" + TestFixtures.apiVersion + "-5.6.2");
+
+        project.getRepositories().mavenCentral();
 
         project.getPluginManager().apply(SpockFunctionalTestingPlugin.class);
         project.getPluginManager().apply(PublishPlugin.class); // For publishing
