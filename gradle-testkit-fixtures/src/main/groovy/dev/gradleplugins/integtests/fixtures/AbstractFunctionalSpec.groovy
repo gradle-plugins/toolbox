@@ -48,7 +48,6 @@ class AbstractFunctionalSpec extends Specification {
 
     protected BuildResult build(String... arguments) {
         result = createAndConfigureGradleRunner(arguments).build()
-        println(result.output)
         return result
     }
 
@@ -62,7 +61,6 @@ class AbstractFunctionalSpec extends Specification {
 
     protected BuildResult buildAndFail(String... arguments) {
         result = createAndConfigureGradleRunner(arguments).buildAndFail()
-        println(result.output)
         return result
     }
 
@@ -85,6 +83,7 @@ class AbstractFunctionalSpec extends Specification {
             settingsFile.createNewFile()
         }
         return GradleRunner.create()
+                .forwardOutput()
                 .withProjectDir(projectDir)
                 .withArguments(args)
                 .withPluginClasspath()
