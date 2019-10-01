@@ -87,7 +87,7 @@ class AbstractFunctionalSpec extends Specification {
                 .withProjectDir(projectDir)
                 .withArguments(args)
                 .withPluginClasspath()
-                .withDebug(true)
+                .withDebug(false) // turning it to true cause https://github.com/gradle/gradle/issues/1687
     }
 
     private static Iterable<File> getImplementationClassPath() {
