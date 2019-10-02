@@ -19,8 +19,6 @@ package dev.gradleplugins.internal;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.artifacts.Dependency;
-import org.gradle.api.artifacts.ModuleDependency;
 import org.gradle.api.internal.plugins.DslObject;
 import org.gradle.api.tasks.GroovySourceSet;
 import org.gradle.api.tasks.SourceSet;
@@ -28,9 +26,6 @@ import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.testing.Test;
 import dev.gradleplugins.internal.TestFixtures;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class SpockFunctionalTestingPlugin implements Plugin<Project> {
     @Override
@@ -59,10 +54,7 @@ public class SpockFunctionalTestingPlugin implements Plugin<Project> {
             it.extendsFrom(functionalTestFixtureConfiguration);
         });
 
-        ModuleDependency dep = (ModuleDependency)project.getDependencies().add("functionalTestImplementation", "org.spockframework:spock-core:1.2-groovy-2.5");
-        Map exclude = new HashMap();
-        exclude.put("group", "org.codehaus.groovy");
-        dep.exclude(exclude);
+        project.getDependencies().add("functionalTestImplementation", "org.spockframework:spock-core:1.2-groovy-2.5");
         project.getDependencies().add("functionalTestImplementation", project.getDependencies().gradleTestKit());
         project.getDependencies().add("functionalTestFixtureImplementation", TestFixtures.notation);
 
