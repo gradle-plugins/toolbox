@@ -17,7 +17,10 @@
 package dev.gradleplugins.internal;
 
 import dev.gradleplugins.GradlePlugin;
+import dev.gradleplugins.internal.tasks.FakeAnnotationProcessorTask;
 import org.gradle.api.Project;
+import org.gradle.api.tasks.SourceSetContainer;
+import org.gradle.api.tasks.TaskProvider;
 
 @GradlePlugin(id = "dev.gradleplugins.groovy-gradle-plugin")
 public class GroovyGradlePluginDevelopmentPlugin extends AbstractGradlePluginDevelopmentPlugin {
@@ -28,6 +31,19 @@ public class GroovyGradlePluginDevelopmentPlugin extends AbstractGradlePluginDev
 
         project.getRepositories().jcenter();
         project.getDependencies().add("implementation", "org.codehaus.groovy:groovy-all:2.5.4"); // require jcenter()
+
+        TaskProvider<FakeAnnotationProcessorTask> fakeAnnotationProcessorTask = project.getTasks().register("fakeAnnotationProcessing", FakeAnnotationProcessorTask.class, task -> {
+            task.getPluginDescriptorDirectory().set(project.getLayout().getBuildDirectory().dir("pluginDescriptors"));
+        });
+
+        project.getExtensions().getByType(SourceSetContainer.class).getByName("main").getResources().srcDir(fakeAnnotationProcessorTask.flatMap(FakeAnnotationProcessorTask::getPluginDescriptorDirectory));
+
+        // TODO: lint java-gradle-plugin extension VS the annotation
+
+        project.getTasks().named("pluginDescriptors", it -> {
+            it.dependsOn(fakeAnnotationProcessorTask);
+            it.setEnabled(false);
+        });
     }
 
     @Override
