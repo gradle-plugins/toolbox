@@ -25,16 +25,6 @@ import static org.hamcrest.CoreMatchers.equalTo
 import static org.hamcrest.CoreMatchers.not
 
 abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends AbstractFunctionalSpec {
-    def setup() {
-        settingsFile << """
-pluginManagement {
-    repositories {
-        mavenLocal()
-    }
-}
-"""
-    }
-
     def "warns when java-gradle-plugin core plugin is applied before dev.gradleplugins development plugin"() {
         given:
         buildFile << """
@@ -87,6 +77,8 @@ pluginManagement {
 
         then:
         assertTasksExecutedAndNotSkipped(':build')
+        // TODO: Assert jar content instead
+        !outputContains("No valid plugin descriptors were found in META-INF/gradle-plugins")
         // TODO: Valid the plugin is proper
     }
 

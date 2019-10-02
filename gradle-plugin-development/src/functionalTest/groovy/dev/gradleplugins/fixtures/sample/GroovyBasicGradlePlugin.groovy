@@ -27,9 +27,9 @@ class GroovyBasicGradlePlugin extends SourceElement implements GradlePluginEleme
     final List<SourceFile> files = Collections.singletonList(sourceFile('groovy', 'com/example/BasicPlugin.groovy', """package com.example
 import ${Plugin.canonicalName}
 import ${Project.canonicalName}
-//import ${GradlePlugin.canonicalName}
+import ${GradlePlugin.canonicalName}
 
-//@GradlePlugin(id = "${pluginId}")
+@GradlePlugin(id = "${pluginId}")
 class BasicPlugin implements Plugin<Project> {
     void apply(Project project) {
         project.logger.lifecycle('Hello')
