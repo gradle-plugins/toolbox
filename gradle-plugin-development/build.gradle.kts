@@ -1,6 +1,7 @@
 plugins {
     id("dev.gradleplugins.java-gradle-plugin")
     dev.gradleplugins.experimental.`shaded-artifact`
+    `maven-publish`
 }
 
 // Supported by the development plugins
@@ -87,6 +88,12 @@ pluginBundle {
             displayName = "Fast Gradle plugin development in Kotlin"
             tags = listOf("gradle", "gradle-plugins", "development", "kotlin")
         }
+    }
+}
+
+publishing {
+    repositories {
+        mavenLocal()
     }
 }
 
