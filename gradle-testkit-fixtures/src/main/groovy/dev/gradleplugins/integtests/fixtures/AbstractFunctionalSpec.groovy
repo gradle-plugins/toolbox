@@ -16,11 +16,12 @@
 
 package dev.gradleplugins.integtests.fixtures
 
+import dev.gradleplugins.integtests.fixtures.executer.GradleExecuter
+import dev.gradleplugins.integtests.fixtures.executer.GradleRunnerExecuter
 import dev.gradleplugins.test.fixtures.file.CleanupTestDirectory
 import dev.gradleplugins.test.fixtures.file.TestFile
 import dev.gradleplugins.test.fixtures.file.TestNameTestDirectoryProvider
 import org.gradle.testkit.runner.BuildResult
-import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Rule
 import spock.lang.Specification
@@ -29,6 +30,12 @@ import spock.lang.Specification
 class AbstractFunctionalSpec extends Specification {
     @Rule
     final TestNameTestDirectoryProvider temporaryFolder = new TestNameTestDirectoryProvider()
+    GradleExecuter executer = createExecuter()
+    BuildResult result
+
+    private GradleExecuter createExecuter() {
+        return new GradleRunnerExecuter(temporaryFolder)
+    }
 
     protected TestFile getProjectDir() {
         return testDirectory
@@ -38,67 +45,20 @@ class AbstractFunctionalSpec extends Specification {
         return testDirectory.file(getBuildFileName())
     }
 
-    protected File getSettingsFile() {
+    protected TestFile getSettingsFile() {
         return testDirectory.file(getSettingsFileName())
     }
 
-    BuildResult result
-
-    private boolean isBuildCacheEnabled = false
-
-    protected BuildResult build(String... arguments) {
-        result = createAndConfigureGradleRunner(arguments).build()
-        return result
+    protected BuildResult succeeds(String... tasks) {
+        return (result = executer.withTasks(tasks).run())
     }
 
-    protected BuildResult succeeds(String... arguments) {
-        return build(arguments)
+    protected BuildResult fails(String... tasks) {
+        return (result = executer.withTasks(tasks).runWithFailure())
     }
 
     protected BuildResult run(String... arguments) {
-        return build(arguments)
-    }
-
-    protected BuildResult buildAndFail(String... arguments) {
-        result = createAndConfigureGradleRunner(arguments).buildAndFail()
-        return result
-    }
-
-    private GradleRunner createAndConfigureGradleRunner(String... arguments) {
-        def args = arguments.toList();
-        args << "-s"
-//        args << "-i"
-        if (isBuildCacheEnabled) {
-            args << "--build-cache"
-        }
-
-//        buildFile.text = """buildscript {
-//    dependencies {
-//        classpath files(${implementationClassPath.collect { "'$it'" }.join(', ')})
-//    }
-//}
-//""" + buildFile.text
-
-        if (!settingsFile.exists()) {
-            settingsFile.createNewFile()
-        }
-        return GradleRunner.create()
-                .forwardOutput()
-                .withProjectDir(projectDir)
-                .withArguments(args)
-                .withPluginClasspath()
-                .withDebug(false) // turning it to true cause https://github.com/gradle/gradle/issues/1687
-    }
-
-    private static Iterable<File> getImplementationClassPath() {
-        def prop = new Properties()
-        prop.load(AbstractFunctionalSpec.getResourceAsStream("/plugin-under-test-metadata.properties"))
-        return prop.get("implementation-classpath").split(File.pathSeparator).collect { new File(it) }
-
-    }
-
-    void enableBuildCache() {
-        isBuildCacheEnabled = true
+        return succeeds(arguments);
     }
 
     void assertTasksExecutedAndNotSkipped(String... tasks) {
@@ -136,5 +96,21 @@ class AbstractFunctionalSpec extends Specification {
 
     private void assertHasResult() {
         assert result != null
+    }
+
+    protected static String configurePluginClasspathAsBuildScriptDependencies() {
+        return """buildscript {
+    dependencies {
+        classpath files(${implementationClassPath.collect { "'$it'" }.join(', ')})
+    }
+}
+"""
+    }
+
+    private static Iterable<File> getImplementationClassPath() {
+        def prop = new Properties()
+        prop.load(AbstractFunctionalSpec.getResourceAsStream("/plugin-under-test-metadata.properties"))
+        return prop.get("implementation-classpath").toString().split(File.pathSeparator).collect { new File(it) }
+
     }
 }

@@ -16,8 +16,6 @@
 
 package dev.gradleplugins.test.fixtures.file;
 
-import java.io.File;
-
 /**
  * Implementations provide a working space to be used in tests.
  *
@@ -30,7 +28,7 @@ public interface TestDirectoryProvider {
      *
      * @return The directory to use, guaranteed to exist.
      */
-    File getTestDirectory();
+    TestFile getTestDirectory();
 
     void suppressCleanup();
 }

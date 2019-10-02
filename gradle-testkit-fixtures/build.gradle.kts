@@ -18,21 +18,23 @@ repositories {
 }
 
 dependencies {
-    shaded("commons-io:commons-io:2.6")
-
     // This is tricky as it's a API dependency but isn't published anywhere
     //   Let's put the burden on the user to declare that as well
+    //   They should be declaring that dependency anyway as this library is not meant to be used outside of the Gradle plugin development plugins within Gradle runtime.
     implementation(gradleTestKit())
 
     // This is tricky as it's a API dependency but may work for other versions
     //    Let's put the burden on the user to declare his requirements but also assume the code is compatible with older versions ;)
-    implementation("org.spockframework:spock-core:1.2-groovy-2.5") {
-        exclude(group = "org.codehaus.groovy")
-    }
+    // TODO: At some point, we will need make this work with an "older" version of Spock depending on how backward compatible the Gradle plugin development plugins will support.
+    implementation("org.spockframework:spock-core:1.2-groovy-2.5")
 }
 
-shadedArtifact {
-    packagesToRelocate.set(listOf("org.apache.commons.io"))
+configure<PublishingExtension> {
+    publications {
+        named<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
+    }
 }
 
 tasks.register("release") {

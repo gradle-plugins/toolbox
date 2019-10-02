@@ -17,6 +17,8 @@
 package dev.gradleplugins.integtests.fixtures
 
 abstract class WellBehavedPluginTest extends AbstractFunctionalSpec {
+    // TODO: Maybe we can infer this value off the environment.
+    //   If we do, we should also provide an good error message telling the user what they should do if we don't infer the plugin id correctly.
     abstract String getQualifiedPluginId()
 
     String getMainTask() {

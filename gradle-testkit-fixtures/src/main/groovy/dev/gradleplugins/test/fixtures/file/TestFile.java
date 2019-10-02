@@ -16,7 +16,6 @@
 
 package dev.gradleplugins.test.fixtures.file;
 
-import org.apache.commons.io.FileUtils;
 import org.codehaus.groovy.runtime.ResourceGroovyMethods;
 
 import java.io.File;
@@ -60,7 +59,8 @@ public class TestFile extends File {
      */
     public TestFile forceDeleteDir() throws IOException {
         if (isDirectory()) {
-            if (FileUtils.isSymlink(this)) {
+
+            if (Files.isSymbolicLink(toPath())) {
                 if (!delete()) {
                     throw new IOException("Unable to delete symlink: " + getCanonicalPath());
                 }
@@ -121,6 +121,10 @@ public class TestFile extends File {
         return this;
     }
 
+    public TestFile createFile(Object path) {
+        return file(path).createFile();
+    }
+
     public TestFile createDir() {
         if (mkdirs()) {
             return this;
@@ -164,10 +168,22 @@ public class TestFile extends File {
 
     public TestFile write(Object content) {
         try {
-            FileUtils.writeStringToFile(this, content.toString(), StandardCharsets.UTF_8);
+            Files.write(toPath(), content.toString().getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new RuntimeException(String.format("Could not write to test file '%s'", this), e);
         }
         return this;
+    }
+
+    public boolean isSelfOrDescendent(File file) {
+        if (file.getAbsolutePath().equals(getAbsolutePath())) {
+            return true;
+        }
+        return file.getAbsolutePath().startsWith(getAbsolutePath() + File.separatorChar);
+    }
+
+    @Override
+    public TestFile getParentFile() {
+        return super.getParentFile() == null ? null : new TestFile(super.getParentFile());
     }
 }
