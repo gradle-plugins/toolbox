@@ -32,6 +32,13 @@ class AbstractFunctionalSpec extends Specification {
     final TestNameTestDirectoryProvider temporaryFolder = new TestNameTestDirectoryProvider()
     GradleExecuter executer = createExecuter()
     BuildResult result
+    private boolean useKotlinDsl = false
+
+    protected void useKotlinDsl() {
+        // TODO: Detect when configuration already started to happen and either migrate the configuration or crash.
+        //   Leaning more toward crashing.
+        useKotlinDsl = true
+    }
 
     private GradleExecuter createExecuter() {
         return new GradleRunnerExecuter(temporaryFolder)
@@ -78,10 +85,16 @@ class AbstractFunctionalSpec extends Specification {
     }
 
     protected String getBuildFileName() {
+        if (useKotlinDsl) {
+            return "build.gradle.kts"
+        }
         return "build.gradle"
     }
 
     protected String getSettingsFileName() {
+        if (useKotlinDsl) {
+            return "settings.gradle.kts"
+        }
         return "settings.gradle"
     }
 
