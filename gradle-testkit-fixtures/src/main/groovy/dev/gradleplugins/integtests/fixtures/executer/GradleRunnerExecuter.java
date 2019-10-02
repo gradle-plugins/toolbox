@@ -67,6 +67,11 @@ public class GradleRunnerExecuter implements GradleExecuter {
     }
 
     @Override
+    public GradleExecuter withTasks(String... tasks) {
+        return withTasks(Arrays.asList(tasks));
+    }
+
+    @Override
     public GradleExecuter withTasks(List<String> tasks) {
         this.tasks.addAll(tasks);
         return this;
@@ -133,11 +138,10 @@ public class GradleRunnerExecuter implements GradleExecuter {
     }
 
     private GradleRunner configureExecuter() {
-        GradleRunner runner = GradleRunner.create().forwardOutput().withPluginClasspath();
-
-        if (workingDirectory != null) {
-            runner.withProjectDir(workingDirectory);
-        }
+        GradleRunner runner = GradleRunner.create();
+        runner.forwardOutput();
+        runner.withPluginClasspath();
+        runner.withProjectDir(getWorkingDirectory());
 
         if (debuggerAttached) {
             System.out.println("WARNING: Gradle TestKit has some class loader issue that may result in runtime failures - such as NoClassDefFoundError for groovy/util/AntBuilder (see https://github.com/gradle/gradle/issues/1687).");

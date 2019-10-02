@@ -20,6 +20,7 @@ import org.codehaus.groovy.runtime.ResourceGroovyMethods;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -168,6 +169,14 @@ public class TestFile extends File {
 
     public TestFile write(Object content) {
         try {
+            if (!exists()) {
+                final File parent = super.getParentFile();
+                if (parent != null) {
+                    if (!parent.mkdirs() && !parent.isDirectory()) {
+                        throw new IOException("Directory '" + parent + "' could not be created");
+                    }
+                }
+            }
             Files.write(toPath(), content.toString().getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new RuntimeException(String.format("Could not write to test file '%s'", this), e);

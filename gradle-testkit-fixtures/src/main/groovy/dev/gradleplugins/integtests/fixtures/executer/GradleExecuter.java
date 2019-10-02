@@ -36,6 +36,11 @@ public interface GradleExecuter {
     /**
      * Sets the task names to execute. Defaults to an empty list.
      */
+    GradleExecuter withTasks(String... tasks);
+
+    /**
+     * Sets the task names to execute. Defaults to an empty list.
+     */
     GradleExecuter withTasks(List<String> tasks);
 
     /**
