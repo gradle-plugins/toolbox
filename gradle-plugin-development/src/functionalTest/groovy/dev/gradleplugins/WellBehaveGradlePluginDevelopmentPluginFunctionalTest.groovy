@@ -25,7 +25,7 @@ import static org.hamcrest.CoreMatchers.equalTo
 import static org.hamcrest.CoreMatchers.not
 
 abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends AbstractFunctionalSpec {
-    def "warns when java-gradle-plugin core plugin is applied before dev.gradleplugins development plugin"() {
+    def "fails when java-gradle-plugin core plugin is applied before dev.gradleplugins development plugin"() {
         given:
         buildFile << """
             plugins {
@@ -35,14 +35,14 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
         """
 
         when:
-        run 'help', '--warn'
+        fails 'help'
 
         then:
         outputContains("The Gradle core plugin 'java-gradle-plugin' should not be applied within your build when using '${pluginIdUnderTest}'.")
     }
 
     @Unroll
-    def "warns when applying #otherPluginId together with the plugin under test"() {
+    def "fails when applying #otherPluginId together with the plugin under test"() {
         Assume.assumeThat(otherPluginId, not(equalTo(pluginIdUnderTest)))
 
         given:
@@ -54,7 +54,7 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
         """
 
         when:
-        run 'help', '--warn'
+        fails 'help'
 
         then:
         outputContains("The '${pluginIdUnderTest}' cannot be applied with '${otherPluginId}', please apply just one of them.")
@@ -79,6 +79,7 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
         assertTasksExecutedAndNotSkipped(':build')
         // TODO: Assert jar content instead
         !outputContains("No valid plugin descriptors were found in META-INF/gradle-plugins")
+        !outputContains("A valid plugin descriptor was found for com.example.hello.properties but the implementation class com.example.BasicPlugin was not found in the jar.")
         // TODO: Valid the plugin is proper
     }
 

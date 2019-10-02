@@ -16,6 +16,7 @@
 
 package dev.gradleplugins.internal;
 
+import org.gradle.api.GradleException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 
@@ -28,10 +29,12 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
     @Override
     public void apply(Project project) {
         getOtherGradlePluginDevelopmentPlugins().stream().filter(id -> project.getPluginManager().hasPlugin(id)).findAny().ifPresent(id -> {
-            project.getLogger().warn("The '" + getPluginId() + "' cannot be applied with '" + id + "', please apply just one of them.");
+            throw new GradleException("The '" + getPluginId() + "' cannot be applied with '" + id + "', please apply just one of them.");
         });
-        if (project.getPluginManager().hasPlugin("java-gradle-plugin")) {
-            project.getLogger().warn("The Gradle core plugin 'java-gradle-plugin' should not be applied within your build when using '" + getPluginId() + "'.");
+        if (project.getPluginManager().hasPlugin("java-gradle-plugin") && !project.getPluginManager().hasPlugin("org.gradle.kotlin.kotlin-dsl")) {
+            // TODO: The kotlin-dsl plugin gets special treatmenet and is pushed all the way in front of the plugin list to be the first plugin to be applied... FFFFFFUUUUU A specific error message will be shown for kotlin-dsl
+            // TODO: kotlin-dsl plugin actually applies the java-gradle-plugin. Provide a better error message in this case.
+            throw new GradleException("The Gradle core plugin 'java-gradle-plugin' should not be applied within your build when using '" + getPluginId() + "'.");
         }
         doApply(project);
     }
