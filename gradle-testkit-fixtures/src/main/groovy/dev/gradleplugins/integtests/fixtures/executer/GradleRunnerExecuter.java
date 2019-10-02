@@ -18,17 +18,21 @@ package dev.gradleplugins.integtests.fixtures.executer;
 
 import dev.gradleplugins.test.fixtures.file.TestDirectoryProvider;
 import dev.gradleplugins.test.fixtures.file.TestFile;
+import groovy.lang.Closure;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
+import org.gradle.util.ClosureBackedAction;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class GradleRunnerExecuter implements GradleExecuter {
     private final List<String> tasks = new ArrayList<>();
     private final List<String> arguments = new ArrayList<>();
+    private final List<Consumer<? super GradleExecuter>> beforeExecute = new ArrayList<>();
     private final TestDirectoryProvider testDirectoryProvider;
     private boolean debuggerAttached = false;
     private boolean showStacktrace = true;
@@ -108,6 +112,7 @@ public class GradleRunnerExecuter implements GradleExecuter {
 
     @Override
     public BuildResult run() {
+        fireBeforeExecute();
         try {
             return configureExecuter().build();
         } finally {
@@ -117,6 +122,7 @@ public class GradleRunnerExecuter implements GradleExecuter {
 
     @Override
     public BuildResult runWithFailure() {
+        fireBeforeExecute();
         try {
             return configureExecuter().buildAndFail();
         } finally {
@@ -186,5 +192,14 @@ public class GradleRunnerExecuter implements GradleExecuter {
             return dir.file("settings.gradle").isFile() || dir.file("settings.gradle.kts").isFile();
         }
         return false;
+    }
+
+    @Override
+    public void beforeExecute(Consumer<? super GradleExecuter> action) {
+        beforeExecute.add(action);
+    }
+
+    private void fireBeforeExecute() {
+        beforeExecute.forEach(it -> it.accept(this));
     }
 }

@@ -17,10 +17,13 @@
 package dev.gradleplugins.integtests.fixtures.executer;
 
 import dev.gradleplugins.test.fixtures.file.TestDirectoryProvider;
+import groovy.lang.Closure;
+import groovy.lang.DelegatesTo;
 import org.gradle.testkit.runner.BuildResult;
 
 import java.io.File;
 import java.util.List;
+import java.util.function.Consumer;
 
 public interface GradleExecuter {
     /**
@@ -90,4 +93,9 @@ public interface GradleExecuter {
      * @return The result.
      */
     BuildResult runWithFailure();
+
+    /**
+     * Adds an action to be called immediately before execution, to allow extra configuration to be injected.
+     */
+    void beforeExecute(Consumer<? super GradleExecuter> action);
 }
