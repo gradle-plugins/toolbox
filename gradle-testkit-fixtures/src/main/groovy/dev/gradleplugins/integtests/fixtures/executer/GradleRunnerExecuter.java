@@ -18,10 +18,8 @@ package dev.gradleplugins.integtests.fixtures.executer;
 
 import dev.gradleplugins.test.fixtures.file.TestDirectoryProvider;
 import dev.gradleplugins.test.fixtures.file.TestFile;
-import groovy.lang.Closure;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
-import org.gradle.util.ClosureBackedAction;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -38,6 +36,7 @@ public class GradleRunnerExecuter implements GradleExecuter {
     private boolean showStacktrace = true;
     private File workingDirectory = null;
     private File settingsFile = null;
+    private String gradleVersion = null;
 
     public GradleRunnerExecuter(TestDirectoryProvider testDirectoryProvider) {
         this.testDirectoryProvider = testDirectoryProvider;
@@ -141,6 +140,7 @@ public class GradleRunnerExecuter implements GradleExecuter {
         showStacktrace = true;
         workingDirectory = null;
         settingsFile = null;
+        gradleVersion = null;
     }
 
     private GradleRunner configureExecuter() {
@@ -152,6 +152,10 @@ public class GradleRunnerExecuter implements GradleExecuter {
         if (debuggerAttached) {
             System.out.println("WARNING: Gradle TestKit has some class loader issue that may result in runtime failures - such as NoClassDefFoundError for groovy/util/AntBuilder (see https://github.com/gradle/gradle/issues/1687).");
             runner.withDebug(true);
+        }
+
+        if (gradleVersion != null) {
+            runner.withGradleVersion(gradleVersion);
         }
 
         List<String> allArguments = new ArrayList<>();
@@ -201,5 +205,10 @@ public class GradleRunnerExecuter implements GradleExecuter {
 
     private void fireBeforeExecute() {
         beforeExecute.forEach(it -> it.accept(this));
+    }
+
+    // TODO: This is not how we want to solve this use case!
+    public void usingGradleVersion(String gradleVersion) {
+        this.gradleVersion = gradleVersion;
     }
 }
