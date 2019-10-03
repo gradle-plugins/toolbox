@@ -1,10 +1,11 @@
 rootProject.name = "toolbox"
 
-include("gradle-testkit-fixtures")
 
 // Gradle APIs
 include("gradle-api")
 project(":gradle-api").projectDir = file("subprojects/gradle-api")
+include("gradle-testkit-fixtures")
+project(":gradle-testkit-fixtures").projectDir = file("subprojects/gradle-testkit-fixtures")
 
 // Plugins
 include("license-gradle-plugin")
