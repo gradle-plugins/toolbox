@@ -58,9 +58,11 @@ public class SpockFunctionalTestingPlugin implements Plugin<Project> {
         project.getDependencies().add("functionalTestImplementation", project.getDependencies().gradleTestKit());
         project.getDependencies().add("functionalTestFixtureImplementation", TestFixtures.notation);
 
+        // TODO: We should lock this repo content for only Spock and it's dependencies that we are resolving here (for version 1.2-groovy-2.5)
         project.getRepositories().jcenter(); // for spock-core
 
         if (TestFixtures.released) {
+            // TODO: We should lock this repo content for only our fixture (we don't use any dependencies)
             project.getRepositories().maven(it -> {
                 it.setName("Gradle Plugins Release");
                 it.setUrl(project.uri("https://dl.bintray.com/gradle-plugins/maven"));

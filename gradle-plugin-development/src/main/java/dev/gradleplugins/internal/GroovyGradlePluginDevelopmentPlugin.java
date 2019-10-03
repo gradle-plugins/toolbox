@@ -44,6 +44,12 @@ public class GroovyGradlePluginDevelopmentPlugin extends AbstractGradlePluginDev
             it.dependsOn(fakeAnnotationProcessorTask);
             it.setEnabled(false);
         });
+
+        // TODO: warn if the plugin only have has Java source and no Groovy.
+        //   You specified a Groovy plugin development so we should expect Gradle plugin to be all in Groovy
+        //   We could ensure GradlePlugin aren't applied to any Java source
+        //   We could also check that no plugin id on `gradlePlugin` container points to a Java source
+        //   We could do the same for Kotlin code
     }
 
     @Override
