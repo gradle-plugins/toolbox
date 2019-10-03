@@ -49,7 +49,8 @@ fun getAllGeneralAvailableVersion(): List<String> {
     val jsonText = URL("https://services.gradle.org/versions/all").readText()
     val type = object : TypeToken<List<VersionDownloadInfo>>() { }.type
     val versionInfo = Gson().fromJson<List<VersionDownloadInfo>>(jsonText, type)
-    return versionInfo.filter { !it.snapshot && !it.version.contains("-rc-") && VersionNumber.parse("5.5.1").compareTo(VersionNumber.parse(it.version)) <= 0 }.map { it.version }
+    val result = versionInfo.filter { !it.snapshot && !it.version.contains("-rc-") && VersionNumber.parse("5.5.1").compareTo(VersionNumber.parse(it.version)) <= 0 }.map { it.version }
+    return result.plus("3.5.1")
 }
 
 getAllGeneralAvailableVersion().forEach {
@@ -89,7 +90,11 @@ getAllGeneralAvailableVersion().forEach {
                         val dependency = asNode().appendNode("dependencies").appendNode("dependency")
                         dependency.appendNode("groupId", "org.codehaus.groovy")
                         dependency.appendNode("artifactId", "groovy-all")
-                        dependency.appendNode("version", "2.5.4")
+                        if (it == "3.5.1") {
+                            dependency.appendNode("version", "2.4.10")
+                        } else {
+                            dependency.appendNode("version", "2.5.4")
+                        }
                         dependency.appendNode("scope", "compile")
                     }
                 }
