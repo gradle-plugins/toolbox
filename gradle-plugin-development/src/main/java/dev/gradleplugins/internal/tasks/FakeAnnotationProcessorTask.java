@@ -20,9 +20,23 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.tasks.TaskAction;
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.Attribute;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.ModuleVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.TypePath;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 
 public abstract class FakeAnnotationProcessorTask extends DefaultTask {
@@ -30,15 +44,65 @@ public abstract class FakeAnnotationProcessorTask extends DefaultTask {
     public abstract DirectoryProperty getPluginDescriptorDirectory();
 
     @TaskAction
-    private void doGenerate() throws FileNotFoundException {
+    private void doGenerate() throws IOException {
+        writePluginStub("com.example.BasicPlugin");
         writePluginDescriptor("com.example.hello", "com.example.BasicPlugin");
     }
 
+    private void writePluginStub(String pluginClass) throws IOException {
+        InputStream dummyPluginStream = this.getClass().getResourceAsStream("/dev/gradleplugins/internal/DummyPlugin.class");
+        ClassReader classReader = new ClassReader(dummyPluginStream);
+        ClassWriter classWriter = new ClassWriter(0);
+
+        String nameSlashOwnerStubClass = pluginClass.replaceAll("\\.", "/") + "Stub";
+
+        classReader.accept(new ClassVisitor(Opcodes.ASM6, classWriter) {
+            @Override
+            public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+                super.visit(version, access, nameSlashOwnerStubClass, signature, superName, interfaces);
+            }
+
+            @Override
+            public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+                MethodVisitor mv = classWriter.visitMethod(access, name, desc, signature, exceptions);
+                return new MethodVisitor(org.objectweb.asm.Opcodes.ASM6, mv) {
+                    @Override
+                    public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
+                        if (opcode == Opcodes.INVOKEVIRTUAL && owner.equals("dev/gradleplugins/internal/DummyPlugin")) {
+                            owner = nameSlashOwnerStubClass;
+                        }
+                        super.visitMethodInsn(opcode, owner, name, desc, itf);
+                    }
+
+                    @Override
+                    public void visitLdcInsn(Object cst) {
+                        if (cst instanceof String) {
+                            String s = (String)cst;
+                            switch (s) {
+                                case "<plugin-id>": cst = "com.example.hello"; break;
+                                case "<minimum-supported-gradle-version>": cst = "5.6.2"; break;
+                                case "<minimum-supported-java-version>": cst = "8"; break;
+                                case "<plugin-class>": cst = "com.example.BasicPlugin"; break;
+                            }
+                        }
+                        super.visitLdcInsn(cst);
+                    }
+                };
+            }
+        }, 0);
+
+        File f = getPluginDescriptorDirectory().file(nameSlashOwnerStubClass + ".class").get().getAsFile();
+        f.getParentFile().mkdirs();
+        try (OutputStream classStream = new FileOutputStream(f)) {
+            classStream.write(classWriter.toByteArray());
+        }
+    }
+
     private void writePluginDescriptor(String pluginId, String pluginClass) throws FileNotFoundException {
-        File pluginDescriptorFile = getPluginDescriptorDirectory().file(pluginId + ".properties").get().getAsFile();
+        File pluginDescriptorFile = getPluginDescriptorDirectory().file("META-INF/gradle-plugins/" + pluginId + ".properties").get().getAsFile();
         pluginDescriptorFile.getParentFile().mkdirs();
         try (PrintWriter out = new PrintWriter(pluginDescriptorFile)) {
-            out.println("implementation-class=" + pluginClass);
+            out.println("implementation-class=" + pluginClass + "Stub");
         }
     }
 }

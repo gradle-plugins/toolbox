@@ -33,10 +33,10 @@ public class GroovyGradlePluginDevelopmentPlugin extends AbstractGradlePluginDev
         project.getDependencies().add("implementation", "org.codehaus.groovy:groovy-all:2.5.4"); // require jcenter()
 
         TaskProvider<FakeAnnotationProcessorTask> fakeAnnotationProcessorTask = project.getTasks().register("fakeAnnotationProcessing", FakeAnnotationProcessorTask.class, task -> {
-            task.getPluginDescriptorDirectory().set(project.getLayout().getBuildDirectory().dir("pluginDescriptors"));
+            task.getPluginDescriptorDirectory().set(project.getLayout().getBuildDirectory().dir("stub-outputs"));
         });
 
-        project.getExtensions().getByType(SourceSetContainer.class).getByName("main").getResources().srcDir(fakeAnnotationProcessorTask.flatMap(FakeAnnotationProcessorTask::getPluginDescriptorDirectory));
+        project.getExtensions().getByType(SourceSetContainer.class).getByName("main").getOutput().dir(fakeAnnotationProcessorTask.flatMap(FakeAnnotationProcessorTask::getPluginDescriptorDirectory));
 
         // TODO: lint java-gradle-plugin extension VS the annotation
 

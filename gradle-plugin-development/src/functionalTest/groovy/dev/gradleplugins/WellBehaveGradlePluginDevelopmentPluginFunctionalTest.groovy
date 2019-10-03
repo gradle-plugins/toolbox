@@ -87,6 +87,39 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
         // TODO: Valid the plugin is proper
     }
 
+    @Ignore("Test using a plugin")
+    def "fails on unsupported Gradle version"() {
+        given:
+        buildFile << """
+            plugins {
+                id("${pluginIdUnderTest}")
+            }
+        """
+
+        when:
+        executer.usingGradleVersion("5.4")
+        fails("tasks")
+
+        then:
+        outputContains("...")
+    }
+
+    @Ignore("Until gradle-testkit-fixtures support changing Java runtime")
+    def "fails on unsupported Java version"() {
+        given:
+        buildFile << """
+            plugins {
+                id("${pluginIdUnderTest}")
+            }
+        """
+
+        when:
+        fails("tasks")
+
+        then:
+        outputContains("Plugin 'dev.gradleplugins.dummy' does not support the current JVM (1.8.0_171). Please use at least JVM 8.")
+    }
+
     protected abstract String getPluginIdUnderTest()
 
     protected abstract SourceElement getComponentUnderTest()

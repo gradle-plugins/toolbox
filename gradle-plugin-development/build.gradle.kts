@@ -25,15 +25,32 @@ repositories {
     gradlePluginPortal()
 }
 
+val stubConfiguration = configurations.create("stub") {
+    isVisible = false
+    isCanBeResolved = true
+    isCanBeConsumed = false
+    attributes.attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class.java, "stub"))
+}
+
 dependencies {
+    add(stubConfiguration.name, project(":gradle-plugin-development-stubs"))
+
     implementation("com.gradle.publish:plugin-publish-plugin:0.10.1")
     functionalTestImplementation(project(":gradle-testkit-fixtures"))
     annotationProcessor(project(":gradle-plugin-development-processor"))
     implementation(project(":gradle-plugin-development-annotation"))
+    implementation("org.ow2.asm:asm:6.0")
+    implementation("org.ow2.asm:asm-util:6.0")
 
     // TODO: should be inherited from implementation
     functionalTestImplementation(project(":gradle-plugin-development-annotation"))
 //    functionalTestImplementation("com.gradle.publish:plugin-publish-plugin:0.10.1")
+}
+
+sourceSets {
+    main.configure {
+        this.resources.srcDir(stubConfiguration)
+    }
 }
 
 fun withoutSnapshot(version: String): String {
