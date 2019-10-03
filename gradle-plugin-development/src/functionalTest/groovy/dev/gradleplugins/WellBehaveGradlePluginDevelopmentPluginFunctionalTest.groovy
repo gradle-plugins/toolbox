@@ -19,12 +19,16 @@ package dev.gradleplugins
 import dev.gradleplugins.fixtures.SourceElement
 import dev.gradleplugins.integtests.fixtures.AbstractFunctionalSpec
 import org.junit.Assume
+import spock.lang.Ignore
 import spock.lang.Unroll
 
 import static org.hamcrest.CoreMatchers.equalTo
 import static org.hamcrest.CoreMatchers.not
 
 abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends AbstractFunctionalSpec {
+    def setup() {
+        settingsFile << "rootProject.name = 'root'"
+    }
     def "fails when java-gradle-plugin core plugin is applied before dev.gradleplugins development plugin"() {
         given:
         buildFile << """
