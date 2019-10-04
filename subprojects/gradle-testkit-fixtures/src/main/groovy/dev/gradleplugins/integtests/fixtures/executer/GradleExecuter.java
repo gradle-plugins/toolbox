@@ -17,12 +17,11 @@
 package dev.gradleplugins.integtests.fixtures.executer;
 
 import dev.gradleplugins.test.fixtures.file.TestDirectoryProvider;
-import groovy.lang.Closure;
-import groovy.lang.DelegatesTo;
 import org.gradle.testkit.runner.BuildResult;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public interface GradleExecuter {
@@ -71,7 +70,30 @@ public interface GradleExecuter {
      */
     GradleExecuter withBuildCacheEnabled();
 
+    /**
+     * Activates the plugin classpath from the plugins under test.
+     */
+    GradleExecuter withPluginClasspath();
+
+    /**
+     * Sets the user's home dir to use when running the build. Implementations are not 100% accurate.
+     */
+    GradleExecuter withUserHomeDirectory(File userHomeDirectory);
+
+    /**
+     * Sets the environment variables to use when executing the build. Defaults to the environment of this process.
+     */
+    GradleExecuter withEnvironmentVars(Map<String, ?> environment);
+
+    /**
+     * Uses the given settings file by adding {@code "--settings-file"} argument.
+     */
     GradleExecuter usingSettingsFile(File settingsFile);
+
+    /**
+     * Uses the given project directory by adding the {@code "--project-dir"} argument.
+     */
+    GradleExecuter usingProjectDirectory(File projectDirectory);
 
     /**
      * The directory that the executer will use for any test specific storage.
@@ -98,4 +120,9 @@ public interface GradleExecuter {
      * Adds an action to be called immediately before execution, to allow extra configuration to be injected.
      */
     void beforeExecute(Consumer<? super GradleExecuter> action);
+
+    /**
+     * Adds an action to be called immediately after execution.
+     */
+    void afterExecute(Consumer<? super GradleExecuter> action);
 }

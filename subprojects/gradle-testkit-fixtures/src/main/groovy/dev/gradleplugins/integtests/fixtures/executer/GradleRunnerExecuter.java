@@ -22,21 +22,30 @@ import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 
 import java.io.File;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class GradleRunnerExecuter implements GradleExecuter {
     private final List<String> tasks = new ArrayList<>();
     private final List<String> arguments = new ArrayList<>();
     private final List<Consumer<? super GradleExecuter>> beforeExecute = new ArrayList<>();
+    private final List<Consumer<? super GradleExecuter>> afterExecute = new ArrayList<>();
     private final TestDirectoryProvider testDirectoryProvider;
     private boolean debuggerAttached = false;
     private boolean showStacktrace = true;
     private File workingDirectory = null;
     private File settingsFile = null;
     private String gradleVersion = null;
+    private File projectDirectory = null;
+    private boolean usePluginClasspath = false;
+    private File userHomeDirectory = null;
+    private Map<String, Object> environment = null;
 
     public GradleRunnerExecuter(TestDirectoryProvider testDirectoryProvider) {
         this.testDirectoryProvider = testDirectoryProvider;
@@ -60,6 +69,12 @@ public class GradleRunnerExecuter implements GradleExecuter {
     @Override
     public GradleExecuter usingSettingsFile(File settingsFile) {
         this.settingsFile = settingsFile;
+        return this;
+    }
+
+    @Override
+    public GradleExecuter usingProjectDirectory(File projectDirectory) {
+        this.projectDirectory = projectDirectory;
         return this;
     }
 
@@ -110,10 +125,30 @@ public class GradleRunnerExecuter implements GradleExecuter {
     }
 
     @Override
+    public GradleExecuter withPluginClasspath() {
+        usePluginClasspath = true;
+        return this;
+    }
+
+    @Override
+    public GradleExecuter withUserHomeDirectory(File userHomeDirectory) {
+        this.userHomeDirectory = userHomeDirectory;
+        return this;
+    }
+
+    @Override
+    public GradleExecuter withEnvironmentVars(Map<String, ?> environment) {
+        this.environment = new HashMap<>(environment);
+        return this;
+    }
+
+    @Override
     public BuildResult run() {
         fireBeforeExecute();
         try {
-            return configureExecuter().build();
+            BuildResult result = configureExecuter().build();
+            fireAfterExecute();
+            return result;
         } finally {
             finished();
         }
@@ -123,7 +158,9 @@ public class GradleRunnerExecuter implements GradleExecuter {
     public BuildResult runWithFailure() {
         fireBeforeExecute();
         try {
-            return configureExecuter().buildAndFail();
+            BuildResult result = configureExecuter().buildAndFail();
+            fireAfterExecute();
+            return result;
         } finally {
             finished();
         }
@@ -141,12 +178,19 @@ public class GradleRunnerExecuter implements GradleExecuter {
         workingDirectory = null;
         settingsFile = null;
         gradleVersion = null;
+        projectDirectory = null;
+        usePluginClasspath = false;
+        userHomeDirectory = null;
+        environment = null;
     }
 
     private GradleRunner configureExecuter() {
         GradleRunner runner = GradleRunner.create();
         runner.forwardOutput();
-        runner.withPluginClasspath();
+
+        if (usePluginClasspath) {
+            runner.withPluginClasspath();
+        }
         runner.withProjectDir(getWorkingDirectory());
 
         if (debuggerAttached) {
@@ -158,10 +202,21 @@ public class GradleRunnerExecuter implements GradleExecuter {
             runner.withGradleVersion(gradleVersion);
         }
 
+        if (environment != null) {
+            runner.withEnvironment(environment.entrySet().stream().map(it -> new AbstractMap.SimpleImmutableEntry<String, String>(it.getKey(), it.getValue().toString())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+        }
+
         List<String> allArguments = new ArrayList<>();
+        if (userHomeDirectory != null) {
+            allArguments.add("-Duser.home=" + userHomeDirectory.getAbsolutePath());
+        }
         if (settingsFile != null) {
             allArguments.add("--settings-file");
             allArguments.add(settingsFile.getAbsolutePath());
+        }
+        if (projectDirectory != null) {
+            allArguments.add("--project-dir");
+            allArguments.add(projectDirectory.getAbsolutePath());
         }
 
         if (showStacktrace) {
@@ -205,6 +260,15 @@ public class GradleRunnerExecuter implements GradleExecuter {
 
     private void fireBeforeExecute() {
         beforeExecute.forEach(it -> it.accept(this));
+    }
+
+    @Override
+    public void afterExecute(Consumer<? super GradleExecuter> action) {
+        afterExecute.add(action);
+    }
+
+    private void fireAfterExecute() {
+        afterExecute.forEach(it -> it.accept(this));
     }
 
     // TODO: This is not how we want to solve this use case!

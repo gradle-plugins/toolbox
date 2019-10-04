@@ -27,6 +27,8 @@ import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Rule
 import spock.lang.Specification
 
+import java.util.function.Consumer
+
 @CleanupTestDirectory
 class AbstractFunctionalSpec extends Specification {
     @Rule
@@ -47,7 +49,7 @@ class AbstractFunctionalSpec extends Specification {
     }
 
     private GradleExecuter createExecuter() {
-        return new GradleRunnerExecuter(temporaryFolder)
+        return new GradleRunnerExecuter(temporaryFolder).withPluginClasspath()
     }
 
     protected TestFile getProjectDir() {
@@ -130,6 +132,10 @@ class AbstractFunctionalSpec extends Specification {
         def prop = new Properties()
         prop.load(AbstractFunctionalSpec.getResourceAsStream("/plugin-under-test-metadata.properties"))
         return prop.get("implementation-classpath").toString().split(File.pathSeparator).collect { new File(it) }
+    }
 
+    protected GradleExecuter using(Consumer<GradleExecuter> action) {
+        action.accept(executer)
+        return executer
     }
 }
