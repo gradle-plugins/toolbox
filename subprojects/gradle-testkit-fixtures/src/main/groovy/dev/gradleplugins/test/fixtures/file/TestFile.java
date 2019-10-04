@@ -20,7 +20,6 @@ import org.codehaus.groovy.runtime.ResourceGroovyMethods;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -33,7 +32,10 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class TestFile extends File {
@@ -51,6 +53,52 @@ public class TestFile extends File {
 
     public TestFile(URL url) {
         this(toUri(url));
+    }
+
+    /**
+     * Asserts that this file contains exactly the given set of descendants.
+     */
+    public TestFile assertHasDescendants(String... descendants) {
+        Set<String> actual = new TreeSet<String>();
+        assertIsDir();
+        visit(actual, "", this);
+        Set<String> expected = new TreeSet<String>(Arrays.asList(descendants));
+
+        Set<String> extras = new TreeSet<String>(actual);
+        extras.removeAll(expected);
+        Set<String> missing = new TreeSet<String>(expected);
+        missing.removeAll(actual);
+
+        assertEquals(String.format("For dir: %s\n extra files: %s, missing files: %s, expected: %s", this, extras, missing, expected), expected, actual);
+
+        return this;
+
+    }
+
+    private void visit(Set<String> names, String prefix, File file) {
+        for (File child : file.listFiles()) {
+            if (child.isFile()) {
+                names.add(prefix + child.getName());
+            } else if (child.isDirectory()) {
+                visit(names, prefix + child.getName() + "/", child);
+            }
+        }
+    }
+
+    public TestFile assertIsFile() {
+        assertTrue(String.format("%s is not a file", this), isFile());
+        return this;
+    }
+
+    public TestFile assertIsDir() {
+        assertTrue(String.format("%s is not a directory.", this), isDirectory());
+        return this;
+    }
+
+    public TestFile assertIsEmptyDir() {
+        assertIsDir();
+        assertHasDescendants();
+        return this;
     }
 
     /**
@@ -126,6 +174,10 @@ public class TestFile extends File {
         return file(path).createFile();
     }
 
+    public TestFile createDir(Object path) {
+        return new TestFile(this, path).createDir();
+    }
+
     public TestFile createDir() {
         if (mkdirs()) {
             return this;
@@ -194,5 +246,23 @@ public class TestFile extends File {
     @Override
     public TestFile getParentFile() {
         return super.getParentFile() == null ? null : new TestFile(super.getParentFile());
+    }
+
+    public String getText() {
+        assertIsFile();
+        try {
+            return new String(Files.readAllBytes(toPath()), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException(String.format("Could not read from test file '%s'", this), e);
+        }
+    }
+
+    public void setText(String content) {
+        getParentFile().mkdirs();
+        try {
+            ResourceGroovyMethods.setText(this, content);
+        } catch (IOException e) {
+            throw new RuntimeException(String.format("Could not append to test file '%s'", this), e);
+        }
     }
 }
