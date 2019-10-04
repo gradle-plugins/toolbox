@@ -17,11 +17,13 @@
 package dev.gradleplugins.internal;
 
 import com.gradle.publish.PublishPlugin;
+import dev.gradleplugins.internal.tasks.FakeAnnotationProcessorTask;
 import org.gradle.api.JavaVersion;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.tasks.SourceSetContainer;
+import org.gradle.api.tasks.TaskProvider;
 import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 import org.gradle.plugin.devel.plugins.JavaGradlePluginPlugin;
 import dev.gradleplugins.internal.TestFixtures;
@@ -31,8 +33,9 @@ import java.io.File;
 public class GradlePluginDevelopmentBasePlugin implements Plugin<Project> {
     @Override
     public void apply(Project project) {
-        project.getConfigurations().matching(it -> it.getName().equals("compile")).all(configuration -> {
-            project.getDependencies().add("compile", "dev.gradleplugins:gradle-api:" + TestFixtures.apiVersion + "-5.6.2");
+        // TODO: Let's not remove the compile configuration but let's instead filter it at key location (when attached to tasks, etc) so we can remove the gradleApi()
+        project.getConfigurations().matching(it -> it.getName().equals("compileOnly")).all(configuration -> {
+            project.getDependencies().add("compileOnly", "dev.gradleplugins:gradle-api:" + TestFixtures.apiVersion + "-5.6.2");
         });
 
         project.getPluginManager().apply(JavaGradlePluginPlugin.class); // For plugin development
@@ -55,8 +58,8 @@ public class GradlePluginDevelopmentBasePlugin implements Plugin<Project> {
         project.getPluginManager().apply(PublishPlugin.class); // For publishing
 
         // Configure annotation processor
-        project.getDependencies().add("annotationProcessor", "dev.gradleplugins:gradle-plugin-development-processor:" + TestFixtures.currentVersion);
-        project.getDependencies().add("implementation", "dev.gradleplugins:gradle-plugin-development-annotation:" + TestFixtures.currentVersion);
+//        project.getDependencies().add("annotationProcessor", "dev.gradleplugins:gradle-plugin-development-processor:" + TestFixtures.currentVersion);
+        project.getDependencies().add("compileOnly", "dev.gradleplugins:gradle-plugin-development-annotation:" + TestFixtures.currentVersion);
 
         // Force Java 8 version
         JavaPluginExtension java = project.getExtensions().getByType(JavaPluginExtension.class);
@@ -65,5 +68,19 @@ public class GradlePluginDevelopmentBasePlugin implements Plugin<Project> {
 
         GradlePluginDevelopmentExtension gradlePlugin = project.getExtensions().getByType(GradlePluginDevelopmentExtension.class);
         gradlePlugin.testSourceSets(project.getExtensions().getByType(SourceSetContainer.class).getByName("functionalTest"));
+
+        // "annotation processor"
+        TaskProvider<FakeAnnotationProcessorTask> fakeAnnotationProcessorTask = project.getTasks().register("fakeAnnotationProcessing", FakeAnnotationProcessorTask.class, task -> {
+            task.getPluginDescriptorDirectory().set(project.getLayout().getBuildDirectory().dir("stub-outputs"));
+        });
+
+        project.getExtensions().getByType(SourceSetContainer.class).getByName("main").getOutput().dir(fakeAnnotationProcessorTask.flatMap(FakeAnnotationProcessorTask::getPluginDescriptorDirectory));
+
+        // TODO: lint java-gradle-plugin extension VS the annotation
+
+        project.getTasks().named("pluginDescriptors", it -> {
+            it.dependsOn(fakeAnnotationProcessorTask);
+            it.setEnabled(false);
+        });
     }
 }

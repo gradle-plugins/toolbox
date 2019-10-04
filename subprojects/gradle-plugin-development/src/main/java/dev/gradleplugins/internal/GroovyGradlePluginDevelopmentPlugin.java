@@ -21,28 +21,20 @@ import dev.gradleplugins.internal.tasks.FakeAnnotationProcessorTask;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskProvider;
+import org.gradle.api.tasks.compile.GroovyCompile;
 
 @GradlePlugin(id = "dev.gradleplugins.groovy-gradle-plugin")
 public class GroovyGradlePluginDevelopmentPlugin extends AbstractGradlePluginDevelopmentPlugin {
     @Override
     public void doApply(Project project) {
-        project.getPluginManager().apply("groovy");
         project.getPluginManager().apply(GradlePluginDevelopmentBasePlugin.class);
+        project.getPluginManager().apply("groovy");
 
         project.getRepositories().jcenter();
-        project.getDependencies().add("implementation", "org.codehaus.groovy:groovy-all:2.5.4"); // require jcenter()
+        project.getDependencies().add("compileOnly", "org.codehaus.groovy:groovy-all:2.5.4"); // require jcenter()
 
-        TaskProvider<FakeAnnotationProcessorTask> fakeAnnotationProcessorTask = project.getTasks().register("fakeAnnotationProcessing", FakeAnnotationProcessorTask.class, task -> {
-            task.getPluginDescriptorDirectory().set(project.getLayout().getBuildDirectory().dir("stub-outputs"));
-        });
-
-        project.getExtensions().getByType(SourceSetContainer.class).getByName("main").getOutput().dir(fakeAnnotationProcessorTask.flatMap(FakeAnnotationProcessorTask::getPluginDescriptorDirectory));
-
-        // TODO: lint java-gradle-plugin extension VS the annotation
-
-        project.getTasks().named("pluginDescriptors", it -> {
-            it.dependsOn(fakeAnnotationProcessorTask);
-            it.setEnabled(false);
+        project.getTasks().named("fakeAnnotationProcessing", FakeAnnotationProcessorTask.class, task -> {
+            task.getSource().from(project.getTasks().named("compileGroovy", GroovyCompile.class).map(GroovyCompile::getSource));
         });
 
         // TODO: warn if the plugin only have has Java source and no Groovy.

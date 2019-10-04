@@ -22,16 +22,11 @@ import dev.gradleplugins.fixtures.SourceElement
 class KotlinGradlePluginDevelopmentWellBehaveFunctionalTest extends WellBehaveGradlePluginDevelopmentPluginFunctionalTest {
     final String pluginIdUnderTest = 'dev.gradleplugins.kotlin-gradle-plugin'
 
-    def setup() {
-        // TODO: Can Gradle plugin be developed in Kotlin with Groovy DSL?... well it can but you can't use kotlin-dsl plugin which is fine because I don't like it.
-        useKotlinDsl()
-        // On Groovy DSL: id "org.jetbrains.kotlin.jvm" version "1.3.50"
-        executer.beforeExecute {
-            // TODO: Provide a better model for applying plugins in a DSL agnostic way.
-            buildFile.text = buildFile.text.replace('id("java-gradle-plugin")', '`java-gradle-plugin`').replace("""id("${pluginIdUnderTest}")""", """id("${pluginIdUnderTest}")
-    kotlin("jvm") version "1.3.50"
-""")
-        }
+    @Override
+    protected String configureApplyPluginUnderTest() {
+        return super.configureApplyPluginUnderTest() + """
+id("org.jetbrains.kotlin.jvm") version "1.3.50"
+"""
     }
 
     @Override

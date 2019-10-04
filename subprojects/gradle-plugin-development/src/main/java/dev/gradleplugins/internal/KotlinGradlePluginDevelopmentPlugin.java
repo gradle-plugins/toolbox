@@ -20,8 +20,14 @@ import dev.gradleplugins.GradlePlugin;
 import dev.gradleplugins.internal.tasks.FakeAnnotationProcessorTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
+import org.gradle.api.Task;
 import org.gradle.api.tasks.SourceSetContainer;
+import org.gradle.api.tasks.SourceTask;
 import org.gradle.api.tasks.TaskProvider;
+import org.gradle.api.tasks.compile.AbstractCompile;
+import org.gradle.api.tasks.compile.GroovyCompile;
+
+import java.lang.reflect.InvocationTargetException;
 
 @GradlePlugin(id = "dev.gradleplugins.kotlin-gradle-plugin")
 public class KotlinGradlePluginDevelopmentPlugin extends AbstractGradlePluginDevelopmentPlugin {
@@ -48,17 +54,12 @@ public class KotlinGradlePluginDevelopmentPlugin extends AbstractGradlePluginDev
         // TODO: I think this is added by the kotlin-dsl, we will leave it out for the next versions
 //        project.getDependencies().add("implementation", kotlin("gradle-plugin"));
 
-        TaskProvider<FakeAnnotationProcessorTask> fakeAnnotationProcessorTask = project.getTasks().register("fakeAnnotationProcessing", FakeAnnotationProcessorTask.class, task -> {
-            task.getPluginDescriptorDirectory().set(project.getLayout().getBuildDirectory().dir("pluginDescriptors"));
-        });
+        // TODO: Link kotlin source
+        project.getPluginManager().withPlugin("org.jetbrains.kotlin.jvm", appliedPlugin -> {
+            project.getTasks().named("fakeAnnotationProcessing", FakeAnnotationProcessorTask.class, task -> {
 
-        project.getExtensions().getByType(SourceSetContainer.class).getByName("main").getResources().srcDir(fakeAnnotationProcessorTask.flatMap(FakeAnnotationProcessorTask::getPluginDescriptorDirectory));
-
-        // TODO: lint java-gradle-plugin extension VS the annotation
-
-        project.getTasks().named("pluginDescriptors", it -> {
-            it.dependsOn(fakeAnnotationProcessorTask);
-            it.setEnabled(false);
+                task.getSource().from(project.getTasks().named("compileKotlin", AbstractCompile.class).map(SourceTask::getSource));
+            });
         });
 
         // TODO: warn if the plugin only have has Java source and no Kotlin.
