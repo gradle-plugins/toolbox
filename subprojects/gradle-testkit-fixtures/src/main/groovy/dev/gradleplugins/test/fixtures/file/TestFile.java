@@ -55,6 +55,11 @@ public class TestFile extends File {
         this(toUri(url));
     }
 
+    public TestFile assertExists() {
+        assertTrue(String.format("%s does not exist", this), exists());
+        return this;
+    }
+
     /**
      * Asserts that this file contains exactly the given set of descendants.
      */
@@ -161,7 +166,7 @@ public class TestFile extends File {
     }
 
     public TestFile createFile() {
-        new TestFile(getParentFile()).createDir();
+        getParentFile().createDir();
         try {
             assertTrue(isFile() || createNewFile());
         } catch (IOException e) {
@@ -246,6 +251,11 @@ public class TestFile extends File {
     @Override
     public TestFile getParentFile() {
         return super.getParentFile() == null ? null : new TestFile(super.getParentFile());
+    }
+
+    @Override
+    public TestFile getAbsoluteFile() {
+        return new TestFile(super.getAbsoluteFile());
     }
 
     public String getText() {
