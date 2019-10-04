@@ -21,6 +21,7 @@ import dev.gradleplugins.integtests.fixtures.executer.GradleRunnerExecuter
 import dev.gradleplugins.test.fixtures.file.CleanupTestDirectory
 import dev.gradleplugins.test.fixtures.file.TestFile
 import dev.gradleplugins.test.fixtures.file.TestNameTestDirectoryProvider
+import dev.gradleplugins.test.fixtures.maven.M2Installation
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Rule
@@ -30,9 +31,14 @@ import spock.lang.Specification
 class AbstractFunctionalSpec extends Specification {
     @Rule
     final TestNameTestDirectoryProvider temporaryFolder = new TestNameTestDirectoryProvider()
+    final M2Installation m2 = new M2Installation(temporaryFolder)
     GradleExecuter executer = createExecuter()
     BuildResult result
     private boolean useKotlinDsl = false
+
+    def setup() {
+         m2.isolateMavenLocalRepo(executer)
+    }
 
     protected void useKotlinDsl() {
         // TODO: Detect when configuration already started to happen and either migrate the configuration or crash.
