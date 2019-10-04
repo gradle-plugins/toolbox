@@ -31,13 +31,19 @@ import org.objectweb.asm.ModuleVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.TypePath;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.UncheckedIOException;
+import java.util.Optional;
+import java.util.Scanner;
 
 public abstract class FakeAnnotationProcessorTask extends DefaultTask {
     public abstract ConfigurableFileCollection getSource();
@@ -45,64 +51,118 @@ public abstract class FakeAnnotationProcessorTask extends DefaultTask {
 
     @TaskAction
     private void doGenerate() throws IOException {
-        writePluginStub("com.example.BasicPlugin");
-        writePluginDescriptor("com.example.hello", "com.example.BasicPlugin");
+        getSource().getFiles().stream().map(this::processFile).filter(Optional::isPresent).map(Optional::get).forEach(it -> {
+            writePluginStub(it.pluginClass);
+            writePluginDescriptor(it.pluginId, it.pluginClass);
+        });
     }
 
-    private void writePluginStub(String pluginClass) throws IOException {
-        InputStream dummyPluginStream = this.getClass().getResourceAsStream("/dev/gradleplugins/internal/DummyPlugin.class");
-        ClassReader classReader = new ClassReader(dummyPluginStream);
-        ClassWriter classWriter = new ClassWriter(0);
-
-        String nameSlashOwnerStubClass = pluginClass.replaceAll("\\.", "/") + "Stub";
-
-        classReader.accept(new ClassVisitor(Opcodes.ASM6, classWriter) {
-            @Override
-            public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-                super.visit(version, access, nameSlashOwnerStubClass, signature, superName, interfaces);
+    private Optional<PluginInfo> processFile(File file) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String classPackage = null;
+            String pluginId = null;
+            for (String line = reader.readLine(); line != null && (classPackage == null || pluginId == null); line = reader.readLine()) {
+                if (classPackage == null && line.contains("package")) {
+                    classPackage = line.replaceAll("package", "").replace(";", "").trim();
+                } else if (pluginId == null && line.contains("@GradlePlugin")) {
+                    int startQuote = line.indexOf('"');
+                    int endQuote = line.lastIndexOf('"');
+                    pluginId = line.substring(startQuote + 1, endQuote);
+                }
             }
 
-            @Override
-            public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-                MethodVisitor mv = classWriter.visitMethod(access, name, desc, signature, exceptions);
-                return new MethodVisitor(org.objectweb.asm.Opcodes.ASM6, mv) {
-                    @Override
-                    public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
-                        if (opcode == Opcodes.INVOKEVIRTUAL && owner.equals("dev/gradleplugins/internal/DummyPlugin")) {
-                            owner = nameSlashOwnerStubClass;
-                        }
-                        super.visitMethodInsn(opcode, owner, name, desc, itf);
-                    }
-
-                    @Override
-                    public void visitLdcInsn(Object cst) {
-                        if (cst instanceof String) {
-                            String s = (String)cst;
-                            switch (s) {
-                                case "<plugin-id>": cst = "com.example.hello"; break;
-                                case "<minimum-supported-gradle-version>": cst = "5.6.2"; break;
-                                case "<minimum-supported-java-version>": cst = "8"; break;
-                                case "<plugin-class>": cst = "com.example.BasicPlugin"; break;
-                            }
-                        }
-                        super.visitLdcInsn(cst);
-                    }
-                };
+            if (classPackage != null && pluginId != null) {
+                PluginInfo info = new PluginInfo();
+                info.pluginClass = classPackage + "." + removeExtension(file.getName());
+                info.pluginId = pluginId;
+                return Optional.of(info);
             }
-        }, 0);
-
-        File f = getPluginDescriptorDirectory().file(nameSlashOwnerStubClass + ".class").get().getAsFile();
-        f.getParentFile().mkdirs();
-        try (OutputStream classStream = new FileOutputStream(f)) {
-            classStream.write(classWriter.toByteArray());
+            return Optional.empty();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 
-    private void writePluginDescriptor(String pluginId, String pluginClass) throws FileNotFoundException {
-        File pluginDescriptorFile = getPluginDescriptorDirectory().file("META-INF/gradle-plugins/" + pluginId + ".properties").get().getAsFile();
-        pluginDescriptorFile.getParentFile().mkdirs();
-        try (PrintWriter out = new PrintWriter(pluginDescriptorFile)) {
-            out.println("implementation-class=" + pluginClass + "Stub");
+    private static String removeExtension(String fileName) {
+        // Poor man extension removal
+        return fileName.replace(".groovy", "").replace(".java", "").replace(".kt", "");
+    }
+
+    private static class PluginInfo {
+        String pluginId;
+        String pluginClass;
+    }
+
+    private void writePluginStub(String pluginClass) {
+        try {
+            InputStream dummyPluginStream = this.getClass().getResourceAsStream("/dev/gradleplugins/internal/DummyPlugin.class");
+            ClassReader classReader = new ClassReader(dummyPluginStream);
+            ClassWriter classWriter = new ClassWriter(0);
+
+            String nameSlashOwnerStubClass = pluginClass.replaceAll("\\.", "/") + "Stub";
+
+            classReader.accept(new ClassVisitor(Opcodes.ASM6, classWriter) {
+                @Override
+                public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+                    super.visit(version, access, nameSlashOwnerStubClass, signature, superName, interfaces);
+                }
+
+                @Override
+                public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+                    MethodVisitor mv = classWriter.visitMethod(access, name, desc, signature, exceptions);
+                    return new MethodVisitor(org.objectweb.asm.Opcodes.ASM6, mv) {
+                        @Override
+                        public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
+                            if (opcode == Opcodes.INVOKEVIRTUAL && owner.equals("dev/gradleplugins/internal/DummyPlugin")) {
+                                owner = nameSlashOwnerStubClass;
+                            }
+                            super.visitMethodInsn(opcode, owner, name, desc, itf);
+                        }
+
+                        @Override
+                        public void visitLdcInsn(Object cst) {
+                            if (cst instanceof String) {
+                                String s = (String) cst;
+                                switch (s) {
+                                    case "<plugin-id>":
+                                        cst = "com.example.hello";
+                                        break;
+                                    case "<minimum-supported-gradle-version>":
+                                        cst = "5.6.2";
+                                        break;
+                                    case "<minimum-supported-java-version>":
+                                        cst = "8";
+                                        break;
+                                    case "<plugin-class>":
+                                        cst = "com.example.BasicPlugin";
+                                        break;
+                                }
+                            }
+                            super.visitLdcInsn(cst);
+                        }
+                    };
+                }
+            }, 0);
+
+            File f = getPluginDescriptorDirectory().file(nameSlashOwnerStubClass + ".class").get().getAsFile();
+            f.getParentFile().mkdirs();
+            try (OutputStream classStream = new FileOutputStream(f)) {
+                classStream.write(classWriter.toByteArray());
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private void writePluginDescriptor(String pluginId, String pluginClass) {
+        try {
+            File pluginDescriptorFile = getPluginDescriptorDirectory().file("META-INF/gradle-plugins/" + pluginId + ".properties").get().getAsFile();
+            pluginDescriptorFile.getParentFile().mkdirs();
+            try (PrintWriter out = new PrintWriter(pluginDescriptorFile)) {
+                out.println("implementation-class=" + pluginClass + "Stub");
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 }
