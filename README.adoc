@@ -1,18 +1,20 @@
 = Gradle Plugin Development Toolbox
 
-The Gradle plugins in this repository helps speed up as much as possible the Gradle plugin development.
+The Gradle plugins in this repository help speed up as much as possible the Gradle plugin development.
 The goal is to have sensible defaults for the majority of all plugin development cases.
-The plugins are highly opinionated and hope to become less and less overtime.
+The plugins are highly opinionated and hope to become less opinionated overtime.
 It doesn't mean the plugins will become complicated to configure, it simply means more knobs will be provided to configure more information.
 
 Three plugins are provided:
+
 - `dev.gradleplugins.java-gradle-plugin`: Everything the `java-gradle-plugin` is not.
 - `dev.gradleplugins.groovy-gradle-plugin`: Gradle plugin written in Groovy
 - `dev.gradleplugins.kotlin-gradle-plugin`: Gradle plugin written in Kotlin
 
 == Contributing
 
-Tell us which features would make your plugin development easier? You can also contribute anything that will accelerate your Gradle plugin development.
+Tell us which features would make your plugin development easier?
+You can also contribute anything that will accelerate your Gradle plugin development.
 
 Some ideas on modeling that will need to take place at some point are licensing, source control manager, developers/contacts, continuous integration, continuous delivery and repository setup (e.g. generating files like LICENSE, issue templates, code of conduct, editorconfig, gitignore, CI configuration generation such as Travis CI and GitLab CI, etc.).
 

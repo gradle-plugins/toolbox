@@ -68,4 +68,6 @@ Attach task to lint file headers to check
 Add task to update file headers license (tricky)
 Add task to report on the license of the dependencies
 Add task to report incompatible dependency license
+
+LICENSE file and what is declared on the model should be checked during check task if the model was forced to a value. It should suggest how to fix this (using the setup plugin).
  */

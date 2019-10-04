@@ -38,3 +38,20 @@ pluginBundle {
         }
     }
 }
+
+// This plugin should install extension for helping with the common use cases:
+// - resolving the GitHub URL of a file within the repo (check if a file is part of the repo)
+// - open a PR on the GitHub repo
+// - open issues
+// - get/set repository tags
+// - get/set repository description
+// - get/set repository website
+
+// This plugin should apply a base git plugin that give the following capability general to Git:
+// - Get the current commit hash
+// - Get versions
+// - Get branches
+// - Get commits
+
+// This base git plugin should apply a base scm plugin that give even more general capabilities:
+// - Is the current workspace contains any unchecked files (dirty)
