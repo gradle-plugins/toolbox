@@ -1,23 +1,15 @@
 plugins {
     `kotlin-dsl`
     `java-gradle-plugin`
+
+    // This is a failed attempt to use the dev plugins
+//    id("dev.gradleplugins.kotlin-gradle-plugin") version "0.0.21"
+//    id("org.jetbrains.kotlin.jvm") version "1.3.50"
 }
 
-repositories {
-    jcenter()
-    gradlePluginPortal()
-}
-
+// The following should be replaced by the dev plugins
 kotlinDslPluginOptions {
     experimentalWarning.set(false)
-}
-
-dependencies {
-    implementation(kotlin("gradle-plugin"))
-    implementation("com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4")
-    implementation("com.github.jengelman.gradle.plugins:shadow:5.1.0")
-    implementation("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:0.4.2")
-    implementation("com.gradle.publish:plugin-publish-plugin:0.10.1")
 }
 
 gradlePlugin {
@@ -55,4 +47,21 @@ gradlePlugin {
             implementationClass = "dev.gradleplugins.SetupProjectPlugin"
         }
     }
+}
+
+dependencies {
+    implementation(kotlin("gradle-plugin"))
+}
+
+// Non dev plugin specific configuration
+repositories {
+    jcenter()
+    gradlePluginPortal()
+}
+
+dependencies {
+    implementation("com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4")
+    implementation("com.github.jengelman.gradle.plugins:shadow:5.1.0")
+    implementation("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:0.4.2")
+    implementation("com.gradle.publish:plugin-publish-plugin:0.10.1")
 }
