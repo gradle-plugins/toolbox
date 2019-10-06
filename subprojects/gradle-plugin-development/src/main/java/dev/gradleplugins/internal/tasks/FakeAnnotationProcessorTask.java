@@ -50,6 +50,10 @@ public abstract class FakeAnnotationProcessorTask extends DefaultTask {
     }
 
     private Optional<PluginInfo> processFile(File file) {
+        // The fake processor doesn't support its own class, so we are adding a shortcut here
+        if (file.getAbsolutePath().endsWith("/dev/gradleplugins/internal/tasks/" + FakeAnnotationProcessorTask.class.getSimpleName() + ".java")) {
+            return Optional.empty();
+        }
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String classPackage = null;
             String pluginId = null;
