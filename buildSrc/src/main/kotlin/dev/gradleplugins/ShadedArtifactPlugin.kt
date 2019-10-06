@@ -35,6 +35,8 @@ class ShadedArtifactPlugin: Plugin<Project> {
         val shadedArtifact = createShadedExtension()
         val shadowJar = configureShadowJarTask(shadedConfiguration, shadedArtifact)
         wireShadowJarTaskInLifecycle(shadowJar)
+
+        // TODO: See `gradle-plugin-development` for what needs to be done for the shadow plugin to correctly work with plugin dev
     }
 
     private
