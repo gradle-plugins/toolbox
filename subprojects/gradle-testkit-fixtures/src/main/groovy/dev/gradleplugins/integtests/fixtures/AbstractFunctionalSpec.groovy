@@ -138,6 +138,4 @@ class AbstractFunctionalSpec extends Specification {
         action.accept(executer)
         return executer
     }
-
-    // TODO: have a fast way to configure publishing build scan
 }
