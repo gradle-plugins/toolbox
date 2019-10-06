@@ -38,3 +38,7 @@ afterEvaluate {
         })
     }
 }
+
+tasks.register("release") {
+    dependsOn("bintrayUpload")
+}
