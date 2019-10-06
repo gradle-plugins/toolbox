@@ -37,6 +37,7 @@ import java.io.PrintWriter;
 import java.io.UncheckedIOException;
 import java.util.Optional;
 
+// TODO: Ensure this class is coverred with enough test coverage
 public abstract class FakeAnnotationProcessorTask extends DefaultTask {
     public abstract ConfigurableFileCollection getSource();
     public abstract DirectoryProperty getPluginDescriptorDirectory();
@@ -44,7 +45,7 @@ public abstract class FakeAnnotationProcessorTask extends DefaultTask {
     @TaskAction
     private void doGenerate() throws IOException {
         getSource().getFiles().stream().map(this::processFile).filter(Optional::isPresent).map(Optional::get).forEach(it -> {
-            writePluginStub(it.pluginClass);
+            writePluginStub(it.pluginId, it.pluginClass);
             writePluginDescriptor(it.pluginId, it.pluginClass);
         });
     }
@@ -89,7 +90,7 @@ public abstract class FakeAnnotationProcessorTask extends DefaultTask {
         String pluginClass;
     }
 
-    private void writePluginStub(String pluginClass) {
+    private void writePluginStub(String pluginId, String pluginClass) {
         try {
             InputStream dummyPluginStream = this.getClass().getResourceAsStream("/dev/gradleplugins/internal/DummyPlugin.class");
             ClassReader classReader = new ClassReader(dummyPluginStream);
@@ -121,7 +122,7 @@ public abstract class FakeAnnotationProcessorTask extends DefaultTask {
                                 String s = (String) cst;
                                 switch (s) {
                                     case "<plugin-id>":
-                                        cst = "com.example.hello";
+                                        cst = pluginId;
                                         break;
                                     case "<minimum-supported-gradle-version>":
                                         cst = "5.6.2";
@@ -130,7 +131,7 @@ public abstract class FakeAnnotationProcessorTask extends DefaultTask {
                                         cst = "8";
                                         break;
                                     case "<plugin-class>":
-                                        cst = "com.example.BasicPlugin";
+                                        cst = pluginClass;
                                         break;
                                 }
                             }
