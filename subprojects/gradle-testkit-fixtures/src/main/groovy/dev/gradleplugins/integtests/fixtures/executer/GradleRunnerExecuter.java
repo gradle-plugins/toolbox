@@ -51,7 +51,7 @@ public class GradleRunnerExecuter implements GradleExecuter {
         this.testDirectoryProvider = testDirectoryProvider;
     }
 
-    private File getWorkingDirectory() {
+    public File getWorkingDirectory() {
         return workingDirectory == null ? getTestDirectoryProvider().getTestDirectory() : workingDirectory;
     }
 

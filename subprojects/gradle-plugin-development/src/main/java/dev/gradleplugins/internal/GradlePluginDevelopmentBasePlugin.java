@@ -88,11 +88,10 @@ public class GradlePluginDevelopmentBasePlugin implements Plugin<Project> {
         String groupId = "dev.gradleplugins";
         String artifactId = "gradle-api";
         String version = TestFixtures.apiVersion + "-5.6.2";
-        project.getConfigurations().matching(it -> it.getName().equals("compileOnly")).all(configuration -> project.getDependencies().add(configuration.getName(), groupId + ":" + artifactId + ":" + version));
-
-        Action<? super MavenRepositoryContentDescriptor> filterContent = (MavenRepositoryContentDescriptor content) -> content.includeVersion(groupId, artifactId, version);
+        project.getConfigurations().matching(it -> it.getName().equals("compileOnly")).configureEach(configuration -> project.getDependencies().add(configuration.getName(), groupId + ":" + artifactId + ":" + version));
 
         String repositoryName = "Gradle Plugin Development - Gradle APIs";
+        Action<? super MavenRepositoryContentDescriptor> filterContent = (MavenRepositoryContentDescriptor content) -> content.includeVersion(groupId, artifactId, version);
         if (TestFixtures.released) {
             project.getRepositories().maven(repository -> {
                 repository.setName(repositoryName);

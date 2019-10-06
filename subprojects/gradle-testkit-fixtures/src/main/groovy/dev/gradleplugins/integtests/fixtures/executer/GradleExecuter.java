@@ -30,6 +30,8 @@ public interface GradleExecuter {
      */
     GradleExecuter inDirectory(File directory);
 
+    File getWorkingDirectory();
+
     /**
      * Allows to trigger on breakpoints inside the Gradle build when the debugger is attached to the caller.
      */

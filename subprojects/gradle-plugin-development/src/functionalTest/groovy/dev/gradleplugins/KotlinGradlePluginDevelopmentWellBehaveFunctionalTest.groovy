@@ -18,9 +18,19 @@ package dev.gradleplugins
 
 import dev.gradleplugins.fixtures.sample.KotlinBasicGradlePlugin
 import dev.gradleplugins.fixtures.SourceElement
+import dev.gradleplugins.test.fixtures.file.TestFile
 
 class KotlinGradlePluginDevelopmentWellBehaveFunctionalTest extends WellBehaveGradlePluginDevelopmentPluginFunctionalTest {
     final String pluginIdUnderTest = 'dev.gradleplugins.kotlin-gradle-plugin'
+
+    def setup() {
+        executer.beforeExecute {
+            // Needed by org.jetbrains.kotlin.jvm plugin
+            new TestFile(it.workingDirectory).file(buildFileName) << """
+repositories.mavenCentral()
+"""
+        }
+    }
 
     @Override
     protected String configureApplyPluginUnderTest() {
@@ -49,6 +59,7 @@ id("org.jetbrains.kotlin.jvm") version "1.3.50"
         result1.output.contains("You need to manually apply the `org.jetbrains.kotlin.jvm` plugin inside the plugin block:")
 
         when:
+        executer.withPluginClasspath()
         buildFile.text = buildFile.text.replace('id("dev.gradleplugins.kotlin-gradle-plugin")', '''id("dev.gradleplugins.kotlin-gradle-plugin")\nid("org.jetbrains.kotlin.jvm") version "1.3.50"''')
         def result2 = succeeds('help')
 

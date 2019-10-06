@@ -17,6 +17,7 @@
 package dev.gradleplugins
 
 import dev.gradleplugins.fixtures.SourceElement
+import dev.gradleplugins.fixtures.sample.BasicGradlePluginWithFunctionalTest
 import dev.gradleplugins.integtests.fixtures.AbstractFunctionalSpec
 import org.junit.Assume
 import spock.lang.Ignore
@@ -64,7 +65,7 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
         otherPluginId << ['dev.gradleplugins.java-gradle-plugin', 'dev.gradleplugins.groovy-gradle-plugin', 'dev.gradleplugins.kotlin-gradle-plugin']
     }
 
-    def "can build Gradle plugin"() {
+    def "can build a Gradle plugin"() {
         given:
         buildFile << """
             plugins {
@@ -79,6 +80,34 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
             }
         """
         componentUnderTest.writeToProject(testDirectory)
+
+        when:
+        succeeds('build')
+
+        then:
+        assertTasksExecutedAndNotSkipped(':build')
+        // TODO: Assert jar content instead
+        !outputContains("No valid plugin descriptors were found in META-INF/gradle-plugins")
+        !outputContains("A valid plugin descriptor was found for com.example.hello.properties but the implementation class com.example.BasicPlugin was not found in the jar.")
+        // TODO: Valid the plugin is proper
+    }
+
+    def "can functional test a Gradle plugin"() {
+        given:
+        buildFile << """
+            plugins {
+                ${configureApplyPluginUnderTest()}
+            }
+
+            // HACK: We should have a way to get the "fake" snapshot jars
+            repositories {
+                maven {
+                    url "${System.properties['user.home']}/.m2/repository"
+                }
+            }
+        """
+        def gradlePlugin = new BasicGradlePluginWithFunctionalTest(componentUnderTest)
+        gradlePlugin.writeToProject(testDirectory)
 
         when:
         succeeds('build')
@@ -141,6 +170,9 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
             }
             group = "com.example"
             version = "1.0"
+
+            // TODO: This is need for Kotlin only, find a way to isolate this only Kotlin tests
+            repositories.mavenCentral()
 
             // HACK: We should have a way to get the "fake" snapshot jars
             repositories {
@@ -295,7 +327,7 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
             rootProject.name = "hello-gradle-plugin"
         """
         using m2
-        executer.usingProjectDirectory(pluginDirectory).withTasks("publish").run()
+        executer.inDirectory(pluginDirectory).withTasks("publish").run()
     }
 
     // TODO: This could maybe be move into some fixtures around publishing and using plugins...

@@ -38,22 +38,28 @@ public class GroovyGradlePluginDevelopmentPlugin extends AbstractGradlePluginDev
                 // for groovy-ant
                 content.includeVersion("org.apache.ant", "ant", "1.9.13");
                 content.includeVersion("org.apache.ant", "ant-launcher", "1.9.13");
+                content.includeVersion("org.apache.ant", "ant-parent", "1.9.13");
 
                 // for groovy-cli-commons
                 content.includeVersion("commons-cli", "commons-cli", "1.4");
+                content.includeVersion("org.apache.commons", "commons-parent", "42");
+                content.includeVersion("org.apache", "apache", "18");
 
                 // for groovy-cli-picocli
                 content.includeVersion("info.picocli", "picocli", "3.7.0");
 
                 // for groovy-docgenerator
                 content.includeVersion("com.thoughtworks.qdox", "qdox", "1.12.1");
+                content.includeVersion("org.codehaus", "codehaus-parent", "4");
 
                 // for groovy-groovysh
                 content.includeVersion("jline", "jline", "2.14.6");
+                content.includeVersion("org.sonatype.oss", "oss-parent", "9");
 
                 // for groovy-test
                 content.includeVersion("junit", "junit", "4.12");
                 content.includeVersion("org.hamcrest", "hamcrest-core", "1.3");
+                content.includeVersion("org.hamcrest", "hamcrest-parent", "1.3");
 
                 // for groovy-test-junit5
                 content.includeVersion("org.junit.platform", "junit-platform-launcher", "1.3.1");

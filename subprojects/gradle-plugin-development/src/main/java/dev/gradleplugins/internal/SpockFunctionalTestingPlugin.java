@@ -16,9 +16,11 @@
 
 package dev.gradleplugins.internal;
 
+import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.repositories.MavenRepositoryContentDescriptor;
 import org.gradle.api.internal.plugins.DslObject;
 import org.gradle.api.tasks.GroovySourceSet;
 import org.gradle.api.tasks.SourceSet;
@@ -29,17 +31,15 @@ import dev.gradleplugins.internal.TestFixtures;
 import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 
 public class SpockFunctionalTestingPlugin implements Plugin<Project> {
+    private static final String FUNCTIONAL_TEST_SOURCE_SET_NAME = "functionalTest";
+
     @Override
     public void apply(Project project) {
         project.getPluginManager().apply("groovy-base"); // For Spock testing
-        configureFunctionalTestingWithSpockAndTestKit(project);
-    }
 
-    private void configureFunctionalTestingWithSpockAndTestKit(Project project) {
         SourceSetContainer sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
 
-        SourceSet functionalTestSourceSet = sourceSets.create("functionalTest", it -> {
-
+        SourceSet functionalTestSourceSet = sourceSets.create(FUNCTIONAL_TEST_SOURCE_SET_NAME, it -> {
             GroovySourceSet groovyIt = new DslObject(it).getConvention().getPlugin(GroovySourceSet.class);
             groovyIt.getGroovy().srcDir("src/functTest/groovy");
             groovyIt.getGroovy().srcDir("src/functionalTest/groovy");
@@ -50,35 +50,11 @@ public class SpockFunctionalTestingPlugin implements Plugin<Project> {
             it.setRuntimeClasspath(it.getRuntimeClasspath().plus(it.getOutput()).plus(it.getCompileClasspath()));
         });
 
-        Configuration functionalTestFixtureConfiguration = project.getConfigurations().create("functionalTestFixtureImplementation");
-        project.getConfigurations().named("functionalTestImplementation", it -> {
-            it.extendsFrom(functionalTestFixtureConfiguration);
-        });
+        configureSpockFrameworkProjectDependency(project);
+        configureTestKitProjectDependency(project);
+        configureGradleTestKitFixturesProjectDependency(project);
 
-        project.getDependencies().add("functionalTestImplementation", "org.spockframework:spock-core:1.2-groovy-2.5");
-        project.getDependencies().add("functionalTestImplementation", project.getDependencies().gradleTestKit());
-        project.getDependencies().add("functionalTestFixtureImplementation", TestFixtures.notation);
-
-        // TODO: We should lock this repo content for only Spock and it's dependencies that we are resolving here (for version 1.2-groovy-2.5)
-//        project.getRepositories().jcenter(); // for spock-core
-
-        if (TestFixtures.released) {
-            // TODO: We should lock this repo content for only our fixture (we don't use any dependencies)
-            project.getRepositories().maven(it -> {
-                it.setName("Gradle Plugins Release");
-                it.setUrl(project.uri("https://dl.bintray.com/gradle-plugins/maven"));
-            });
-        } else {
-            // TODO: remove as bintray doesn't allow SNAPSHOT publication OR find a workaround
-            project.getRepositories().maven(it -> {
-                it.setName("Gradle Plugins Snapshot");
-                it.setUrl(project.uri("https://dl.bintray.com/gradle-plugins/maven-snapshot"));
-            });
-            functionalTestFixtureConfiguration.getResolutionStrategy().cacheChangingModulesFor(0, "seconds");
-//            project.getRepositories().mavenLocal();
-        }
-
-        TaskProvider<Test> functionalTest = project.getTasks().register("functionalTest", Test.class, it -> {
+        TaskProvider<Test> functionalTest = project.getTasks().register(FUNCTIONAL_TEST_SOURCE_SET_NAME, Test.class, it -> {
             it.setDescription("Runs the functional tests");
             it.setGroup("verification");
             it.setTestClassesDirs(functionalTestSourceSet.getOutput().getClassesDirs());
@@ -90,6 +66,66 @@ public class SpockFunctionalTestingPlugin implements Plugin<Project> {
 
         // Configure functionalTest for GradlePluginDevelopmentExtension
         GradlePluginDevelopmentExtension gradlePlugin = project.getExtensions().getByType(GradlePluginDevelopmentExtension.class);
-        gradlePlugin.testSourceSets(project.getExtensions().getByType(SourceSetContainer.class).getByName("functionalTest"));
+        gradlePlugin.testSourceSets(project.getExtensions().getByType(SourceSetContainer.class).getByName(FUNCTIONAL_TEST_SOURCE_SET_NAME));
+    }
+
+    private static void configureTestKitProjectDependency(Project project) {
+        project.getConfigurations().matching(it -> it.getName().equals(FUNCTIONAL_TEST_SOURCE_SET_NAME + "Implementation")).configureEach( it -> {
+            project.getDependencies().add(it.getName(), project.getDependencies().gradleTestKit());
+        });
+    }
+
+    private static void configureSpockFrameworkProjectDependency(Project project) {
+        String groupId = "org.spockframework";
+        String artifactId = "spock-core";
+        String version = "1.2-groovy-2.5";
+
+        Configuration configuration = project.getConfigurations().create(FUNCTIONAL_TEST_SOURCE_SET_NAME + "SpockFrameworkImplementation");
+        project.getConfigurations().matching(it -> it.getName().equals(FUNCTIONAL_TEST_SOURCE_SET_NAME + "Implementation")).configureEach(it -> {
+            it.extendsFrom(configuration);
+        });
+
+        project.getDependencies().add(configuration.getName(), groupId + ":" + artifactId + ":" + version);
+
+        project.getRepositories().mavenCentral(repository -> {
+            repository.setName("Gradle Plugin Development - Spock Framework");
+            repository.mavenContent(content -> {
+                content.includeVersion("org.spockframework", "spock-core", "1.2-groovy-2.5");
+                content.includeVersion("junit", "junit", "4.12");
+                content.includeVersion("org.hamcrest", "hamcrest-core", "1.3");
+
+                // For groovy:2.5.2
+                content.includeVersionByRegex("org.codehaus.groovy", "groovy.*", "2\\.5\\.2");
+            });
+        });
+    }
+
+    private static void configureGradleTestKitFixturesProjectDependency(Project project) {
+        String groupId = "dev.gradleplugins";
+        String artifactId = "gradle-testkit-fixtures";
+        String version = TestFixtures.currentVersion;
+
+        Configuration configuration = project.getConfigurations().create(FUNCTIONAL_TEST_SOURCE_SET_NAME + "FixtureImplementation");
+        project.getConfigurations().matching(it -> it.getName().equals(FUNCTIONAL_TEST_SOURCE_SET_NAME + "Implementation")).configureEach(it -> {
+            it.extendsFrom(configuration);
+        });
+
+        project.getDependencies().add(configuration.getName(), groupId + ":" + artifactId + ":" + version);
+
+        String repositoryName = "Gradle Plugins Development - TestKit Fixtures";
+        Action<? super MavenRepositoryContentDescriptor> filterContent = (MavenRepositoryContentDescriptor content) -> content.includeVersion(groupId, artifactId, version);
+        if (TestFixtures.released) {
+            project.getRepositories().maven(repository -> {
+                repository.setName(repositoryName);
+                repository.setUrl(project.uri("https://dl.bintray.com/gradle-plugins/maven"));
+                repository.mavenContent(filterContent);
+            });
+        } else {
+            configuration.getResolutionStrategy().cacheChangingModulesFor(0, "seconds");
+            project.getRepositories().mavenLocal(repository -> {
+                repository.setName(repositoryName);
+                repository.mavenContent(filterContent);
+            });
+        }
     }
 }
