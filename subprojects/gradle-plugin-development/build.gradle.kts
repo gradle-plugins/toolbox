@@ -47,6 +47,10 @@ dependencies {
 //    functionalTestImplementation("com.gradle.publish:plugin-publish-plugin:0.10.1")
 }
 
+tasks.named<PluginUnderTestMetadata>("pluginUnderTestMetadata") {
+    getPluginClasspath().from(configurations.shaded.get())
+}
+
 sourceSets {
     main.configure {
         this.resources.srcDir(stubConfiguration)

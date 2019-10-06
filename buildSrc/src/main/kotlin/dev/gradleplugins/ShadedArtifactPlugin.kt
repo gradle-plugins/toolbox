@@ -65,6 +65,7 @@ class ShadedArtifactPlugin: Plugin<Project> {
                 for (pkg in shadedExtension.packagesToRelocate.get()) {
                     relocate(pkg, "${shadedExtension.relocatePackagePrefix.get()}.$pkg")
                 }
+                exclude("module-info.class")
             }
         }
 

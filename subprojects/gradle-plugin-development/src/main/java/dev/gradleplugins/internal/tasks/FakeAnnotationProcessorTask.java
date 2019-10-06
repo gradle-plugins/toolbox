@@ -102,7 +102,7 @@ public abstract class FakeAnnotationProcessorTask extends DefaultTask {
                 @Override
                 public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
                     MethodVisitor mv = classWriter.visitMethod(access, name, desc, signature, exceptions);
-                    return new MethodVisitor(org.objectweb.asm.Opcodes.ASM6, mv) {
+                    return new MethodVisitor(Opcodes.ASM6, mv) {
                         @Override
                         public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
                             if (opcode == Opcodes.INVOKEVIRTUAL && owner.equals("dev/gradleplugins/internal/DummyPlugin")) {
