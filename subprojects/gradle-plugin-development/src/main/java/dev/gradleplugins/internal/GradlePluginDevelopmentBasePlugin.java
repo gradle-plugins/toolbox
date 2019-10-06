@@ -52,7 +52,8 @@ public class GradlePluginDevelopmentBasePlugin implements Plugin<Project> {
         configureGradlePluginDevelopmentAnnotationProjectDependency(project);
         TaskProvider<FakeAnnotationProcessorTask> processorTask = createAnnotationProcessorTask(project.getTasks(), project.getLayout());
         bindAnnotationProcessorOutputToSourceSetContainer(project.getExtensions().getByType(SourceSetContainer.class), processorTask);
-        project.getTasks().named("jar", task -> task.dependsOn(processorTask));
+        // Note: don't attach to `jar` task as with the Shadow plugin, we disable the `jar` task
+        project.getTasks().named("pluginDescriptors", task -> task.dependsOn(processorTask));
 
         // TODO: lint java-gradle-plugin extension VS the annotation
     }
