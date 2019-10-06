@@ -88,25 +88,25 @@ sourceSets.main.configure {
     java.srcDir(project.layout.buildDirectory.dir("generatedSources"))
 }
 
-gradlePlugin {
-    plugins {
-        create("javaGradlePluginDevelopment") {
-            id = "dev.gradleplugins.java-gradle-plugin"
-            implementationClass = "dev.gradleplugins.internal.JavaGradlePluginDevelopmentPlugin"
-            description = "Fast track development of Gradle plugins in Java"
-        }
-        create("groovyGradlePluginDevelopment") {
-            id = "dev.gradleplugins.groovy-gradle-plugin"
-            implementationClass = "dev.gradleplugins.internal.GroovyGradlePluginDevelopmentPlugin"
-            description = "Fast track development of Gradle plugins in Groovy"
-        }
-        create("kotlinGradlePluginDevelopment") {
-            id = "dev.gradleplugins.kotlin-gradle-plugin"
-            implementationClass = "dev.gradleplugins.internal.KotlinGradlePluginDevelopmentPlugin"
-            description = "Fast track development of Gradle plugins in Kotlin"
-        }
-    }
-}
+//gradlePlugin {
+//    plugins {
+//        create("javaGradlePluginDevelopment") {
+//            id = "dev.gradleplugins.java-gradle-plugin"
+//            implementationClass = "dev.gradleplugins.internal.JavaGradlePluginDevelopmentPlugin"
+//            description = "Fast track development of Gradle plugins in Java"
+//        }
+//        create("groovyGradlePluginDevelopment") {
+//            id = "dev.gradleplugins.groovy-gradle-plugin"
+//            implementationClass = "dev.gradleplugins.internal.GroovyGradlePluginDevelopmentPlugin"
+//            description = "Fast track development of Gradle plugins in Groovy"
+//        }
+//        create("kotlinGradlePluginDevelopment") {
+//            id = "dev.gradleplugins.kotlin-gradle-plugin"
+//            implementationClass = "dev.gradleplugins.internal.KotlinGradlePluginDevelopmentPlugin"
+//            description = "Fast track development of Gradle plugins in Kotlin"
+//        }
+//    }
+//}
 
 pluginBundle {
     website = "https://gradleplugins.dev/"
@@ -114,19 +114,19 @@ pluginBundle {
     tags = listOf("gradle", "gradle-plugins", "development")
 
     plugins {
-        val javaGradlePluginDevelopment by getting {
+        val javaGradlePluginDevelopment by creating {
             id = "dev.gradleplugins.java-gradle-plugin"
             description = "Fast track development of Gradle plugins in Java"
             displayName = "Fast Gradle plugin development in Java"
             tags = listOf("gradle", "gradle-plugins", "development", "java")
         }
-        val groovyGradlePluginDevelopment by getting {
+        val groovyGradlePluginDevelopment by creating {
             id = "dev.gradleplugins.groovy-gradle-plugin"
             description = "Fast track development of Gradle plugins in Groovy"
             displayName = "Fast Gradle plugin development in Groovy"
             tags = listOf("gradle", "gradle-plugins", "development", "groovy")
         }
-        val kotlinGradlePluginDevelopment by getting {
+        val kotlinGradlePluginDevelopment by creating {
             id = "dev.gradleplugins.kotlin-gradle-plugin"
             description = "Fast track development of Gradle plugins in Kotlin"
             displayName = "Fast Gradle plugin development in Kotlin"
