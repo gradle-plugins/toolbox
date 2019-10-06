@@ -283,11 +283,6 @@ public class TestFile extends File {
         return new TestFile(super.getAbsoluteFile());
     }
 
-    @Override
-    public TestFile getCanonicalFile() throws IOException {
-        return new TestFile(super.getCanonicalFile());
-    }
-
     public String getText() {
         assertIsFile();
         try {

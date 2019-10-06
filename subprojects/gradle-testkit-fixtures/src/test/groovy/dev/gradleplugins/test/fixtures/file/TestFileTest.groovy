@@ -17,6 +17,7 @@
 package dev.gradleplugins.test.fixtures.file
 
 import org.junit.Rule
+import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.Subject
 
@@ -441,6 +442,7 @@ class TestFileTest extends AbstractTestFileSpec {
         file.getAbsoluteFile() instanceof TestFile
     }
 
+    @Ignore("Implementing this cause TestKit to fail and starting 100s of Java processes")
     def "returns a TestFile from TestFile#getCanonicalFile()"() {
         expect:
         def file = new TestFile(testDirectory, "aFile.txt")
