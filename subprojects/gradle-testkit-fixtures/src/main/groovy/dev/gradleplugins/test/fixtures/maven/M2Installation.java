@@ -41,10 +41,10 @@ public class M2Installation implements Consumer<GradleExecuter> {
 
     private void init() {
         if (!initialized) {
-            userHomeDirectory = temporaryFolder.getTestDirectory().createDir("maven_home");
-            userM2Directory = userHomeDirectory.createDir(".m2");
+            userHomeDirectory = temporaryFolder.getTestDirectory().createDirectory("maven_home");
+            userM2Directory = userHomeDirectory.createDirectory(".m2");
             userSettingsFile = userM2Directory.file("settings.xml");
-            globalMavenDirectory = userHomeDirectory.createDir("m2_home");
+            globalMavenDirectory = userHomeDirectory.createDirectory("m2_home");
             globalSettingsFile = globalMavenDirectory.file("conf/settings.xml");
             System.out.println("M2 home: " + userHomeDirectory);
 
@@ -116,13 +116,13 @@ public class M2Installation implements Consumer<GradleExecuter> {
     public void isolateMavenLocalRepo(GradleExecuter gradleExecuter) {
         gradleExecuter.beforeExecute(executer -> {
             if (isolateMavenLocal) {
-                isolatedMavenRepoForLeakageChecks = temporaryFolder.getTestDirectory().createDir("m2-home-should-not-be-filled");
+                isolatedMavenRepoForLeakageChecks = temporaryFolder.getTestDirectory().createDirectory("m2-home-should-not-be-filled");
                 setMavenLocalLocation(gradleExecuter, isolatedMavenRepoForLeakageChecks);
             }
         });
         gradleExecuter.afterExecute(executer -> {
             if (isolateMavenLocal) {
-                isolatedMavenRepoForLeakageChecks.assertIsEmptyDir();
+                isolatedMavenRepoForLeakageChecks.assertIsEmptyDirectory();
             }
         });
     }

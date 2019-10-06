@@ -20,12 +20,11 @@ import org.codehaus.groovy.runtime.ResourceGroovyMethods;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -43,16 +42,21 @@ public class TestFile extends File {
         super(join(file, path).getAbsolutePath());
     }
 
-    public TestFile(URI uri) {
-        this(new File(uri));
-    }
-
     public TestFile(String path) {
         this(new File(path));
     }
 
-    public TestFile(URL url) {
-        this(toUri(url));
+    private TestFile(File file, boolean followLinks) {
+        super(file.getAbsolutePath());
+    }
+
+    // TODO: Unit test this method
+    //   Above all, figure out what the default behavior (aka the canonical of the file)
+    public static TestFile of(File file, LinkOption... options) {
+        if (Arrays.asList(options).contains(LinkOption.NOFOLLOW_LINKS)) {
+            return new TestFile(file, false);
+        }
+        return new TestFile(file);
     }
 
     public TestFile assertExists() {
@@ -63,9 +67,10 @@ public class TestFile extends File {
     /**
      * Asserts that this file contains exactly the given set of descendants.
      */
+    // TODO: Unit test this method
     public TestFile assertHasDescendants(String... descendants) {
         Set<String> actual = new TreeSet<String>();
-        assertIsDir();
+        assertIsDirectory();
         visit(actual, "", this);
         Set<String> expected = new TreeSet<String>(Arrays.asList(descendants));
 
@@ -95,13 +100,18 @@ public class TestFile extends File {
         return this;
     }
 
-    public TestFile assertIsDir() {
-        assertTrue(String.format("%s is not a directory.", this), isDirectory());
+    public TestFile assertIsDirectory() {
+        assertTrue(String.format("%s is not a directory", this), isDirectory());
         return this;
     }
 
-    public TestFile assertIsEmptyDir() {
-        assertIsDir();
+    public TestFile assertIsSymbolicLink() {
+        assertTrue(String.format("%s is not a symbolic link", this), isSymbolicLink());
+        return this;
+    }
+
+    public TestFile assertIsEmptyDirectory() {
+        assertIsDirectory();
         assertHasDescendants();
         return this;
     }
@@ -111,6 +121,7 @@ public class TestFile extends File {
      * @return this instance
      * @throws IOException if unable to delete the directory
      */
+    // TODO: Test this method
     public TestFile forceDeleteDir() throws IOException {
         if (isDirectory()) {
 
@@ -157,6 +168,11 @@ public class TestFile extends File {
         return this;
     }
 
+    // TODO: Unit test this method
+    //    - path to file
+    //    - path to dir
+    //    - path to link (this one will give a TestFile pointing to the actual linked file
+    //    - path to link (non existing link)
     public TestFile file(Object... path) {
         try {
             return new TestFile(this, path);
@@ -166,7 +182,7 @@ public class TestFile extends File {
     }
 
     public TestFile createFile() {
-        getParentFile().createDir();
+        getParentFile().createDirectory();
         try {
             assertTrue(isFile() || createNewFile());
         } catch (IOException e) {
@@ -179,11 +195,11 @@ public class TestFile extends File {
         return file(path).createFile();
     }
 
-    public TestFile createDir(Object path) {
-        return new TestFile(this, path).createDir();
+    public TestFile createDirectory(Object path) {
+        return new TestFile(this, path).createDirectory();
     }
 
-    public TestFile createDir() {
+    public TestFile createDirectory() {
         if (mkdirs()) {
             return this;
         }
@@ -194,12 +210,18 @@ public class TestFile extends File {
                 + ". Diagnostics: exists=" + this.exists() + ", isFile=" + this.isFile() + ", isDirectory=" + this.isDirectory());
     }
 
-    private static URI toUri(URL url) {
+    public TestFile createSymbolicLink(File target) {
+        getParentFile().createDirectory();
         try {
-            return url.toURI();
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
+            Files.createSymbolicLink(toPath(), target.toPath());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
+        return this;
+    }
+
+    public TestFile createSymbolicLink(String target) {
+        return createSymbolicLink(new File(target));
     }
 
     private static File join(File file, Object[] path) {
@@ -214,6 +236,7 @@ public class TestFile extends File {
         }
     }
 
+    // TODO: Unit test this method
     public TestFile leftShift(Object content) {
         getParentFile().mkdirs();
         try {
@@ -224,6 +247,7 @@ public class TestFile extends File {
         }
     }
 
+    // TODO: Unit test this method
     public TestFile write(Object content) {
         try {
             if (!exists()) {
@@ -241,6 +265,7 @@ public class TestFile extends File {
         return this;
     }
 
+    // TODO: Unit test this method
     public boolean isSelfOrDescendent(File file) {
         if (file.getAbsolutePath().equals(getAbsolutePath())) {
             return true;
@@ -256,6 +281,11 @@ public class TestFile extends File {
     @Override
     public TestFile getAbsoluteFile() {
         return new TestFile(super.getAbsoluteFile());
+    }
+
+    @Override
+    public TestFile getCanonicalFile() throws IOException {
+        return new TestFile(super.getCanonicalFile());
     }
 
     public String getText() {
@@ -274,5 +304,9 @@ public class TestFile extends File {
         } catch (IOException e) {
             throw new RuntimeException(String.format("Could not append to test file '%s'", this), e);
         }
+    }
+
+    public boolean isSymbolicLink() {
+        return Files.isSymbolicLink(toPath());
     }
 }
