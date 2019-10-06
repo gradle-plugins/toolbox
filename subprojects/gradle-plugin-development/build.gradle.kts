@@ -148,3 +148,6 @@ tasks.register("release") {
 shadedArtifact {
     packagesToRelocate.set(listOf("org.objectweb.asm", "org.objectweb.asm.util"))
 }
+
+// TODO: Add smoke test of the final binaires to make sure it contains the expected plugin ids, etc
+//   - Also check the dependencies inside the POM to make sure we aren't leaking anything

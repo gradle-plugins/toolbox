@@ -38,6 +38,8 @@ import java.io.UncheckedIOException;
 import java.util.Optional;
 
 // TODO: Ensure this class is coverred with enough test coverage
+//   - The generated properties files (inside the Jar) are pointing to the stub (valid class
+//   - The generated stub contains the right information (aka minimum gradle version, minimum java, plugin ID and plugin class)
 public abstract class FakeAnnotationProcessorTask extends DefaultTask {
     public abstract ConfigurableFileCollection getSource();
     public abstract DirectoryProperty getPluginDescriptorDirectory();
