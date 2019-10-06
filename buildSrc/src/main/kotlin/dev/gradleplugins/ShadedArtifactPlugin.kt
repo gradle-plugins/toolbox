@@ -90,5 +90,8 @@ class ShadedArtifactPlugin: Plugin<Project> {
         tasks.named("assemble") {
             dependsOn(shadowJar)
         }
+        tasks.named("jar") {
+            dependsOn(shadowJar)
+        }
     }
 }

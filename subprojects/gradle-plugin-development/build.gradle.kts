@@ -8,17 +8,20 @@ plugins {
 tasks.named("publishPlugins") {
     dependsOn("shadowJar")
 }
-//afterEvaluate {
-//    publishing {
-//        publications {
-//            withType<MavenPublication> {
-//                if (name == "pluginMaven") {
-//                    setArtifacts(listOf(tasks.getByName("shadowJar")))
-//                }
-//            }
-//        }
-//    }
-//}
+tasks.named("jar") {
+    enabled = false
+}
+afterEvaluate {
+    publishing {
+        publications {
+            withType<MavenPublication> {
+                if (name == "pluginMaven") {
+                    setArtifacts(listOf(tasks.getByName("shadowJar")))
+                }
+            }
+        }
+    }
+}
 
 repositories {
     jcenter()
