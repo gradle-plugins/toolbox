@@ -18,7 +18,7 @@ buildScan {
 
 allprojects {
     group = "dev.gradleplugins"
-    version = "0.0.18"
+    version = "0.0.19-SNAPSHOT"
 
     apply<GitHubSourceControlManagerPlugin>()
     configure<GitHubSourceControlManagerExtension> {
