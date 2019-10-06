@@ -20,47 +20,18 @@ import dev.gradleplugins.GradlePlugin;
 import dev.gradleplugins.internal.tasks.FakeAnnotationProcessorTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
-import org.gradle.api.Task;
-import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.SourceTask;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.compile.AbstractCompile;
-import org.gradle.api.tasks.compile.GroovyCompile;
-
-import java.lang.reflect.InvocationTargetException;
 
 @GradlePlugin(id = "dev.gradleplugins.kotlin-gradle-plugin")
 public class KotlinGradlePluginDevelopmentPlugin extends AbstractGradlePluginDevelopmentPlugin {
     @Override
     public void doApply(Project project) {
         project.getPluginManager().apply(GradlePluginDevelopmentBasePlugin.class);
+        project.afterEvaluate(KotlinGradlePluginDevelopmentPlugin::assertKotlinPluginWasApplied);
 
-        // TODO: Not totally sure if this is required for building plugins in Kotlin
-        //   Actually is doesn't seems like it. kotlin-dsl is an "alias" to java-gradle-plugin and other stuff
-        //   Instead, let's check to see org.jetbrains.kotlin.jvm is applied so Kotlin can be compiled.
-        //   Everything else will be handled by us
-//        // There is no way to properly apply this plugin automatically
-//        // project.pluginManager.apply("org.gradle.kotlin.kotlin-dsl")
-//        // Instead we will crash the build if not applied manually
-//        project.afterEvaluate( proj -> {
-//            if (project.getPluginManager().findPlugin("org.gradle.kotlin.kotlin-dsl") == null) {
-//                throw new GradleException("You need to manually apply the `kotlin-dsl` plugin inside the plugin block:\n" +
-//                        "plugins {\n" +
-//                        "    `kotlin-dsl`\n" +
-//                        "}");
-//            }
-//        });
-
-        // TODO: I think this is added by the kotlin-dsl, we will leave it out for the next versions
-//        project.getDependencies().add("implementation", kotlin("gradle-plugin"));
-
-        // TODO: Link kotlin source
-        project.getPluginManager().withPlugin("org.jetbrains.kotlin.jvm", appliedPlugin -> {
-            project.getTasks().named("fakeAnnotationProcessing", FakeAnnotationProcessorTask.class, task -> {
-
-                task.getSource().from(project.getTasks().named("compileKotlin", AbstractCompile.class).map(SourceTask::getSource));
-            });
-        });
+        project.getPluginManager().withPlugin("org.jetbrains.kotlin.jvm", appliedPlugin -> configureAnnotationProcessorSources(project.getTasks().named("fakeAnnotationProcessing", FakeAnnotationProcessorTask.class)));
 
         // TODO: warn if the plugin only have has Java source and no Kotlin.
         //   You specified a Kotlin plugin development so we should expect Gradle plugin to be all in Kotlin
@@ -72,5 +43,23 @@ public class KotlinGradlePluginDevelopmentPlugin extends AbstractGradlePluginDev
     @Override
     protected String getPluginId() {
         return "dev.gradleplugins.kotlin-gradle-plugin";
+    }
+
+    private static void configureAnnotationProcessorSources(TaskProvider<FakeAnnotationProcessorTask> processorTask) {
+        processorTask.configure(task -> {
+            task.getSource().from(task.getProject().getTasks().named("compileKotlin", AbstractCompile.class).map(SourceTask::getSource));
+        });
+    }
+
+    private static void assertKotlinPluginWasApplied(Project evaluatedProject) {
+        // We need a plugin to enable Kotlin compilation. The kotlin-dsl plugin seems to be useless for this plugin so we request the user to apply org.jetbrains.kotlin.jvm. We can apply the plugin ourselves as we will be lock to a specific version and require to pull the library even if someone is only using Java or Groovy. We could split the plugin into various Jar. We can explore this later.
+        if (evaluatedProject.getPluginManager().findPlugin("org.jetbrains.kotlin.jvm") == null) {
+            // TODO: Detect and suggest the Kotlin DSL way of applying the plugin
+            // TODO: Suggest the right version for the used Gradle
+            throw new GradleException("You need to manually apply the `org.jetbrains.kotlin.jvm` plugin inside the plugin block:\n" +
+                    "plugins {\n" +
+                    "    id(\"org.jetbrains.kotlin.jvm\") version \"1.3.50\"\n" +
+                    "}");
+        }
     }
 }

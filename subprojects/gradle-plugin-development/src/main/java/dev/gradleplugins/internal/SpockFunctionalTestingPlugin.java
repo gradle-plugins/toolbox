@@ -26,6 +26,7 @@ import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.testing.Test;
 import dev.gradleplugins.internal.TestFixtures;
+import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 
 public class SpockFunctionalTestingPlugin implements Plugin<Project> {
     @Override
@@ -59,7 +60,7 @@ public class SpockFunctionalTestingPlugin implements Plugin<Project> {
         project.getDependencies().add("functionalTestFixtureImplementation", TestFixtures.notation);
 
         // TODO: We should lock this repo content for only Spock and it's dependencies that we are resolving here (for version 1.2-groovy-2.5)
-        project.getRepositories().jcenter(); // for spock-core
+//        project.getRepositories().jcenter(); // for spock-core
 
         if (TestFixtures.released) {
             // TODO: We should lock this repo content for only our fixture (we don't use any dependencies)
@@ -74,7 +75,7 @@ public class SpockFunctionalTestingPlugin implements Plugin<Project> {
                 it.setUrl(project.uri("https://dl.bintray.com/gradle-plugins/maven-snapshot"));
             });
             functionalTestFixtureConfiguration.getResolutionStrategy().cacheChangingModulesFor(0, "seconds");
-            project.getRepositories().mavenLocal();
+//            project.getRepositories().mavenLocal();
         }
 
         TaskProvider<Test> functionalTest = project.getTasks().register("functionalTest", Test.class, it -> {
@@ -86,5 +87,9 @@ public class SpockFunctionalTestingPlugin implements Plugin<Project> {
         });
 
         project.getTasks().named("check", it -> it.dependsOn(functionalTest));
+
+        // Configure functionalTest for GradlePluginDevelopmentExtension
+        GradlePluginDevelopmentExtension gradlePlugin = project.getExtensions().getByType(GradlePluginDevelopmentExtension.class);
+        gradlePlugin.testSourceSets(project.getExtensions().getByType(SourceSetContainer.class).getByName("functionalTest"));
     }
 }

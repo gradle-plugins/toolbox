@@ -33,4 +33,26 @@ id("org.jetbrains.kotlin.jvm") version "1.3.50"
     protected SourceElement getComponentUnderTest() {
         return new KotlinBasicGradlePlugin()
     }
+
+    def "fails with an helpful message when org.jetbrains.kotlin.jvm"() {
+        given:
+        buildFile << """
+            plugins {
+                id("dev.gradleplugins.kotlin-gradle-plugin")
+            }
+        """
+
+        when:
+        def result1 = fails('help')
+
+        then:
+        result1.output.contains("You need to manually apply the `org.jetbrains.kotlin.jvm` plugin inside the plugin block:")
+
+        when:
+        buildFile.text = buildFile.text.replace('id("dev.gradleplugins.kotlin-gradle-plugin")', '''id("dev.gradleplugins.kotlin-gradle-plugin")\nid("org.jetbrains.kotlin.jvm") version "1.3.50"''')
+        def result2 = succeeds('help')
+
+        then:
+        result2.output.contains("BUILD SUCCESSFUL")
+    }
 }

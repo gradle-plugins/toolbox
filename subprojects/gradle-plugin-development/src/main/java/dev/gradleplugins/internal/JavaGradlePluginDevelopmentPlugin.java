@@ -19,7 +19,7 @@ package dev.gradleplugins.internal;
 import dev.gradleplugins.GradlePlugin;
 import dev.gradleplugins.internal.tasks.FakeAnnotationProcessorTask;
 import org.gradle.api.Project;
-import org.gradle.api.tasks.compile.GroovyCompile;
+import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.compile.JavaCompile;
 
 @GradlePlugin(id = "dev.gradleplugins.java-gradle-plugin")
@@ -28,13 +28,17 @@ public class JavaGradlePluginDevelopmentPlugin extends AbstractGradlePluginDevel
     public void doApply(Project project) {
         project.getPluginManager().apply(GradlePluginDevelopmentBasePlugin.class);
 
-        project.getTasks().named("fakeAnnotationProcessing", FakeAnnotationProcessorTask.class, task -> {
-            task.getSource().from(project.getTasks().named("compileJava", JavaCompile.class).map(JavaCompile::getSource));
-        });
+        configureAnnotationProcessorSources(project.getTasks().named("fakeAnnotationProcessing", FakeAnnotationProcessorTask.class));
     }
 
     @Override
     protected String getPluginId() {
         return "dev.gradleplugins.java-gradle-plugin";
+    }
+
+    private static void configureAnnotationProcessorSources(TaskProvider<FakeAnnotationProcessorTask> processorTask) {
+        processorTask.configure(task -> {
+            task.getSource().from(task.getProject().getTasks().named("compileJava", JavaCompile.class).map(JavaCompile::getSource));
+        });
     }
 }

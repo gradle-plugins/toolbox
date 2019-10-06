@@ -19,7 +19,6 @@ package dev.gradleplugins.internal;
 import dev.gradleplugins.GradlePlugin;
 import dev.gradleplugins.internal.tasks.FakeAnnotationProcessorTask;
 import org.gradle.api.Project;
-import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.compile.GroovyCompile;
 
@@ -30,12 +29,42 @@ public class GroovyGradlePluginDevelopmentPlugin extends AbstractGradlePluginDev
         project.getPluginManager().apply(GradlePluginDevelopmentBasePlugin.class);
         project.getPluginManager().apply("groovy");
 
-        project.getRepositories().jcenter();
+//        project.getRepositories().jcenter();
         project.getDependencies().add("compileOnly", "org.codehaus.groovy:groovy-all:2.5.4"); // require jcenter()
+        project.getRepositories().mavenCentral(repo -> {
+            repo.mavenContent(content -> {
+                content.includeVersionByRegex("org\\.codehaus\\.groovy", "groovy.*", "2\\.5\\.4");
 
-        project.getTasks().named("fakeAnnotationProcessing", FakeAnnotationProcessorTask.class, task -> {
-            task.getSource().from(project.getTasks().named("compileGroovy", GroovyCompile.class).map(GroovyCompile::getSource));
+                // for groovy-ant
+                content.includeVersion("org.apache.ant", "ant", "1.9.13");
+                content.includeVersion("org.apache.ant", "ant-launcher", "1.9.13");
+
+                // for groovy-cli-commons
+                content.includeVersion("commons-cli", "commons-cli", "1.4");
+
+                // for groovy-cli-picocli
+                content.includeVersion("info.picocli", "picocli", "3.7.0");
+
+                // for groovy-docgenerator
+                content.includeVersion("com.thoughtworks.qdox", "qdox", "1.12.1");
+
+                // for groovy-groovysh
+                content.includeVersion("jline", "jline", "2.14.6");
+
+                // for groovy-test
+                content.includeVersion("junit", "junit", "4.12");
+                content.includeVersion("org.hamcrest", "hamcrest-core", "1.3");
+
+                // for groovy-test-junit5
+                content.includeVersion("org.junit.platform", "junit-platform-launcher", "1.3.1");
+                content.includeVersion("org.apiguardian", "apiguardian-api", "1.0.0");
+                content.includeVersion("org.junit.platform", "junit-platform-engine", "1.3.1");
+                content.includeVersion("org.junit.platform", "junit-platform-commons", "1.3.1");
+                content.includeVersion("org.opentest4j", "opentest4j", "1.1.1");
+            });
         });
+
+        configureAnnotationProcessorSources(project.getTasks().named("fakeAnnotationProcessing", FakeAnnotationProcessorTask.class));
 
         // TODO: warn if the plugin only have has Java source and no Groovy.
         //   You specified a Groovy plugin development so we should expect Gradle plugin to be all in Groovy
@@ -47,5 +76,11 @@ public class GroovyGradlePluginDevelopmentPlugin extends AbstractGradlePluginDev
     @Override
     protected String getPluginId() {
         return "dev.gradleplugins.groovy-gradle-plugin";
+    }
+
+    private static void configureAnnotationProcessorSources(TaskProvider<FakeAnnotationProcessorTask> processorTask) {
+        processorTask.configure(task -> {
+            task.getSource().from(task.getProject().getTasks().named("compileGroovy", GroovyCompile.class).map(GroovyCompile::getSource));
+        });
     }
 }

@@ -18,25 +18,24 @@ package dev.gradleplugins.internal;
 
 import com.gradle.publish.PublishPlugin;
 import dev.gradleplugins.internal.tasks.FakeAnnotationProcessorTask;
+import org.gradle.api.Action;
 import org.gradle.api.JavaVersion;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.repositories.MavenRepositoryContentDescriptor;
+import org.gradle.api.file.ProjectLayout;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.tasks.SourceSetContainer;
+import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskProvider;
-import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 import org.gradle.plugin.devel.plugins.JavaGradlePluginPlugin;
 import dev.gradleplugins.internal.TestFixtures;
-
-import java.io.File;
 
 public class GradlePluginDevelopmentBasePlugin implements Plugin<Project> {
     @Override
     public void apply(Project project) {
         // TODO: Let's not remove the compile configuration but let's instead filter it at key location (when attached to tasks, etc) so we can remove the gradleApi()
-        project.getConfigurations().matching(it -> it.getName().equals("compileOnly")).all(configuration -> {
-            project.getDependencies().add("compileOnly", "dev.gradleplugins:gradle-api:" + TestFixtures.apiVersion + "-5.6.2");
-        });
+        configureGradleApiProjectDependency(project);
 
         project.getPluginManager().apply(JavaGradlePluginPlugin.class); // For plugin development
 
@@ -44,43 +43,77 @@ public class GradlePluginDevelopmentBasePlugin implements Plugin<Project> {
         // TODO: Print deprecation warning about using GradlePlugin the container for declaring plugin IDs
         // TODO: Warn when calling gradleApi()
 
-//        project.getConfigurations().removeIf(it -> it.getName().equals("compile"));
-
-        if (!TestFixtures.released) {
-            project.getRepositories().mavenLocal();
-        }
-        // TODO: Properly configure the POM of gradle-api per version to pull the right Groovy API
-//        project.getDependencies().add("compile", "dev.gradleplugins:gradle-api:" + TestFixtures.apiVersion + "-5.6.2");
-
-        project.getRepositories().mavenCentral();
-
-        project.getPluginManager().apply(SpockFunctionalTestingPlugin.class);
+        project.getPluginManager().apply(SpockFunctionalTestingPlugin.class); // For functional testing
         project.getPluginManager().apply(PublishPlugin.class); // For publishing
 
-        // Configure annotation processor
-//        project.getDependencies().add("annotationProcessor", "dev.gradleplugins:gradle-plugin-development-processor:" + TestFixtures.currentVersion);
-        project.getDependencies().add("compileOnly", "dev.gradleplugins:gradle-plugin-development-annotation:" + TestFixtures.currentVersion);
+        configureDefaultJavaCompatibility(project.getExtensions().getByType(JavaPluginExtension.class));
 
-        // Force Java 8 version
-        JavaPluginExtension java = project.getExtensions().getByType(JavaPluginExtension.class);
-        java.setSourceCompatibility(JavaVersion.VERSION_1_8);
-        java.setTargetCompatibility(JavaVersion.VERSION_1_8);
-
-        GradlePluginDevelopmentExtension gradlePlugin = project.getExtensions().getByType(GradlePluginDevelopmentExtension.class);
-        gradlePlugin.testSourceSets(project.getExtensions().getByType(SourceSetContainer.class).getByName("functionalTest"));
-
-        // "annotation processor"
-        TaskProvider<FakeAnnotationProcessorTask> fakeAnnotationProcessorTask = project.getTasks().register("fakeAnnotationProcessing", FakeAnnotationProcessorTask.class, task -> {
-            task.getPluginDescriptorDirectory().set(project.getLayout().getBuildDirectory().dir("stub-outputs"));
-        });
-
-        project.getExtensions().getByType(SourceSetContainer.class).getByName("main").getOutput().dir(fakeAnnotationProcessorTask.flatMap(FakeAnnotationProcessorTask::getPluginDescriptorDirectory));
+        // Configure the Gradle Plugin Development annotation processor
+        configureGradlePluginDevelopmentAnnotationProjectDependency(project);
+        TaskProvider<FakeAnnotationProcessorTask> processorTask = createAnnotationProcessorTask(project.getTasks(), project.getLayout());
+        bindAnnotationProcessorOutputToSourceSetContainer(project.getExtensions().getByType(SourceSetContainer.class), processorTask);
+        project.getTasks().named("jar", task -> task.dependsOn(processorTask));
 
         // TODO: lint java-gradle-plugin extension VS the annotation
+    }
 
-        project.getTasks().named("pluginDescriptors", it -> {
-            it.dependsOn(fakeAnnotationProcessorTask);
-            it.setEnabled(false);
+    private static void configureDefaultJavaCompatibility(JavaPluginExtension java) {
+        java.setSourceCompatibility(JavaVersion.VERSION_1_8);
+        java.setTargetCompatibility(JavaVersion.VERSION_1_8);
+    }
+
+    private static void configureGradlePluginDevelopmentAnnotationProjectDependency(Project project) {
+        String groupId = "dev.gradleplugins";
+        String artifactId = "gradle-plugin-development-annotation";
+        project.getConfigurations().matching(it -> it.getName().equals("compileOnly")).all(configuration -> project.getDependencies().add(configuration.getName(), groupId + ":" + artifactId + ":" + TestFixtures.currentVersion));
+
+        Action<? super MavenRepositoryContentDescriptor> filterContent = (MavenRepositoryContentDescriptor content) -> content.includeVersion(groupId, artifactId, TestFixtures.currentVersion);
+
+        String repositoryName = "Gradle Plugin Development - Annotations";
+        if (TestFixtures.released) {
+            project.getRepositories().maven(repository -> {
+                repository.setName(repositoryName);
+                repository.setUrl(project.uri("https://dl.bintray.com/gradle-plugins/maven"));
+                repository.mavenContent(filterContent);
+            });
+        } else {
+            project.getRepositories().mavenLocal(repository -> {
+                repository.setName(repositoryName);
+                repository.mavenContent(filterContent);
+            });
+        }
+    }
+
+    private static void configureGradleApiProjectDependency(Project project) {
+        String groupId = "dev.gradleplugins";
+        String artifactId = "gradle-api";
+        String version = TestFixtures.apiVersion + "-5.6.2";
+        project.getConfigurations().matching(it -> it.getName().equals("compileOnly")).all(configuration -> project.getDependencies().add(configuration.getName(), groupId + ":" + artifactId + ":" + version));
+
+        Action<? super MavenRepositoryContentDescriptor> filterContent = (MavenRepositoryContentDescriptor content) -> content.includeVersion(groupId, artifactId, version);
+
+        String repositoryName = "Gradle Plugin Development - Gradle APIs";
+        if (TestFixtures.released) {
+            project.getRepositories().maven(repository -> {
+                repository.setName(repositoryName);
+                repository.setUrl(project.uri("https://dl.bintray.com/gradle-plugins/maven"));
+                repository.mavenContent(filterContent);
+            });
+        } else {
+            project.getRepositories().mavenLocal(repository -> {
+                repository.setName(repositoryName);
+                repository.mavenContent(filterContent);
+            });
+        }
+    }
+
+    private static TaskProvider<FakeAnnotationProcessorTask> createAnnotationProcessorTask(TaskContainer tasks, ProjectLayout projectLayout) {
+        return tasks.register("fakeAnnotationProcessing", FakeAnnotationProcessorTask.class, task -> {
+            task.getPluginDescriptorDirectory().set(projectLayout.getBuildDirectory().dir("fake-annotation-processing"));
         });
+    }
+
+    private static void bindAnnotationProcessorOutputToSourceSetContainer(SourceSetContainer sourceSets, TaskProvider<FakeAnnotationProcessorTask> processorTask) {
+        sourceSets.getByName("main").getOutput().dir(processorTask.flatMap(FakeAnnotationProcessorTask::getPluginDescriptorDirectory));
     }
 }

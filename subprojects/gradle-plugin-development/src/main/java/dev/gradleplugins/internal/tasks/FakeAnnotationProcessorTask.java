@@ -20,30 +20,22 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.tasks.TaskAction;
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.ModuleVisitor;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.TypePath;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.io.Reader;
 import java.io.UncheckedIOException;
 import java.util.Optional;
-import java.util.Scanner;
 
 public abstract class FakeAnnotationProcessorTask extends DefaultTask {
     public abstract ConfigurableFileCollection getSource();
