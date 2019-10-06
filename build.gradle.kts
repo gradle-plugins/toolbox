@@ -27,3 +27,5 @@ allprojects {
 
     apply<OpenSourceSoftwareLicensePlugin>()
 }
+
+// TODO: Fails the build if running with anything else than Java 8 (or fix the projects so we can execute the build on other Java version)
