@@ -15,7 +15,7 @@ kotlinDslPluginOptions {
 dependencies {
     implementation(kotlin("gradle-plugin"))
     implementation("com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4")
-    implementation("com.github.jengelman.gradle.plugins:shadow:5.0.0")
+    implementation("com.github.jengelman.gradle.plugins:shadow:5.1.0")
     implementation("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:0.4.2")
     implementation("com.gradle.publish:plugin-publish-plugin:0.10.1")
 }

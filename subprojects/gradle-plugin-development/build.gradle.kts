@@ -35,11 +35,12 @@ val stubConfiguration = configurations.create("stub") {
 dependencies {
     add(stubConfiguration.name, project(":gradle-plugin-development-stubs"))
 
+    implementation(gradleApi())
     implementation("com.gradle.publish:plugin-publish-plugin:0.10.1")
     functionalTestImplementation(project(":gradle-testkit-fixtures"))
-    implementation(project(":gradle-plugin-development-annotation"))
-    implementation("org.ow2.asm:asm:6.0")
-    implementation("org.ow2.asm:asm-util:6.0")
+    compileOnly(project(":gradle-plugin-development-annotation"))
+    shaded("org.ow2.asm:asm:6.0")
+    shaded("org.ow2.asm:asm-util:6.0")
 
     // TODO: should be inherited from implementation
     functionalTestImplementation(project(":gradle-plugin-development-annotation"))
@@ -135,4 +136,8 @@ publishing {
 
 tasks.register("release") {
     dependsOn("publishPlugins")
+}
+
+shadedArtifact {
+    packagesToRelocate.set(listOf("org.objectweb.asm", "org.objectweb.asm.util"))
 }

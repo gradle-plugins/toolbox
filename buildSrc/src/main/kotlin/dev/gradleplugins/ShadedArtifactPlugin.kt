@@ -35,23 +35,6 @@ class ShadedArtifactPlugin: Plugin<Project> {
         val shadedArtifact = createShadedExtension()
         val shadowJar = configureShadowJarTask(shadedConfiguration, shadedArtifact)
         wireShadowJarTaskInLifecycle(shadowJar)
-
-        pluginManager.withPlugin("maven-publish") {
-            configure<PublishingExtension> {
-                publications.withType(MavenPublication::class.java) {
-                    pom.withXml {
-                        val artifactIdsToRemove = shadedConfiguration.allDependencies.map { it.name }
-                        (asNode().get("dependencies") as List<Node>).forEach { dependencies ->
-                            dependencies.setValue((dependencies.value() as List<Node>).filter { dependency ->
-                                val artifactIdNode = (dependency.value() as List<Node>).find { it.name().toString().contains("artifactId") }
-
-                                !artifactIdsToRemove.contains((artifactIdNode!!.value() as List<String>).first())
-                            })
-                        }
-                    }
-                }
-            }
-        }
     }
 
     private
@@ -69,8 +52,8 @@ class ShadedArtifactPlugin: Plugin<Project> {
     private
     fun Project.createShadedConfiguration(): Configuration {
         val shaded by configurations.creating
-        val implementation = configurations.getByName("implementation")
-        implementation.extendsFrom(shaded)
+        val compileOnly = configurations.getByName("compileOnly")
+        compileOnly.extendsFrom(shaded)
         return shaded
     }
 
