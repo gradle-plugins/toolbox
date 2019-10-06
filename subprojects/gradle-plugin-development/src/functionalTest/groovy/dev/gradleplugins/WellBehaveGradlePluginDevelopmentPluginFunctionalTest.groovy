@@ -26,6 +26,7 @@ import spock.lang.Unroll
 import static org.hamcrest.CoreMatchers.equalTo
 import static org.hamcrest.CoreMatchers.not
 
+// TODO: Add fork Gradle Executer so I can test what user really experience once the plugin is released
 abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends AbstractFunctionalSpec {
     def "fails when java-gradle-plugin core plugin is applied before dev.gradleplugins development plugin"() {
         given:
