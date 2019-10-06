@@ -38,16 +38,13 @@ val stubConfiguration = configurations.create("stub") {
 dependencies {
     add(stubConfiguration.name, project(":gradle-plugin-development-stubs"))
 
-    implementation(gradleApi())
     implementation("com.gradle.publish:plugin-publish-plugin:0.10.1")
     functionalTestImplementation(project(":gradle-testkit-fixtures"))
     compileOnly(project(":gradle-plugin-development-annotation"))
     shaded("org.ow2.asm:asm:6.0")
     shaded("org.ow2.asm:asm-util:6.0")
 
-    // TODO: should be inherited from implementation
     functionalTestImplementation(project(":gradle-plugin-development-annotation"))
-//    functionalTestImplementation("com.gradle.publish:plugin-publish-plugin:0.10.1")
 }
 
 tasks.named<PluginUnderTestMetadata>("pluginUnderTestMetadata") {
@@ -87,26 +84,6 @@ tasks.named<JavaCompile>("compileJava") {
 sourceSets.main.configure {
     java.srcDir(project.layout.buildDirectory.dir("generatedSources"))
 }
-
-//gradlePlugin {
-//    plugins {
-//        create("javaGradlePluginDevelopment") {
-//            id = "dev.gradleplugins.java-gradle-plugin"
-//            implementationClass = "dev.gradleplugins.internal.JavaGradlePluginDevelopmentPlugin"
-//            description = "Fast track development of Gradle plugins in Java"
-//        }
-//        create("groovyGradlePluginDevelopment") {
-//            id = "dev.gradleplugins.groovy-gradle-plugin"
-//            implementationClass = "dev.gradleplugins.internal.GroovyGradlePluginDevelopmentPlugin"
-//            description = "Fast track development of Gradle plugins in Groovy"
-//        }
-//        create("kotlinGradlePluginDevelopment") {
-//            id = "dev.gradleplugins.kotlin-gradle-plugin"
-//            implementationClass = "dev.gradleplugins.internal.KotlinGradlePluginDevelopmentPlugin"
-//            description = "Fast track development of Gradle plugins in Kotlin"
-//        }
-//    }
-//}
 
 pluginBundle {
     website = "https://gradleplugins.dev/"
