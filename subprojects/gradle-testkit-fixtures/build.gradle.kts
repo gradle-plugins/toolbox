@@ -50,3 +50,5 @@ afterEvaluate {
 tasks.register("release") {
     dependsOn("bintrayUpload")
 }
+
+// TODO: fix all javadoc issues
