@@ -34,7 +34,7 @@ configure<PublishingExtension> {
 afterEvaluate {
     configure<BintrayExtension> {
         pkg(closureOf<BintrayExtension.PackageConfig> {
-            name = "" // TODO
+            name = "plugin-development"
         })
     }
 }

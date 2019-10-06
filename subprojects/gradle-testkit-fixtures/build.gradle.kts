@@ -1,3 +1,5 @@
+import com.jfrog.bintray.gradle.BintrayExtension
+
 plugins {
     groovy
     dev.gradleplugins.experimental.`shaded-artifact`
@@ -34,6 +36,14 @@ configure<PublishingExtension> {
         named<MavenPublication>("mavenJava") {
             from(components["java"])
         }
+    }
+}
+
+afterEvaluate {
+    configure<BintrayExtension> {
+        pkg(closureOf<BintrayExtension.PackageConfig> {
+            name = "testkit-fixtures"
+        })
     }
 }
 

@@ -70,13 +70,13 @@ class PublishingPlugin : Plugin<Project> {
     private
     fun Project.configureBintrayExtension() {
         afterEvaluate {
-            val packageName = "${project.group}:${project.name}"
+//            val packageName = "${project.group}:${project.name}"
 
             configure<BintrayExtension> {
                 setPublications("mavenJava")
 
                 pkg(closureOf<BintrayExtension.PackageConfig> {
-                    name = packageName
+//                    name = packageName
                     setLabels("gradle", "gradle-plugins")
                     publicDownloadNumbers = true
                 })
