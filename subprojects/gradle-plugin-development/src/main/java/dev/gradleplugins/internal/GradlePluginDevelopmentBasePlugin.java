@@ -17,6 +17,7 @@
 package dev.gradleplugins.internal;
 
 import com.gradle.publish.PublishPlugin;
+import dev.gradleplugins.internal.ide.IdePlugin;
 import dev.gradleplugins.internal.tasks.FakeAnnotationProcessorTask;
 import org.gradle.api.Action;
 import org.gradle.api.JavaVersion;
@@ -45,6 +46,7 @@ public class GradlePluginDevelopmentBasePlugin implements Plugin<Project> {
 
         project.getPluginManager().apply(SpockFunctionalTestingPlugin.class); // For functional testing
         project.getPluginManager().apply(PublishPlugin.class); // For publishing
+        project.getPluginManager().apply(IdePlugin.class);
 
         configureDefaultJavaCompatibility(project.getExtensions().getByType(JavaPluginExtension.class));
 

@@ -16,6 +16,7 @@
 
 plugins {
     id("dev.gradleplugins.java-gradle-plugin")
+    dev.gradleplugins.experimental.ide
 }
 
 gradlePlugin {

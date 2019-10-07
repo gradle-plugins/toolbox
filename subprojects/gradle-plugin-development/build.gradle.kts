@@ -2,6 +2,7 @@ plugins {
     id("dev.gradleplugins.java-gradle-plugin")
     dev.gradleplugins.experimental.`shaded-artifact`
     `maven-publish`
+    dev.gradleplugins.experimental.ide
 }
 
 // Supported by the development plugins
