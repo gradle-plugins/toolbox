@@ -1,0 +1,27 @@
+= Gradle TestKit Fixtures
+
+These are fixtures for accelerating your Gradle plugin development.
+These fixtures are mostly extracted from https://github.com/gradle/gradle[Gradle code base].
+The main goal is to extract what is required for the all plugin authors.
+
+== How to use?
+
+Add the repository to your build script:
+
+```
+repositories {
+    maven {
+        url = uri("https://dl.bintray.com/gradle-plugins/maven")
+    }
+}
+```
+
+Add the dependency to your functional tests:
+
+```
+dependencies {
+    // See https://bintray.com/gradle-plugins/maven/testkit-fixtures for the latest version
+    functionalTestImplementation("dev.gradleplugins:gradle-testkit-fixtures:0.0.21")
+}
+```
+
