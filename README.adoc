@@ -21,3 +21,24 @@ Some ideas on modeling that will need to take place at some point are licensing,
 The other aspect to contribute is improving the TestKit fixtures.
 We are done rewriting the same piece of boilerplate code for testing plugins and tasks.
 Let's go wild and move all the goodies in the same place.
+
+== Roadmap
+
+=== Stable
+
+At the moment, the project is mostly aiming toward a stable version for developing plugins with 5.6.2 and up.
+Because of the opinion of the plugins, all built plugins will only work for Java 8+ and 5.6.2+.
+Those will be changed once we reach a stable version.
+
+There are still issues with the `dev.gradleplugins.kotlin-gradle-plugin` that prevent it from being useful.
+This needs to be addressed before moving forward.
+The plugins for Java and Groovy are mostly stable.
+
+There is a lot of test coverage missing in the `gradle-plugin-development` project and `gradle-testkit-fixture`.
+
+Finally, the basic documentation is missing.
+
+=== 1.0
+
+For 1.0 to arrive, we need full documentation and some configurability for at the very least the minimum Gradle version.
+
