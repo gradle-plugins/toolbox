@@ -125,6 +125,10 @@ tasks.register("release") {
     dependsOn("publishPlugins")
 }
 
+tasks.register("install") {
+    dependsOn("publishToMavenLocal")
+}
+
 shadedArtifact {
     packagesToRelocate.set(listOf("org.objectweb.asm", "org.objectweb.asm.util"))
 }

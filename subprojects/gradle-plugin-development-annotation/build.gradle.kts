@@ -42,3 +42,7 @@ afterEvaluate {
 tasks.register("release") {
     dependsOn("bintrayUpload")
 }
+
+tasks.register("install") {
+    dependsOn("publishToMavenLocal")
+}

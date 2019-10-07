@@ -1,3 +1,23 @@
+pluginManagement {
+    if (System.getProperty("dev.gradleplugins.useLocal") != null && (System.getProperty("dev.gradleplugins.useLocal") == "true" || System.getProperty("dev.gradleplugins.useLocal") == "")) {
+
+        repositories {
+            mavenLocal()
+            gradlePluginPortal()
+        }
+
+        val version = file("version.txt").readText()
+        resolutionStrategy {
+            eachPlugin {
+                if (requested.id.namespace == "dev.gradleplugins") {
+                    useModule("dev.gradleplugins:gradle-plugin-development:${version}")
+                }
+            }
+        }
+    }
+}
+
+
 rootProject.name = "toolbox"
 
 

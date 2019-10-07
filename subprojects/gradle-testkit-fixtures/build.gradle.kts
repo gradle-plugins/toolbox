@@ -51,4 +51,8 @@ tasks.register("release") {
     dependsOn("bintrayUpload")
 }
 
+tasks.register("install") {
+    dependsOn("publishToMavenLocal")
+}
+
 // TODO: fix all javadoc issues
