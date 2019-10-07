@@ -38,6 +38,9 @@ val stubConfiguration = configurations.create("stub") {
 dependencies {
     add(stubConfiguration.name, project(":gradle-plugin-development-stubs"))
 
+    // TODO: Figure out why this can't be removed...
+    implementation(gradleApi())
+
     implementation("com.gradle.publish:plugin-publish-plugin:0.10.1")
     functionalTestImplementation(project(":gradle-testkit-fixtures"))
     compileOnly(project(":gradle-plugin-development-annotation"))
