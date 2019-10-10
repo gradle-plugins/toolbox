@@ -5,6 +5,7 @@ import dev.gradleplugins.test.fixtures.file.TestFile;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public abstract class AbstractGradleExecuter implements GradleExecuter {
@@ -80,7 +81,31 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
     }
     //endregion
 
+    //region Process arguments
+    private final List<String> arguments = new ArrayList<>();
+
+    @Override
+    public GradleExecuter withArguments(String... args) {
+        return withArguments(Arrays.asList(args));
+    }
+
+    @Override
+    public GradleExecuter withArguments(List<String> args) {
+        arguments.clear();
+        arguments.addAll(args);
+        return this;
+    }
+
+    @Override
+    public GradleExecuter withArgument(String arg) {
+        arguments.add(arg);
+        return this;
+    }
+    //endregion
+
     protected void reset() {
+        arguments.clear();
+
         workingDirectory = null;
         userHomeDirectory = null;
         settingsFile = null;
@@ -109,6 +134,8 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
         if (settingsFile == null) {
             ensureSettingsFileAvailable();
         }
+
+        allArguments.addAll(arguments);
 
         return allArguments;
     }

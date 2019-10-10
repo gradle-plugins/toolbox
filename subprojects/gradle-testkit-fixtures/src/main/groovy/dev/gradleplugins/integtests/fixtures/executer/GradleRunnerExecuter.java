@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
 
 public class GradleRunnerExecuter extends AbstractGradleExecuter {
     private final List<String> tasks = new ArrayList<>();
-    private final List<String> arguments = new ArrayList<>();
     private final List<Consumer<? super GradleExecuter>> beforeExecute = new ArrayList<>();
     private final List<Consumer<? super GradleExecuter>> afterExecute = new ArrayList<>();
     private boolean debuggerAttached = false;
@@ -66,24 +65,6 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
     @Override
     public GradleExecuter withTasks(List<String> tasks) {
         this.tasks.addAll(tasks);
-        return this;
-    }
-
-    @Override
-    public GradleExecuter withArguments(String... args) {
-        return withArguments(Arrays.asList(args));
-    }
-
-    @Override
-    public GradleExecuter withArguments(List<String> args) {
-        arguments.clear();
-        arguments.addAll(args);
-        return this;
-    }
-
-    @Override
-    public GradleExecuter withArgument(String arg) {
-        arguments.add(arg);
         return this;
     }
 
@@ -136,7 +117,6 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
     protected void reset() {
         super.reset();
         tasks.clear();
-        arguments.clear();
         debuggerAttached = false;
         gradleVersion = null;
         projectDirectory = null;
@@ -172,7 +152,6 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
             allArguments.add(projectDirectory.getAbsolutePath());
         }
 
-        allArguments.addAll(arguments);
         allArguments.addAll(tasks);
 
         runner.withArguments(allArguments);
