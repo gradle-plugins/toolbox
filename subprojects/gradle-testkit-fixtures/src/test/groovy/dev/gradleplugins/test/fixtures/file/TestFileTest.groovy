@@ -60,7 +60,24 @@ abstract class AbstractTestFileTest extends AbstractTestFileSpec {
 
         then:
         def error = thrown(AssertionError)
-        error.message == "${nonExistingFile.absoluteFile} does not exist"
+        error.message == "${nonExistingFile.absolutePath} does not exist"
+    }
+
+    def "can assert the non existance of a file"() {
+        when:
+        def existingFile = getExistingFileUnderTest()
+        of(existingFile).assertDoesNotExist()
+
+        then:
+        def error = thrown(AssertionError)
+        error.message == "${existingFile.absolutePath} should not exist"
+
+        when:
+        def nonExistingFile = getNonExistingFileUnderTest()
+        of(nonExistingFile).assertDoesNotExist()
+
+        then:
+        noExceptionThrown()
     }
 }
 

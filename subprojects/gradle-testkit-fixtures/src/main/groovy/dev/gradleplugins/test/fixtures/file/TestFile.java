@@ -34,8 +34,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class TestFile extends File {
     public TestFile(File file, Object... path) {
@@ -61,6 +60,11 @@ public class TestFile extends File {
 
     public TestFile assertExists() {
         assertTrue(String.format("%s does not exist", this), exists());
+        return this;
+    }
+
+    public TestFile assertDoesNotExist() {
+        assertFalse(String.format("%s should not exist", this), exists());
         return this;
     }
 
