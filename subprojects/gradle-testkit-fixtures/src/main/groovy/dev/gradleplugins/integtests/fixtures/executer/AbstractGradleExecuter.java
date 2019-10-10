@@ -40,16 +40,32 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
     }
     //endregion
 
+    //region Stacktrace (--stack-trace)
+    private boolean showStacktrace = true;
+    @Override
+    public GradleExecuter withStacktraceDisabled() {
+        showStacktrace = false;
+        return this;
+    }
+    //endregion
+
     protected void reset() {
         workingDirectory = null;
         userHomeDirectory = null;
+        showStacktrace = true;
     }
 
     protected List<String> getAllArguments() {
         List<String> allArguments = new ArrayList<>();
 
+        // JVM arguments
         if (userHomeDirectory != null) {
             allArguments.add("-Duser.home=" + userHomeDirectory.getAbsolutePath());
+        }
+
+        // Gradle arguments
+        if (showStacktrace) {
+            allArguments.add("--stacktrace");
         }
 
         return allArguments;

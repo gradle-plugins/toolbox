@@ -37,7 +37,6 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
     private final List<Consumer<? super GradleExecuter>> beforeExecute = new ArrayList<>();
     private final List<Consumer<? super GradleExecuter>> afterExecute = new ArrayList<>();
     private boolean debuggerAttached = false;
-    private boolean showStacktrace = true;
 
     private File settingsFile = null;
     private String gradleVersion = null;
@@ -102,12 +101,6 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
     }
 
     @Override
-    public GradleExecuter withStacktraceDisabled() {
-        showStacktrace = false;
-        return this;
-    }
-
-    @Override
     public GradleExecuter withPluginClasspath() {
         usePluginClasspath = true;
         return this;
@@ -153,7 +146,6 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
         tasks.clear();
         arguments.clear();
         debuggerAttached = false;
-        showStacktrace = true;
         settingsFile = null;
         gradleVersion = null;
         projectDirectory = null;
@@ -193,9 +185,6 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
             allArguments.add(projectDirectory.getAbsolutePath());
         }
 
-        if (showStacktrace) {
-            allArguments.add("--stacktrace");
-        }
         allArguments.addAll(arguments);
         allArguments.addAll(tasks);
 
