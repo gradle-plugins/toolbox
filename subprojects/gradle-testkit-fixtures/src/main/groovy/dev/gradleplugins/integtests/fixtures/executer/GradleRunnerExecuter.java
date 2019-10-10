@@ -31,7 +31,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class GradleRunnerExecuter extends AbstractGradleExecuter {
-    private final List<String> tasks = new ArrayList<>();
     private final List<Consumer<? super GradleExecuter>> beforeExecute = new ArrayList<>();
     private final List<Consumer<? super GradleExecuter>> afterExecute = new ArrayList<>();
     private boolean debuggerAttached = false;
@@ -47,17 +46,6 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
     @Override
     public GradleExecuter withDebuggerAttached() {
         debuggerAttached = true;
-        return this;
-    }
-
-    @Override
-    public GradleExecuter withTasks(String... tasks) {
-        return withTasks(Arrays.asList(tasks));
-    }
-
-    @Override
-    public GradleExecuter withTasks(List<String> tasks) {
-        this.tasks.addAll(tasks);
         return this;
     }
 
@@ -104,7 +92,6 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
     @Override
     protected void reset() {
         super.reset();
-        tasks.clear();
         debuggerAttached = false;
         gradleVersion = null;
         usePluginClasspath = false;
@@ -134,8 +121,6 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
         }
 
         List<String> allArguments = new ArrayList<>(getAllArguments());
-
-        allArguments.addAll(tasks);
 
         runner.withArguments(allArguments);
 

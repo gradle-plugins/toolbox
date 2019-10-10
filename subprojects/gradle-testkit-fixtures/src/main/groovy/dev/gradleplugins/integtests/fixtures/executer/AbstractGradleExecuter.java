@@ -120,8 +120,24 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
     }
     //endregion
 
+    //region Gradle tasks configuration
+    private final List<String> tasks = new ArrayList<>();
+
+    @Override
+    public GradleExecuter withTasks(String... tasks) {
+        return withTasks(Arrays.asList(tasks));
+    }
+
+    @Override
+    public GradleExecuter withTasks(List<String> tasks) {
+        this.tasks.addAll(tasks);
+        return this;
+    }
+    //endregion
+
     protected void reset() {
         arguments.clear();
+        tasks.clear();
 
         workingDirectory = null;
         userHomeDirectory = null;
@@ -158,6 +174,7 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
         }
 
         allArguments.addAll(arguments);
+        allArguments.addAll(tasks);
 
         return allArguments;
     }
