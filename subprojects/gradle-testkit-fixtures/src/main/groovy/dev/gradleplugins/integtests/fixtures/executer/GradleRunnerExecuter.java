@@ -43,7 +43,6 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
     private String gradleVersion = null;
     private File projectDirectory = null;
     private boolean usePluginClasspath = false;
-    private File userHomeDirectory = null;
     private Map<String, Object> environment = null;
 
     public GradleRunnerExecuter(TestDirectoryProvider testDirectoryProvider) {
@@ -115,12 +114,6 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
     }
 
     @Override
-    public GradleExecuter withUserHomeDirectory(File userHomeDirectory) {
-        this.userHomeDirectory = userHomeDirectory;
-        return this;
-    }
-
-    @Override
     public GradleExecuter withEnvironmentVars(Map<String, ?> environment) {
         this.environment = new HashMap<>(environment);
         return this;
@@ -165,7 +158,6 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
         gradleVersion = null;
         projectDirectory = null;
         usePluginClasspath = false;
-        userHomeDirectory = null;
         environment = null;
     }
 
@@ -191,10 +183,7 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
             runner.withEnvironment(environment.entrySet().stream().map(it -> new AbstractMap.SimpleImmutableEntry<String, String>(it.getKey(), it.getValue().toString())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
         }
 
-        List<String> allArguments = new ArrayList<>();
-        if (userHomeDirectory != null) {
-            allArguments.add("-Duser.home=" + userHomeDirectory.getAbsolutePath());
-        }
+        List<String> allArguments = new ArrayList<>(getAllArguments());
         if (settingsFile != null) {
             allArguments.add("--settings-file");
             allArguments.add(settingsFile.getAbsolutePath());

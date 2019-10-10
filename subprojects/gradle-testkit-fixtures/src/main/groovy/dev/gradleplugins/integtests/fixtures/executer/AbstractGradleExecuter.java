@@ -3,10 +3,11 @@ package dev.gradleplugins.integtests.fixtures.executer;
 import dev.gradleplugins.test.fixtures.file.TestDirectoryProvider;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class AbstractGradleExecuter implements GradleExecuter {
     private final TestDirectoryProvider testDirectoryProvider;
-    private File workingDirectory = null;
 
     public AbstractGradleExecuter(TestDirectoryProvider testDirectoryProvider) {
         this.testDirectoryProvider = testDirectoryProvider;
@@ -18,6 +19,7 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
     }
 
     //region Working directory
+    private File workingDirectory = null;
     public File getWorkingDirectory() {
         return workingDirectory == null ? getTestDirectoryProvider().getTestDirectory() : workingDirectory;
     }
@@ -29,7 +31,27 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
     }
     //endregion
 
+    //region User home directory (java.home)
+    private File userHomeDirectory = null;
+    @Override
+    public GradleExecuter withUserHomeDirectory(File userHomeDirectory) {
+        this.userHomeDirectory = userHomeDirectory;
+        return this;
+    }
+    //endregion
+
     protected void reset() {
         workingDirectory = null;
+        userHomeDirectory = null;
+    }
+
+    protected List<String> getAllArguments() {
+        List<String> allArguments = new ArrayList<>();
+
+        if (userHomeDirectory != null) {
+            allArguments.add("-Duser.home=" + userHomeDirectory.getAbsolutePath());
+        }
+
+        return allArguments;
     }
 }
