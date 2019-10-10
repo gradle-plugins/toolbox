@@ -81,6 +81,13 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
     }
     //endregion
 
+    //region Flag `--build-cache` configuration
+    @Override
+    public GradleExecuter withBuildCacheEnabled() {
+        return withArgument("--build-cache");
+    }
+    //endregion
+
     //region Process arguments configuration
     private final List<String> arguments = new ArrayList<>();
 

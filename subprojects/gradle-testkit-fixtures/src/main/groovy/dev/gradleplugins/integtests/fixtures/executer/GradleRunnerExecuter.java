@@ -69,11 +69,6 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
     }
 
     @Override
-    public GradleExecuter withBuildCacheEnabled() {
-        return withArgument("--build-cache");
-    }
-
-    @Override
     public GradleExecuter withPluginClasspath() {
         usePluginClasspath = true;
         return this;
