@@ -38,7 +38,7 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
     private final List<Consumer<? super GradleExecuter>> afterExecute = new ArrayList<>();
     private boolean debuggerAttached = false;
     private boolean showStacktrace = true;
-    private File workingDirectory = null;
+
     private File settingsFile = null;
     private String gradleVersion = null;
     private File projectDirectory = null;
@@ -48,16 +48,6 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
 
     public GradleRunnerExecuter(TestDirectoryProvider testDirectoryProvider) {
         super(testDirectoryProvider);
-    }
-
-    public File getWorkingDirectory() {
-        return workingDirectory == null ? getTestDirectoryProvider().getTestDirectory() : workingDirectory;
-    }
-
-    @Override
-    public GradleExecuter inDirectory(File directory) {
-        workingDirectory = directory;
-        return this;
     }
 
     @Override
@@ -164,12 +154,13 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
         reset();
     }
 
-    private void reset() {
+    @Override
+    protected void reset() {
+        super.reset();
         tasks.clear();
         arguments.clear();
         debuggerAttached = false;
         showStacktrace = true;
-        workingDirectory = null;
         settingsFile = null;
         gradleVersion = null;
         projectDirectory = null;
