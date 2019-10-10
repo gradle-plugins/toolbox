@@ -156,13 +156,13 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
         }
 
         // Gradle arguments
-        if (settingsFile != null) {
-            allArguments.add("--settings-file");
-            allArguments.add(settingsFile.getAbsolutePath());
-        }
         if (projectDirectory != null) {
             allArguments.add("--project-dir");
             allArguments.add(projectDirectory.getAbsolutePath());
+        }
+        if (settingsFile != null) {
+            allArguments.add("--settings-file");
+            allArguments.add(settingsFile.getAbsolutePath());
         }
         if (showStacktrace) {
             allArguments.add("--stacktrace");
