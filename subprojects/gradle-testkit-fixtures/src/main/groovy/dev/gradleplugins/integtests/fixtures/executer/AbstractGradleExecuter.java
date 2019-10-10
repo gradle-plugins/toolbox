@@ -2,11 +2,13 @@ package dev.gradleplugins.integtests.fixtures.executer;
 
 import dev.gradleplugins.test.fixtures.file.TestDirectoryProvider;
 import dev.gradleplugins.test.fixtures.file.TestFile;
+import org.gradle.testkit.runner.BuildResult;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 public abstract class AbstractGradleExecuter implements GradleExecuter {
     private final TestDirectoryProvider testDirectoryProvider;
@@ -134,6 +136,64 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
         return this;
     }
     //endregion
+
+    //region Before execute actions
+    private final List<Consumer<? super GradleExecuter>> beforeExecute = new ArrayList<>();
+
+    @Override
+    public void beforeExecute(Consumer<? super GradleExecuter> action) {
+        beforeExecute.add(action);
+    }
+
+    private void fireBeforeExecute() {
+        beforeExecute.forEach(it -> it.accept(this));
+    }
+    //endregion
+
+    //region After execute actions
+    private final List<Consumer<? super GradleExecuter>> afterExecute = new ArrayList<>();
+
+    @Override
+    public void afterExecute(Consumer<? super GradleExecuter> action) {
+        afterExecute.add(action);
+    }
+
+    private void fireAfterExecute() {
+        afterExecute.forEach(it -> it.accept(this));
+    }
+    //endregion
+
+    @Override
+    public ExecutionResult run() {
+        fireBeforeExecute();
+        try {
+            ExecutionResult result = doRun();
+            fireAfterExecute();
+            return result;
+        } finally {
+            finished();
+        }
+    }
+
+    protected abstract ExecutionResult doRun();
+
+    @Override
+    public ExecutionFailure runWithFailure() {
+        fireBeforeExecute();
+        try {
+            ExecutionFailure result = doRunWithFailure();
+            fireAfterExecute();
+            return result;
+        } finally {
+            finished();
+        }
+    }
+
+    protected abstract ExecutionFailure doRunWithFailure();
+
+    private void finished() {
+        reset();
+    }
 
     protected void reset() {
         arguments.clear();

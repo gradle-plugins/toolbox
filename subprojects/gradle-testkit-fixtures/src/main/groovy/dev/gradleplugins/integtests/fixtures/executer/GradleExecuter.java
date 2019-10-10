@@ -109,14 +109,14 @@ public interface GradleExecuter {
      *
      * @return The result.
      */
-    BuildResult run();
+    ExecutionResult run();
 
     /**
      * Executes the requested build, asserting that the build fails. Resets the configuration of this executer.
      *
      * @return The result.
      */
-    BuildResult runWithFailure();
+    ExecutionFailure runWithFailure();
 
     /**
      * Adds an action to be called immediately before execution, to allow extra configuration to be injected.

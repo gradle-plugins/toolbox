@@ -18,21 +18,22 @@ package dev.gradleplugins.integtests.fixtures.executer;
 
 import dev.gradleplugins.test.fixtures.file.TestDirectoryProvider;
 import org.gradle.testkit.runner.BuildResult;
+import org.gradle.testkit.runner.BuildTask;
 import org.gradle.testkit.runner.GradleRunner;
+import org.gradle.testkit.runner.TaskOutcome;
 
-import java.io.File;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 public class GradleRunnerExecuter extends AbstractGradleExecuter {
-    private final List<Consumer<? super GradleExecuter>> beforeExecute = new ArrayList<>();
-    private final List<Consumer<? super GradleExecuter>> afterExecute = new ArrayList<>();
     private boolean debuggerAttached = false;
 
     private String gradleVersion = null;
@@ -62,31 +63,13 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
     }
 
     @Override
-    public BuildResult run() {
-        fireBeforeExecute();
-        try {
-            BuildResult result = configureExecuter().build();
-            fireAfterExecute();
-            return result;
-        } finally {
-            finished();
-        }
+    public ExecutionResult doRun() {
+        return new GradleRunnerExecutionResult(configureExecuter().build());
     }
 
     @Override
-    public BuildResult runWithFailure() {
-        fireBeforeExecute();
-        try {
-            BuildResult result = configureExecuter().buildAndFail();
-            fireAfterExecute();
-            return result;
-        } finally {
-            finished();
-        }
-    }
-
-    private void finished() {
-        reset();
+    public ExecutionFailure doRunWithFailure() {
+        return new GradleRunnerExecutionFailure(configureExecuter().buildAndFail());
     }
 
     @Override
@@ -120,33 +103,128 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
             runner.withEnvironment(environment.entrySet().stream().map(it -> new AbstractMap.SimpleImmutableEntry<String, String>(it.getKey(), it.getValue().toString())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
         }
 
-        List<String> allArguments = new ArrayList<>(getAllArguments());
-
-        runner.withArguments(allArguments);
+        runner.withArguments(getAllArguments());
 
         return runner;
-    }
-
-    @Override
-    public void beforeExecute(Consumer<? super GradleExecuter> action) {
-        beforeExecute.add(action);
-    }
-
-    private void fireBeforeExecute() {
-        beforeExecute.forEach(it -> it.accept(this));
-    }
-
-    @Override
-    public void afterExecute(Consumer<? super GradleExecuter> action) {
-        afterExecute.add(action);
-    }
-
-    private void fireAfterExecute() {
-        afterExecute.forEach(it -> it.accept(this));
     }
 
     // TODO: This is not how we want to solve this use case!
     public void usingGradleVersion(String gradleVersion) {
         this.gradleVersion = gradleVersion;
+    }
+
+    private static class GradleRunnerExecutionResult implements ExecutionResult {
+        private final BuildResult result;
+
+        GradleRunnerExecutionResult(BuildResult result) {
+            this.result = result;
+        }
+
+        private static List<String> flattenTaskPaths(Object[] taskPaths) {
+            List<String> result = new ArrayList<>();
+            flattenTaskPaths(Arrays.asList(taskPaths), result);
+            return result;
+        }
+
+        private static void flattenTaskPaths(Collection<? super Object> taskPaths, List<String> flattenTaskPaths) {
+            taskPaths.stream().forEach(it -> {
+                if (it instanceof Collection) {
+                    flattenTaskPaths((Collection<Object>)it, flattenTaskPaths);
+                } else {
+                    flattenTaskPaths.add(it.toString());
+                }
+            });
+        }
+
+        @Override
+        public String getOutput() {
+            return result.getOutput();
+        }
+
+        @Override
+        public ExecutionResult assertTasksExecuted(Object... taskPaths) {
+            Set<String> expectedTasks = new TreeSet<String>(flattenTaskPaths(taskPaths));
+            Set<String> actualTasks = findExecutedTasksInOrderStarted();
+            if (!expectedTasks.equals(actualTasks)) {
+                failOnDifferentSets("Build output does not contain the expected tasks.", expectedTasks, actualTasks);
+            }
+            return this;
+        }
+
+        @Override
+        public ExecutionResult assertTasksExecutedAndNotSkipped(Object... taskPaths) {
+            assertTasksExecuted(taskPaths);
+            return assertTasksNotSkipped(taskPaths);
+        }
+
+        @Override
+        public ExecutionResult assertTasksNotSkipped(Object... taskPaths) {
+            Set<String> expectedTasks = new TreeSet<String>(flattenTaskPaths(taskPaths));
+            Set<String> tasks = new TreeSet<String>(getNotSkippedTasks());
+            if (!expectedTasks.equals(tasks)) {
+                failOnDifferentSets("Build output does not contain the expected non skipped tasks.", expectedTasks, tasks);
+            }
+            return this;
+        }
+
+        @Override
+        public ExecutionResult assertTasksSkipped(Object... taskPaths) {
+            Set<String> expectedTasks = new TreeSet<String>(flattenTaskPaths(taskPaths));
+            Set<String> skippedTasks = getSkippedTasks();
+            if (!expectedTasks.equals(skippedTasks)) {
+                failOnDifferentSets("Build output does not contain the expected skipped tasks.", expectedTasks, skippedTasks);
+            }
+            return this;
+        }
+
+        private void failOnDifferentSets(String message, Set<String> expected, Set<String> actual) {
+            failureOnUnexpectedOutput(String.format("%s%nExpected: %s%nActual: %s", message, expected, actual));
+        }
+
+        private void failureOnUnexpectedOutput(String message) {
+            throw new AssertionError(unexpectedOutputMessage(message));
+        }
+
+        private String unexpectedOutputMessage(String message) {
+            return String.format("%s%nOutput:%n=======%n%s%nError:%n======%n%s", message, getOutput(), "Using TestKit Runner which mixin both error output");
+        }
+
+        @Override
+        public ExecutionResult assertOutputContains(String expectedOutput) {
+            assert result.getOutput().contains(expectedOutput.trim());
+            return this;
+        }
+
+        @Override
+        public ExecutionResult assertHasPostBuildOutput(String expectedOutput) {
+            return this;
+        }
+
+        private static final List<TaskOutcome> SKIPPED_TASK_OUTCOMES = Arrays.asList(TaskOutcome.FROM_CACHE, TaskOutcome.NO_SOURCE, TaskOutcome.SKIPPED, TaskOutcome.UP_TO_DATE);
+
+        private Set<String> findExecutedTasksInOrderStarted() {
+            return result.getTasks().stream().map(BuildTask::getPath).collect(Collectors.toCollection(TreeSet::new));
+        }
+
+        private Set<String> getSkippedTasks() {
+            return result.getTasks().stream().filter(it -> SKIPPED_TASK_OUTCOMES.contains(it.getOutcome())).map(BuildTask::getPath).collect(Collectors.toCollection(TreeSet::new));
+        }
+
+        private List<String> getExecutedTasks() {
+            return new ArrayList<>(findExecutedTasksInOrderStarted());
+        }
+
+        private Collection<String> getNotSkippedTasks() {
+            Set<String> all = new TreeSet<String>(getExecutedTasks());
+            Set<String> skipped = getSkippedTasks();
+            all.removeAll(skipped);
+            return all;
+        }
+    }
+
+    private static class GradleRunnerExecutionFailure extends GradleRunnerExecutionResult implements ExecutionFailure {
+        GradleRunnerExecutionFailure(BuildResult result) {
+            super(result);
+        }
     }
 }

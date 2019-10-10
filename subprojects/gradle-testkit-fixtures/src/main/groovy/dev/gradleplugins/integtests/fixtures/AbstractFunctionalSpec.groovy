@@ -16,6 +16,8 @@
 
 package dev.gradleplugins.integtests.fixtures
 
+import dev.gradleplugins.integtests.fixtures.executer.ExecutionFailure
+import dev.gradleplugins.integtests.fixtures.executer.ExecutionResult
 import dev.gradleplugins.integtests.fixtures.executer.GradleExecuter
 import dev.gradleplugins.integtests.fixtures.executer.GradleRunnerExecuter
 import dev.gradleplugins.test.fixtures.file.CleanupTestDirectory
@@ -35,7 +37,8 @@ class AbstractFunctionalSpec extends Specification {
     final TestNameTestDirectoryProvider temporaryFolder = new TestNameTestDirectoryProvider()
     final M2Installation m2 = new M2Installation(temporaryFolder)
     GradleExecuter executer = createExecuter()
-    BuildResult result
+    ExecutionResult result
+    ExecutionFailure failure
     private boolean useKotlinDsl = false
 
     def setup() {
@@ -64,28 +67,26 @@ class AbstractFunctionalSpec extends Specification {
         return testDirectory.file(getSettingsFileName())
     }
 
-    protected BuildResult succeeds(String... tasks) {
+    protected ExecutionResult succeeds(String... tasks) {
         return (result = executer.withTasks(tasks).run())
     }
 
-    protected BuildResult fails(String... tasks) {
-        return (result = executer.withTasks(tasks).runWithFailure())
+    protected ExecutionFailure fails(String... tasks) {
+        return (result = failure = executer.withTasks(tasks).runWithFailure())
     }
 
-    protected BuildResult run(String... arguments) {
+    protected ExecutionResult run(String... arguments) {
         return succeeds(arguments);
     }
 
     void assertTasksExecutedAndNotSkipped(String... tasks) {
-        tasks.each {
-            assert result.task(it).outcome in [TaskOutcome.SUCCESS]
-        }
+        assertHasResult()
+        result.assertTasksExecutedAndNotSkipped(tasks)
     }
 
     void assertTasksSkipped(String... tasks) {
-        tasks.each {
-            assert result.task(it).outcome in [TaskOutcome.FROM_CACHE, TaskOutcome.NO_SOURCE, TaskOutcome.SKIPPED, TaskOutcome.UP_TO_DATE]
-        }
+        assertHasResult()
+        result.assertTasksSkipped(tasks)
     }
 
     protected TestFile file(String relativePath) {
@@ -112,11 +113,11 @@ class AbstractFunctionalSpec extends Specification {
 
     boolean outputContains(String string) {
         assertHasResult()
-        return result.output.contains(string.trim())
+        result.assertOutputContains(string)
     }
 
     private void assertHasResult() {
-        assert result != null
+        assert result != null: "result is null, you haven't run succeeds(), fails() or run()"
     }
 
     protected static String configurePluginClasspathAsBuildScriptDependencies() {
