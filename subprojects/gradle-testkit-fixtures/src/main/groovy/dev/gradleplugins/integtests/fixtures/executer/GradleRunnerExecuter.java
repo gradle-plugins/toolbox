@@ -31,12 +31,11 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class GradleRunnerExecuter implements GradleExecuter {
+public class GradleRunnerExecuter extends AbstractGradleExecuter {
     private final List<String> tasks = new ArrayList<>();
     private final List<String> arguments = new ArrayList<>();
     private final List<Consumer<? super GradleExecuter>> beforeExecute = new ArrayList<>();
     private final List<Consumer<? super GradleExecuter>> afterExecute = new ArrayList<>();
-    private final TestDirectoryProvider testDirectoryProvider;
     private boolean debuggerAttached = false;
     private boolean showStacktrace = true;
     private File workingDirectory = null;
@@ -48,16 +47,11 @@ public class GradleRunnerExecuter implements GradleExecuter {
     private Map<String, Object> environment = null;
 
     public GradleRunnerExecuter(TestDirectoryProvider testDirectoryProvider) {
-        this.testDirectoryProvider = testDirectoryProvider;
+        super(testDirectoryProvider);
     }
 
     public File getWorkingDirectory() {
         return workingDirectory == null ? getTestDirectoryProvider().getTestDirectory() : workingDirectory;
-    }
-
-    @Override
-    public TestDirectoryProvider getTestDirectoryProvider() {
-        return testDirectoryProvider;
     }
 
     @Override
