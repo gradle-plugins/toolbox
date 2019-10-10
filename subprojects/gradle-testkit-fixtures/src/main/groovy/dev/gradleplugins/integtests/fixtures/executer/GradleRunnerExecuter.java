@@ -17,7 +17,6 @@
 package dev.gradleplugins.integtests.fixtures.executer;
 
 import dev.gradleplugins.test.fixtures.file.TestDirectoryProvider;
-import dev.gradleplugins.test.fixtures.file.TestFile;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 
@@ -38,7 +37,6 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
     private final List<Consumer<? super GradleExecuter>> afterExecute = new ArrayList<>();
     private boolean debuggerAttached = false;
 
-    private File settingsFile = null;
     private String gradleVersion = null;
     private File projectDirectory = null;
     private boolean usePluginClasspath = false;
@@ -46,12 +44,6 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
 
     public GradleRunnerExecuter(TestDirectoryProvider testDirectoryProvider) {
         super(testDirectoryProvider);
-    }
-
-    @Override
-    public GradleExecuter usingSettingsFile(File settingsFile) {
-        this.settingsFile = settingsFile;
-        return this;
     }
 
     @Override
@@ -146,7 +138,6 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
         tasks.clear();
         arguments.clear();
         debuggerAttached = false;
-        settingsFile = null;
         gradleVersion = null;
         projectDirectory = null;
         usePluginClasspath = false;
@@ -176,10 +167,6 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
         }
 
         List<String> allArguments = new ArrayList<>(getAllArguments());
-        if (settingsFile != null) {
-            allArguments.add("--settings-file");
-            allArguments.add(settingsFile.getAbsolutePath());
-        }
         if (projectDirectory != null) {
             allArguments.add("--project-dir");
             allArguments.add(projectDirectory.getAbsolutePath());
@@ -188,32 +175,9 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
         allArguments.addAll(arguments);
         allArguments.addAll(tasks);
 
-        if (settingsFile == null) {
-            ensureSettingsFileAvailable();
-        }
-
         runner.withArguments(allArguments);
 
         return runner;
-    }
-
-    private void ensureSettingsFileAvailable() {
-        TestFile workingDirectory = new TestFile(getWorkingDirectory());
-        TestFile dir = workingDirectory;
-        while (dir != null && getTestDirectoryProvider().getTestDirectory().isSelfOrDescendent(dir)) {
-            if (hasSettingsFile(dir)) {
-                return;
-            }
-            dir = dir.getParentFile();
-        }
-        workingDirectory.createFile("settings.gradle");
-    }
-
-    private boolean hasSettingsFile(TestFile dir) {
-        if (dir.isDirectory()) {
-            return dir.file("settings.gradle").isFile() || dir.file("settings.gradle.kts").isFile();
-        }
-        return false;
     }
 
     @Override

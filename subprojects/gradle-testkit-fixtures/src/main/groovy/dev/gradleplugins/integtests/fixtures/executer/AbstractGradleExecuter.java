@@ -1,6 +1,7 @@
 package dev.gradleplugins.integtests.fixtures.executer;
 
 import dev.gradleplugins.test.fixtures.file.TestDirectoryProvider;
+import dev.gradleplugins.test.fixtures.file.TestFile;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -49,9 +50,41 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
     }
     //endregion
 
+    //region Settings file (--settings-file)
+    private File settingsFile = null;
+
+    @Override
+    public GradleExecuter usingSettingsFile(File settingsFile) {
+        this.settingsFile = settingsFile;
+        return this;
+    }
+
+    // TODO: Maybe we should remove dependency on TestFile within this implementation
+    private void ensureSettingsFileAvailable() {
+        TestFile workingDirectory = new TestFile(getWorkingDirectory());
+        TestFile directory = workingDirectory;
+        while (directory != null && getTestDirectoryProvider().getTestDirectory().isSelfOrDescendent(directory)) {
+            if (hasSettingsFile(directory)) {
+                return;
+            }
+            directory = directory.getParentFile();
+        }
+        workingDirectory.createFile("settings.gradle");
+    }
+
+    private boolean hasSettingsFile(TestFile directory) {
+        if (directory.isDirectory()) {
+            return directory.file("settings.gradle").isFile() || directory.file("settings.gradle.kts").isFile();
+        }
+        return false;
+    }
+    //endregion
+
     protected void reset() {
         workingDirectory = null;
         userHomeDirectory = null;
+        settingsFile = null;
+
         showStacktrace = true;
     }
 
@@ -64,8 +97,17 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
         }
 
         // Gradle arguments
+        if (settingsFile != null) {
+            allArguments.add("--settings-file");
+            allArguments.add(settingsFile.getAbsolutePath());
+        }
         if (showStacktrace) {
             allArguments.add("--stacktrace");
+        }
+
+        // Deal with missing settings.gradle[.kts] file
+        if (settingsFile == null) {
+            ensureSettingsFileAvailable();
         }
 
         return allArguments;
