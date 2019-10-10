@@ -20,7 +20,7 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
         return testDirectoryProvider;
     }
 
-    //region Working directory
+    //region Working directory configuration
     private File workingDirectory = null;
     public File getWorkingDirectory() {
         return workingDirectory == null ? getTestDirectoryProvider().getTestDirectory() : workingDirectory;
@@ -33,7 +33,7 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
     }
     //endregion
 
-    //region User home directory (java.home)
+    //region Flag `-Djava.home` configuration
     private File userHomeDirectory = null;
     @Override
     public GradleExecuter withUserHomeDirectory(File userHomeDirectory) {
@@ -42,7 +42,7 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
     }
     //endregion
 
-    //region Stacktrace (--stack-trace)
+    //region Flag `--stack-trace` configuration
     private boolean showStacktrace = true;
     @Override
     public GradleExecuter withStacktraceDisabled() {
@@ -51,7 +51,7 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
     }
     //endregion
 
-    //region Settings file (--settings-file)
+    //region Flag `--settings-file` configuration
     private File settingsFile = null;
 
     @Override
@@ -81,7 +81,7 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
     }
     //endregion
 
-    //region Process arguments
+    //region Process arguments configuration
     private final List<String> arguments = new ArrayList<>();
 
     @Override
