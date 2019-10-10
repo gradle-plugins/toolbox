@@ -37,18 +37,11 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
     private boolean debuggerAttached = false;
 
     private String gradleVersion = null;
-    private File projectDirectory = null;
     private boolean usePluginClasspath = false;
     private Map<String, Object> environment = null;
 
     public GradleRunnerExecuter(TestDirectoryProvider testDirectoryProvider) {
         super(testDirectoryProvider);
-    }
-
-    @Override
-    public GradleExecuter usingProjectDirectory(File projectDirectory) {
-        this.projectDirectory = projectDirectory;
-        return this;
     }
 
     @Override
@@ -114,7 +107,6 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
         tasks.clear();
         debuggerAttached = false;
         gradleVersion = null;
-        projectDirectory = null;
         usePluginClasspath = false;
         environment = null;
     }
@@ -142,10 +134,6 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
         }
 
         List<String> allArguments = new ArrayList<>(getAllArguments());
-        if (projectDirectory != null) {
-            allArguments.add("--project-dir");
-            allArguments.add(projectDirectory.getAbsolutePath());
-        }
 
         allArguments.addAll(tasks);
 

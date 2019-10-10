@@ -81,6 +81,16 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
     }
     //endregion
 
+    //region Flag `--project-dir` configuration
+    private File projectDirectory = null;
+
+    @Override
+    public GradleExecuter usingProjectDirectory(File projectDirectory) {
+        this.projectDirectory = projectDirectory;
+        return this;
+    }
+    //endregion
+
     //region Flag `--build-cache` configuration
     @Override
     public GradleExecuter withBuildCacheEnabled() {
@@ -116,6 +126,7 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
         workingDirectory = null;
         userHomeDirectory = null;
         settingsFile = null;
+        projectDirectory = null;
 
         showStacktrace = true;
     }
@@ -132,6 +143,10 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
         if (settingsFile != null) {
             allArguments.add("--settings-file");
             allArguments.add(settingsFile.getAbsolutePath());
+        }
+        if (projectDirectory != null) {
+            allArguments.add("--project-dir");
+            allArguments.add(projectDirectory.getAbsolutePath());
         }
         if (showStacktrace) {
             allArguments.add("--stacktrace");
