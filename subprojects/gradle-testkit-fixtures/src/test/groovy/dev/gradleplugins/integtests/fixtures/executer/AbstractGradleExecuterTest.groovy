@@ -41,6 +41,7 @@ abstract class AbstractGradleExecuterTest extends Specification {
     }
 
     def "can change working directory"() {
+        // TODO: We should probably use System.getProperty("user.dir") but TestKit seems to be embedded
         String settingsFileContent = '''println("The executer is using '${settingsDir}' as its working directory")'''
         file('settings.gradle') << settingsFileContent
         def workingDirectory = file('other-directory')
@@ -53,7 +54,20 @@ abstract class AbstractGradleExecuterTest extends Specification {
         result.output.contains("The executer is using '${workingDirectory}' as its working directory")
     }
 
-    // TODO: Can change project directory while keeping working directory
+    def "can change project directory while keeping working directory"() {
+        // TODO: We should probably also check System.getProperty("user.dir") but TestKit seems to be embedded
+        String settingsFileContent = '''println("The executer is using '${settingsDir}' as its project directory")'''
+        file('settings.gradle') << settingsFileContent
+        def projectDirectory = file('other-directory')
+        projectDirectory.file('settings.gradle') << settingsFileContent
+
+        when:
+        def result = executerUnderTest.usingProjectDirectory(projectDirectory).run()
+
+        then:
+        result.output.contains("The executer is using '${projectDirectory}' as its project directory")
+    }
+
     // TODO: Can relocate build.gradle
     // TODO: Can have before execute action
     // TODO: Can have after execute action
