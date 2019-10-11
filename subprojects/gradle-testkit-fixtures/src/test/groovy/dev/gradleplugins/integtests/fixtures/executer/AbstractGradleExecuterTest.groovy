@@ -2,6 +2,8 @@ package dev.gradleplugins.integtests.fixtures.executer
 
 import dev.gradleplugins.test.fixtures.file.TestFile
 import dev.gradleplugins.test.fixtures.file.TestNameTestDirectoryProvider
+import org.gradle.testkit.runner.UnexpectedBuildFailure
+import org.gradle.testkit.runner.UnexpectedBuildSuccess
 import org.junit.Rule
 import spock.lang.Specification
 
@@ -81,10 +83,59 @@ abstract class AbstractGradleExecuterTest extends Specification {
         result.output.contains("The executer is using '${buildFile}' as its build file")
     }
 
+    def "can assert successful execution"() {
+        file('build.gradle') << '''
+            if (System.properties.containsKey('throw')) {
+                throw new GradleException("build failing")
+            } else if (System.properties.containsKey('nothrow')) {
+                println('build succeeding')
+            } else {
+                println('something is wrong')
+            }
+        '''
+
+        when:
+        def resultNoThrow = executerUnderTest.withArguments('-Dnothrow').run()
+
+        then:
+        noExceptionThrown()
+        resultNoThrow.output.contains('build succeeding')
+
+        when:
+        executerUnderTest.withArguments('-Dthrow').run()
+
+        then:
+        def error = thrown(UnexpectedBuildFailure)
+        error.message.contains('build failing')
+    }
+
+    def "can assert unsuccessful execution"() {
+        file('build.gradle') << '''
+            if (System.properties.containsKey('throw')) {
+                throw new GradleException("build failing")
+            } else if (System.properties.containsKey('nothrow')) {
+                println('build succeeding')
+            } else {
+                println('something is wrong')
+            }
+        '''
+
+        when:
+        def resultThrow = executerUnderTest.withArguments('-Dthrow').runWithFailure()
+
+        then:
+        noExceptionThrown()
+        resultThrow.output.contains('build failing')
+
+        when:
+        executerUnderTest.withArguments('-Dnothrow').runWithFailure()
+
+        then:
+        def error = thrown(UnexpectedBuildSuccess)
+        error.message.contains('build succeeding')
+    }
     // TODO: Can have before execute action
     // TODO: Can have after execute action
-    // TODO: Can assert run successfully (no throw and throw)
-    // TODO: Can assert run with failure (no throw and throw)
     // TODO: Can change home user directory (one run with and one run without)
     // TODO: withArguments replace all arguments
     // TODO: withArgument adds arguments
