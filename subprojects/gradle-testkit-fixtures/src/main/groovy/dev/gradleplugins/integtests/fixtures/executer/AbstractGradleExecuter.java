@@ -14,6 +14,7 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
     private final TestDirectoryProvider testDirectoryProvider;
 
     public AbstractGradleExecuter(TestDirectoryProvider testDirectoryProvider) {
+        assert testDirectoryProvider != null : "testDirectoryProvider cannot be null";
         this.testDirectoryProvider = testDirectoryProvider;
     }
 
