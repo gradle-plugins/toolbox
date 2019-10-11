@@ -2,7 +2,6 @@ package dev.gradleplugins.integtests.fixtures.executer;
 
 import dev.gradleplugins.test.fixtures.file.TestDirectoryProvider;
 import dev.gradleplugins.test.fixtures.file.TestFile;
-import org.gradle.testkit.runner.BuildResult;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -10,8 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-// TODO: This should be implementation details and moved to internal package
-public abstract class AbstractGradleExecuter implements GradleExecuter {
+abstract class AbstractGradleExecuter implements GradleExecuter {
     private final TestDirectoryProvider testDirectoryProvider;
 
     public AbstractGradleExecuter(TestDirectoryProvider testDirectoryProvider) {
