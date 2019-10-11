@@ -9,7 +9,7 @@ import spock.lang.Specification
 
 abstract class AbstractGradleExecuterTest extends Specification {
     @Rule
-    final TestNameTestDirectoryProvider temporaryFolder = new TestNameTestDirectoryProvider()
+    protected final TestNameTestDirectoryProvider temporaryFolder = new TestNameTestDirectoryProvider()
 
     protected abstract GradleExecuter getExecuterUnderTest()
 
