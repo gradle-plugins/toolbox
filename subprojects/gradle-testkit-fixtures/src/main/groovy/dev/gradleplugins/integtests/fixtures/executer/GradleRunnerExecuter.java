@@ -33,6 +33,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+// TODO: This is implementation details and should be moved to internal package
+//    We should instead offer a factory to construct the right executer
+//    The contextual executer would also be beneficial here.
 public class GradleRunnerExecuter extends AbstractGradleExecuter {
     private boolean debuggerAttached = false;
 

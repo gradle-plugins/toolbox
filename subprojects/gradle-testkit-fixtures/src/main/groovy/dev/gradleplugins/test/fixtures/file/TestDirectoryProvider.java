@@ -21,6 +21,7 @@ package dev.gradleplugins.test.fixtures.file;
  *
  * The client is not responsible for removing any files.
  */
+// TODO: We should decouple the provider from TestFile
 public interface TestDirectoryProvider {
 
     /**

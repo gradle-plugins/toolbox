@@ -116,7 +116,7 @@ public class M2Installation implements Consumer<GradleExecuter> {
     public void isolateMavenLocalRepo(GradleExecuter gradleExecuter) {
         gradleExecuter.beforeExecute(executer -> {
             if (isolateMavenLocal) {
-                isolatedMavenRepoForLeakageChecks = temporaryFolder.getTestDirectory().createDirectory("m2-home-should-not-be-filled");
+                isolatedMavenRepoForLeakageChecks = executer.getTestDirectoryProvider().getTestDirectory().createDirectory("m2-home-should-not-be-filled");
                 setMavenLocalLocation(gradleExecuter, isolatedMavenRepoForLeakageChecks);
             }
         });

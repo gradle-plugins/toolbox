@@ -24,6 +24,8 @@ import java.io.IOException;
 /**
  * A JUnit rule which provides a unique temporary folder for the test.
  */
+// TODO: We should decouple this provider from TestFile
+// TODO: Can we move this to an internal API?
 public class TestNameTestDirectoryProvider extends AbstractTestDirectoryProvider {
     public TestNameTestDirectoryProvider() {
         // NOTE: the space in the directory name is intentional

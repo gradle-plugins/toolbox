@@ -24,22 +24,24 @@ import dev.gradleplugins.test.fixtures.file.CleanupTestDirectory
 import dev.gradleplugins.test.fixtures.file.TestFile
 import dev.gradleplugins.test.fixtures.file.TestNameTestDirectoryProvider
 import dev.gradleplugins.test.fixtures.maven.M2Installation
-import org.gradle.testkit.runner.BuildResult
-import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Rule
 import spock.lang.Specification
 
 import java.util.function.Consumer
 
+// TODO: This should be rename to something else... Given it's a Spock specification we could call it GradleSpecification (the fact that it's Functional is putting the wrong spin to this class).
+//    This class should only ties things together for fast starting with gradle, however, each pieces should be usable on it's own and compose into something else if the user wants.
 @CleanupTestDirectory
 class AbstractFunctionalSpec extends Specification {
     @Rule
     final TestNameTestDirectoryProvider temporaryFolder = new TestNameTestDirectoryProvider()
     final M2Installation m2 = new M2Installation(temporaryFolder)
     GradleExecuter executer = createExecuter()
+    private boolean useKotlinDsl = false
+
+    // TODO: I'm hesitant to keep the following here
     ExecutionResult result
     ExecutionFailure failure
-    private boolean useKotlinDsl = false
 
     def setup() {
          m2.isolateMavenLocalRepo(executer)
@@ -79,11 +81,13 @@ class AbstractFunctionalSpec extends Specification {
         return succeeds(arguments);
     }
 
+    // TODO: Given the comment on the class, this method should be removed
     void assertTasksExecutedAndNotSkipped(String... tasks) {
         assertHasResult()
         result.assertTasksExecutedAndNotSkipped(tasks)
     }
 
+    // TODO: Given the comment on the class, this method should be removed
     void assertTasksSkipped(String... tasks) {
         assertHasResult()
         result.assertTasksSkipped(tasks)
@@ -111,11 +115,13 @@ class AbstractFunctionalSpec extends Specification {
         temporaryFolder.testDirectory
     }
 
+    // TODO: Given the comment on the class, this method should be removed
     boolean outputContains(String string) {
         assertHasResult()
         result.assertOutputContains(string)
     }
 
+    // TODO: I'm hesitent to keep the result and failure variable as they hide some of the internal (the fact that succeeds, fails or run needs to be executed first)
     private void assertHasResult() {
         assert result != null: "result is null, you haven't run succeeds(), fails() or run()"
     }

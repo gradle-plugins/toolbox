@@ -22,22 +22,25 @@ import dev.gradleplugins.test.fixtures.file.TestFile;
 
 import java.util.function.Consumer;
 
+/**
+ * Configure build scan in you build under test. It inject `com.gradle.build-scan` plugin version 2.3 inside the plugin block and append the buildScan configuration for agreeing to the public term of service server.
+ *
+ * <pre>
+ * GradleExecuter executer = createExecuter();
+ * executer.using(new GradleEnterpriseBuildScan())
+ * </pre>
+ */
 public class GradleEnterpriseBuildScan implements Consumer<GradleExecuter> {
-    private final TestDirectoryProvider temporaryFolder;
-
-    public GradleEnterpriseBuildScan(TestDirectoryProvider temporaryFolder) {
-        this.temporaryFolder = temporaryFolder;
-    }
-
     @Override
     public void accept(GradleExecuter executer) {
         executer.beforeExecute(it -> {
             // TODO: Make sure build scan is not already applied
             // TODO: Support Kotlin DSL
 
-            TestFile buildFile = temporaryFolder.getTestDirectory().file("build.gradle");
+            TestFile buildFile = executer.getTestDirectoryProvider().getTestDirectory().file("build.gradle");
             String content = buildFile.getText();
             // TODO: support multiple space between `plugins` and `{`
+            // TODO: It should detect and use the latest build scan version for the distribution to use.
             content = content.replace("plugins {", "plugins {\nid('com.gradle.build-scan') version '2.3'")
                     + "\nbuildScan {\n" +
                     "    termsOfServiceUrl = \"https://gradle.com/terms-of-service\"\n" +
