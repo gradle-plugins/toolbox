@@ -68,7 +68,19 @@ abstract class AbstractGradleExecuterTest extends Specification {
         result.output.contains("The executer is using '${projectDirectory}' as its project directory")
     }
 
-    // TODO: Can relocate build.gradle
+    def "can relocate build.gradle"() {
+        String buildFileContent = '''println("The executer is using '${buildscript.sourceFile}' as its build file")'''
+        file('build.gradle') << buildFileContent
+        def buildFile = file('foo-build.gradle')
+        buildFile << buildFileContent
+
+        when:
+        def result = executerUnderTest.usingSettingsFile(buildFile).run()
+
+        then:
+        result.output.contains("The executer is using '${buildFile}' as its build file")
+    }
+
     // TODO: Can have before execute action
     // TODO: Can have after execute action
     // TODO: Can assert run successfully (no throw and throw)

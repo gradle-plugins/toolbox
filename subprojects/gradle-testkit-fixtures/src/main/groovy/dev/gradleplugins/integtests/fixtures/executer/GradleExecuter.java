@@ -93,6 +93,11 @@ public interface GradleExecuter {
     GradleExecuter usingSettingsFile(File settingsFile);
 
     /**
+     * Uses the given build script by adding {@code "--build-file"} argument.
+     */
+    GradleExecuter usingBuildScript(File buildScript);
+
+    /**
      * Uses the given project directory by adding the {@code "--project-dir"} argument.
      */
     GradleExecuter usingProjectDirectory(File projectDirectory);

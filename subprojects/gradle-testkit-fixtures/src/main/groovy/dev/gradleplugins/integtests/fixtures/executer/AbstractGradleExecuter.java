@@ -84,6 +84,16 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
     }
     //endregion
 
+    //region Flag `--build-file` configuration
+    private File buildScript = null;
+
+    @Override
+    public GradleExecuter usingBuildScript(File buildScript) {
+        this.buildScript = buildScript;
+        return this;
+    }
+    //endregion
+
     //region Flag `--project-dir` configuration
     private File projectDirectory = null;
 
@@ -203,6 +213,7 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
         workingDirectory = null;
         userHomeDirectory = null;
         settingsFile = null;
+        buildScript = null;
         projectDirectory = null;
 
         showStacktrace = true;
@@ -217,6 +228,10 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
         }
 
         // Gradle arguments
+        if (buildScript != null) {
+            allArguments.add("--build-file");
+            allArguments.add(buildScript.getAbsolutePath());
+        }
         if (projectDirectory != null) {
             allArguments.add("--project-dir");
             allArguments.add(projectDirectory.getAbsolutePath());
