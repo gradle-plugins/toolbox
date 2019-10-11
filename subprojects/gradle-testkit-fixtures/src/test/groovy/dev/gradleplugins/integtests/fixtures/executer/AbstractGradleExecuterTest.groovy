@@ -28,31 +28,29 @@ abstract class AbstractGradleExecuterTest extends Specification {
     }
 
     def "can relocate settings.gradle"() {
-        file('settings.gradle') << 'println("Goodbye, world!")'
+        String settingsFileContent = '''println("The executer is using '${buildscript.sourceFile}' as its settings file")'''
+        file('settings.gradle') << settingsFileContent
         def settingsFile = file('foo-settings.gradle')
-        settingsFile << """
-            println('Hello, world!')
-        """
+        settingsFile << settingsFileContent
 
         when:
         def result = executerUnderTest.usingSettingsFile(settingsFile).run()
 
         then:
-        result.output.contains('Hello, world!')
-        !result.output.contains('Goodbye, world!')
+        result.output.contains("The executer is using '${settingsFile}' as its settings file")
     }
 
     def "can change working directory"() {
-        file('settings.gradle') << 'println("Goodbye, world!")'
+        String settingsFileContent = '''println("The executer is using '${settingsDir}' as its working directory")'''
+        file('settings.gradle') << settingsFileContent
         def workingDirectory = file('other-directory')
-        workingDirectory.file('settings.gradle') << 'println("Hello, world!")'
+        workingDirectory.file('settings.gradle') << settingsFileContent
 
         when:
         def result = executerUnderTest.inDirectory(workingDirectory).run()
 
         then:
-        result.output.contains('Hello, world!')
-        !result.output.contains('Goodbye, world!')
+        result.output.contains("The executer is using '${workingDirectory}' as its working directory")
     }
 
     // TODO: Can change project directory while keeping working directory
