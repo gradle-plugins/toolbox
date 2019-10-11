@@ -42,7 +42,19 @@ abstract class AbstractGradleExecuterTest extends Specification {
         !result.output.contains('Goodbye, world!')
     }
 
-    // TODO: Can change working directory
+    def "can change working directory"() {
+        file('settings.gradle') << 'println("Goodbye, world!")'
+        def workingDirectory = file('other-directory')
+        workingDirectory.file('settings.gradle') << 'println("Hello, world!")'
+
+        when:
+        def result = executerUnderTest.inDirectory(workingDirectory).run()
+
+        then:
+        result.output.contains('Hello, world!')
+        !result.output.contains('Goodbye, world!')
+    }
+
     // TODO: Can change project directory while keeping working directory
     // TODO: Can relocate build.gradle
     // TODO: Can have before execute action
