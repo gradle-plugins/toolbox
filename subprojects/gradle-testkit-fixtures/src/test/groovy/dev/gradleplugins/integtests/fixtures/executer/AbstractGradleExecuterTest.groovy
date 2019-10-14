@@ -134,8 +134,40 @@ abstract class AbstractGradleExecuterTest extends Specification {
         def error = thrown(UnexpectedBuildSuccess)
         error.message.contains('build succeeding')
     }
-    // TODO: Can have before execute action
-    // TODO: Can have after execute action
+
+    def "can have before execute action"() {
+        def resultFile = file('result.txt')
+        def executer = executerUnderTest
+        executer.beforeExecute { resultFile << 'GradleExecuter#beforeExecute\n' }
+        file('build.gradle') << """
+            file('${resultFile}') << 'build.gradle\\n'
+        """
+
+        when:
+        executer.run()
+
+        then:
+        resultFile.text == '''GradleExecuter#beforeExecute
+build.gradle
+'''
+    }
+
+    def "can have after execute action"() {
+        def resultFile = file('result.txt')
+        def executer = executerUnderTest
+        executer.afterExecute { resultFile << 'GradleExecuter#afterExecute\n' }
+        file('build.gradle') << """
+            file('${resultFile}') << 'build.gradle\\n'
+        """
+
+        when:
+        executer.run()
+
+        then:
+        resultFile.text == '''build.gradle
+GradleExecuter#afterExecute
+'''
+    }
     // TODO: Can change home user directory (one run with and one run without)
     // TODO: withArguments replace all arguments
     // TODO: withArgument adds arguments
