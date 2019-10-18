@@ -168,7 +168,19 @@ build.gradle
 GradleExecuter#afterExecute
 '''
     }
-    // TODO: Can change home user directory (one run with and one run without)
+
+    def "can have change user home directory"() {
+        file('build.gradle') << '''
+            println("User home directory is: '${System.properties['user.home']}'")
+        '''
+
+        expect:
+        executerUnderTest.run().output.contains("User home directory is: '${System.properties['user.home']}'")
+        executerUnderTest.withUserHomeDirectory(temporaryFolder.testDirectory).run().output.contains("User home directory is: '${temporaryFolder.testDirectory.absolutePath}'")
+    }
+
+    
+
     // TODO: withArguments replace all arguments
     // TODO: withArgument adds arguments
     // TODO: withTasks execute tasks
