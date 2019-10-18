@@ -46,11 +46,15 @@ private
 data class VersionDownloadInfo(val version: String, val downloadUrl: String, val snapshot: Boolean)
 
 fun getAllGeneralAvailableVersion(): List<String> {
-    val jsonText = URL("https://services.gradle.org/versions/all").readText()
-    val type = object : TypeToken<List<VersionDownloadInfo>>() { }.type
-    val versionInfo = Gson().fromJson<List<VersionDownloadInfo>>(jsonText, type)
-    val result = versionInfo.filter { !it.snapshot && !it.version.contains("-rc-") && VersionNumber.parse("5.5.1").compareTo(VersionNumber.parse(it.version)) <= 0 }.map { it.version }
-    return result.plus("3.5.1")
+    if (project.gradle.startParameter.isOffline) {
+        return listOf()
+    } else {
+        val jsonText = URL("https://services.gradle.org/versions/all").readText()
+        val type = object : TypeToken<List<VersionDownloadInfo>>() {}.type
+        val versionInfo = Gson().fromJson<List<VersionDownloadInfo>>(jsonText, type)
+        val result = versionInfo.filter { !it.snapshot && !it.version.contains("-rc-") && VersionNumber.parse("5.5.1").compareTo(VersionNumber.parse(it.version)) <= 0 }.map { it.version }
+        return result.plus("3.5.1")
+    }
 }
 
 getAllGeneralAvailableVersion().forEach {
