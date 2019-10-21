@@ -179,10 +179,66 @@ GradleExecuter#afterExecute
         executerUnderTest.withUserHomeDirectory(temporaryFolder.testDirectory).run().output.contains("User home directory is: '${temporaryFolder.testDirectory.absolutePath}'")
     }
 
-    
+    // TODO: Disallow argument flags that are handled by some modeling
+    // TODO: Disallow tasks argument
+    // TODO: Disallow listing tasks (aka `tasks`) in favor of listTasks()... maybe
+    def "can add arguments on the executer"() {
+        file('build.gradle') << """
+            if (System.properties['foo'] != 'bar') {
+                throw new GradleException("'foo' property wasn't passed")
+            }
+            if (System.properties['bar'] != 'foo') {
+                throw new GradleException("'bar' property wasn't passed")
+            }
+        """
 
-    // TODO: withArguments replace all arguments
-    // TODO: withArgument adds arguments
+        when:
+        executerUnderTest.withArgument('-Dfoo=bar').withArgument('-Dbar=foo').run()
+
+        then:
+        noExceptionThrown()
+    }
+
+    def "can replace all arguments on the executer"() {
+        file('build.gradle') << """
+            if (System.properties.containsKey('nofoo')) {
+                throw new GradleException("'nofoo' property was passed but shouldn't")
+            }
+            if (System.properties['foo'] != 'bar') {
+                throw new GradleException("'foo' property wasn't passed")
+            }
+            if (System.properties['bar'] != 'foo') {
+                throw new GradleException("'bar' property wasn't passed")
+            }
+        """
+
+        when:
+        executerUnderTest.withArgument('-Dnofoo=nobar').withArguments('-Dfoo=bar', '-Dbar=foo').run()
+
+        then:
+        noExceptionThrown()
+    }
+
+    def "can append arguments on the executer"() {
+        file('build.gradle') << """
+            if (System.properties.containsKey('nofoo')) {
+                throw new GradleException("'nofoo' property was passed but shouldn't")
+            }
+            if (System.properties['foo'] != 'bar') {
+                throw new GradleException("'foo' property wasn't passed")
+            }
+            if (System.properties['bar'] != 'foo') {
+                throw new GradleException("'bar' property wasn't passed")
+            }
+        """
+
+        when:
+        executerUnderTest.withArgument('-Dnofoo=nobar').withArguments('-Dfoo=bar').withArgument('-Dbar=foo').run()
+
+        then:
+        noExceptionThrown()
+    }
+
     // TODO: withTasks execute tasks
     // TODO: with build cache enabled
     // TODO: with stacktrace disabled

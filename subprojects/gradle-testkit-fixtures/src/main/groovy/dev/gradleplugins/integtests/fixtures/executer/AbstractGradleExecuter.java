@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 abstract class AbstractGradleExecuter implements GradleExecuter {
     private final TestDirectoryProvider testDirectoryProvider;
 
-    public AbstractGradleExecuter(TestDirectoryProvider testDirectoryProvider) {
+    AbstractGradleExecuter(TestDirectoryProvider testDirectoryProvider) {
         assert testDirectoryProvider != null : "testDirectoryProvider cannot be null";
         this.testDirectoryProvider = testDirectoryProvider;
     }
