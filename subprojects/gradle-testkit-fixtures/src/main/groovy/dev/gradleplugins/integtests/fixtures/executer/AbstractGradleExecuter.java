@@ -110,6 +110,21 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
     }
     //endregion
 
+    //region Flag `--gradle-user-home` configuration
+    private File gradleUserHomeDirectory = new File(System.getProperty("user.home") + File.separator + ".gradle");
+
+    @Override
+    public GradleExecuter requireOwnGradleUserHomeDir() {
+        return withGradleUserHomeDir(testDirectoryProvider.getTestDirectory().file("user-home"));
+    }
+
+    @Override
+    public GradleExecuter withGradleUserHomeDir(File userHomeDir) {
+        this.gradleUserHomeDirectory = userHomeDir;
+        return this;
+    }
+    //endregion
+
     //region Process arguments configuration
     private final List<String> arguments = new ArrayList<>();
 
@@ -246,6 +261,11 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
         // Deal with missing settings.gradle[.kts] file
         if (settingsFile == null) {
             ensureSettingsFileAvailable();
+        }
+
+        if (gradleUserHomeDirectory != null) {
+            allArguments.add("--gradle-user-home");
+            allArguments.add(gradleUserHomeDirectory.getAbsolutePath());
         }
 
         allArguments.addAll(arguments);

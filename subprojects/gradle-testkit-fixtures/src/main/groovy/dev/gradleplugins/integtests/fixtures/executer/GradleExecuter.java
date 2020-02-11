@@ -132,4 +132,24 @@ public interface GradleExecuter {
      * Adds an action to be called immediately after execution.
      */
     void afterExecute(Consumer<? super GradleExecuter> action);
+
+    /**
+     * Configures a unique gradle user home dir for the test.
+     *
+     * The gradle user home dir used will be underneath the {@link #getTestDirectoryProvider()} directory.
+     *
+     * This value is persistent across executions by this executer.
+     *
+     * <p>Note: does not affect the daemon base dir.</p>
+     */
+    GradleExecuter requireOwnGradleUserHomeDir();
+
+    /**
+     * Sets the <em>Gradle</em> user home dir. Setting to null requests that the executer use the real default Gradle user home dir rather than the default used for testing.
+     *
+     * This value is persistent across executions by this executer.
+     *
+     * <p>Note: does not affect the daemon base dir.</p>
+     */
+    GradleExecuter withGradleUserHomeDir(File userHomeDir);
 }

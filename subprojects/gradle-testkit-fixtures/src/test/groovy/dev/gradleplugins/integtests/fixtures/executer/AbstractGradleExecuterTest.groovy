@@ -239,8 +239,56 @@ GradleExecuter#afterExecute
         noExceptionThrown()
     }
 
+    def "can enable build cache"() {
+        file('build.gradle') << '''
+            plugins {
+                id 'base'
+            }
+
+            @CacheableTask
+            class FooTask extends DefaultTask {
+                @Input
+                String input
+
+                @OutputFile
+                File outputFile
+
+                @TaskAction
+                private void doAction() {
+                    outputFile.text = input
+                }
+            }
+
+            tasks.create('foo', FooTask) {
+                input = 'bar'
+                outputFile = file("${buildDir}/foo.txt")
+            }
+        '''
+
+        when:
+        def result1 = executerUnderTest.requireOwnGradleUserHomeDir().withBuildCacheEnabled().withArgument('-i').withTasks('clean', 'foo').run()
+
+        then:
+        result1.output.contains("Build cache key for task ':foo' is")
+        result1.output.contains("No history is available.")
+        result1.output.contains("Stored cache entry for task ':foo' with cache key")
+
+        when:
+        def result2 = executerUnderTest.requireOwnGradleUserHomeDir().withBuildCacheEnabled().withArgument('-i').withTasks('clean', 'foo').run()
+
+        then:
+        result2.output.contains("> Task :foo FROM-CACHE")
+        result2.output.contains("Build cache key for task ':foo' is")
+        result2.output.contains("Output property 'outputFile' file ${file('build/foo.txt').absolutePath} has been removed.")
+        result2.output.contains("Loaded cache entry for task ':foo' with cache key")
+
+        when:
+        def result3 = executerUnderTest.requireOwnGradleUserHomeDir().withArgument('-i').withTasks('clean', 'foo').run()
+
+        then:
+        result3.output.contains("ggg")
+    }
     // TODO: withTasks execute tasks
-    // TODO: with build cache enabled
     // TODO: with stacktrace disabled
 
     // ExecutionResult / ExecutionFailure
