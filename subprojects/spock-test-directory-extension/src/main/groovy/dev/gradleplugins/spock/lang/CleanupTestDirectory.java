@@ -14,24 +14,20 @@
  * limitations under the License.
  */
 
-package dev.gradleplugins.test.fixtures.file;
+package dev.gradleplugins.spock.lang;
 
 import org.spockframework.runtime.extension.ExtensionAnnotation;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Instructs Spock to use {@link CleanupTestDirectoryExtension} to clean up the test directory provided by a
- * {@link dev.gradleplugins.test.fixtures.file.TestDirectoryProvider}.  This is to work around the fact that using
+ * {@link TestDirectoryProvider}.  This is to work around the fact that using
  * a test directory provider as a TestRule causes spock to swallow any test failures and the test directory
  * is cleaned up even for failed tests.  {@link CleanupTestDirectoryExtension} on the other hand, registers
  * an interceptor and listener which cleans up the test directory only when the test passes.
  *
- * The annotation needs to know which field is the {@link dev.gradleplugins.test.fixtures.file.TestDirectoryProvider}
+ * The annotation needs to know which field is the {@link TestDirectoryProvider}
  * to clean up.  It defaults to "temporaryFolder", which is the field for AbstractIntegrationSpec.  Other specs
  * can set it accordingly using "fieldName".
  */

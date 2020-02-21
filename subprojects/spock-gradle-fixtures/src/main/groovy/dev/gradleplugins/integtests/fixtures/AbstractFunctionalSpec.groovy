@@ -20,9 +20,9 @@ import dev.gradleplugins.integtests.fixtures.executer.ExecutionFailure
 import dev.gradleplugins.integtests.fixtures.executer.ExecutionResult
 import dev.gradleplugins.integtests.fixtures.executer.GradleExecuter
 import dev.gradleplugins.integtests.fixtures.executer.GradleRunnerExecuter
-import dev.gradleplugins.test.fixtures.file.CleanupTestDirectory
+import dev.gradleplugins.spock.lang.CleanupTestDirectory
+import dev.gradleplugins.spock.lang.TestNameTestDirectoryProvider
 import dev.gradleplugins.test.fixtures.file.TestFile
-import dev.gradleplugins.test.fixtures.file.TestNameTestDirectoryProvider
 import dev.gradleplugins.test.fixtures.maven.M2Installation
 import org.junit.Rule
 import spock.lang.Specification
@@ -112,7 +112,7 @@ class AbstractFunctionalSpec extends Specification {
     }
 
     protected TestFile getTestDirectory() {
-        temporaryFolder.testDirectory
+        return TestFile.of(temporaryFolder.testDirectory)
     }
 
     // TODO: Given the comment on the class, this method should be removed

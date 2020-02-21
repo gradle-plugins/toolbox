@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.gradleplugins.test.fixtures.file;
+package dev.gradleplugins.spock.lang;
 
 import org.spockframework.runtime.AbstractRunListener;
 import org.spockframework.runtime.GroovyRuntimeUtil;

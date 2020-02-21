@@ -28,6 +28,8 @@ include('gradle-fixtures')
 project(':gradle-fixtures').projectDir = file('subprojects/gradle-fixtures')
 include('spock-gradle-fixtures')
 project(':spock-gradle-fixtures').projectDir = file('subprojects/spock-gradle-fixtures')
+include('spock-test-directory-extension')
+project(':spock-test-directory-extension').projectDir = file('subprojects/spock-test-directory-extension')
 
 // Plugins
 include('license-gradle-plugin')

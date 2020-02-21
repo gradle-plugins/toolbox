@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package dev.gradleplugins.test.fixtures.file;
+package dev.gradleplugins.spock.lang;
 
-import org.gradle.api.GradleException;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Random;
@@ -32,14 +32,14 @@ import java.util.regex.Pattern;
 // TODO: Remove dependency on TestFile so it can be composed to use it
 // TODO: Can we move this to an internal API?
 abstract class AbstractTestDirectoryProvider implements TestRule, TestDirectoryProvider {
-    protected TestFile root;
+    protected File root;
 
     private static final Random RANDOM = new Random();
     private static final int ALL_DIGITS_AND_LETTERS_RADIX = 36;
     private static final int MAX_RANDOM_PART_VALUE = Integer.valueOf("zzzzz", ALL_DIGITS_AND_LETTERS_RADIX);
     private static final Pattern WINDOWS_RESERVED_NAMES = Pattern.compile("(con)|(prn)|(aux)|(nul)|(com\\d)|(lpt\\d)", Pattern.CASE_INSENSITIVE);
 
-    private TestFile dir;
+    private File dir;
     private String prefix;
     private boolean cleanup = true;
 
@@ -56,7 +56,7 @@ abstract class AbstractTestDirectoryProvider implements TestRule, TestDirectoryP
         if (cleanup && dir != null && dir.exists()) {
             while (dir.exists()) {
                 try {
-                    dir.forceDeleteDir();
+                    FileUtils.forceDeleteDirectory(dir);
                 } catch (IOException e) {
                     throw new UncheckedIOException(e);
                 }
@@ -87,7 +87,7 @@ abstract class AbstractTestDirectoryProvider implements TestRule, TestDirectoryP
             try {
                 cleanup();
             } catch (Exception e) {
-                throw new GradleException(cleanupErrorMessage(), e);
+                throw new RuntimeException(cleanupErrorMessage(), e);
             }
         }
 
@@ -118,21 +118,21 @@ abstract class AbstractTestDirectoryProvider implements TestRule, TestDirectoryP
     }
 
     @Override
-    public TestFile getTestDirectory() {
+    public File getTestDirectory() {
         if (dir == null) {
             dir = createUniqueTestDirectory();
         }
         return dir;
     }
 
-    private TestFile createUniqueTestDirectory() {
+    private File createUniqueTestDirectory() {
         while (true) {
             // Use a random prefix to avoid reusing test directories
             String randomPrefix = Integer.toString(RANDOM.nextInt(MAX_RANDOM_PART_VALUE), ALL_DIGITS_AND_LETTERS_RADIX);
             if (WINDOWS_RESERVED_NAMES.matcher(randomPrefix).matches()) {
                 continue;
             }
-            TestFile dir = root.file(getPrefix(), randomPrefix);
+            File dir = new File(root, String.format("%s/%s", getPrefix(), randomPrefix));
             if (dir.mkdirs()) {
                 return dir;
             }
@@ -148,16 +148,16 @@ abstract class AbstractTestDirectoryProvider implements TestRule, TestDirectoryP
         return prefix;
     }
 
-    public TestFile file(Object... path) {
-        return getTestDirectory().file((Object[]) path);
-    }
-
-    public TestFile createFile(Object... path) {
-        return file((Object[]) path).createFile();
-    }
-
-    // TODO: rename to createDirectory
-    public TestFile createDir(Object... path) {
-        return file((Object[]) path).createDirectory();
-    }
+//    public TestFile file(Object... path) {
+//        return getTestDirectory().file((Object[]) path);
+//    }
+//
+//    public TestFile createFile(Object... path) {
+//        return file((Object[]) path).createFile();
+//    }
+//
+//    // TODO: rename to createDirectory
+//    public TestFile createDir(Object... path) {
+//        return file((Object[]) path).createDirectory();
+//    }
 }

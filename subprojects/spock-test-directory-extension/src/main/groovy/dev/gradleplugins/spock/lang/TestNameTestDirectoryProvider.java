@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.gradleplugins.test.fixtures.file;
+package dev.gradleplugins.spock.lang;
 
 import org.junit.runners.model.FrameworkMethod;
 
@@ -29,7 +29,7 @@ import java.io.IOException;
 public class TestNameTestDirectoryProvider extends AbstractTestDirectoryProvider {
     public TestNameTestDirectoryProvider() {
         // NOTE: the space in the directory name is intentional
-        root = new TestFile(new File("build/tmp/test files"));
+        root = new File("build/tmp/test files");
     }
 
     private File createTemporaryFolderIn(File parentFolder) throws IOException {

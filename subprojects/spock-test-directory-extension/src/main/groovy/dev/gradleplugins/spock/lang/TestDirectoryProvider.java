@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package dev.gradleplugins.test.fixtures.file;
+package dev.gradleplugins.spock.lang;
+
+import java.io.File;
 
 /**
  * Implementations provide a working space to be used in tests.
@@ -29,7 +31,7 @@ public interface TestDirectoryProvider {
      *
      * @return The directory to use, guaranteed to exist.
      */
-    TestFile getTestDirectory();
+    File getTestDirectory();
 
     void suppressCleanup();
 }
