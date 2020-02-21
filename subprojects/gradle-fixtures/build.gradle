@@ -2,6 +2,7 @@ import com.jfrog.bintray.gradle.BintrayExtension
 
 plugins {
     id 'java-library'
+    id 'groovy' // for Spock framework
     id 'dev.gradleplugins.experimental.shaded-artifact'
     id 'dev.gradleplugins.experimental.artifacts'
     id 'dev.gradleplugins.experimental.publishing'
