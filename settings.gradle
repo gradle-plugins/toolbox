@@ -24,8 +24,10 @@ rootProject.name = 'toolbox'
 // Gradle APIs
 include('gradle-api')
 project(':gradle-api').projectDir = file('subprojects/gradle-api')
-include('gradle-testkit-fixtures')
-project(':gradle-testkit-fixtures').projectDir = file('subprojects/gradle-testkit-fixtures')
+include('gradle-fixtures')
+project(':gradle-fixtures').projectDir = file('subprojects/gradle-fixtures')
+include('gradle-fixtures-spockframework')
+project(':gradle-fixtures-spockframework').projectDir = file('subprojects/gradle-fixtures-spockframework')
 
 // Plugins
 include('license-gradle-plugin')

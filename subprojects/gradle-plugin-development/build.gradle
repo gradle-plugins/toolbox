@@ -43,7 +43,7 @@ dependencies {
     implementation gradleApi()
 
     implementation 'com.gradle.publish:plugin-publish-plugin:0.10.1'
-    functionalTestImplementation project(':gradle-testkit-fixtures')
+    functionalTestImplementation project(':gradle-fixtures')
     compileOnly project(':gradle-plugin-development-annotation')
     shaded 'org.ow2.asm:asm:6.0'
     shaded 'org.ow2.asm:asm-util:6.0'
@@ -69,13 +69,13 @@ def generatorTask = tasks.register('createVersionInformation') {
     outputs.dir(project.layout.buildDirectory.dir('generatedSources'))
     inputs.property('version', project.version)
     inputs.property('group', project.group)
-    inputs.property('name', project.project(':gradle-testkit-fixtures').name)
+    inputs.property('name', project.project(':gradle-fixtures').name)
     doLast {
         project.layout.buildDirectory.file('generatedSources/TestFixtures.java').get().asFile.text = """package dev.gradleplugins.internal;
 
 public class TestFixtures {
     public static final boolean released = ${!project.version.toString().contains("-SNAPSHOT")};
-    public static final String notation = "${project.group}:${project.project(":gradle-testkit-fixtures").name}:${project.version}";
+    public static final String notation = "${project.group}:${project.project(":gradle-fixtures").name}:${project.version}";
     public static final String apiVersion = "0.0.12";
     public static final String currentVersion = "${project.version}";
 }
