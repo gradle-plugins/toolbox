@@ -19,63 +19,68 @@ import com.jfrog.bintray.gradle.BintrayExtension
 import dev.gradleplugins.GenerateGradleApiJar
 import org.gradle.util.VersionNumber
 import java.net.URL
+import groovy.transform.Canonical
 
 plugins {
-    `java`
-    `application`
-    id("com.jfrog.bintray")
-    `maven-publish`
-    dev.gradleplugins.experimental.`publishing-base`
+    id 'java'
+    id 'application'
+    id 'com.jfrog.bintray'
+    id 'maven-publish'
+    id 'dev.gradleplugins.experimental.publishing-base'
 }
 
-version = "0.0.13"
+version = '0.0.13'
 
-val java = project.extensions.getByType(JavaPluginExtension::class.java)
+def java = project.extensions.getByType(JavaPluginExtension)
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 java.targetCompatibility = JavaVersion.VERSION_1_8
 
 dependencies {
-    implementation(gradleTestKit())
+    implementation gradleTestKit()
 }
 
 application {
-    mainClassName = "dev.gradleplugins.Main"
+    mainClassName = 'dev.gradleplugins.Main'
 }
 
-private
-data class VersionDownloadInfo(val version: String, val downloadUrl: String, val snapshot: Boolean)
+@Canonical
+class VersionDownloadInfo {
+    String version
+    String downloadUrl
+    boolean snapshot
+}
 
-fun getAllGeneralAvailableVersion(): List<String> {
-    val jsonText = URL("https://services.gradle.org/versions/all").readText()
-    val type = object : TypeToken<List<VersionDownloadInfo>>() { }.type
-    val versionInfo = Gson().fromJson<List<VersionDownloadInfo>>(jsonText, type)
-    val result = versionInfo.filter { !it.snapshot && !it.version.contains("-rc-") && VersionNumber.parse("5.5.1").compareTo(VersionNumber.parse(it.version)) <= 0 }.map { it.version }
+List<String> getAllGeneralAvailableVersion() {
+    def jsonText = new URL("https://services.gradle.org/versions/all").text
+    def type = new TypeToken<List<VersionDownloadInfo>>() { }.type
+    def versionInfo = new Gson().fromJson(jsonText, type)
+    def result = versionInfo.findAll { !it.snapshot && !it.version.contains("-rc-") && VersionNumber.parse("5.5.1").compareTo(VersionNumber.parse(it.version)) <= 0 }.collect { it.version }
     return result.plus("3.5.1")
 }
 
-getAllGeneralAvailableVersion().forEach {
-    val generateGradleApiJarTask = tasks.register<GenerateGradleApiJar>("generateGradleApi${it}") {
-        getClasspath().from(tasks.getByName<JavaExec>("run").classpath)
-        getVersion().set(it)
-        getOutputFile().set(layout.buildDirectory.file("generated-gradle-jars/gradle-api-${it}.jar"))
+getAllGeneralAvailableVersion().each { availableVersion ->
+    def generateGradleApiJarTask = tasks.register("generateGradleApi${availableVersion}", GenerateGradleApiJar) {
+        getClasspath().from(tasks.withType(JavaExec).getByName('run').classpath)
+        getVersion().set(availableVersion)
+        getOutputFile().set(layout.buildDirectory.file("generated-gradle-jars/gradle-api-${availableVersion}.jar"))
     }
 
-    val jarTask = tasks.register<Jar>("hack${it}") {
+    def jarTask = tasks.register("hack${availableVersion}", Jar) {
         dependsOn(generateGradleApiJarTask)
-        destinationDirectory.set(layout.buildDirectory.dir("generated-gradle-jars/"))
-        archiveExtension.set("jar")
-        archiveBaseName.set("gradle-api")
-        archiveVersion.set(it)
+        destinationDirectory.set(layout.buildDirectory.dir('generated-gradle-jars/'))
+        archiveExtension.set('jar')
+        archiveBaseName.set('gradle-api')
+        archiveVersion.set(availableVersion)
         enabled = false
     }
 
-    configure<PublishingExtension> {
+    publishing {
         publications {
-            val mavenPublication = create<MavenPublication>("gradle-api-${it}") {
+            def mavenPublication = create("gradle-api-${availableVersion}", MavenPublication) {
                 artifact(jarTask.get())
 
                 pom {
-                    name.set("Gradle API v${it}")
+                    name.set("Gradle API v${availableVersion}")
                     description.set(project.provider { project.description })
 //                    inceptionYear.set("2019")
 
@@ -100,31 +105,31 @@ getAllGeneralAvailableVersion().forEach {
                 }
             }
 
-            afterEvaluate {
+            project.afterEvaluate {
                 mavenPublication.groupId = "${project.group}"
                 if (project.version.toString().endsWith("-SNAPSHOT")) {
-                    val v = project.version.toString().replace("-SNAPSHOT", "")
-                    mavenPublication.version = "${v}-${it}-SNAPSHOT"
+                    def v = project.version.toString().replace("-SNAPSHOT", "")
+                    mavenPublication.version = "${v}-${availableVersion}-SNAPSHOT"
                 } else {
-                    mavenPublication.version = "${project.version}-${it}"
+                    mavenPublication.version = "${project.version}-${availableVersion}"
                 }
             }
 
-            configure<BintrayExtension> {
-                val list = if (publications != null) mutableListOf(*publications) else mutableListOf()
-                list.add("gradle-api-${it}")
-                setPublications(*list.toTypedArray())
+            project.extensions.configure(BintrayExtension) { bintray ->
+                def list = (bintray.publications != null) ? [*bintray.publications] : []
+                list.add("gradle-api-${availableVersion}")
+                bintray.setPublications(*list.toArray())
             }
         }
     }
 }
 
 afterEvaluate {
-    configure<BintrayExtension> {
-        pkg(closureOf<BintrayExtension.PackageConfig> {
+    extensions.configure(BintrayExtension) { bintray ->
+        bintray.pkg {
             name = "gradle-api-jars"
             setLabels("gradle", "gradle-api", "gradle-plugins")
             publicDownloadNumbers = true
-        })
+        }
     }
 }

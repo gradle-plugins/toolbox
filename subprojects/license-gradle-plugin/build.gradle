@@ -15,16 +15,16 @@
  */
 
 plugins {
-    id("dev.gradleplugins.java-gradle-plugin")
-    dev.gradleplugins.experimental.ide
+    id 'dev.gradleplugins.java-gradle-plugin'
+    id 'dev.gradleplugins.experimental.ide'
 }
 
 gradlePlugin {
     plugins {
-        register("licensePlugin") {
-            id = "dev.gradleplugins.license"
-            implementationClass = "dev.gradleplugins.license.internal.OpenSourceSoftwareLicensePlugin"
-            description = "License management for Gradle builds"
+        licensePlugin {
+            id = 'dev.gradleplugins.license'
+            implementationClass = 'dev.gradleplugins.license.internal.OpenSourceSoftwareLicensePlugin'
+            description = 'License management for Gradle builds'
         }
     }
 }
@@ -35,12 +35,12 @@ repositories {
 }
 
 pluginBundle {
-    website = "https://gradleplugins.dev/"
-    tags = listOf("license")
+    website = 'https://gradleplugins.dev/'
+    tags = ['license']
 
     plugins {
-        val licensePlugin by existing {
-            displayName = "License management for Gradle builds"
+        licensePlugin {
+            displayName = 'License management for Gradle builds'
         }
     }
 }

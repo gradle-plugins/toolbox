@@ -26,44 +26,40 @@ import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
-import org.gradle.kotlin.dsl.*
 
-class ShadedArtifactPlugin: Plugin<Project> {
-    override fun apply(project: Project): Unit = project.run {
-        applyShadowPlugin()
-        val shadedConfiguration = createShadedConfiguration()
-        val shadedArtifact = createShadedExtension()
-        val shadowJar = configureShadowJarTask(shadedConfiguration, shadedArtifact)
-        wireShadowJarTaskInLifecycle(shadowJar)
+class ShadedArtifactPlugin implements Plugin<Project> {
+    void apply(Project project) {
+        applyShadowPlugin(project)
+        def shadedConfiguration = createShadedConfiguration(project)
+        def shadedArtifact = createShadedExtension(project)
+        def shadowJar = configureShadowJarTask(project, shadedConfiguration, shadedArtifact)
+        wireShadowJarTaskInLifecycle(project, shadowJar)
 
         // TODO: See `gradle-plugin-development` for what needs to be done for the shadow plugin to correctly work with plugin dev
     }
 
-    private
-    fun Project.applyShadowPlugin() {
-        apply<ShadowPlugin>()
+    private void applyShadowPlugin(Project project) {
+        project.apply plugin: ShadowPlugin
     }
 
-    private fun Project.createShadedExtension(): ShadedArtifactExtension {
-        val result = extensions.create("shadedArtifact", ShadedArtifactExtension::class.java)
+    private ShadedArtifactExtension createShadedExtension(Project project) {
+        def result = project.extensions.create("shadedArtifact", ShadedArtifactExtension)
         result.packagesToRelocate.empty()
-        result.relocatePackagePrefix.set(provider { "${group}.internal.impldep" })
+        result.relocatePackagePrefix.set(project.provider { "${project.group}.internal.impldep" })
         return result
     }
 
-    private
-    fun Project.createShadedConfiguration(): Configuration {
-        val shaded by configurations.creating
-        val compileOnly = configurations.getByName("compileOnly")
+    private Configuration createShadedConfiguration(Project project) {
+        def shaded = project.configurations.create("shaded")
+        def compileOnly = project.configurations.getByName("compileOnly")
         compileOnly.extendsFrom(shaded)
         return shaded
     }
 
-    private
-    fun Project.configureShadowJarTask(shadedConfiguration: Configuration, shadedExtension: ShadedArtifactExtension): TaskProvider<ShadowJar> {
+    private TaskProvider<ShadowJar> configureShadowJarTask(Project project, Configuration shadedConfiguration, ShadedArtifactExtension shadedExtension) {
         // TODO: Remove once we can properly differ, maybe use relocate(Relocator) with custom Relocator implementation
-        afterEvaluate {
-            tasks.named<ShadowJar>("shadowJar") {
+        project.afterEvaluate {
+            project.tasks.named("shadowJar", ShadowJar) {
                 for (pkg in shadedExtension.packagesToRelocate.get()) {
                     relocate(pkg, "${shadedExtension.relocatePackagePrefix.get()}.$pkg")
                 }
@@ -71,26 +67,25 @@ class ShadedArtifactPlugin: Plugin<Project> {
             }
         }
 
-        return tasks.named<ShadowJar>("shadowJar") {
+        return project.tasks.named("shadowJar", ShadowJar) {
             classifier = null
-            configurations = listOf(shadedConfiguration)
+            configurations = [shadedConfiguration]
             mergeServiceFiles()
         }
     }
 
-    private
-    fun Project.wireShadowJarTaskInLifecycle(shadowJar: TaskProvider<ShadowJar>) {
-        gradle.taskGraph.whenReady {
-            if (hasTask(tasks.getByName("assemble"))) {
-                tasks.named<Jar>("jar") {
+    private TaskProvider<ShadowJar> wireShadowJarTaskInLifecycle(Project project, TaskProvider<ShadowJar> shadowJar) {
+        project.gradle.taskGraph.whenReady { taskGraph ->
+            if (taskGraph.hasTask(project.tasks.getByName("assemble"))) {
+                project.tasks.named("jar", Jar) {
                     enabled = false
                 }
             }
         }
-        tasks.named("assemble") {
+        project.tasks.named("assemble") {
             dependsOn(shadowJar)
         }
-        tasks.named("jar") {
+        project.tasks.named("jar") {
             dependsOn(shadowJar)
         }
     }

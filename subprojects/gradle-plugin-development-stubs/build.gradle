@@ -15,7 +15,7 @@
  */
 
 plugins {
-    `java-library`
+    id 'java-library'
 }
 
 java {
@@ -29,21 +29,21 @@ repositories {
 }
 
 dependencies {
-    implementation("dev.gradleplugins:gradle-api:0.0.13-3.5.1")
+    implementation 'dev.gradleplugins:gradle-api:0.0.13-3.5.1'
 }
 
 configurations {
-    create("stubElements") {
-        isVisible = false
-        isCanBeResolved = false
-        isCanBeConsumed = true
-        attributes.attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class.java, "stub"))
-        outgoing.artifact(project.layout.buildDirectory.dir("classes/java/main")) {
-            builtBy(tasks.named("compileJava"))
+    stubElements {
+        visible = false
+        canBeResolved = false
+        canBeConsumed = true
+        attributes.attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, 'stub'))
+        outgoing.artifact(project.layout.buildDirectory.dir('classes/java/main')) {
+            builtBy(tasks.named('compileJava'))
         }
     }
 }
 
-tasks.named<JavaCompile>("compileJava") {
-    options.debugOptions.debugLevel = "none"
+tasks.named('compileJava', JavaCompile) {
+    options.debugOptions.debugLevel = 'none'
 }

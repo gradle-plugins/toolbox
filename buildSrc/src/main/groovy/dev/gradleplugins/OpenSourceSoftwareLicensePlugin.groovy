@@ -21,20 +21,17 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
-import org.gradle.kotlin.dsl.closureOf
-import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.withType
 import org.gradle.plugins.ide.idea.IdeaPlugin
 import org.jetbrains.gradle.ext.ProjectSettings
 import java.net.URL
 
-class OpenSourceSoftwareLicensePlugin : Plugin<Project> {
-    override fun apply(project: Project): Unit = project.run {
-        val ossLicense = project.extensions.create("ossLicense", OpenSourceSoftwareLicenseExtension::class.java)
+class OpenSourceSoftwareLicensePlugin implements Plugin<Project> {
+    void apply(Project project) {
+        def ossLicense = project.extensions.create("ossLicense", OpenSourceSoftwareLicenseExtension)
 
-        pluginManager.withPlugin("maven-publish") {
-            configure<PublishingExtension> {
-                publications.withType(MavenPublication::class.java) {
+        project.pluginManager.withPlugin("maven-publish") {
+            project.publishing {
+                publications.withType(MavenPublication) {
                     pom {
                         licenses {
                             license {
@@ -48,20 +45,20 @@ class OpenSourceSoftwareLicensePlugin : Plugin<Project> {
             }
         }
 
-        pluginManager.withPlugin("com.jfrog.bintray") {
+        project.pluginManager.withPlugin("com.jfrog.bintray") {
             // TODO: Remove once bintray support Provider API
-            afterEvaluate {
-                configure<BintrayExtension> {
-                    pkg(closureOf<BintrayExtension.PackageConfig> {
+            project.afterEvaluate {
+                project.extensions.configure(BintrayExtension) { bintray ->
+                    bintray.pkg {
                         setLicenses(ossLicense.name.get())
-                    })
+                    }
                 }
             }
         }
 
-        pluginManager.withPlugin("org.jetbrains.gradle.plugin.idea-ext") {
-            plugins.withType<IdeaPlugin> {
-                with(model) {
+        project.pluginManager.withPlugin("org.jetbrains.gradle.plugin.idea-ext") {
+            project.plugins.withType(IdeaPlugin) {
+                model.with {
                     project {
                         settings {
                             configureCopyright(ossLicense)
@@ -71,35 +68,34 @@ class OpenSourceSoftwareLicensePlugin : Plugin<Project> {
             }
         }
 
-        plugins.withType<SetupProjectPlugin> {
+        project.plugins.withType(SetupProjectPlugin) {
             // TODO: Only in rootProject
-            if (isRootProject()) {
-                val generateLicenseFileTask = tasks.register("generateLicenseFile") {
+            if (isRootProject(project)) {
+                def generateLicenseFileTask = project.tasks.register("generateLicenseFile") {
                     doLast {
                         file("LICENSE").writeText(ossLicense.licenseUrl.get().readText())
                     }
                 }
 
-                tasks.named("setup") {
+                project.tasks.named("setup") {
                     dependsOn(generateLicenseFileTask)
                 }
             }
         }
     }
-}
 
-private fun Project.isRootProject(): Boolean {
-    return project.parent == null
-}
+    private boolean isRootProject(Project project) {
+        return project.parent == null;
+    }
 
-private
-fun ProjectSettings.configureCopyright(ossLicense: OpenSourceSoftwareLicenseExtension) {
-    copyright {
-        useDefault = ossLicense.shortName.get()
-        profiles {
-            create(ossLicense.shortName.get()) {
-                notice = ossLicense.copyrightFileHeader.get()
-                keyword = "Copyright"
+    private void configureCopyright(ProjectSettings projectSettings, OpenSourceSoftwareLicenseExtension ossLicense) {
+        projectSettings.copyright {
+            useDefault = ossLicense.shortName.get()
+            profiles {
+                create(ossLicense.shortName.get()) {
+                    notice = ossLicense.copyrightFileHeader.get()
+                    keyword = "Copyright"
+                }
             }
         }
     }

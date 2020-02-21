@@ -15,36 +15,34 @@ import org.gradle.kotlin.dsl.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-class PublishingPlugin : Plugin<Project> {
-    override fun apply(project: Project): Unit = project.run {
-        applyPublishingPlugin()
-        configurePublishingExtension()
-        configureBintrayExtension()
+class PublishingPlugin implements Plugin<Project> {
+    void apply(Project project) {
+        applyPublishingPlugin(project)
+        configurePublishingExtension(project)
+        configureBintrayExtension(project)
     }
 
-    private
-    fun Project.applyPublishingPlugin() {
-        apply<PublishingBasePlugin>()
-        apply<MavenPublishPlugin>()
-        apply<BintrayPlugin>()
+    private void applyPublishingPlugin(Project project) {
+        project.apply plugin: PublishingBasePlugin
+        project.apply plugin: MavenPublishPlugin
+        project.apply plugin: BintrayPlugin
     }
 
-    private
-    fun Project.configurePublishingExtension() {
+    private void configurePublishingExtension(Project project) {
 //        var jarTask: TaskProvider<out Task> = tasks.named<Jar>("jar")
 //        if (project.pluginManager.hasPlugin("com.github.johnrengelman.shadow")) {
 //            jarTask = tasks.named<ShadowJar>("shadowJar")
 //        }
-        val sourcesJar = tasks.named<Jar>("sourcesJar")
-        val javadocJar = tasks.named<Jar>("javadocJar")
+        def sourcesJar = project.tasks.named("sourcesJar", Jar)
+        def javadocJar = project.tasks.named("javadocJar", Jar)
 
-        configure<PublishingExtension> {
+        project.publishing {
             publications {
-                create<MavenPublication>("mavenJava") {
+                create("mavenJava", MavenPublication) {
 //                    artifact(jarTask.get())
                     artifact(sourcesJar.get())
                     if (project.pluginManager.hasPlugin("groovy")) {
-                        val groovydocJar = tasks.named<Jar>("groovydocJar")
+                        def groovydocJar = project.tasks.named("groovydocJar", Jar)
                         artifact(groovydocJar.get())
                     }
                     artifact(javadocJar.get())
@@ -67,19 +65,18 @@ class PublishingPlugin : Plugin<Project> {
         }
     }
 
-    private
-    fun Project.configureBintrayExtension() {
-        afterEvaluate {
+    private void configureBintrayExtension(Project project) {
+        project.afterEvaluate {
 //            val packageName = "${project.group}:${project.name}"
 
-            configure<BintrayExtension> {
-                setPublications("mavenJava")
+            project.extensions.configure(BintrayExtension) { bintray ->
+                bintray.setPublications("mavenJava")
 
-                pkg(closureOf<BintrayExtension.PackageConfig> {
+                bintray.pkg {
 //                    name = packageName
                     setLabels("gradle", "gradle-plugins")
                     publicDownloadNumbers = true
-                })
+                }
             }
         }
     }

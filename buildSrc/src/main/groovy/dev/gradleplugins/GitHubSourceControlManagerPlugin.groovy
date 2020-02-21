@@ -22,19 +22,17 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
-import org.gradle.kotlin.dsl.closureOf
-import org.gradle.kotlin.dsl.configure
 import org.gradle.plugins.ide.idea.model.IdeaModel
 
-open class GitHubSourceControlManagerPlugin : Plugin<Project> {
-    override fun apply(project: Project): Unit = project.run {
-        val gitHub = project.extensions.create("gitHub", GitHubSourceControlManagerExtension::class.java)
+class GitHubSourceControlManagerPlugin implements Plugin<Project> {
+    void apply(Project project) {
+        def gitHub = project.extensions.create("gitHub", GitHubSourceControlManagerExtension)
         gitHub.gitHubHostName.convention("github.com")
-        gitHub.gitHubRepositoryName.convention(rootProject.name)
+        gitHub.gitHubRepositoryName.convention(project.rootProject.name)
 
-        pluginManager.withPlugin("maven-publish") {
-            configure<PublishingExtension> {
-                publications.withType(MavenPublication::class.java) {
+        project.pluginManager.withPlugin("maven-publish") {
+            project.publishing {
+                publications.withType(MavenPublication) {
                     pom {
                         description.set(project.provider { project.description })
                         url.set(gitHub.gitHubWebsiteUrl.map { it.toString() })
@@ -54,11 +52,11 @@ open class GitHubSourceControlManagerPlugin : Plugin<Project> {
             }
         }
 
-        pluginManager.withPlugin("com.jfrog.bintray") {
+        project.pluginManager.withPlugin("com.jfrog.bintray") {
             // TODO: Remove once bintray support Provider API
-            afterEvaluate {
-                configure<BintrayExtension> {
-                    pkg(closureOf<BintrayExtension.PackageConfig> {
+            project.afterEvaluate {
+                project.extensions.configure(BintrayExtension) { bintray ->
+                    bintray.pkg {
                         userOrg = gitHub.gitHubOrganization.get()
                         websiteUrl = gitHub.gitHubWebsiteUrl.get().toString()
                         issueTrackerUrl = gitHub.gitHubIssueTrackerUrl.get().toString()
@@ -67,23 +65,23 @@ open class GitHubSourceControlManagerPlugin : Plugin<Project> {
                         version.vcsTag = "v${project.version}"
 
                         githubRepo = gitHub.gitHubRepositorySlug.get()
-                    })
+                    }
                 }
             }
         }
 
-        pluginManager.withPlugin("org.jetbrains.gradle.plugin.idea-ext") {
-            configure<IdeaModel> {
-                project {
+        project.pluginManager.withPlugin("org.jetbrains.gradle.plugin.idea-ext") {
+            project.extensions.configure(IdeaModel) { idea ->
+                idea.project {
                     vcs = "Git"
                 }
             }
         }
 
-        pluginManager.withPlugin("com.gradle.plugin-publish") {
-            afterEvaluate {
-                configure<PluginBundleExtension> {
-                    vcsUrl = gitHub.gitHubWebsiteUrl.get().toString()
+        project.pluginManager.withPlugin("com.gradle.plugin-publish") {
+            project.afterEvaluate {
+                project.extensions.configure(PluginBundleExtension) { pluginBundle ->
+                    pluginBundle.vcsUrl = gitHub.gitHubWebsiteUrl.get().toString()
                 }
             }
         }

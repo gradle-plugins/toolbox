@@ -1,0 +1,36 @@
+import dev.gradleplugins.GitHubSourceControlManagerPlugin
+import dev.gradleplugins.GitHubSourceControlManagerExtension
+import dev.gradleplugins.OpenSourceSoftwareLicensePlugin
+
+plugins {
+    id 'com.gradle.build-scan' version '2.3'
+    id 'dev.gradleplugins.experimental.setup'
+    id 'dev.gradleplugins.java-gradle-plugin' version '0.0.21' apply false
+}
+
+buildScan {
+    termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+    termsOfServiceAgree = 'yes'
+
+    publishAlways()
+}
+
+allprojects {
+    group = 'dev.gradleplugins'
+    version = rootProject.file('version.txt').text
+
+    apply plugin: GitHubSourceControlManagerPlugin
+    extensions.configure(GitHubSourceControlManagerExtension) {
+        it.gitHubOrganization.set('gradle-plugins')
+    }
+
+    apply plugin: OpenSourceSoftwareLicensePlugin
+}
+
+//// TODO: Fails the build if running with anything else than Java 8 (or fix the projects so we can execute the build on other Java version)
+//dependencies {
+//    implementation(kotlinModule("stdlib", kotlin_version))
+//}
+//repositories {
+//    mavenCentral()
+//}

@@ -6,29 +6,28 @@ import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.javadoc.Groovydoc
 import org.gradle.api.tasks.javadoc.Javadoc
-import org.gradle.kotlin.dsl.*
 
-class AdditionalArtifactsPlugin: Plugin<Project> {
-    override fun apply(project: Project): Unit = project.run {
-        val sourceSets = the<SourceSetContainer>()
-        val javadoc = tasks.named<Javadoc>("javadoc")
+class AdditionalArtifactsPlugin implements Plugin<Project> {
+    void apply(Project project) {
+        def sourceSets = project.sourceSets
+        def javadoc = project.tasks.named("javadoc", Javadoc)
 
-        tasks.create("sourcesJar", Jar::class) {
+        project.tasks.create("sourcesJar", Jar) {
             archiveClassifier.set("sources")
-            from(sourceSets["main"].allSource)
+            from(sourceSets.main.allSource)
         }
 
         // TODO: React to the plugin instead, this is order dependent and bad
         if (project.pluginManager.hasPlugin("groovy")) {
-            val groovydoc = tasks.named<Groovydoc>("groovydoc")
-            tasks.create("groovydocJar", Jar::class) {
+            def groovydoc = project.tasks.named("groovydoc", Groovydoc)
+            project.tasks.create("groovydocJar", Jar) {
                 dependsOn(groovydoc)
                 archiveClassifier.set("groovydoc")
                 from(groovydoc.get().destinationDir)
             }
         }
 
-        tasks.create("javadocJar", Jar::class) {
+        project.tasks.create("javadocJar", Jar) {
             dependsOn(javadoc)
             archiveClassifier.set("javadoc")
             from(javadoc.get().destinationDir)

@@ -15,27 +15,27 @@
  */
 
 plugins {
-    id("dev.gradleplugins.java-gradle-plugin")
-    dev.gradleplugins.experimental.ide
+    id 'dev.gradleplugins.java-gradle-plugin'
+    id 'dev.gradleplugins.experimental.ide'
 }
 
 gradlePlugin {
     plugins {
-        register("gitHubPlugin") {
-            id = "dev.gradleplugins.scm.github"
-            implementationClass = "dev.gradleplugins.scm.internal.GitHubSourceControlManagerPlugin"
-            description = "GitHub source control manager modeling for Gradle builds"
+        gitHubPlugin {
+            id = 'dev.gradleplugins.scm.github'
+            implementationClass = 'dev.gradleplugins.scm.internal.GitHubSourceControlManagerPlugin'
+            description = 'GitHub source control manager modeling for Gradle builds'
         }
     }
 }
 
 pluginBundle {
-    website = "https://gradleplugins.dev/"
-    tags = listOf("scm", "github")
+    website = 'https://gradleplugins.dev/'
+    tags = ['scm', 'github']
 
     plugins {
-        val gitHubPlugin by existing {
-            displayName = "GitHub source control manager modeling for Gradle builds"
+        gitHubPlugin {
+            displayName = 'GitHub source control manager modeling for Gradle builds'
         }
     }
 }

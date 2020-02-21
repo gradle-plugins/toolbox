@@ -1,0 +1,138 @@
+plugins {
+    id 'dev.gradleplugins.java-gradle-plugin'
+    id 'dev.gradleplugins.experimental.shaded-artifact'
+    id 'maven-publish'
+    id 'dev.gradleplugins.experimental.ide'
+}
+
+// Supported by the development plugins
+tasks.named('publishPlugins') {
+    dependsOn('shadowJar')
+}
+tasks.named('jar') {
+    enabled = false
+}
+afterEvaluate {
+    publishing {
+        publications {
+            withType(MavenPublication) {
+                if (name == 'pluginMaven') {
+                    setArtifacts([tasks.getByName('shadowJar')])
+                }
+            }
+        }
+    }
+}
+
+repositories {
+    jcenter()
+    gradlePluginPortal()
+}
+
+def stubConfiguration = configurations.create('stub') {
+    visible = false
+    canBeResolved = true
+    canBeConsumed = false
+    attributes.attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, 'stub'))
+}
+
+dependencies {
+    add(stubConfiguration.name, project(':gradle-plugin-development-stubs'))
+
+    // TODO: Figure out why this can't be removed...
+    implementation gradleApi()
+
+    implementation 'com.gradle.publish:plugin-publish-plugin:0.10.1'
+    functionalTestImplementation project(':gradle-testkit-fixtures')
+    compileOnly project(':gradle-plugin-development-annotation')
+    shaded 'org.ow2.asm:asm:6.0'
+    shaded 'org.ow2.asm:asm-util:6.0'
+
+    functionalTestImplementation project(':gradle-plugin-development-annotation')
+}
+
+tasks.named('pluginUnderTestMetadata', PluginUnderTestMetadata) {
+    getPluginClasspath().from(configurations.shaded)
+}
+
+sourceSets {
+    main {
+        resources.srcDir(stubConfiguration)
+    }
+}
+
+String withoutSnapshot(String version) {
+    return version.toString().replace('-SNAPSHOT', '')
+}
+
+def generatorTask = tasks.register('createVersionInformation') {
+    outputs.dir(project.layout.buildDirectory.dir('generatedSources'))
+    inputs.property('version', project.version)
+    inputs.property('group', project.group)
+    inputs.property('name', project.project(':gradle-testkit-fixtures').name)
+    doLast {
+        project.layout.buildDirectory.file('generatedSources/TestFixtures.java').get().asFile.text = """package dev.gradleplugins.internal;
+
+public class TestFixtures {
+    public static final boolean released = ${!project.version.toString().contains("-SNAPSHOT")};
+    public static final String notation = "${project.group}:${project.project(":gradle-testkit-fixtures").name}:${project.version}";
+    public static final String apiVersion = "0.0.12";
+    public static final String currentVersion = "${project.version}";
+}
+"""
+    }
+}
+tasks.named('compileJava', JavaCompile) {
+    dependsOn(generatorTask)
+}
+sourceSets.main {
+    java.srcDir(project.layout.buildDirectory.dir("generatedSources"))
+}
+
+pluginBundle {
+    website = 'https://gradleplugins.dev/'
+//    description = "A sets of highly opinionated plugins to kick start any Gradle plugin project."
+    tags = ['gradle', 'gradle-plugins', 'development']
+
+    plugins {
+        javaGradlePluginDevelopment {
+            id = 'dev.gradleplugins.java-gradle-plugin'
+            description = 'Fast track development of Gradle plugins in Java'
+            displayName = 'Fast Gradle plugin development in Java'
+            tags = ["gradle", "gradle-plugins", "development", "java"]
+        }
+        groovyGradlePluginDevelopment {
+            id = 'dev.gradleplugins.groovy-gradle-plugin'
+            description = 'Fast track development of Gradle plugins in Groovy'
+            displayName = 'Fast Gradle plugin development in Groovy'
+            tags = ['gradle', 'gradle-plugins', 'development', 'groovy']
+        }
+        kotlinGradlePluginDevelopment {
+            id = 'dev.gradleplugins.kotlin-gradle-plugin'
+            description = 'Fast track development of Gradle plugins in Kotlin'
+            displayName = 'Fast Gradle plugin development in Kotlin'
+            tags = ['gradle', 'gradle-plugins', 'development', 'kotlin']
+        }
+    }
+}
+
+publishing {
+    repositories {
+        mavenLocal()
+    }
+}
+
+tasks.register('release') {
+    dependsOn('publishPlugins')
+}
+
+tasks.register('install') {
+    dependsOn('publishToMavenLocal')
+}
+
+shadedArtifact {
+    packagesToRelocate.set(['org.objectweb.asm', 'org.objectweb.asm.util'])
+}
+
+// TODO: Add smoke test of the final binaires to make sure it contains the expected plugin ids, etc
+//   - Also check the dependencies inside the POM to make sure we aren't leaking anything

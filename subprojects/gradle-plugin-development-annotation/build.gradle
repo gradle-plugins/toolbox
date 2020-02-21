@@ -1,3 +1,5 @@
+import com.jfrog.bintray.gradle.BintrayExtension
+
 /*
  * Copyright 2019 the original author or authors.
  *
@@ -14,14 +16,33 @@
  * limitations under the License.
  */
 
-package dev.gradleplugins
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'dev.gradleplugins.experimental.artifacts'
+    id 'dev.gradleplugins.experimental.publishing'
+}
 
-import org.gradle.api.plugins.ExtensionAware
-import org.gradle.kotlin.dsl.configure
-import org.gradle.plugins.ide.idea.model.IdeaProject
-import org.jetbrains.gradle.ext.CopyrightConfiguration
-import org.jetbrains.gradle.ext.ProjectSettings
+publishing {
+    publications {
+        mavenJava {
+            from(components.java)
+        }
+    }
+}
 
-fun IdeaProject.settings(configuration: ProjectSettings.() -> kotlin.Unit) = (this as ExtensionAware).configure(configuration)
+afterEvaluate {
+    extensions.configure(BintrayExtension) { bintray ->
+        bintray.pkg {
+            name = 'plugin-development'
+        }
+    }
+}
 
-fun ProjectSettings.copyright(configuration: CopyrightConfiguration.() -> kotlin.Unit) = (this as ExtensionAware).configure(configuration)
+tasks.register('release') {
+    dependsOn('bintrayUpload')
+}
+
+tasks.register('install') {
+    dependsOn('publishToMavenLocal')
+}

@@ -20,9 +20,9 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.buildinit.plugins.BuildInitPlugin
 
-class SetupProjectPlugin : Plugin<Project> {
-    override fun apply(project: Project): Unit = project.run {
-        tasks.register("setup") {
+class SetupProjectPlugin implements Plugin<Project> {
+    void apply(Project project) {
+        project.tasks.register("setup") {
             group = "Build Setup"
             description = "Generates general project files."
         }
