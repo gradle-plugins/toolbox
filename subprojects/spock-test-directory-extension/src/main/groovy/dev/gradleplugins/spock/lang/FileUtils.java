@@ -8,7 +8,10 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import static org.junit.Assert.assertTrue;
 
 // TODO: Share implementation with TestFile
 public class FileUtils {
@@ -57,5 +60,47 @@ public class FileUtils {
                 throw new IOException("Unable to delete file: " + directory.getCanonicalPath());
             }
         }
+    }
+
+    public static File createDirectory(File directory) {
+        if (directory.mkdirs()) {
+            return directory;
+        }
+        if (directory.isDirectory()) {
+            return directory;
+        }
+        throw new AssertionError("Problems creating dir: " + directory
+                + ". Diagnostics: exists=" + directory.exists() + ", isFile=" + directory.isFile() + ", isDirectory=" + directory.isDirectory() + ", isSymbolicLink=" + Files.isSymbolicLink(directory.toPath()));
+    }
+
+    public static File createFile(File file) {
+        createDirectory(file.getParentFile());
+        try {
+            assertTrue(file.isFile() || file.createNewFile());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return file;
+    }
+
+    /**
+     * Construct a file from the set of name elements.
+     *
+     * @param directory the parent directory
+     * @param names the name elements
+     * @return the file
+     */
+    public static File file(final File directory, final String... names) {
+        if (directory == null) {
+            throw new NullPointerException("directory must not be null");
+        }
+        if (names == null) {
+            throw new NullPointerException("names must not be null");
+        }
+        File file = directory;
+        for (final String name : names) {
+            file = new File(file, name);
+        }
+        return file;
     }
 }

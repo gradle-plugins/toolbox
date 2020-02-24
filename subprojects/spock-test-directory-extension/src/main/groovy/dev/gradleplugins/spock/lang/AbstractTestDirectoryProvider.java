@@ -147,16 +147,15 @@ abstract class AbstractTestDirectoryProvider implements TestRule, TestDirectoryP
         return prefix;
     }
 
-//    public TestFile file(Object... path) {
-//        return getTestDirectory().file((Object[]) path);
-//    }
-//
-//    public TestFile createFile(Object... path) {
-//        return file((Object[]) path).createFile();
-//    }
-//
-//    // TODO: rename to createDirectory
-//    public TestFile createDir(Object... path) {
-//        return file((Object[]) path).createDirectory();
-//    }
+    public File file(String... path) {
+        return FileUtils.file(getTestDirectory(), path);
+    }
+
+    public File createFile(String... path) {
+        return FileUtils.createFile(file(path));
+    }
+
+    public File createDirectory(String... path) {
+        return FileUtils.createDirectory(file(path));
+    }
 }
