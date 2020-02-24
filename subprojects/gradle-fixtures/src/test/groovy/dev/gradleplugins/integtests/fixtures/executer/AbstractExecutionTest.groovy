@@ -1,6 +1,6 @@
 package dev.gradleplugins.integtests.fixtures.executer
 
-import dev.gradleplugins.test.fixtures.file.TestNameTestDirectoryProvider
+import dev.gradleplugins.spock.lang.TestNameTestDirectoryProvider
 import org.junit.Rule
 import spock.lang.Specification
 

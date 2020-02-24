@@ -17,7 +17,6 @@
 package dev.gradleplugins.test.fixtures.maven;
 
 import dev.gradleplugins.integtests.fixtures.executer.GradleExecuter;
-import dev.gradleplugins.test.fixtures.file.TestDirectoryProvider;
 import dev.gradleplugins.test.fixtures.file.TestFile;
 
 import java.io.File;
@@ -25,7 +24,7 @@ import java.util.Collections;
 import java.util.function.Consumer;
 
 public class M2Installation implements Consumer<GradleExecuter> {
-    private final TestDirectoryProvider temporaryFolder;
+    private final TestFile testDirectory;
     private boolean initialized = false;
     private TestFile userHomeDirectory;
     private TestFile userM2Directory;
@@ -35,13 +34,13 @@ public class M2Installation implements Consumer<GradleExecuter> {
     private TestFile isolatedMavenRepoForLeakageChecks;
     private boolean isolateMavenLocal = true;
 
-    public M2Installation(TestDirectoryProvider temporaryFolder) {
-        this.temporaryFolder = temporaryFolder;
+    public M2Installation(TestFile testDirectory) {
+        this.testDirectory = testDirectory;
     }
 
     private void init() {
         if (!initialized) {
-            userHomeDirectory = temporaryFolder.getTestDirectory().createDirectory("maven_home");
+            userHomeDirectory = testDirectory.createDirectory("maven_home");
             userM2Directory = userHomeDirectory.createDirectory(".m2");
             userSettingsFile = userM2Directory.file("settings.xml");
             globalMavenDirectory = userHomeDirectory.createDirectory("m2_home");
@@ -116,7 +115,7 @@ public class M2Installation implements Consumer<GradleExecuter> {
     public void isolateMavenLocalRepo(GradleExecuter gradleExecuter) {
         gradleExecuter.beforeExecute(executer -> {
             if (isolateMavenLocal) {
-                isolatedMavenRepoForLeakageChecks = executer.getTestDirectoryProvider().getTestDirectory().createDirectory("m2-home-should-not-be-filled");
+                isolatedMavenRepoForLeakageChecks = executer.getTestDirectory().createDirectory("m2-home-should-not-be-filled");
                 setMavenLocalLocation(gradleExecuter, isolatedMavenRepoForLeakageChecks);
             }
         });

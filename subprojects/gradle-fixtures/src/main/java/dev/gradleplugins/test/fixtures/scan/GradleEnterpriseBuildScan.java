@@ -17,7 +17,6 @@
 package dev.gradleplugins.test.fixtures.scan;
 
 import dev.gradleplugins.integtests.fixtures.executer.GradleExecuter;
-import dev.gradleplugins.test.fixtures.file.TestDirectoryProvider;
 import dev.gradleplugins.test.fixtures.file.TestFile;
 
 import java.util.function.Consumer;
@@ -37,7 +36,7 @@ public class GradleEnterpriseBuildScan implements Consumer<GradleExecuter> {
             // TODO: Make sure build scan is not already applied
             // TODO: Support Kotlin DSL
 
-            TestFile buildFile = executer.getTestDirectoryProvider().getTestDirectory().file("build.gradle");
+            TestFile buildFile = executer.getTestDirectory().file("build.gradle");
             String content = buildFile.getText();
             // TODO: support multiple space between `plugins` and `{`
             // TODO: It should detect and use the latest build scan version for the distribution to use.

@@ -1,6 +1,5 @@
 package dev.gradleplugins.integtests.fixtures.executer
 
-
 import spock.lang.Subject
 
 @Subject(GradleRunnerExecuter)

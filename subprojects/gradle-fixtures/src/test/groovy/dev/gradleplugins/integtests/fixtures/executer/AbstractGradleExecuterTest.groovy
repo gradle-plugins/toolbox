@@ -1,7 +1,7 @@
 package dev.gradleplugins.integtests.fixtures.executer
 
+import dev.gradleplugins.spock.lang.TestNameTestDirectoryProvider
 import dev.gradleplugins.test.fixtures.file.TestFile
-import dev.gradleplugins.test.fixtures.file.TestNameTestDirectoryProvider
 import org.gradle.testkit.runner.UnexpectedBuildFailure
 import org.gradle.testkit.runner.UnexpectedBuildSuccess
 import org.junit.Rule

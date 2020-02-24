@@ -16,7 +16,7 @@
 
 package dev.gradleplugins.integtests.fixtures.executer;
 
-import dev.gradleplugins.test.fixtures.file.TestDirectoryProvider;
+import dev.gradleplugins.test.fixtures.file.TestFile;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.BuildTask;
 import org.gradle.testkit.runner.GradleRunner;
@@ -43,8 +43,8 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
     private boolean usePluginClasspath = false;
     private Map<String, Object> environment = null;
 
-    public GradleRunnerExecuter(TestDirectoryProvider testDirectoryProvider) {
-        super(testDirectoryProvider);
+    public GradleRunnerExecuter(TestFile testDirectory) {
+        super(testDirectory);
     }
 
     @Override

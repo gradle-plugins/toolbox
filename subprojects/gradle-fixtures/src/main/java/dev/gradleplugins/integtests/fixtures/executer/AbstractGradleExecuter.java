@@ -1,6 +1,5 @@
 package dev.gradleplugins.integtests.fixtures.executer;
 
-import dev.gradleplugins.test.fixtures.file.TestDirectoryProvider;
 import dev.gradleplugins.test.fixtures.file.TestFile;
 
 import java.io.File;
@@ -10,22 +9,22 @@ import java.util.List;
 import java.util.function.Consumer;
 
 abstract class AbstractGradleExecuter implements GradleExecuter {
-    private final TestDirectoryProvider testDirectoryProvider;
+    private final TestFile testDirectory;
 
-    public AbstractGradleExecuter(TestDirectoryProvider testDirectoryProvider) {
-        assert testDirectoryProvider != null : "testDirectoryProvider cannot be null";
-        this.testDirectoryProvider = testDirectoryProvider;
+    public AbstractGradleExecuter(TestFile testDirectory) {
+        assert testDirectory != null : "testDirectory cannot be null";
+        this.testDirectory = testDirectory;
     }
 
     @Override
-    public TestDirectoryProvider getTestDirectoryProvider() {
-        return testDirectoryProvider;
+    public TestFile getTestDirectory() {
+        return testDirectory;
     }
 
     //region Working directory configuration
     private File workingDirectory = null;
     public File getWorkingDirectory() {
-        return workingDirectory == null ? getTestDirectoryProvider().getTestDirectory() : workingDirectory;
+        return workingDirectory == null ? testDirectory : workingDirectory;
     }
 
     @Override
@@ -66,7 +65,7 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
     private void ensureSettingsFileAvailable() {
         TestFile workingDirectory = new TestFile(getWorkingDirectory());
         TestFile directory = workingDirectory;
-        while (directory != null && getTestDirectoryProvider().getTestDirectory().isSelfOrDescendent(directory)) {
+        while (directory != null && getTestDirectory().isSelfOrDescendent(directory)) {
             if (hasSettingsFile(directory)) {
                 return;
             }

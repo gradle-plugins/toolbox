@@ -16,6 +16,7 @@
 
 package dev.gradleplugins.test.fixtures.file
 
+import dev.gradleplugins.spock.lang.TestNameTestDirectoryProvider
 import org.junit.Rule
 import spock.lang.Ignore
 import spock.lang.Specification

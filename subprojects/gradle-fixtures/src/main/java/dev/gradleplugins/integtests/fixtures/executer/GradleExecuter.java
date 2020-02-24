@@ -16,7 +16,7 @@
 
 package dev.gradleplugins.integtests.fixtures.executer;
 
-import dev.gradleplugins.test.fixtures.file.TestDirectoryProvider;
+import dev.gradleplugins.test.fixtures.file.TestFile;
 import org.gradle.testkit.runner.BuildResult;
 
 import java.io.File;
@@ -107,7 +107,7 @@ public interface GradleExecuter {
      *
      * May or may not be the same directory as the build to be run.
      */
-    TestDirectoryProvider getTestDirectoryProvider();
+    TestFile getTestDirectory();
 
     /**
      * Executes the requested build, asserting that the build succeeds. Resets the configuration of this executor.
