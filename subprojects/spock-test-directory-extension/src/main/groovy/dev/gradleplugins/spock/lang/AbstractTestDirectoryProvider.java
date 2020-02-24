@@ -29,7 +29,6 @@ import java.util.regex.Pattern;
 /**
  * A JUnit rule which provides a unique temporary folder for the test.
  */
-// TODO: Remove dependency on TestFile so it can be composed to use it
 // TODO: Can we move this to an internal API?
 abstract class AbstractTestDirectoryProvider implements TestRule, TestDirectoryProvider {
     protected File root;

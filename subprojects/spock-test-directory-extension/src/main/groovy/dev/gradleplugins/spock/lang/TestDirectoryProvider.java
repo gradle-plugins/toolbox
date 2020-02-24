@@ -23,7 +23,6 @@ import java.io.File;
  *
  * The client is not responsible for removing any files.
  */
-// TODO: We should decouple the provider from TestFile
 public interface TestDirectoryProvider {
 
     /**
