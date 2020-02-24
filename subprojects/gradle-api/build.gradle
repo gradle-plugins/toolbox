@@ -13,123 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import com.google.common.reflect.TypeToken
-import com.google.gson.Gson
+
 import com.jfrog.bintray.gradle.BintrayExtension
-import dev.gradleplugins.GenerateGradleApiJar
-import org.gradle.util.VersionNumber
-import java.net.URL
-import groovy.transform.Canonical
 
 plugins {
-    id 'java'
-    id 'application'
+    id 'dev.gradleplugins.build.gradle-api-jars'
     id 'com.jfrog.bintray'
     id 'maven-publish'
     id 'dev.gradleplugins.experimental.publishing-base'
 }
 
-version = '0.0.13'
-
-def java = project.extensions.getByType(JavaPluginExtension)
-java.sourceCompatibility = JavaVersion.VERSION_1_8
-java.targetCompatibility = JavaVersion.VERSION_1_8
-
-dependencies {
-    implementation gradleTestKit()
-}
-
-application {
-    mainClassName = 'dev.gradleplugins.Main'
-}
-
-@Canonical
-class VersionDownloadInfo {
-    String version
-    String downloadUrl
-    boolean snapshot
-}
-
-List<String> getAllGeneralAvailableVersion() {
-    def jsonText = new URL("https://services.gradle.org/versions/all").text
-    def type = new TypeToken<List<VersionDownloadInfo>>() { }.type
-    def versionInfo = new Gson().fromJson(jsonText, type)
-    def result = versionInfo.findAll { !it.snapshot && !it.version.contains("-rc-") && VersionNumber.parse("5.5.1").compareTo(VersionNumber.parse(it.version)) <= 0 }.collect { it.version }
-    return result.plus("3.5.1")
-}
-
-getAllGeneralAvailableVersion().each { availableVersion ->
-    def generateGradleApiJarTask = tasks.register("generateGradleApi${availableVersion}", GenerateGradleApiJar) {
-        getClasspath().from(tasks.withType(JavaExec).getByName('run').classpath)
-        getVersion().set(availableVersion)
-        getOutputFile().set(layout.buildDirectory.file("generated-gradle-jars/gradle-api-${availableVersion}.jar"))
-    }
-
-    def jarTask = tasks.register("hack${availableVersion}", Jar) {
-        dependsOn(generateGradleApiJarTask)
-        destinationDirectory.set(layout.buildDirectory.dir('generated-gradle-jars/'))
-        archiveExtension.set('jar')
-        archiveBaseName.set('gradle-api')
-        archiveVersion.set(availableVersion)
-        enabled = false
-    }
-
-    publishing {
-        publications {
-            def mavenPublication = create("gradle-api-${availableVersion}", MavenPublication) {
-                artifact(jarTask.get())
-
-                pom {
-                    name.set("Gradle API v${availableVersion}")
-                    description.set(project.provider { project.description })
-//                    inceptionYear.set("2019")
-
-                    developers {
-                        developer {
-                            id.set("gradle")
-                            name.set("Gradle Inc.")
-                            url.set("https://github.com/gradle")
-                        }
-                    }
-                    withXml {
-                        def dependency = asNode().appendNode("dependencies").appendNode("dependency")
-                        dependency.appendNode("groupId", "org.codehaus.groovy")
-                        dependency.appendNode("artifactId", "groovy-all")
-                        if (it == "3.5.1") {
-                            dependency.appendNode("version", "2.4.10")
-                        } else {
-                            dependency.appendNode("version", "2.5.4")
-                        }
-                        dependency.appendNode("scope", "compile")
-                    }
-                }
-            }
-
-            project.afterEvaluate {
-                mavenPublication.groupId = "${project.group}"
-                if (project.version.toString().endsWith("-SNAPSHOT")) {
-                    def v = project.version.toString().replace("-SNAPSHOT", "")
-                    mavenPublication.version = "${v}-${availableVersion}-SNAPSHOT"
-                } else {
-                    mavenPublication.version = "${project.version}-${availableVersion}"
-                }
-            }
-
-            project.extensions.configure(BintrayExtension) { bintray ->
-                def list = (bintray.publications != null) ? [*bintray.publications] : []
-                list.add("gradle-api-${availableVersion}")
-                bintray.setPublications(*list.toArray())
-            }
-        }
-    }
-}
-
 afterEvaluate {
     extensions.configure(BintrayExtension) { bintray ->
+        bintray.publications = publishing.publications.collect { it.name }
         bintray.pkg {
             name = "gradle-api-jars"
             setLabels("gradle", "gradle-api", "gradle-plugins")
-            publicDownloadNumbers = true
+            publicDownloadNumbers = false
         }
     }
 }

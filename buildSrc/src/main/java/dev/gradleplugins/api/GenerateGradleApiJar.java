@@ -14,31 +14,39 @@
  * limitations under the License.
  */
 
-package dev.gradleplugins;
+package dev.gradleplugins.api;
 
-import org.gradle.testkit.runner.GradleRunner;
+import org.gradle.api.DefaultTask;
+import org.gradle.api.file.RegularFileProperty;
+import org.gradle.api.provider.Property;
+import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.OutputFile;
+import org.gradle.api.tasks.TaskAction;
+import org.gradle.tooling.GradleConnector;
+import org.gradle.tooling.ProjectConnection;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
 
-public class Main {
-    public static void main(String[] a) throws IOException {
-        if (a.length < 2) {
-            throw new IllegalArgumentException("missing gradle version");
-        }
+public abstract class GenerateGradleApiJar extends DefaultTask {
+    @Input
+    public abstract Property<String> getVersion();
+
+    @OutputFile
+    public abstract RegularFileProperty getOutputFile();
+
+    @TaskAction
+    private void doGenerate() throws IOException {
+        getOutputFile().get().getAsFile().delete();
+
         File temporaryDir = Files.createTempDirectory("gradle").toFile();
         try (PrintWriter out = new PrintWriter(new File(temporaryDir, "build.gradle"))) {
-            out.println("plugins {");
-            out.println("    id('java')");
-            out.println("}");
+            out.println("apply plugin: 'java'");
             out.println("dependencies {");
             out.println("    compile(gradleApi())");
             out.println("}");
-//            out.println("tasks.create('bob').doLast { configurations.implementation.artifacts.files }");
         }
         try (PrintWriter out = new PrintWriter(new File(temporaryDir, "settings.gradle"))) {
             out.println("rootProject.name = 'gradle-api-jar'");
@@ -48,19 +56,17 @@ public class Main {
             out.println("public class Some {}");
         }
 
-        File gradleUserHomeDir = new File(temporaryDir, "gradle-user-home");
+        ProjectConnection connection = GradleConnector.newConnector()
+                .forProjectDirectory(temporaryDir)
+                .useGradleVersion(getVersion().get())
+                .connect();
 
-        List<String> args = new ArrayList<>();
-        args.add("--gradle-user-home");
-        args.add(gradleUserHomeDir.getAbsolutePath());
-        args.add("-q");
-        args.add("build");
-        GradleRunner.create()
-                .withProjectDir(temporaryDir)
-                .withArguments(args)
-                .withGradleVersion(a[0]).build();
+        try {
+            connection.newBuild().forTasks("build").run();
+        } finally {
+            connection.close();
+        }
 
-        Files.copy(new File(gradleUserHomeDir, "caches/" + a[0] + "/generated-gradle-jars/gradle-api-" + a[0] + ".jar").toPath(), new File(a[1] + "/gradle-api-" + a[0] + ".jar").toPath());
-//        System.out.println(new File(gradleUserHomeDir, "caches/" + a[0] + "/generated-gradle-jars/gradle-api-" + a[0] + ".jar").getCanonicalPath());
+        Files.copy(new File(System.getProperty("user.home") + "/.gradle/caches/" + getVersion().get() + "/generated-gradle-jars/gradle-api-" + getVersion().get() + ".jar").toPath(), getOutputFile().getAsFile().get().toPath());
     }
 }
