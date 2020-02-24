@@ -92,7 +92,7 @@ getAllGeneralAvailableVersion().each { availableVersion ->
                         }
                     }
                     withXml {
-                        val dependency = asNode().appendNode("dependencies").appendNode("dependency")
+                        def dependency = asNode().appendNode("dependencies").appendNode("dependency")
                         dependency.appendNode("groupId", "org.codehaus.groovy")
                         dependency.appendNode("artifactId", "groovy-all")
                         if (it == "3.5.1") {
