@@ -28,6 +28,7 @@ dependencies {
     implementation gradleTestKit()
 
     testImplementation 'org.spockframework:spock-core:1.2-groovy-2.5'
+    testImplementation project(':spock-test-directory-extension')
     implementation 'junit:junit:4.12'
 }
 
