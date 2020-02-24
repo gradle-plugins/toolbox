@@ -28,7 +28,7 @@ import java.lang.annotation.*;
  * an interceptor and listener which cleans up the test directory only when the test passes.
  *
  * The annotation needs to know which field is the {@link TestDirectoryProvider}
- * to clean up.  It defaults to "temporaryFolder", which is the field for AbstractIntegrationSpec.  Other specs
+ * to clean up. It defaults to "temporaryFolder", which is the field for AbstractIntegrationSpec. Other specs
  * can set it accordingly using "fieldName".
  */
 @Inherited
