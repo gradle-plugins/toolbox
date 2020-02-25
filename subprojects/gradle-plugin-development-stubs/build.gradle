@@ -29,12 +29,15 @@ repositories {
 }
 
 dependencies {
-    implementation 'dev.gradleplugins:gradle-api:0.0.13-3.5.1'
+    compileOnly(project(':gradle-api')) {
+        attributes {
+            attribute(Attribute.of('dev.gradleplugins.gradleAbi', String), '2.14.1')
+        }
+    }
 }
 
 configurations {
     stubElements {
-        visible = false
         canBeResolved = false
         canBeConsumed = true
         attributes.attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, 'stub'))
