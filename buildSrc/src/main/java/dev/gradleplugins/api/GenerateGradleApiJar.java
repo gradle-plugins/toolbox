@@ -24,10 +24,12 @@ import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.tooling.GradleConnector;
 import org.gradle.tooling.ProjectConnection;
+import org.gradle.workers.WorkAction;
+import org.gradle.workers.WorkParameters;
+import org.gradle.workers.WorkerExecutor;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
+import javax.inject.Inject;
+import java.io.*;
 import java.nio.file.Files;
 
 public abstract class GenerateGradleApiJar extends DefaultTask {
@@ -37,36 +39,61 @@ public abstract class GenerateGradleApiJar extends DefaultTask {
     @OutputFile
     public abstract RegularFileProperty getOutputFile();
 
+    @Inject
+    protected abstract WorkerExecutor getWorkerExecutor();
+
     @TaskAction
-    private void doGenerate() throws IOException {
-        getOutputFile().get().getAsFile().delete();
+    private void doGenerate() {
+        getWorkerExecutor().noIsolation().submit(GenerateGradleApiJarAction.class, param -> {
+            param.getOutputFile().set(getOutputFile());
+            param.getVersion().set(getVersion());
+        });
 
-        File temporaryDir = Files.createTempDirectory("gradle").toFile();
-        try (PrintWriter out = new PrintWriter(new File(temporaryDir, "build.gradle"))) {
-            out.println("apply plugin: 'java'");
-            out.println("dependencies {");
-            out.println("    compile(gradleApi())");
-            out.println("}");
-        }
-        try (PrintWriter out = new PrintWriter(new File(temporaryDir, "settings.gradle"))) {
-            out.println("rootProject.name = 'gradle-api-jar'");
-        }
-        new File(temporaryDir, "src/main/java").mkdirs();
-        try (PrintWriter out = new PrintWriter(new File(temporaryDir, "src/main/java/Some.java"))) {
-            out.println("public class Some {}");
-        }
+    }
 
-        ProjectConnection connection = GradleConnector.newConnector()
-                .forProjectDirectory(temporaryDir)
-                .useGradleVersion(getVersion().get())
-                .connect();
+    public static abstract class GenerateGradleApiJarAction implements WorkAction<GenerateGradleApiJarParameters> {
 
-        try {
-            connection.newBuild().forTasks("build").run();
-        } finally {
-            connection.close();
+        @Override
+        public void execute() {
+            getParameters().getOutputFile().get().getAsFile().delete();
+
+            try {
+                File temporaryDir = Files.createTempDirectory("gradle").toFile();
+                try (PrintWriter out = new PrintWriter(new File(temporaryDir, "build.gradle"))) {
+                    out.println("apply plugin: 'java'");
+                    out.println("dependencies {");
+                    out.println("    compile(gradleApi())");
+                    out.println("}");
+                }
+                try (PrintWriter out = new PrintWriter(new File(temporaryDir, "settings.gradle"))) {
+                    out.println("rootProject.name = 'gradle-api-jar'");
+                }
+                new File(temporaryDir, "src/main/java").mkdirs();
+                try (PrintWriter out = new PrintWriter(new File(temporaryDir, "src/main/java/Some.java"))) {
+                    out.println("public class Some {}");
+                }
+
+                ProjectConnection connection = GradleConnector.newConnector()
+                        .forProjectDirectory(temporaryDir)
+                        .useGradleVersion(getParameters().getVersion().get())
+                        .connect();
+
+                ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+                try {
+                    connection.newBuild().setStandardOutput(outStream).forTasks("build").run();
+                } finally {
+                    connection.close();
+                }
+
+                Files.copy(new File(System.getProperty("user.home") + "/.gradle/caches/" + getParameters().getVersion().get() + "/generated-gradle-jars/gradle-api-" + getParameters().getVersion().get() + ".jar").toPath(), getParameters().getOutputFile().getAsFile().get().toPath());
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
         }
+    }
 
-        Files.copy(new File(System.getProperty("user.home") + "/.gradle/caches/" + getVersion().get() + "/generated-gradle-jars/gradle-api-" + getVersion().get() + ".jar").toPath(), getOutputFile().getAsFile().get().toPath());
+    public interface GenerateGradleApiJarParameters extends WorkParameters {
+        RegularFileProperty getOutputFile();
+        Property<String> getVersion();
     }
 }
