@@ -86,13 +86,7 @@ public class GradleApiJarGeneratorPlugin implements Plugin<Project> {
                 });
             });
 
-            if (availableVersion.getVersion().equals("2.14") || availableVersion.getVersion().equals("2.14.1")) {
-                dependencies.add(api.getName(), "org.codehaus.groovy:groovy-all:2.4.4");
-            } else if (availableVersion.getVersion().equals("3.5.1")) {
-                dependencies.add(api.getName(), "org.codehaus.groovy:groovy-all:2.4.10");
-            } else {
-                dependencies.add(api.getName(), "org.codehaus.groovy:groovy-all:2.5.4");
-            }
+            dependencies.add(api.getName(), "org.codehaus.groovy:groovy-all:" + toGroovyVersion(availableVersion));
 
             AdhocComponentWithVariants adhocComponent = softwareComponentFactory.adhoc("gradleApi" + availableVersion.getVersion());
             // add it to the list of components that this project declares
@@ -171,5 +165,34 @@ public class GradleApiJarGeneratorPlugin implements Plugin<Project> {
     private static class VersionDownloadInfo {
         String version;
         boolean snapshot;
+    }
+
+    private static String toGroovyVersion(GradleVersion version) {
+        // Use `find ~/.gradle/wrapper -name "groovy-all-*"`
+        switch (version.getVersion()) {
+            case "2.14":
+            case "2.14.1":
+                return "2.4.4";
+            case "3.5.1":
+                return "2.4.10";
+            case "5.4.1":
+            case "5.5.1":
+                return "2.5.4"; //"org.gradle.groovy:groovy-all:1.0-2.5.4";
+            case "5.6":
+            case "5.6.1":
+            case "5.6.2":
+            case "5.6.3":
+            case "5.6.4":
+                return "2.5.4"; //"org.gradle.groovy:groovy-all:1.3-2.5.4";
+            case "6.0":
+            case "6.0.1":
+            case "6.1":
+            case "6.1.1":
+            case "6.2":
+            case "6.2.1":
+                return "2.5.8"; //"org.gradle.groovy:groovy-all:1.3-2.5.8";
+            default:
+                throw new IllegalArgumentException("Version not known at the time, please check groovy-all version");
+        }
     }
 }
