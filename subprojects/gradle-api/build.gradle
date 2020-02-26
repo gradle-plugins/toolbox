@@ -50,6 +50,7 @@ project.tasks.withType(BintrayUploadTask).configureEach {
 afterEvaluate {
     extensions.configure(BintrayExtension) { bintray ->
         bintray.publications = publishing.publications.collect { it.name }
+        bintray.override = true
         bintray.pkg {
             name = "gradle-api-jars"
             setLabels("gradle", "gradle-api", "gradle-plugins")
