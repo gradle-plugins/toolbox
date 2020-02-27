@@ -1,11 +1,20 @@
-//plugins {
-//    id 'java-gradle-plugin'
+plugins {
+    id 'java-gradle-plugin'
 //    id 'com.gradle.plugin-publish'
 //    id 'dev.gradleplugins.experimental.shaded-artifact'
 //    id 'maven-publish'
 //    id 'dev.gradleplugins.experimental.ide'
-//}
-//
+}
+
+gradlePlugin {
+    plugins {
+        javaGradlePlugin {
+            id = 'dev.gradleplugins.java-gradle-plugin'
+            implementationClass = 'dev.gradleplugins.internal.plugins.JavaGradlePluginDevelopmentPlugin'
+        }
+    }
+}
+
 //// Supported by the development plugins
 //tasks.named('publishPlugins') {
 //    dependsOn('shadowJar')
@@ -25,11 +34,11 @@
 //    }
 //}
 //
-//repositories {
-//    jcenter()
+repositories {
+    jcenter()
 //    gradlePluginPortal()
-//}
-//
+}
+
 //def stubConfiguration = configurations.create('stub') {
 //    visible = false
 //    canBeResolved = true
@@ -37,12 +46,15 @@
 //    attributes.attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, 'stub'))
 //}
 //
-//dependencies {
-////    add(stubConfiguration.name, project(':gradle-plugin-development-stubs'))
-//
-//    // TODO: Figure out why this can't be removed...
-//    implementation gradleApi()
-//
+dependencies {
+//    add(stubConfiguration.name, project(':gradle-plugin-development-stubs'))
+
+    compileOnly(project(':gradle-api')) {
+        attributes {
+            attribute(Attribute.of('dev.gradleplugins.gradleAbi', String), '6.2.1')
+        }
+    }
+
 //    implementation 'com.gradle.publish:plugin-publish-plugin:0.10.1'
 ////    functionalTestImplementation project(':gradle-fixtures')
 //    compileOnly project(':gradle-plugin-development-annotation')
@@ -50,8 +62,8 @@
 //    shaded 'org.ow2.asm:asm-util:6.0'
 //
 ////    functionalTestImplementation project(':gradle-plugin-development-annotation')
-//}
-//
+}
+
 //tasks.named('pluginUnderTestMetadata', PluginUnderTestMetadata) {
 //    getPluginClasspath().from(configurations.shaded)
 //}

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.gradleplugins.internal;
+package dev.gradleplugins.internal.plugins;
 
 import org.gradle.api.GradleException;
 import org.gradle.api.Plugin;
