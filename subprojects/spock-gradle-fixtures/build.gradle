@@ -10,6 +10,8 @@ repositories {
 dependencies {
     api project(':gradle-fixtures')
 
+    implementation gradleTestKit()
+
     // This is tricky as it's a API dependency but may work for other versions
     //    Let's put the burden on the user to declare his requirements but also assume the code is compatible with older versions ;)
     // TODO: At some point, we will need make this work with an "older" version of Spock depending on how backward compatible the Gradle plugin development plugins will support.
