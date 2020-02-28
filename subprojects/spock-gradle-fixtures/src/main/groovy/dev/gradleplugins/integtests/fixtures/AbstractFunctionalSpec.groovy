@@ -16,10 +16,10 @@
 
 package dev.gradleplugins.integtests.fixtures
 
-import dev.gradleplugins.integtests.fixtures.executer.ExecutionFailure
-import dev.gradleplugins.integtests.fixtures.executer.ExecutionResult
-import dev.gradleplugins.integtests.fixtures.executer.GradleExecuter
-import dev.gradleplugins.integtests.fixtures.executer.GradleRunnerExecuter
+import dev.gradleplugins.test.fixtures.gradle.executer.ExecutionFailure
+import dev.gradleplugins.test.fixtures.gradle.executer.ExecutionResult
+import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter
+import dev.gradleplugins.test.fixtures.gradle.executer.GradleRunnerExecuter
 import dev.gradleplugins.spock.lang.CleanupTestDirectory
 import dev.gradleplugins.spock.lang.TestNameTestDirectoryProvider
 import dev.gradleplugins.test.fixtures.file.TestFile
@@ -35,7 +35,7 @@ import java.util.function.Consumer
 class AbstractFunctionalSpec extends Specification {
     @Rule
     final TestNameTestDirectoryProvider temporaryFolder = new TestNameTestDirectoryProvider()
-    final M2Installation m2 = new M2Installation(temporaryFolder)
+    final M2Installation m2 = new M2Installation(TestFile.of(temporaryFolder.testDirectory))
     GradleExecuter executer = createExecuter()
     private boolean useKotlinDsl = false
 
@@ -54,7 +54,7 @@ class AbstractFunctionalSpec extends Specification {
     }
 
     private GradleExecuter createExecuter() {
-        return new GradleRunnerExecuter(temporaryFolder).withPluginClasspath()
+        return new GradleRunnerExecuter(TestFile.of(temporaryFolder.testDirectory)).withPluginClasspath()
     }
 
     protected TestFile getProjectDir() {
