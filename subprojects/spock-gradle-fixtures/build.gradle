@@ -21,5 +21,5 @@ dependencies {
     //    Let's put the burden on the user to declare his requirements but also assume the code is compatible with older versions ;)
     // TODO: At some point, we will need make this work with an "older" version of Spock depending on how backward compatible the Gradle plugin development plugins will support.
     implementation 'org.spockframework:spock-core:1.2-groovy-2.5'
-    implementation project(':spock-test-directory-extension')
+    api project(':spock-test-directory-extension')
 }
