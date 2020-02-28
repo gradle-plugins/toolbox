@@ -16,7 +16,7 @@
 
 package dev.gradleplugins.test.fixtures.maven;
 
-import dev.gradleplugins.integtests.fixtures.executer.GradleExecuter;
+import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter;
 import dev.gradleplugins.test.fixtures.file.TestFile;
 
 import java.io.File;

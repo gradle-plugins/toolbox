@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package dev.gradleplugins.integtests.fixtures.executer;
+package dev.gradleplugins.test.fixtures.gradle.executer;
 
 import dev.gradleplugins.test.fixtures.file.TestFile;
-import org.gradle.testkit.runner.BuildResult;
 
 import java.io.File;
 import java.util.List;

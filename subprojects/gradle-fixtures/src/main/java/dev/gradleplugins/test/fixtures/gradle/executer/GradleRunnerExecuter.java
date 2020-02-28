@@ -14,23 +14,16 @@
  * limitations under the License.
  */
 
-package dev.gradleplugins.integtests.fixtures.executer;
+package dev.gradleplugins.test.fixtures.gradle.executer;
 
 import dev.gradleplugins.test.fixtures.file.TestFile;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.BuildTask;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
+import org.hamcrest.Matcher;
 
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 // TODO: This is implementation details and should be moved to internal package
@@ -226,8 +219,26 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
     }
 
     private static class GradleRunnerExecutionFailure extends GradleRunnerExecutionResult implements ExecutionFailure {
+        private final OutputScrapingExecutionFailure delegate;
+
         GradleRunnerExecutionFailure(BuildResult result) {
             super(result);
+            delegate = OutputScrapingExecutionFailure.from(result.getOutput(), result.getOutput());
+        }
+
+        @Override
+        public ExecutionFailure assertHasCause(String description) {
+            return delegate.assertHasCause(description);
+        }
+
+        @Override
+        public ExecutionFailure assertThatCause(Matcher<? super String> matcher) {
+            return delegate.assertThatCause(matcher);
+        }
+
+        @Override
+        public ExecutionFailure assertHasDescription(String context) {
+            return delegate.assertHasDescription(context);
         }
     }
 }

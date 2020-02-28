@@ -1,4 +1,4 @@
-package dev.gradleplugins.integtests.fixtures.executer;
+package dev.gradleplugins.test.fixtures.gradle.executer;
 
 public interface ExecutionResult {
     /**
