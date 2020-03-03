@@ -138,7 +138,8 @@ public class OutputScrapingExecutionResult implements ExecutionResult {
         return groupedOutputFixture;
     }
 
-    private String normalize(LogContent output) {
+    // HACK: So I can get a plain normalized output
+    public static String normalize(LogContent output) {
         List<String> result = new ArrayList<String>();
         List<String> lines = output.getLines();
         int i = 0;
