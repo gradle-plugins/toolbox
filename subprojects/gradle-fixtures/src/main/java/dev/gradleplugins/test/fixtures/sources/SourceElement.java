@@ -81,6 +81,13 @@ public abstract class SourceElement extends Element {
                 }
                 return files;
             }
+
+            @Override
+            public void writeToProject(TestFile projectDir) {
+                for (SourceElement element : elements) {
+                    element.writeToProject(projectDir);
+                }
+            }
         };
     }
 
