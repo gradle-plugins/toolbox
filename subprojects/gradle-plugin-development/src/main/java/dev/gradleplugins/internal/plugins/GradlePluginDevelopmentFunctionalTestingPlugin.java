@@ -10,7 +10,7 @@ public class GradlePluginDevelopmentFunctionalTestingPlugin implements Plugin<Pr
     @Override
     public void apply(Project project) {
         project.getPluginManager().apply("groovy-base");
-        project.getPluginManager().apply(SpockFunctionalTestingPlugin.class);
+        project.getPluginManager().apply(SpockFrameworkTestSuiteBasePlugin.class);
 
         project.getComponents().add(project.getObjects().newInstance(GroovyGradlePluginSpockTestSuite.class, FUNCTIONAL_TEST_NAME));
     }

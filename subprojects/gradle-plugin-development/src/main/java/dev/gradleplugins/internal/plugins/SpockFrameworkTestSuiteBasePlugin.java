@@ -17,6 +17,7 @@
 package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.internal.GroovyGradlePluginSpockTestSuite;
+import dev.gradleplugins.internal.GroovySpockFrameworkTestSuite;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.internal.plugins.DslObject;
@@ -27,22 +28,31 @@ import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.testing.Test;
 import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 
-public class SpockFunctionalTestingPlugin implements Plugin<Project> {
-    private static final String FUNCTIONAL_TEST_SOURCE_SET_NAME = "functionalTest";
-
+public class SpockFrameworkTestSuiteBasePlugin implements Plugin<Project> {
     @Override
     public void apply(Project project) {
-        project.getComponents().withType(GroovyGradlePluginSpockTestSuite.class, testSuite -> {
-            SourceSet sourceSet = createSourceSet(testSuite, project);
-            System.out.println("Bob" + sourceSet.getName());
+        project.getPluginManager().apply("groovy-base");
+        project.getComponents().withType(GroovySpockFrameworkTestSuite.class, testSuite -> {
+            SourceSet sourceSet = maybeCreateSourceSet(testSuite, project);
             createAndAttachTestTask(testSuite, sourceSet, project);
 
-            configureTestKitProjectDependency(testSuite, sourceSet, project);
             configureSpockFrameworkProjectDependency(testSuite, sourceSet, project);
-
-            configureGradleFixturesProjectDependency(testSuite, sourceSet, project);
         });
 
+        project.getComponents().withType(GroovyGradlePluginSpockTestSuite.class, testSuite -> {
+            SourceSet sourceSet = maybeCreateSourceSet(testSuite, project);
+
+            // This is synonym of testedComponent. For GradlePlugin spock test, we automatically depends on main source set
+            SourceSetContainer sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
+            sourceSet.setCompileClasspath(sourceSet.getCompileClasspath().plus(sourceSets.getByName("main").getOutput()));
+
+            // Configure functionalTest for GradlePluginDevelopmentExtension
+            GradlePluginDevelopmentExtension gradlePlugin = project.getExtensions().getByType(GradlePluginDevelopmentExtension.class);
+            gradlePlugin.testSourceSets(sourceSet);
+
+            configureTestKitProjectDependency(testSuite, sourceSet, project);
+            configureGradleFixturesProjectDependency(testSuite, sourceSet, project);
+        });
     }
 
     private static void configureTestKitProjectDependency(GroovyGradlePluginSpockTestSuite testSuite, SourceSet sourceSet, Project project) {
@@ -51,7 +61,7 @@ public class SpockFunctionalTestingPlugin implements Plugin<Project> {
         });
     }
 
-    private static void configureSpockFrameworkProjectDependency(GroovyGradlePluginSpockTestSuite testSuite, SourceSet sourceSet, Project project) {
+    private static void configureSpockFrameworkProjectDependency(GroovySpockFrameworkTestSuite testSuite, SourceSet sourceSet, Project project) {
         String groupId = "org.spockframework";
         String artifactId = "spock-core";
         String version = "1.2-groovy-2.5";
@@ -91,27 +101,25 @@ public class SpockFunctionalTestingPlugin implements Plugin<Project> {
         });
     }
 
-    private SourceSet createSourceSet(GroovyGradlePluginSpockTestSuite testSuite, Project project) {
+    private SourceSet maybeCreateSourceSet(GroovySpockFrameworkTestSuite testSuite, Project project) {
         SourceSetContainer sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
 
-        SourceSet sourceSet = sourceSets.create(testSuite.getName(), it -> {
-            GroovySourceSet groovyIt = new DslObject(it).getConvention().getPlugin(GroovySourceSet.class);
-            groovyIt.getGroovy().srcDir("src/" + testSuite.getName() + "/groovy");
+        SourceSet sourceSet = sourceSets.findByName(testSuite.getName());
+        if (sourceSet == null) {
+            sourceSet = sourceSets.create(testSuite.getName(), it -> {
+                GroovySourceSet groovyIt = new DslObject(it).getConvention().getPlugin(GroovySourceSet.class);
+                groovyIt.getGroovy().srcDir("src/" + testSuite.getName() + "/groovy");
 
-            it.getResources().srcDir("src/" + testSuite.getName() + "/resources");
-            it.setCompileClasspath(it.getCompileClasspath().plus(sourceSets.getByName("main").getOutput()));
-            it.setRuntimeClasspath(it.getRuntimeClasspath().plus(it.getOutput()).plus(it.getCompileClasspath()));
-        });
-
-        // Configure functionalTest for GradlePluginDevelopmentExtension
-        GradlePluginDevelopmentExtension gradlePlugin = project.getExtensions().getByType(GradlePluginDevelopmentExtension.class);
-        gradlePlugin.testSourceSets(sourceSet);
+                it.getResources().srcDir("src/" + testSuite.getName() + "/resources");
+                it.setRuntimeClasspath(it.getRuntimeClasspath().plus(it.getOutput()).plus(it.getCompileClasspath()));
+            });
+        }
 
         return sourceSet;
     }
 
-    private TaskProvider<Test> createAndAttachTestTask(GroovyGradlePluginSpockTestSuite testSuite, SourceSet sourceSet, Project project) {
-        TaskProvider<Test> testTask = project.getTasks().register(FUNCTIONAL_TEST_SOURCE_SET_NAME, Test.class, it -> {
+    private TaskProvider<Test> createAndAttachTestTask(GroovySpockFrameworkTestSuite testSuite, SourceSet sourceSet, Project project) {
+        TaskProvider<Test> testTask = project.getTasks().register(sourceSet.getName(), Test.class, it -> {
             it.setDescription("Runs the functional tests");
             it.setGroup("verification");
 
