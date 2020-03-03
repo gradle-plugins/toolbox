@@ -9,6 +9,11 @@ public interface ExecutionResult {
     String getOutput();
 
     /**
+     * Asserts that the given task has not been executed.
+     */
+    ExecutionResult assertTaskNotExecuted(String taskPath);
+
+    /**
      * Asserts that exactly the given set of tasks have been executed in any order and none of the tasks were skipped.
      */
     ExecutionResult assertTasksExecutedAndNotSkipped(Object... taskPaths);
@@ -34,6 +39,13 @@ public interface ExecutionResult {
      * @param expectedOutput The expected log message, with line endings normalized to a newline character.
      */
     ExecutionResult assertOutputContains(String expectedOutput);
+
+    /**
+     * Asserts that this result does not include the given log message anywhere in the build output.
+     *
+     * @param expectedOutput The expected log message, with line endings normalized to a newline character.
+     */
+    ExecutionResult assertNotOutput(String expectedOutput);
 
     /**
      * Assert that the given message appears after the build result message.

@@ -138,6 +138,19 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
         }
 
         @Override
+        public ExecutionResult assertTaskNotExecuted(String taskPath) {
+            Set<String> actualTasks = findExecutedTasksInOrderStarted();
+            if (actualTasks.contains(taskPath)) {
+                failOnMissingElement("Build output does contains unexpected task.", taskPath, actualTasks);
+            }
+            return this;
+        }
+
+        private void failOnMissingElement(String message, String expected, Set<String> actual) {
+            failureOnUnexpectedOutput(String.format("%s%nExpected: %s%nActual: %s", message, expected, actual));
+        }
+
+        @Override
         public ExecutionResult assertTasksExecuted(Object... taskPaths) {
             Set<String> expectedTasks = new TreeSet<String>(flattenTaskPaths(taskPaths));
             Set<String> actualTasks = findExecutedTasksInOrderStarted();
@@ -188,6 +201,12 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
         @Override
         public ExecutionResult assertOutputContains(String expectedOutput) {
             assert result.getOutput().contains(expectedOutput.trim());
+            return this;
+        }
+
+        @Override
+        public ExecutionResult assertNotOutput(String expectedOutput) {
+            assert !result.getOutput().contains(expectedOutput.trim());
             return this;
         }
 

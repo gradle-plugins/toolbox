@@ -22,10 +22,8 @@ import org.gradle.internal.featurelifecycle.LoggingDeprecatedFeatureHandler;
 import org.gradle.launcher.daemon.client.DaemonStartupMessage;
 import org.gradle.launcher.daemon.server.DaemonStateCoordinator;
 import org.gradle.launcher.daemon.server.health.LowHeapSpaceDaemonExpirationStrategy;
-import org.gradle.util.GUtil;
 import org.junit.ComparisonFailure;
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -265,6 +263,7 @@ public class OutputScrapingExecutionResult implements ExecutionResult {
         return this;
     }
 
+    @Override
     public ExecutionResult assertTaskNotExecuted(String taskPath) {
         Set<String> actualTasks = findExecutedTasksInOrderStarted();
         if (actualTasks.contains(taskPath)) {
