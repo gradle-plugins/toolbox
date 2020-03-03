@@ -1,5 +1,7 @@
 package dev.gradleplugins.test.fixtures.gradle.executer;
 
+import dev.gradleplugins.test.fixtures.logging.GroupedOutputFixture;
+
 public interface ExecutionResult {
     /**
      * Stdout of the Gradle execution, normalized to use new-line char as line separator.
@@ -7,6 +9,16 @@ public interface ExecutionResult {
      * <p>You should avoid using this method as it couples the tests to a particular layout for the console. Instead use the more descriptive assertion methods on this class.</p>
      */
     String getOutput();
+
+    /**
+     * Returns a fixture that parses the output and forms them into the expected groups
+     */
+    GroupedOutputFixture getGroupedOutput();
+
+    /**
+     * Stdout of the Gradle execution, with ANSI characters interpreted and text attributes discarded.
+     */
+    String getPlainTextOutput();
 
     /**
      * Asserts that the given task has not been executed.

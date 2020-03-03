@@ -125,10 +125,12 @@ public class OutputScrapingExecutionResult implements ExecutionResult {
         return output.ansiCharsToColorText().withNormalizedEol();
     }
 
+    @Override
     public String getPlainTextOutput() {
         return output.ansiCharsToPlainText().withNormalizedEol();
     }
 
+    @Override
     public GroupedOutputFixture getGroupedOutput() {
         if (groupedOutputFixture == null) {
             groupedOutputFixture = new GroupedOutputFixture(getMainContent());

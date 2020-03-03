@@ -17,6 +17,7 @@
 package dev.gradleplugins.test.fixtures.gradle.executer;
 
 import dev.gradleplugins.test.fixtures.file.TestFile;
+import dev.gradleplugins.test.fixtures.logging.GroupedOutputFixture;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.BuildTask;
 import org.gradle.testkit.runner.GradleRunner;
@@ -111,9 +112,11 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
 
     private static class GradleRunnerExecutionResult implements ExecutionResult {
         private final BuildResult result;
+        private final OutputScrapingExecutionResult delegate;
 
         GradleRunnerExecutionResult(BuildResult result) {
             this.result = result;
+            delegate = OutputScrapingExecutionResult.from(result.getOutput(), "");
         }
 
         private static List<String> flattenTaskPaths(Object[] taskPaths) {
@@ -130,6 +133,16 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
                     flattenTaskPaths.add(it.toString());
                 }
             });
+        }
+
+        @Override
+        public GroupedOutputFixture getGroupedOutput() {
+            return delegate.getGroupedOutput();
+        }
+
+        @Override
+        public String getPlainTextOutput() {
+            return delegate.getPlainTextOutput();
         }
 
         @Override
