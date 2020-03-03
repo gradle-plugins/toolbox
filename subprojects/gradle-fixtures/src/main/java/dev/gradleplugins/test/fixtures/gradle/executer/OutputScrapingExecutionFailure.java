@@ -15,7 +15,7 @@
  */
 package dev.gradleplugins.test.fixtures.gradle.executer;
 
-import org.gradle.internal.Pair;
+import dev.gradleplugins.test.fixtures.Pair;
 import org.gradle.util.TextUtil;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;

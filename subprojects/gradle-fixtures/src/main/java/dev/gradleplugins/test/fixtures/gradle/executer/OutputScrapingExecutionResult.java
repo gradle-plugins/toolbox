@@ -15,9 +15,8 @@
  */
 package dev.gradleplugins.test.fixtures.gradle.executer;
 
+import dev.gradleplugins.test.fixtures.Pair;
 import dev.gradleplugins.test.fixtures.logging.GroupedOutputFixture;
-import org.gradle.api.Action;
-import org.gradle.internal.Pair;
 import org.gradle.internal.featurelifecycle.LoggingDeprecatedFeatureHandler;
 import org.gradle.launcher.daemon.client.DaemonStartupMessage;
 import org.gradle.launcher.daemon.server.DaemonStateCoordinator;
@@ -25,6 +24,7 @@ import org.gradle.launcher.daemon.server.health.LowHeapSpaceDaemonExpirationStra
 import org.junit.ComparisonFailure;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 public class OutputScrapingExecutionResult implements ExecutionResult {
@@ -350,9 +350,9 @@ public class OutputScrapingExecutionResult implements ExecutionResult {
         final List<String> tasks = new ArrayList<>();
         final List<String> taskStatusLines = new ArrayList<>();
 
-        getMainContent().eachLine(new Action<String>() {
+        getMainContent().eachLine(new Consumer<String>() {
             @Override
-            public void execute(String line) {
+            public void accept(String line) {
                 java.util.regex.Matcher matcher = pattern.matcher(line);
                 if (matcher.matches()) {
                     String taskStatusLine = matcher.group().replace(TASK_PREFIX, "");

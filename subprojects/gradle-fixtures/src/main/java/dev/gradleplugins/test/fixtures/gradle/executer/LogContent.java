@@ -16,14 +16,13 @@
 
 package dev.gradleplugins.test.fixtures.gradle.executer;
 
+import dev.gradleplugins.test.fixtures.Pair;
 import net.rubygrapefruit.ansi.AnsiParser;
 import net.rubygrapefruit.ansi.console.AnsiConsole;
 import net.rubygrapefruit.ansi.console.DiagnosticConsole;
 import net.rubygrapefruit.ansi.token.NewLine;
 import net.rubygrapefruit.ansi.token.Text;
-import org.gradle.api.Action;
 import org.gradle.api.UncheckedIOException;
-import org.gradle.internal.Pair;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -32,6 +31,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 public class LogContent {
@@ -125,9 +125,9 @@ public class LogContent {
     /**
      * Visits each line in this content. The line does not include the line separator.
      */
-    public void eachLine(Action<? super String> action) {
+    public void eachLine(Consumer<? super String> action) {
         for (String line : lines) {
-            action.execute(line);
+            action.accept(line);
         }
     }
 
