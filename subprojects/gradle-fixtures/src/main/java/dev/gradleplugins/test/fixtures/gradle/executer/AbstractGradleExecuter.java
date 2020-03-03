@@ -1,6 +1,7 @@
 package dev.gradleplugins.test.fixtures.gradle.executer;
 
 import dev.gradleplugins.test.fixtures.file.TestFile;
+import dev.gradleplugins.test.fixtures.logging.ConsoleOutput;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -172,6 +173,16 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
     }
     //endregion
 
+    //region Console type configuration
+    private ConsoleOutput consoleType;
+
+    @Override
+    public GradleExecuter withConsole(ConsoleOutput consoleType) {
+        this.consoleType = consoleType;
+        return this;
+    }
+    //endregion
+
     @Override
     public ExecutionResult run() {
         fireBeforeExecute();
@@ -213,6 +224,7 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
         settingsFile = null;
         buildScript = null;
         projectDirectory = null;
+        consoleType = null;
 
         showStacktrace = true;
     }
@@ -245,6 +257,10 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
         // Deal with missing settings.gradle[.kts] file
         if (settingsFile == null) {
             ensureSettingsFileAvailable();
+        }
+
+        if (consoleType != null) {
+            allArguments.add("--console=" + consoleType.toString().toLowerCase());
         }
 
         allArguments.addAll(arguments);

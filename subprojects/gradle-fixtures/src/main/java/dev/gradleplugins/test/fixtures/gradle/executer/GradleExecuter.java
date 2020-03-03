@@ -17,6 +17,7 @@
 package dev.gradleplugins.test.fixtures.gradle.executer;
 
 import dev.gradleplugins.test.fixtures.file.TestFile;
+import dev.gradleplugins.test.fixtures.logging.ConsoleOutput;
 
 import java.io.File;
 import java.util.List;
@@ -131,4 +132,10 @@ public interface GradleExecuter {
      * Adds an action to be called immediately after execution.
      */
     void afterExecute(Consumer<? super GradleExecuter> action);
+
+    /**
+     * Executes the build with {@code "--console=rich, auto, verbose"} argument.
+     */
+    GradleExecuter withConsole(ConsoleOutput consoleOutput);
+
 }
