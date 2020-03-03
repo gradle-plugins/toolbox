@@ -34,6 +34,7 @@ dependencies {
     implementation 'com.google.guava:guava:28.2-jre'
     implementation 'org.apache.ant:ant:1.9.13'
     implementation 'org.ow2.asm:asm:6.0'
+    implementation 'commons-io:commons-io:2.6'
 
     testImplementation 'org.spockframework:spock-core:1.2-groovy-2.5'
     testImplementation project(':spock-test-directory-extension')

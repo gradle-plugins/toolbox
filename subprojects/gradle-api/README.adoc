@@ -1,0 +1,23 @@
+= Gradle API Jars
+
+== Usages
+
+=== As included build
+
+```
+dependencies {
+    compileOnly(project(':gradle-api')) {
+        attributes {
+            attribute(Attribute.of('dev.gradleplugins.gradleAbi', String), '2.14.1')
+        }
+    }
+}
+```
+
+=== As external binary
+
+```
+dependencies {
+    compileOnly 'dev.gradleplugins:gradle-api:2.14.1'
+}
+```
