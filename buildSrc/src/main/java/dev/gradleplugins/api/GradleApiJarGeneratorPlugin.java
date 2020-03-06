@@ -190,6 +190,7 @@ public class GradleApiJarGeneratorPlugin implements Plugin<Project> {
             case "6.1.1":
             case "6.2":
             case "6.2.1":
+            case "6.2.2":
                 return "2.5.8"; //"org.gradle.groovy:groovy-all:1.3-2.5.8";
             default:
                 throw new IllegalArgumentException("Version not known at the time, please check groovy-all version");
