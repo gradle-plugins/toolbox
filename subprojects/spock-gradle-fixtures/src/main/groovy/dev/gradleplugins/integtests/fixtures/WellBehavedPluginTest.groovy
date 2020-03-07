@@ -45,7 +45,11 @@ abstract class WellBehavedPluginTest extends AbstractFunctionalSpec {
     }
 
     protected applyPlugin(File target = buildFile) {
-        target << "apply plugin: '${getQualifiedPluginId()}'\n"
+        target << """
+            plugins {
+                id '${getQualifiedPluginId()}'
+            }
+        """
     }
 
     def "does not realize all possible tasks"() {
