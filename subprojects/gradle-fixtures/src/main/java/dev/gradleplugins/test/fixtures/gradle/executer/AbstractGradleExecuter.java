@@ -1,21 +1,43 @@
 package dev.gradleplugins.test.fixtures.gradle.executer;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import dev.gradleplugins.test.fixtures.file.TestFile;
+import dev.gradleplugins.test.fixtures.gradle.executer.internal.GradleExecuterConfiguration;
 import dev.gradleplugins.test.fixtures.logging.ConsoleOutput;
+import lombok.NonNull;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
 
 abstract class AbstractGradleExecuter implements GradleExecuter {
+    protected GradleExecuterConfiguration configuration;
     private final TestFile testDirectory;
 
-    public AbstractGradleExecuter(TestFile testDirectory) {
-        assert testDirectory != null : "testDirectory cannot be null";
+    public AbstractGradleExecuter(@NonNull TestFile testDirectory) {
+        this(testDirectory, new GradleExecuterConfiguration());
+    }
+
+    protected AbstractGradleExecuter(TestFile testDirectory, GradleExecuterConfiguration configuration) {
+        this.configuration = configuration;
         this.testDirectory = testDirectory;
     }
+
+    protected GradleExecuter newInstance(GradleExecuterConfiguration configuration) {
+        return newInstance(testDirectory, configuration);
+    }
+
+    protected abstract GradleExecuter newInstance(TestFile testDirectory, GradleExecuterConfiguration configuration);
 
     @Override
     public TestFile getTestDirectory() {
@@ -23,43 +45,34 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
     }
 
     //region Working directory configuration
-    private File workingDirectory = null;
     public File getWorkingDirectory() {
-        return workingDirectory == null ? testDirectory : workingDirectory;
+        return ofNullable(configuration.getWorkingDirectory()).orElse(testDirectory);
     }
 
     @Override
     public GradleExecuter inDirectory(File directory) {
-        workingDirectory = directory;
-        return this;
+        return newInstance(configuration.withWorkingDirectory(directory));
     }
     //endregion
 
     //region Flag `-Djava.home` configuration
-    private File userHomeDirectory = null;
     @Override
     public GradleExecuter withUserHomeDirectory(File userHomeDirectory) {
-        this.userHomeDirectory = userHomeDirectory;
-        return this;
+        return newInstance(configuration.withUserHomeDirectory(userHomeDirectory));
     }
     //endregion
 
     //region Flag `--stack-trace` configuration
-    private boolean showStacktrace = true;
     @Override
     public GradleExecuter withStacktraceDisabled() {
-        showStacktrace = false;
-        return this;
+        return newInstance(configuration.withShowStacktrace(false));
     }
     //endregion
 
     //region Flag `--settings-file` configuration
-    private File settingsFile = null;
-
     @Override
     public GradleExecuter usingSettingsFile(File settingsFile) {
-        this.settingsFile = settingsFile;
-        return this;
+        return newInstance(configuration.withSettingsFile(settingsFile));
     }
 
     // TODO: Maybe we should remove dependency on TestFile within this implementation
@@ -84,32 +97,23 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
     //endregion
 
     //region Flag `--build-file` configuration
-    private File buildScript = null;
-
     @Override
     public GradleExecuter usingBuildScript(File buildScript) {
-        this.buildScript = buildScript;
-        return this;
+        return newInstance(configuration.withBuildScript(buildScript));
     }
     //endregion
 
     //region Flag `--init-script` configuration
-    private final List<File> initScripts = new ArrayList<>();
-
     @Override
     public GradleExecuter usingInitScript(File initScript) {
-        initScripts.add(initScript);
-        return this;
+        return newInstance(configuration.withInitScripts(ImmutableList.<File>builder().addAll(configuration.getInitScripts()).add(initScript).build()));
     }
     //endregion
 
     //region Flag `--project-dir` configuration
-    private File projectDirectory = null;
-
     @Override
     public GradleExecuter usingProjectDirectory(File projectDirectory) {
-        this.projectDirectory = projectDirectory;
-        return this;
+        return newInstance(configuration.withProjectDirectory(projectDirectory));
     }
     //endregion
 
@@ -121,39 +125,31 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
     //endregion
 
     //region Process arguments configuration
-    private final List<String> arguments = new ArrayList<>();
-
     @Override
     public GradleExecuter withArguments(String... args) {
-        return withArguments(Arrays.asList(args));
+        return withArguments(asList(args));
     }
 
     @Override
     public GradleExecuter withArguments(List<String> args) {
-        arguments.clear();
-        arguments.addAll(args);
-        return this;
+        return newInstance(configuration.withArguments(args));
     }
 
     @Override
     public GradleExecuter withArgument(String arg) {
-        arguments.add(arg);
-        return this;
+        return newInstance(configuration.withArguments(ImmutableList.<String>builder().addAll(configuration.getArguments()).add(arg).build()));
     }
     //endregion
 
     //region Gradle tasks configuration
-    private final List<String> tasks = new ArrayList<>();
-
     @Override
     public GradleExecuter withTasks(String... tasks) {
-        return withTasks(Arrays.asList(tasks));
+        return withTasks(asList(tasks));
     }
 
     @Override
     public GradleExecuter withTasks(List<String> tasks) {
-        this.tasks.addAll(tasks);
-        return this;
+        return newInstance(configuration.withTasks(ImmutableList.<String>builder().addAll(configuration.getTasks()).addAll(tasks).build()));
     }
     //endregion
 
@@ -184,12 +180,16 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
     //endregion
 
     //region Console type configuration
-    private ConsoleOutput consoleType;
-
     @Override
     public GradleExecuter withConsole(ConsoleOutput consoleType) {
-        this.consoleType = consoleType;
-        return this;
+        return newInstance(configuration.withConsoleType(consoleType));
+    }
+    //endregion
+
+    //region Environment variables configuration
+    @Override
+    public GradleExecuter withEnvironmentVars(Map<String, ?> environment) {
+        return newInstance(configuration.withEnvironment(ImmutableMap.<String, Object>builder().putAll(configuration.getEnvironment()).putAll(environment).build()));
     }
     //endregion
 
@@ -222,64 +222,30 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
     protected abstract ExecutionFailure doRunWithFailure();
 
     private void finished() {
-        reset();
-    }
-
-    protected void reset() {
-        arguments.clear();
-        tasks.clear();
-        initScripts.clear();
-
-        workingDirectory = null;
-        userHomeDirectory = null;
-        settingsFile = null;
-        buildScript = null;
-        projectDirectory = null;
-        consoleType = null;
-
-        showStacktrace = true;
     }
 
     protected List<String> getAllArguments() {
         List<String> allArguments = new ArrayList<>();
 
         // JVM arguments
-        if (userHomeDirectory != null) {
-            allArguments.add("-Duser.home=" + userHomeDirectory.getAbsolutePath());
-        }
+        allArguments.addAll(ofNullable(configuration.getUserHomeDirectory()).map(it -> singletonList("-Duser.home=" + it.getAbsolutePath())).orElse(emptyList()));
 
         // Gradle arguments
-        if (buildScript != null) {
-            allArguments.add("--build-file");
-            allArguments.add(buildScript.getAbsolutePath());
-        }
-        if (projectDirectory != null) {
-            allArguments.add("--project-dir");
-            allArguments.add(projectDirectory.getAbsolutePath());
-        }
-        for (File initScript : initScripts) {
-            allArguments.add("--init-script");
-            allArguments.add(initScript.getAbsolutePath());
-        }
-        if (settingsFile != null) {
-            allArguments.add("--settings-file");
-            allArguments.add(settingsFile.getAbsolutePath());
-        }
-        if (showStacktrace) {
-            allArguments.add("--stacktrace");
-        }
+        allArguments.addAll(ofNullable(configuration.getBuildScript()).map(it -> asList("--build-file", it.getAbsolutePath())).orElse(emptyList()));
+        allArguments.addAll(ofNullable(configuration.getBuildScript()).map(it -> asList("--project-dir", it.getAbsolutePath())).orElse(emptyList()));
+        allArguments.addAll(ofNullable(configuration.getInitScripts()).map(it -> it.stream().flatMap(initScript -> Stream.of("--init-script", initScript.getAbsolutePath())).collect(toList())).orElse(emptyList()));
+        allArguments.addAll(ofNullable(configuration.getSettingsFile()).map(it -> asList("--settings-file", it.getAbsolutePath())).orElse(emptyList()));
+        allArguments.addAll(configuration.isShowStacktrace() ? singletonList("--stacktrace") : emptyList());
 
         // Deal with missing settings.gradle[.kts] file
-        if (settingsFile == null) {
+        if (configuration.getSettingsFile() == null) {
             ensureSettingsFileAvailable();
         }
 
-        if (consoleType != null) {
-            allArguments.add("--console=" + consoleType.toString().toLowerCase());
-        }
+        allArguments.addAll(ofNullable(configuration.getConsoleType()).map(it -> asList("--console", it.toString().toLowerCase())).orElse(emptyList()));
 
-        allArguments.addAll(arguments);
-        allArguments.addAll(tasks);
+        allArguments.addAll(configuration.getArguments());
+        allArguments.addAll(configuration.getTasks());
 
         return allArguments;
     }

@@ -1,6 +1,7 @@
 package dev.gradleplugins.test.fixtures.gradle.executer;
 
 import dev.gradleplugins.test.fixtures.file.TestFile;
+import dev.gradleplugins.test.fixtures.gradle.executer.internal.GradleExecuterConfiguration;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
@@ -12,10 +13,17 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class GradleWrapperExecuter extends AbstractGradleExecuter {
-    private Map<String, Object> environment = null;
-
     public GradleWrapperExecuter(TestFile testDirectory) {
         super(testDirectory);
+    }
+
+    private GradleWrapperExecuter(TestFile testDirectory, GradleExecuterConfiguration configuration) {
+        super(testDirectory, configuration);
+    }
+
+    @Override
+    protected GradleExecuter newInstance(TestFile testDirectory, GradleExecuterConfiguration configuration) {
+        return new GradleWrapperExecuter(testDirectory, configuration);
     }
 
     @Override
@@ -25,8 +33,8 @@ public class GradleWrapperExecuter extends AbstractGradleExecuter {
             command.add("./gradlew");
             command.addAll(getAllArguments());
             ProcessBuilder processBuilder = new ProcessBuilder().command(command).directory(getWorkingDirectory());
-            if (environment != null) {
-                processBuilder.environment().putAll(environment.entrySet().stream().map(it -> new HashMap.SimpleEntry<>(it.getKey(), it.getValue().toString())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+            if (!configuration.getEnvironment().isEmpty()) {
+                processBuilder.environment().putAll(configuration.getEnvironment().entrySet().stream().map(it -> new HashMap.SimpleEntry<>(it.getKey(), it.getValue().toString())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
             }
             OutputCapturer standardOutputCapturer = outputCapturerFor(System.out, Charset.defaultCharset());
             OutputCapturer errorOutputCapturer = outputCapturerFor(System.err, Charset.defaultCharset());
@@ -82,11 +90,5 @@ public class GradleWrapperExecuter extends AbstractGradleExecuter {
     @Override
     public GradleExecuter withPluginClasspath() {
         return null;
-    }
-
-    @Override
-    public GradleExecuter withEnvironmentVars(Map<String, ?> environment) {
-        this.environment = new HashMap<>(environment);
-        return this;
     }
 }

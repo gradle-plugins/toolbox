@@ -17,6 +17,7 @@
 package dev.gradleplugins.test.fixtures.gradle.executer;
 
 import dev.gradleplugins.test.fixtures.file.TestFile;
+import dev.gradleplugins.test.fixtures.gradle.executer.internal.GradleExecuterConfiguration;
 import dev.gradleplugins.test.fixtures.logging.GroupedOutputFixture;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.BuildTask;
@@ -31,32 +32,27 @@ import java.util.stream.Collectors;
 //    We should instead offer a factory to construct the right executer
 //    The contextual executer would also be beneficial here.
 public class GradleRunnerExecuter extends AbstractGradleExecuter {
-    private boolean debuggerAttached = false;
-
-    private String gradleVersion = null;
-    private boolean usePluginClasspath = false;
-    private Map<String, Object> environment = null;
-
     public GradleRunnerExecuter(TestFile testDirectory) {
         super(testDirectory);
     }
 
+    private GradleRunnerExecuter(TestFile testDirectory, GradleExecuterConfiguration configuration) {
+        super(testDirectory, configuration);
+    }
+
+    @Override
+    protected GradleExecuter newInstance(TestFile testDirectory, GradleExecuterConfiguration configuration) {
+        return new GradleRunnerExecuter(testDirectory, configuration);
+    }
+
     @Override
     public GradleExecuter withDebuggerAttached() {
-        debuggerAttached = true;
-        return this;
+        return newInstance(configuration.withDebuggerAttached(true));
     }
 
     @Override
     public GradleExecuter withPluginClasspath() {
-        usePluginClasspath = true;
-        return this;
-    }
-
-    @Override
-    public GradleExecuter withEnvironmentVars(Map<String, ?> environment) {
-        this.environment = new HashMap<>(environment);
-        return this;
+        return newInstance(configuration.withPluginClasspath(true));
     }
 
     @Override
@@ -69,36 +65,27 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
         return new GradleRunnerExecutionFailure(configureExecuter().buildAndFail());
     }
 
-    @Override
-    protected void reset() {
-        super.reset();
-        debuggerAttached = false;
-        gradleVersion = null;
-        usePluginClasspath = false;
-        environment = null;
-    }
-
     private GradleRunner configureExecuter() {
         GradleRunner runner = GradleRunner.create();
         runner.forwardOutput();
 
-        if (usePluginClasspath) {
+        if (configuration.isPluginClasspath()) {
             runner.withPluginClasspath();
         }
         runner.withProjectDir(getWorkingDirectory());
 
-        if (debuggerAttached) {
+        if (configuration.isDebuggerAttached()) {
             System.out.println("WARNING: Gradle TestKit has some class loader issue that may result in runtime failures - such as NoClassDefFoundError for groovy/util/AntBuilder (see https://github.com/gradle/gradle/issues/1687).");
             runner.withDebug(true);
         }
 
-        if (gradleVersion != null) {
-            runner.withGradleVersion(gradleVersion);
+        if (configuration.getGradleVersion() != null) {
+            runner.withGradleVersion(configuration.getGradleVersion());
         }
 
-        if (environment != null) {
+        if (!configuration.getEnvironment().isEmpty()) {
             Map<String, String> environment = new HashMap<>(System.getenv());
-            environment.putAll(this.environment.entrySet().stream().map(it -> new AbstractMap.SimpleImmutableEntry<>(it.getKey(), it.getValue().toString())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+            environment.putAll(configuration.getEnvironment().entrySet().stream().map(it -> new AbstractMap.SimpleImmutableEntry<>(it.getKey(), it.getValue().toString())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
             runner.withEnvironment(environment);
         }
 
@@ -108,8 +95,8 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
     }
 
     // TODO: This is not how we want to solve this use case!
-    public void usingGradleVersion(String gradleVersion) {
-        this.gradleVersion = gradleVersion;
+    public GradleExecuter usingGradleVersion(String gradleVersion) {
+        return newInstance(configuration.withGradleVersion(gradleVersion));
     }
 
     private static class GradleRunnerExecutionResult implements ExecutionResult {

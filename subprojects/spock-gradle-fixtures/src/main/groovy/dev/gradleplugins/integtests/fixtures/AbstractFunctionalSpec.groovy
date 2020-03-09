@@ -147,7 +147,6 @@ class AbstractFunctionalSpec extends Specification {
     }
 
     protected GradleExecuter usingInitScript(File initScript) {
-        executer.usingInitScript(initScript);
-        return executer
+        return executer = executer.usingInitScript(initScript);
     }
 }
