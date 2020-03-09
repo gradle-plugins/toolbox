@@ -17,8 +17,11 @@
 package dev.gradleplugins.test.fixtures.scan;
 
 import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter;
-import dev.gradleplugins.test.fixtures.file.TestFile;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
+import java.io.UncheckedIOException;
 import java.util.function.Consumer;
 
 /**
@@ -33,20 +36,42 @@ public class GradleEnterpriseBuildScan implements Consumer<GradleExecuter> {
     @Override
     public void accept(GradleExecuter executer) {
         executer.beforeExecute(it -> {
-            // TODO: Make sure build scan is not already applied
-            // TODO: Support Kotlin DSL
-
-            TestFile buildFile = executer.getTestDirectory().file("build.gradle");
-            String content = buildFile.getText();
-            // TODO: support multiple space between `plugins` and `{`
-            // TODO: It should detect and use the latest build scan version for the distribution to use.
-            content = content.replace("plugins {", "plugins {\nid('com.gradle.build-scan') version '2.3'")
-                    + "\nbuildScan {\n" +
-                    "    termsOfServiceUrl = \"https://gradle.com/terms-of-service\"\n" +
-                    "    termsOfServiceAgree = \"yes\"\n" +
-                    "}";
-            buildFile.setText(content);
-
+            try (PrintWriter out = new PrintWriter(new FileOutputStream(executer.getTestDirectory().file("build-scan.init.gradle")))) {
+                out.println("import org.gradle.util.GradleVersion");
+                out.println("");
+                out.println("def isTopLevelBuild = gradle.getParent() == null");
+                out.println("");
+                out.println("if (isTopLevelBuild) {");
+                out.println("    def gradleVersion = GradleVersion.current().baseVersion");
+                out.println("    def atLeastGradle5 = gradleVersion >= GradleVersion.version('5.0')");
+                out.println("    def atLeastGradle6 = gradleVersion >= GradleVersion.version('6.0')");
+                out.println("");
+                out.println("    if (atLeastGradle6) {");
+                out.println("        settingsEvaluated {");
+                out.println("            if (it.pluginManager.hasPlugin('com.gradle.enterprise')) {");
+                out.println("               configureExtension(it.extensions['gradleEnterprise'].buildScan)");
+                out.println("            }");
+                out.println("        }");
+                out.println("    } else if (atLeastGradle5) {");
+                out.println("        rootProject {");
+                out.println("            if (it.pluginManager.hasPlugin('com.gradle.build-scan')) {");
+                out.println("               configureExtension(extensions['buildScan'])");
+                out.println("            }");
+                out.println("        }");
+                out.println("    }");
+                out.println("}");
+                out.println("");
+                out.println("void configureExtension(extension) {");
+                out.println("    extension.with {");
+                out.println("        termsOfServiceUrl = 'https://gradle.com/terms-of-service'");
+                out.println("        termsOfServiceAgree = 'yes'");
+                out.println("    }");
+                out.println("}");
+            } catch (FileNotFoundException e) {
+                throw new UncheckedIOException(e);
+            }
+            executer.withArgument("--init-script");
+            executer.withArgument(executer.getTestDirectory().file("build-scan.init.gradle").getAbsolutePath());
             executer.withArgument("--scan");
         });
     }
