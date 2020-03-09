@@ -97,7 +97,9 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
         }
 
         if (environment != null) {
-            runner.withEnvironment(environment.entrySet().stream().map(it -> new AbstractMap.SimpleImmutableEntry<String, String>(it.getKey(), it.getValue().toString())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+            Map<String, String> environment = new HashMap<>(System.getenv());
+            environment.putAll(this.environment.entrySet().stream().map(it -> new AbstractMap.SimpleImmutableEntry<>(it.getKey(), it.getValue().toString())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+            runner.withEnvironment(environment);
         }
 
         runner.withArguments(getAllArguments());

@@ -93,6 +93,16 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
     }
     //endregion
 
+    //region Flag `--init-script` configuration
+    private final List<File> initScripts = new ArrayList<>();
+
+    @Override
+    public GradleExecuter usingInitScript(File initScript) {
+        initScripts.add(initScript);
+        return this;
+    }
+    //endregion
+
     //region Flag `--project-dir` configuration
     private File projectDirectory = null;
 
@@ -218,6 +228,7 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
     protected void reset() {
         arguments.clear();
         tasks.clear();
+        initScripts.clear();
 
         workingDirectory = null;
         userHomeDirectory = null;
@@ -245,6 +256,10 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
         if (projectDirectory != null) {
             allArguments.add("--project-dir");
             allArguments.add(projectDirectory.getAbsolutePath());
+        }
+        for (File initScript : initScripts) {
+            allArguments.add("--init-script");
+            allArguments.add(initScript.getAbsolutePath());
         }
         if (settingsFile != null) {
             allArguments.add("--settings-file");

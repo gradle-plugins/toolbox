@@ -16,23 +16,26 @@
 
 package dev.gradleplugins.test.fixtures.file;
 
+import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.Executor;
+import org.apache.commons.exec.PumpStreamHandler;
+import org.apache.tools.ant.util.TeeOutputStream;
 import org.codehaus.groovy.runtime.ResourceGroovyMethods;
+import org.gradle.internal.hash.HashCode;
+import org.gradle.internal.hash.Hashing;
+import org.gradle.internal.hash.HashingOutputStream;
+import org.hamcrest.Matchers;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
@@ -307,5 +310,115 @@ public class TestFile extends File {
 
     public boolean isSymbolicLink() {
         return Files.isSymbolicLink(toPath());
+    }
+
+    public ExecOutput exec(Object... args) {
+        CommandLine commandLine = new CommandLine(this);
+        commandLine.addArguments(Arrays.toString(args));
+        Executor executor = new DefaultExecutor();
+        ByteArrayOutputStream stdout = new ByteArrayOutputStream();
+        ByteArrayOutputStream stderr = new ByteArrayOutputStream();
+        executor.setStreamHandler(new PumpStreamHandler(new TeeOutputStream(stdout, System.out), new TeeOutputStream(stderr, System.err)));
+        executor.setExitValue(0);
+        try {
+            int exitCode = executor.execute(commandLine);
+            return new ExecOutput(exitCode, stdout.toString(), stderr.toString());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public ExecOutput execWithFailure(List<Object> args, List<Object> env) {
+        CommandLine commandLine = new CommandLine(this);
+        commandLine.addArguments(Arrays.toString(args.toArray(new Object[0])));
+        Executor executor = new DefaultExecutor();
+        ByteArrayOutputStream stdout = new ByteArrayOutputStream();
+        ByteArrayOutputStream stderr = new ByteArrayOutputStream();
+        executor.setStreamHandler(new PumpStreamHandler(new TeeOutputStream(stdout, System.out), new TeeOutputStream(stderr, System.err)));
+        try {
+            Map<String, String> environment = env.stream().map(TestFile::toEntry).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            int exitCode = executor.execute(commandLine, environment);
+            assertThat(exitCode, Matchers.not(Matchers.equalTo(0)));
+            return new ExecOutput(exitCode, stdout.toString(), stderr.toString());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private static Map.Entry<String, String> toEntry(Object o) {
+        String[] tokens = o.toString().split("=");
+        assertThat(tokens.length, Matchers.equalTo(2));
+        return new HashMap.SimpleEntry<>(tokens[0], tokens[1]);
+    }
+
+    public ExecOutput execute(List<Object> args, List<Object> env) {
+        CommandLine commandLine = new CommandLine(this);
+        commandLine.addArguments(args.stream().map(Objects::toString).collect(Collectors.toList()).toArray(new String[0]));
+        Executor executor = new DefaultExecutor();
+        ByteArrayOutputStream stdout = new ByteArrayOutputStream();
+        ByteArrayOutputStream stderr = new ByteArrayOutputStream();
+        executor.setStreamHandler(new PumpStreamHandler(new TeeOutputStream(stdout, System.out), new TeeOutputStream(stderr, System.err)));
+        try {
+            Map<String, String> environment = env.stream().map(TestFile::toEntry).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            int exitCode = executor.execute(commandLine, environment);
+            assertThat(exitCode, Matchers.equalTo(0));
+            return new ExecOutput(exitCode, stdout.toString(), stderr.toString());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public Snapshot snapshot() {
+        assertIsFile();
+        return new Snapshot(lastModified(), md5(this));
+    }
+
+    public static HashCode md5(File file) {
+        HashingOutputStream hashingStream = Hashing.primitiveStreamHasher();
+        try {
+            Files.copy(file.toPath(), hashingStream);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        return hashingStream.hash();
+    }
+
+    public void assertHasChangedSince(Snapshot snapshot) {
+        Snapshot now = snapshot();
+        assertTrue(String.format("contents or modification time of %s have not changed", this), now.modTime != snapshot.modTime || !now.hash.equals(snapshot.hash));
+    }
+
+    public void assertContentsHaveChangedSince(Snapshot snapshot) {
+        Snapshot now = snapshot();
+        assertNotEquals(String.format("contents of %s have not changed", this), snapshot.hash, now.hash);
+    }
+
+    public void assertContentsHaveNotChangedSince(Snapshot snapshot) {
+        Snapshot now = snapshot();
+        assertEquals(String.format("contents of %s has changed", this), snapshot.hash, now.hash);
+    }
+
+    public void assertHasNotChangedSince(Snapshot snapshot) {
+        Snapshot now = snapshot();
+        assertEquals(String.format("last modified time of %s has changed", this), snapshot.modTime, now.modTime);
+        assertEquals(String.format("contents of %s has changed", this), snapshot.hash, now.hash);
+    }
+
+    public static class Snapshot {
+        private final long modTime;
+        private final HashCode hash;
+
+        public Snapshot(long modTime, HashCode hash) {
+            this.modTime = modTime;
+            this.hash = hash;
+        }
+
+        public long getModTime() {
+            return modTime;
+        }
+
+        public HashCode getHash() {
+            return hash;
+        }
     }
 }

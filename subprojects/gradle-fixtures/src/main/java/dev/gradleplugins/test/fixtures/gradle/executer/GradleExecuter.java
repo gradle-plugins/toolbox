@@ -98,6 +98,11 @@ public interface GradleExecuter {
     GradleExecuter usingBuildScript(File buildScript);
 
     /**
+     * Uses the given init script by adding {@code "--init-script"} argument.
+     */
+    GradleExecuter usingInitScript(File initScript);
+
+    /**
      * Uses the given project directory by adding the {@code "--project-dir"} argument.
      */
     GradleExecuter usingProjectDirectory(File projectDirectory);
