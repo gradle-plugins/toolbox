@@ -20,6 +20,7 @@ import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.Executor;
 import org.apache.commons.exec.PumpStreamHandler;
+import org.apache.commons.io.FileUtils;
 import org.apache.tools.ant.util.TeeOutputStream;
 import org.codehaus.groovy.runtime.ResourceGroovyMethods;
 import org.gradle.internal.hash.HashCode;
@@ -37,6 +38,8 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.junit.Assert.*;
 
 public class TestFile extends File {
@@ -305,6 +308,40 @@ public class TestFile extends File {
             ResourceGroovyMethods.setText(this, content);
         } catch (IOException e) {
             throw new RuntimeException(String.format("Could not append to test file '%s'", this), e);
+        }
+    }
+
+    public void copyTo(File target) {
+        if (isDirectory()) {
+            try {
+                final Path targetDir = target.toPath();
+                final Path sourceDir = this.toPath();
+                Files.walkFileTree(sourceDir, new SimpleFileVisitor<Path>() {
+                    @Override
+                    public FileVisitResult visitFile(Path sourceFile, BasicFileAttributes attributes) throws IOException {
+                        Path targetFile = targetDir.resolve(sourceDir.relativize(sourceFile));
+                        Files.copy(sourceFile, targetFile, COPY_ATTRIBUTES, REPLACE_EXISTING);
+
+                        return FileVisitResult.CONTINUE;
+                    }
+
+                    @Override
+                    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attributes) throws IOException {
+                        Path newDir = targetDir.resolve(sourceDir.relativize(dir));
+                        Files.createDirectories(newDir);
+
+                        return FileVisitResult.CONTINUE;
+                    }
+                });
+            } catch (IOException e) {
+                throw new RuntimeException(String.format("Could not copy test directory '%s' to '%s'", this, target), e);
+            }
+        } else {
+            try {
+                FileUtils.copyFile(this, target);
+            } catch (IOException e) {
+                throw new RuntimeException(String.format("Could not copy test file '%s' to '%s'", this, target), e);
+            }
         }
     }
 
