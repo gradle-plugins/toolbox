@@ -44,7 +44,7 @@ public class GradleWrapperExecuter extends AbstractGradleExecuter {
             outStream.start();
             inStream.start();
             if (0 != process.waitFor()) {
-                throw new RuntimeException("Build failure");
+                throw new RuntimeException("Build failure (" + process.exitValue() + ")");
             }
             outStream.join();
             inStream.join();
