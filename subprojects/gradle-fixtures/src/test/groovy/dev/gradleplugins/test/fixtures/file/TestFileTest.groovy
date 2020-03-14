@@ -27,7 +27,7 @@ import java.nio.file.LinkOption
 
 abstract class AbstractTestFileSpec extends Specification {
     @Rule
-    protected final TestNameTestDirectoryProvider temporaryFolder = new TestNameTestDirectoryProvider()
+    protected final TestNameTestDirectoryProvider temporaryFolder = new TestNameTestDirectoryProvider(getClass())
 
     protected File getTestDirectory() {
         // Ensure the type of testDirectory is a File implementation and not a TestFile.

@@ -2,6 +2,7 @@ package dev.gradleplugins.integtests.fixtures.executer
 
 import dev.gradleplugins.spock.lang.TestNameTestDirectoryProvider
 import dev.gradleplugins.test.fixtures.file.TestFile
+import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter
 import org.gradle.testkit.runner.UnexpectedBuildFailure
 import org.gradle.testkit.runner.UnexpectedBuildSuccess
 import org.junit.Rule
@@ -9,7 +10,7 @@ import spock.lang.Specification
 
 abstract class AbstractGradleExecuterTest extends Specification {
     @Rule
-    protected final TestNameTestDirectoryProvider temporaryFolder = new TestNameTestDirectoryProvider()
+    protected final TestNameTestDirectoryProvider temporaryFolder = new TestNameTestDirectoryProvider(getClass())
 
     protected abstract GradleExecuter getExecuterUnderTest()
 

@@ -1,12 +1,13 @@
 package dev.gradleplugins.integtests.fixtures.executer
 
 import dev.gradleplugins.spock.lang.TestNameTestDirectoryProvider
+import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter
 import org.junit.Rule
 import spock.lang.Specification
 
 abstract class AbstractExecutionTest extends Specification {
     @Rule
-    protected final TestNameTestDirectoryProvider temporaryFolder = new TestNameTestDirectoryProvider()
+    protected final TestNameTestDirectoryProvider temporaryFolder = new TestNameTestDirectoryProvider(getClass())
 
     protected abstract GradleExecuter getExecuterUnderTest()
 

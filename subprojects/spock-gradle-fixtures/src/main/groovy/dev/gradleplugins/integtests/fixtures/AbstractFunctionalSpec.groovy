@@ -34,7 +34,7 @@ import java.util.function.Consumer
 @CleanupTestDirectory
 class AbstractFunctionalSpec extends Specification {
     @Rule
-    final TestNameTestDirectoryProvider temporaryFolder = new TestNameTestDirectoryProvider()
+    final TestNameTestDirectoryProvider temporaryFolder = new TestNameTestDirectoryProvider(getClass())
     final M2Installation m2 = new M2Installation(TestFile.of(temporaryFolder.testDirectory))
     GradleExecuter executer = createExecuter()
     private boolean useKotlinDsl = false

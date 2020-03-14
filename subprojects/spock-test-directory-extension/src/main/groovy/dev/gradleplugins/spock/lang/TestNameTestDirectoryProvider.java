@@ -25,9 +25,9 @@ import java.io.IOException;
  * A JUnit rule which provides a unique temporary folder for the test.
  */
 public class TestNameTestDirectoryProvider extends AbstractTestDirectoryProvider {
-    public TestNameTestDirectoryProvider() {
+    public TestNameTestDirectoryProvider(Class<?> testClass) {
         // NOTE: the space in the directory name is intentional
-        root = new File("build/tmp/test files");
+        super(new File("build/tmp/test files"), testClass);
     }
 
     private File createTemporaryFolderIn(File parentFolder) throws IOException {
@@ -37,13 +37,13 @@ public class TestNameTestDirectoryProvider extends AbstractTestDirectoryProvider
         return createdFolder;
     }
 
-    public static TestNameTestDirectoryProvider newInstance() {
-        return new TestNameTestDirectoryProvider();
+    public static TestNameTestDirectoryProvider newInstance(Class<?> testClass) {
+        return new TestNameTestDirectoryProvider(testClass);
     }
 
     public static TestNameTestDirectoryProvider newInstance(FrameworkMethod method, Object target) {
-        TestNameTestDirectoryProvider testDirectoryProvider = new TestNameTestDirectoryProvider();
-        testDirectoryProvider.init(method.getName(), target.getClass().getSimpleName());
+        TestNameTestDirectoryProvider testDirectoryProvider = new TestNameTestDirectoryProvider(target.getClass());
+        testDirectoryProvider.init(method.getName());
         return testDirectoryProvider;
     }
 }
