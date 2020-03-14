@@ -358,7 +358,7 @@ public class TestFile extends File {
         executor.setStreamHandler(new PumpStreamHandler(new TeeOutputStream(stdout, System.out), new TeeOutputStream(stderr, System.err)));
         executor.setExitValue(0);
         try {
-            int exitCode = executor.execute(commandLine);
+            int exitCode = executor.execute(commandLine, System.getenv());
             return new ExecOutput(exitCode, stdout.toString(), stderr.toString());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
