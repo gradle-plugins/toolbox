@@ -22,7 +22,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.io.UncheckedIOException;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Configure build scan in you build under test. It inject `com.gradle.build-scan` plugin version 2.3 inside the plugin block and append the buildScan configuration for agreeing to the public term of service server.
@@ -32,10 +32,10 @@ import java.util.function.Consumer;
  * executer.using(new GradleEnterpriseBuildScan())
  * </pre>
  */
-public class GradleEnterpriseBuildScan implements Consumer<GradleExecuter> {
+public class GradleEnterpriseBuildScan implements Function<GradleExecuter, GradleExecuter> {
     @Override
-    public void accept(GradleExecuter executer) {
-        executer.beforeExecute(it -> {
+    public GradleExecuter apply(GradleExecuter executer) {
+        return executer.beforeExecute(it -> {
             try (PrintWriter out = new PrintWriter(new FileOutputStream(executer.getTestDirectory().file("build-scan.init.gradle")))) {
                 out.println("import org.gradle.util.GradleVersion");
                 out.println("");
@@ -70,9 +70,8 @@ public class GradleEnterpriseBuildScan implements Consumer<GradleExecuter> {
             } catch (FileNotFoundException e) {
                 throw new UncheckedIOException(e);
             }
-            executer.withArgument("--init-script");
-            executer.withArgument(executer.getTestDirectory().file("build-scan.init.gradle").getAbsolutePath());
-            executer.withArgument("--scan");
-        });
+        }).withArgument("--init-script")
+                .withArgument(executer.getTestDirectory().file("build-scan.init.gradle").getAbsolutePath())
+                .withArgument("--scan");
     }
 }

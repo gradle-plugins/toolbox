@@ -45,6 +45,8 @@ public class SpockFrameworkTestSuiteBasePlugin implements Plugin<Project> {
             // This is synonym of testedComponent. For GradlePlugin spock test, we automatically depends on main source set
             SourceSetContainer sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
             sourceSet.setCompileClasspath(sourceSet.getCompileClasspath().plus(sourceSets.getByName("main").getOutput()));
+            sourceSet.setRuntimeClasspath(sourceSet.getRuntimeClasspath().plus(sourceSet.getOutput()).plus(sourceSet.getCompileClasspath()));
+
 
             // Configure functionalTest for GradlePluginDevelopmentExtension
             GradlePluginDevelopmentExtension gradlePlugin = project.getExtensions().getByType(GradlePluginDevelopmentExtension.class);

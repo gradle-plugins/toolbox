@@ -154,15 +154,13 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
     //endregion
 
     //region Before execute actions
-    private final List<Consumer<? super GradleExecuter>> beforeExecute = new ArrayList<>();
-
     @Override
-    public void beforeExecute(Consumer<? super GradleExecuter> action) {
-        beforeExecute.add(action);
+    public GradleExecuter beforeExecute(Consumer<? super GradleExecuter> action) {
+        return newInstance(configuration.withBeforeExecute(ImmutableList.<Consumer<? super GradleExecuter>>builder().addAll(configuration.getBeforeExecute()).add(action).build()));
     }
 
     private void fireBeforeExecute() {
-        beforeExecute.forEach(it -> it.accept(this));
+        configuration.getBeforeExecute().forEach(it -> it.accept(this));
     }
     //endregion
 
@@ -170,12 +168,12 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
     private final List<Consumer<? super GradleExecuter>> afterExecute = new ArrayList<>();
 
     @Override
-    public void afterExecute(Consumer<? super GradleExecuter> action) {
-        afterExecute.add(action);
+    public GradleExecuter afterExecute(Consumer<? super GradleExecuter> action) {
+        return newInstance(configuration.withAfterExecute(ImmutableList.<Consumer<? super GradleExecuter>>builder().addAll(configuration.getAfterExecute()).add(action).build()));
     }
 
     private void fireAfterExecute() {
-        afterExecute.forEach(it -> it.accept(this));
+        configuration.getAfterExecute().forEach(it -> it.accept(this));
     }
     //endregion
 

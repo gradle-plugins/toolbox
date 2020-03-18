@@ -1,5 +1,6 @@
 package dev.gradleplugins.test.fixtures.gradle.executer.internal;
 
+import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter;
 import dev.gradleplugins.test.fixtures.logging.ConsoleOutput;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,6 +9,7 @@ import lombok.With;
 
 import java.io.File;
 import java.util.*;
+import java.util.function.Consumer;
 
 @Data
 @AllArgsConstructor
@@ -27,8 +29,10 @@ public class GradleExecuterConfiguration {
     @With private boolean debuggerAttached = false;
     @With private boolean pluginClasspath = false;
     @With private String gradleVersion = null;
+    @With @NonNull private List<Consumer<? super GradleExecuter>> beforeExecute = new ArrayList<>();
+    @With @NonNull private List<Consumer<? super GradleExecuter>> afterExecute = new ArrayList<>();
 
     public GradleExecuterConfiguration() {
-        this(null, null, false, null, null, Collections.emptyList(), null, false, Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), null, false, false, null);
+        this(null, null, false, null, null, Collections.emptyList(), null, false, Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), null, false, false, null, Collections.emptyList(), Collections.emptyList());
     }
 }

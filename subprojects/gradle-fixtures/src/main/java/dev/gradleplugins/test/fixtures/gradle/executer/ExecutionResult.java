@@ -26,6 +26,16 @@ public interface ExecutionResult {
     ExecutionResult assertTaskNotExecuted(String taskPath);
 
     /**
+     * Asserts that the given task has not been skipped.
+     */
+    ExecutionResult assertTaskNotSkipped(String taskPath);
+
+    /**
+     * Asserts the given task has been skipped.
+     */
+    ExecutionResult assertTaskSkipped(String taskPath);
+
+    /**
      * Asserts that exactly the given set of tasks have been executed in any order and none of the tasks were skipped.
      */
     ExecutionResult assertTasksExecutedAndNotSkipped(Object... taskPaths);

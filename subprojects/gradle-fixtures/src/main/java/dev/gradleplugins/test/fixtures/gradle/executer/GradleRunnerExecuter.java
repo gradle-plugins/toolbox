@@ -24,9 +24,12 @@ import org.gradle.testkit.runner.BuildTask;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.hamcrest.Matcher;
+import org.junit.Assert;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.hamcrest.CoreMatchers.hasItem;
 
 // TODO: This is implementation details and should be moved to internal package
 //    We should instead offer a factory to construct the right executer
@@ -236,6 +239,18 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
             Set<String> skipped = getSkippedTasks();
             all.removeAll(skipped);
             return all;
+        }
+
+        @Override
+        public ExecutionResult assertTaskNotSkipped(String taskPath) {
+            Assert.assertThat(getExecutedTasks(), hasItem(taskPath));
+            return this;
+        }
+
+        @Override
+        public ExecutionResult assertTaskSkipped(String taskPath) {
+            Assert.assertThat(getSkippedTasks(), hasItem(taskPath));
+            return this;
         }
     }
 

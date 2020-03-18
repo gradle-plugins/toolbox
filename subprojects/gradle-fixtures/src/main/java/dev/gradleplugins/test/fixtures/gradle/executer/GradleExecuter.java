@@ -131,12 +131,12 @@ public interface GradleExecuter {
     /**
      * Adds an action to be called immediately before execution, to allow extra configuration to be injected.
      */
-    void beforeExecute(Consumer<? super GradleExecuter> action);
+    GradleExecuter beforeExecute(Consumer<? super GradleExecuter> action);
 
     /**
      * Adds an action to be called immediately after execution.
      */
-    void afterExecute(Consumer<? super GradleExecuter> action);
+    GradleExecuter afterExecute(Consumer<? super GradleExecuter> action);
 
     /**
      * Executes the build with {@code "--console=rich, auto, verbose"} argument.
