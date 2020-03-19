@@ -25,6 +25,7 @@ import dev.gradleplugins.integtests.fixtures.nativeplatform.msvcpp.VisualStudioV
 import dev.gradleplugins.test.fixtures.file.TestFile;
 import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter;
 import org.gradle.api.specs.Spec;
+import org.gradle.internal.FileUtils;
 import org.gradle.internal.nativeintegration.ProcessEnvironment;
 import org.gradle.internal.os.OperatingSystem;
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform;
@@ -233,6 +234,10 @@ public class AvailableToolChains {
                     if (!candidate.equals(firstInPath)) {
                         // Not the first g++ in the path, needs the path variable updated
                         gcc.inPath(candidate.getParentFile());
+                    }
+                    if (!candidate.getName().equals("g++") || !candidate.getName().startsWith("g++.")) {
+                        String suffix = FileUtils.removeExtension(candidate.getName()).substring("g++".length());
+                        gcc = gcc.withSuffix(suffix);
                     }
                     toolChains.add(gcc);
                 }
@@ -479,6 +484,7 @@ public class AvailableToolChains {
     }
 
     public static abstract class GccCompatibleToolChain extends InstalledToolChain {
+        protected String suffix = "";
         protected GccCompatibleToolChain(ToolFamily family, VersionNumber version) {
             super(family, version);
         }
@@ -495,7 +501,7 @@ public class AvailableToolChains {
         }
 
         public File getStaticLibArchiver() {
-            return find("ar");
+            return find("ar" + suffix);
         }
 
         public abstract File getCppCompiler();
@@ -535,12 +541,12 @@ public class AvailableToolChains {
 
         @Override
         public File getCppCompiler() {
-            return find("g++");
+            return find("g++" + suffix);
         }
 
         @Override
         public File getCCompiler() {
-            return find("gcc");
+            return find("gcc" + suffix);
         }
 
         @Override
@@ -560,7 +566,13 @@ public class AvailableToolChains {
 
         @Override
         public String getId() {
-            return "gcc";
+            return "gcc" + suffix;
+        }
+
+        public InstalledGcc withSuffix(String suffix) {
+            // TODO: Make it immutable
+            this.suffix = suffix;
+            return this;
         }
     }
 
