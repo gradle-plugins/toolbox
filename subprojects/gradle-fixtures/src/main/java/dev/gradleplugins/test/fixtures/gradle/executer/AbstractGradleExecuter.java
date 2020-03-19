@@ -165,8 +165,6 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
     //endregion
 
     //region After execute actions
-    private final List<Consumer<? super GradleExecuter>> afterExecute = new ArrayList<>();
-
     @Override
     public GradleExecuter afterExecute(Consumer<? super GradleExecuter> action) {
         return newInstance(configuration.withAfterExecute(ImmutableList.<Consumer<? super GradleExecuter>>builder().addAll(configuration.getAfterExecute()).add(action).build()));
