@@ -88,8 +88,7 @@ public class SpockFrameworkTestSuiteBasePlugin implements Plugin<Project> {
     }
 
     private static void configureGradleFixturesProjectDependency(GroovyGradlePluginSpockTestSuite testSuite, SourceSet sourceSet, Project project) {
-        configureProjectDependency(project, "Gradle Fixtures", sourceSet.getImplementationConfigurationName(), "dev.gradleplugins", "gradle-fixtures", "0.0.22");
-        configureProjectDependency(project, "Spock Fixtures for Gradle", sourceSet.getImplementationConfigurationName(), "dev.gradleplugins", "spock-gradle-fixtures", "0.0.22");
+        configureProjectDependency(project, "Gradle Fixtures", sourceSet.getImplementationConfigurationName(), "dev.gradleplugins", "gradle-fixtures", "0.0.24");
     }
 
     private static void configureProjectDependency(Project project, String repositoryDisplayName, String configurationName, String groupId, String artifactId, String version) {
