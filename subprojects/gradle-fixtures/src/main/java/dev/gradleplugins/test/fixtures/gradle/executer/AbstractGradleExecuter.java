@@ -1,7 +1,7 @@
 package dev.gradleplugins.test.fixtures.gradle.executer;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import dev.gradleplugins.test.fixtures.file.TestFile;
 import dev.gradleplugins.test.fixtures.gradle.executer.internal.GradleExecuterConfiguration;
 import dev.gradleplugins.test.fixtures.logging.ConsoleOutput;
@@ -187,7 +187,9 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
     //region Environment variables configuration
     @Override
     public GradleExecuter withEnvironmentVars(Map<String, ?> environment) {
-        return newInstance(configuration.withEnvironment(ImmutableMap.<String, Object>builder().putAll(configuration.getEnvironment()).putAll(environment).build()));
+        Map<String, Object> env = Maps.newHashMap(configuration.getEnvironment());
+        env.putAll(environment);
+        return newInstance(configuration.withEnvironment(env));
     }
     //endregion
 
