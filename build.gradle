@@ -1,5 +1,5 @@
-import dev.gradleplugins.GitHubSourceControlManagerPlugin
 import dev.gradleplugins.GitHubSourceControlManagerExtension
+import dev.gradleplugins.GitHubSourceControlManagerPlugin
 import dev.gradleplugins.OpenSourceSoftwareLicensePlugin
 
 plugins {
@@ -8,8 +8,8 @@ plugins {
 }
 
 allprojects {
-    group = 'dev.gradleplugins'
     version = rootProject.file('version.txt').text
+    group = 'dev.gradleplugins'
 
     apply plugin: GitHubSourceControlManagerPlugin
     extensions.configure(GitHubSourceControlManagerExtension) {

@@ -1,5 +1,3 @@
-import com.jfrog.bintray.gradle.BintrayExtension
-
 /*
  * Copyright 2019 the original author or authors.
  *
@@ -16,30 +14,23 @@ import com.jfrog.bintray.gradle.BintrayExtension
  * limitations under the License.
  */
 
-plugins {
-    id 'java-library'
-    id 'maven-publish'
-    id 'dev.gradleplugins.experimental.artifacts'
-    id 'dev.gradleplugins.experimental.publishing'
-}
+package dev.gradleplugins.spock.lang;
 
-publishing {
-    publications {
-        mavenJava {
-            from(components.java)
-        }
-    }
-}
+import java.io.File;
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
+/**
+ * Implementations provide a working space to be used in tests.
+ *
+ * The client is not responsible for removing any files.
+ */
+public interface TestDirectoryProvider {
 
-afterEvaluate {
-    extensions.configure(BintrayExtension) { bintray ->
-        bintray.pkg {
-            name = 'plugin-development'
-        }
-    }
+    /**
+     * The directory to use, guaranteed to exist.
+     *
+     * @return The directory to use, guaranteed to exist.
+     */
+    File getTestDirectory();
+
+    void suppressCleanup();
 }

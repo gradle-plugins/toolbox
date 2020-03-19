@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import com.jfrog.bintray.gradle.BintrayExtension
 import com.jfrog.bintray.gradle.tasks.BintrayUploadTask
 import org.gradle.api.publish.maven.internal.artifact.FileBasedMavenArtifact
+
+import java.text.SimpleDateFormat
 
 plugins {
     id 'dev.gradleplugins.build.gradle-api-jars'
     id 'com.jfrog.bintray'
     id 'maven-publish'
-    id 'dev.gradleplugins.experimental.publishing-base'
 }
 
-version = null
+version = '6.2.2'
 
 // Temporary workaround for https://github.com/bintray/gradle-bintray-plugin/issues/229
 PublishingExtension publishing = project.extensions.getByType(PublishingExtension)
@@ -47,14 +47,51 @@ project.tasks.withType(BintrayUploadTask).configureEach {
     }
 }
 
+private String resolveProperty(Project project, String envVarKey, String projectPropKey) {
+    Object propValue = System.getenv().get(envVarKey);
+
+    if (propValue != null) {
+        return propValue.toString();
+    }
+
+    propValue = project.findProperty(projectPropKey);
+    if (propValue != null) {
+        return propValue.toString();
+    }
+
+    return null;
+}
+
+
 afterEvaluate {
-    extensions.configure(BintrayExtension) { bintray ->
-        bintray.publications = publishing.publications.collect { it.name }
-        bintray.override = true
-        bintray.pkg {
-            name = "gradle-api-jars"
-            setLabels("gradle", "gradle-api", "gradle-plugins")
+    bintray {
+        user = resolveProperty(project, "BINTRAY_USER", "dev.gradleplugins.bintray.user")
+        key = resolveProperty(project, "BINTRAY_KEY", "dev.gradleplugins.bintray.key")
+        publications = publishing.publications.collect { it.name }
+
+        publish = true
+        override = true // only for snapshot
+
+        pkg {
+            repo = 'distributions'
+            name = 'dev.gradleplugins:gradle-api'
+            desc = project.description
+            userOrg = 'gradle-plugins'
+            websiteUrl = 'https://nokee.dev'
+            issueTrackerUrl = 'https://github.com/gradle-plugins/toolbox/issues'
+            vcsUrl = 'https://github.com/gradle-plugins/toolbox.git'
+            labels = ['gradle', 'gradle-api', 'gradle-plugins']
+            licenses = ['Apache-2.0']
             publicDownloadNumbers = false
+
+            version {
+                released = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").format(new Date())
+                // TODO: Sign artifacts
+                gpg {
+                    sign = false
+                    passphrase = resolveProperty(project, "GPG_PASSPHRASE", "dev.gradleplugins.bintray.gpgPassphrase")
+                }
+            }
         }
     }
 }
