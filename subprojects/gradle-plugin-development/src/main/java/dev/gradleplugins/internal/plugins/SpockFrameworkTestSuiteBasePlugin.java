@@ -99,7 +99,7 @@ public class SpockFrameworkTestSuiteBasePlugin implements Plugin<Project> {
 
         project.getRepositories().maven(repository -> {
             repository.setName("Gradle Plugins Development - " + repositoryDisplayName);
-            repository.setUrl(project.uri("https://dl.bintray.com/gradle-plugins/maven"));
+            repository.setUrl(project.uri("https://dl.bintray.com/gradle-plugins/distributions"));
             repository.mavenContent(content -> content.includeVersion(groupId, artifactId, version));
         });
     }
