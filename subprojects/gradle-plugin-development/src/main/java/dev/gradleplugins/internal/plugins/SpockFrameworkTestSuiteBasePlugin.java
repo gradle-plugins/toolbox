@@ -20,6 +20,7 @@ import dev.gradleplugins.internal.GroovyGradlePluginSpockTestSuite;
 import dev.gradleplugins.internal.GroovySpockFrameworkTestSuite;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.ModuleDependency;
 import org.gradle.api.internal.plugins.DslObject;
 import org.gradle.api.tasks.GroovySourceSet;
 import org.gradle.api.tasks.SourceSet;
@@ -93,7 +94,8 @@ public class SpockFrameworkTestSuiteBasePlugin implements Plugin<Project> {
 
     private static void configureProjectDependency(Project project, String repositoryDisplayName, String configurationName, String groupId, String artifactId, String version) {
         project.getConfigurations().matching(it -> it.getName().equals(configurationName)).configureEach(it -> {
-            project.getDependencies().add(it.getName(), groupId + ":" + artifactId + ":" + version);
+            ModuleDependency dep = (ModuleDependency) project.getDependencies().add(it.getName(), groupId + ":" + artifactId + ":" + version);
+            dep.capabilities(h -> h.requireCapability("dev.gradleplugins:gradle-fixtures-spock-support"));
         });
 
         project.getRepositories().maven(repository -> {
