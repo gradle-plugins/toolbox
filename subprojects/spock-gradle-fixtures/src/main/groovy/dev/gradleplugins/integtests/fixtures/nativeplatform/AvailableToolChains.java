@@ -16,6 +16,7 @@
 
 package dev.gradleplugins.integtests.fixtures.nativeplatform;
 
+import com.google.common.collect.ImmutableSet;
 import dev.gradleplugins.integtests.fixtures.AbstractContextualMultiVersionSpecRunner;
 import dev.gradleplugins.integtests.fixtures.nativeplatform.internal.NativeServicesTestFixture;
 import dev.gradleplugins.integtests.fixtures.nativeplatform.internal.TestFiles;
@@ -221,7 +222,7 @@ public class AvailableToolChains {
     static private List<ToolChainCandidate> findGccs(boolean mustFind) {
         GccMetadataProvider versionDeterminer = GccMetadataProvider.forGcc(TestFiles.execActionFactory());
 
-        Set<File> gppCandidates = Collections.unmodifiableSet(new HashSet<>(OperatingSystem.current().findAllInPath("g++")));
+        Set<File> gppCandidates = ImmutableSet.<File>builder().addAll(OperatingSystem.current().findAllInPath("g++")).addAll(OperatingSystem.current().findAllInPath("g++-8")).build();
         List<ToolChainCandidate> toolChains = new ArrayList<>();
         if (!gppCandidates.isEmpty()) {
             File firstInPath = gppCandidates.iterator().next();
