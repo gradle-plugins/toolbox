@@ -49,10 +49,7 @@ abstract class AbstractInstalledToolChainIntegrationSpec extends AbstractFunctio
                 }
             }
         """
-        executer = executer.beforeExecute({
-            usingInitScript(initScript)
-            executer = toolChain.configureExecuter(it)
-        })
+        executer = toolChain.configureExecuter(executer.usingInitScript(initScript))
     }
 
     String executableName(Object path) {
