@@ -1,0 +1,20 @@
+= Getting Started
+
+Copy the following inside `settings.gradle[.kts]`:
+
+```
+pluginManagement {
+	repositories {
+		gradlePluginPortal()
+		maven { url = uri("https://dl.bintray.com/gradle-plugins/distributions") }
+	}
+	def gradlePluginVersion = "0.0.28" // Set this version to the right once
+	resolutionStrategy {
+		eachPlugin {
+			if (requested.id.id.startsWith("dev.gradleplugins.")) {
+				useModule("${requested.id.id}:${requested.id.id}.gradle.plugin:${gradlePluginVersion}")
+			}
+		}
+	}
+}
+```

@@ -17,7 +17,11 @@ dependencies {
 === As external binary
 
 ```
+repositories {
+    maven { url = uri("https://dl.bintray.com/gradle-plugins/distributions") }
+}
+
 dependencies {
-    compileOnly 'dev.gradleplugins:gradle-api:2.14.1'
+    compileOnly("dev.gradleplugins:gradle-api:2.14.1")
 }
 ```

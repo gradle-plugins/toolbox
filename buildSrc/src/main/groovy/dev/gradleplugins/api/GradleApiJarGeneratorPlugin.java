@@ -60,6 +60,7 @@ public class GradleApiJarGeneratorPlugin implements Plugin<Project> {
             TaskProvider<GenerateGradleApiJar> generateGradleApiJarTask = tasks.register("generateGradleApi" + availableVersion.getVersion(), GenerateGradleApiJar.class, task -> {
                 task.getVersion().set(availableVersion.getVersion());
                 task.getOutputFile().set(layout.getBuildDirectory().file("generated-gradle-jars/gradle-api-" + availableVersion.getVersion() + ".jar"));
+                task.getOutputSourceFile().set(layout.getBuildDirectory().file("generated-gradle-jars/gradle-api-" + availableVersion.getVersion() + "-sources.jar"));
             });
 
             Configuration api = configurations.create("apiForGradleApi" + availableVersion.getVersion(), configuration -> {
@@ -86,6 +87,24 @@ public class GradleApiJarGeneratorPlugin implements Plugin<Project> {
                 });
             });
 
+            Configuration gradleApiSourceElements = configurations.create("gradleApi" + availableVersion.getVersion() + "SourceElements", configuration -> {
+                configuration.setCanBeResolved(false);
+                configuration.setCanBeConsumed(true);
+                configuration.getOutgoing().artifact(generateGradleApiJarTask.flatMap(it -> it.getOutputSourceFile()), it -> it.setClassifier("sources"));
+                configuration.attributes(attributes -> {
+                    attributes.attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage.class, Usage.JAVA_RUNTIME));
+                    attributes.attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category.class, Category.DOCUMENTATION));
+                    attributes.attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.class, Bundling.EXTERNAL));
+                    attributes.attribute(DocsType.DOCS_TYPE_ATTRIBUTE, objects.named(DocsType.class, DocsType.SOURCES));
+                    if (availableVersion.compareTo(GradleVersion.version("3.0")) < 0) {
+                        attributes.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, Integer.parseInt(JavaVersion.VERSION_1_6.getMajorVersion()));
+                    } else {
+                        attributes.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, Integer.parseInt(JavaVersion.VERSION_1_8.getMajorVersion()));
+                    }
+                    attributes.attribute(Attribute.of("dev.gradleplugins.gradleAbi", String.class), availableVersion.getVersion());
+                });
+            });
+
             dependencies.add(api.getName(), "org.codehaus.groovy:groovy-all:" + toGroovyVersion(availableVersion));
 
             AdhocComponentWithVariants adhocComponent = softwareComponentFactory.adhoc("gradleApi" + availableVersion.getVersion());
@@ -93,6 +112,7 @@ public class GradleApiJarGeneratorPlugin implements Plugin<Project> {
             project.getComponents().add(adhocComponent);
             // and register a variant for publication
             adhocComponent.addVariantsFromConfiguration(gradleApiElements, it -> {});
+            adhocComponent.addVariantsFromConfiguration(gradleApiSourceElements, it -> {});
 
 
             project.getPluginManager().withPlugin("maven-publish", appliedPlugin -> {
