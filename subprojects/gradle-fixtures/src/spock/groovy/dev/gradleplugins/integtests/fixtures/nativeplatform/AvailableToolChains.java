@@ -235,7 +235,7 @@ public class AvailableToolChains {
                         // Not the first g++ in the path, needs the path variable updated
                         gcc.inPath(candidate.getParentFile());
                     }
-                    if (!candidate.getName().equals("g++") || !candidate.getName().startsWith("g++.")) {
+                    if (!(candidate.getName().equals("g++") || candidate.getName().startsWith("g++."))) {
                         String suffix = FileUtils.removeExtension(candidate.getName()).substring("g++".length());
                         gcc = gcc.withSuffix(suffix);
                     }
@@ -532,10 +532,22 @@ public class AvailableToolChains {
 
         @Override
         public String getBuildScriptConfig() {
-            String config = String.format("%s(%s)\n", getId(), getImplementationClass());
+            String config = String.format("'%s'(%s) {\n", getId(), getImplementationClass());
             for (File pathEntry : getPathEntries()) {
-                config += String.format("%s.path file('%s')\n", getId(), pathEntry.toURI());
+                config += String.format("path file('%s')\n", pathEntry.toURI());
             }
+            if (!suffix.isEmpty()) {
+                config += "    eachPlatform { platformToolChain ->\n";
+                config += String.format("        platformToolChain.cCompiler.executable='%s'\n", "gcc" + suffix);
+                config += String.format("        platformToolChain.cppCompiler.executable='%s'\n", "g++" + suffix);
+                config += String.format("        platformToolChain.objcCompiler.executable='%s'\n", "gcc" + suffix);
+                config += String.format("        platformToolChain.objcppCompiler.executable='%s'\n", "g++" + suffix);
+                config += String.format("        platformToolChain.assembler.executable='%s'\n", "gcc" + suffix);
+                config += String.format("        platformToolChain.linker.executable='%s'\n", "g++" + suffix);
+                config += String.format("        platformToolChain.staticLibArchiver.executable='%s'\n", "gcc-ar" + suffix);
+                config += "    }\n";
+            }
+            config += "}\n";
             return config;
         }
 
