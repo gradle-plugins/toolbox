@@ -93,7 +93,10 @@ class AbstractFunctionalSpec extends Specification {
         result.assertTasksSkipped(tasks)
     }
 
-    protected TestFile file(String relativePath) {
+    /**
+     * NOTE: The method is public so it can align with Trait classes like {@link ArchiveTestFixture}.
+     */
+    TestFile file(String relativePath) {
         return getTestDirectory().file(relativePath)
     }
 

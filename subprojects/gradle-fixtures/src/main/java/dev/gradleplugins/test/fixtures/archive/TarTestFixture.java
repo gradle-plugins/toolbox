@@ -24,7 +24,7 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.util.zip.GZIPInputStream;
 
-class TarTestFixture extends ArchiveTestFixture {
+public class TarTestFixture extends ArchiveTestFixture {
     private final TestFile tarFile;
 
     public TarTestFixture(TestFile tarFile) {
