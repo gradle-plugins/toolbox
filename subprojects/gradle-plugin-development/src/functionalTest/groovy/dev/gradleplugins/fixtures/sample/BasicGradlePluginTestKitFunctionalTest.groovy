@@ -16,10 +16,9 @@
 
 package dev.gradleplugins.fixtures.sample
 
-
-import dev.gradleplugins.fixtures.SourceElement
-import dev.gradleplugins.fixtures.SourceFile
 import dev.gradleplugins.integtests.fixtures.AbstractFunctionalSpec
+import dev.gradleplugins.test.fixtures.sources.SourceElement
+import dev.gradleplugins.test.fixtures.sources.SourceFile
 
 class BasicGradlePluginTestKitFunctionalTest extends SourceElement {
     final List<SourceFile> files = Collections.singletonList(sourceFile('groovy', 'com/example/BasicPluginFunctionalTest.groovy', """package com.example

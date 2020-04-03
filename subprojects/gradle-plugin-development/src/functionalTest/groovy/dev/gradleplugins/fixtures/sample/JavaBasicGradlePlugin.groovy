@@ -16,24 +16,47 @@
 
 package dev.gradleplugins.fixtures.sample
 
-import dev.gradleplugins.GradlePlugin
-import dev.gradleplugins.fixtures.SourceElement
-import dev.gradleplugins.fixtures.SourceFile
+import dev.gradleplugins.test.fixtures.file.TestFile
+import dev.gradleplugins.test.fixtures.sources.SourceFile
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
-class JavaBasicGradlePlugin extends SourceElement implements GradlePluginElement {
+class JavaBasicGradlePlugin extends GradlePluginElement {
     final String pluginId = "com.example.hello"
     final List<SourceFile> files = Collections.singletonList(sourceFile('java', 'com/example/BasicPlugin.java', """package com.example;
 import ${Plugin.canonicalName};
 import ${Project.canonicalName};
-import ${GradlePlugin.canonicalName};
 
-@GradlePlugin(id = "${pluginId}")
 public class BasicPlugin implements Plugin<Project> {
     public void apply(Project project) {
         project.getLogger().lifecycle("Hello");
     }
 }
 """))
+
+    @Override
+    GradlePluginElement withFunctionalTest() {
+        def delegate = ofElements(this, new BasicGradlePluginTestKitFunctionalTest())
+        return new GradlePluginElement() {
+            @Override
+            String getPluginId() {
+                return JavaBasicGradlePlugin.this.pluginId
+            }
+
+            @Override
+            GradlePluginElement withFunctionalTest() {
+                return this
+            }
+
+            @Override
+            List<SourceFile> getFiles() {
+                throw new UnsupportedOperationException()
+            }
+
+            @Override
+            void writeToProject(TestFile projectDir) {
+                delegate.writeToProject(projectDir)
+            }
+        }
+    }
 }

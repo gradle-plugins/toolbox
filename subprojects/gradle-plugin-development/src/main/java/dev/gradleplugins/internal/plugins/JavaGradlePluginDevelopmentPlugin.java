@@ -18,15 +18,23 @@ package dev.gradleplugins.internal.plugins;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.plugins.JavaPluginExtension;
 
-//@GradlePlugin(id = "dev.gradleplugins.java-gradle-plugin")
+import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.*;
+
 public class JavaGradlePluginDevelopmentPlugin implements Plugin<Project> { //extends AbstractGradlePluginDevelopmentPlugin {
+    private static final String PLUGIN_ID = "dev.gradleplugins.java-gradle-plugin";
     @Override
     public void apply(Project project) {
-        // Assert java-gradle-plugin not applied
+        assertOtherGradlePluginDevelopmentPluginsAreNeverApplied(project.getPluginManager(), PLUGIN_ID);
+        assertJavaGradlePluginIsNotPreviouslyApplied(project.getPluginManager(), PLUGIN_ID);
+        assertKotlinDslPluginIsNeverApplied(project.getPluginManager(), PLUGIN_ID);
+
         // Configure api dependencies
 
         project.getPluginManager().apply("java-gradle-plugin"); // For plugin development
+
+        configureDefaultJavaCompatibility(project.getExtensions().getByType(JavaPluginExtension.class));
 
         project.getPluginManager().apply(GradlePluginDevelopmentFunctionalTestingPlugin.class);
 
@@ -36,9 +44,9 @@ public class JavaGradlePluginDevelopmentPlugin implements Plugin<Project> { //ex
     }
 
 //    @Override
-    protected String getPluginId() {
-        return "dev.gradleplugins.java-gradle-plugin";
-    }
+//    protected String getPluginId() {
+//        return "dev.gradleplugins.java-gradle-plugin";
+//    }
 
 //    private static void configureAnnotationProcessorSources(TaskProvider<FakeAnnotationProcessorTask> processorTask) {
 //        processorTask.configure(task -> {

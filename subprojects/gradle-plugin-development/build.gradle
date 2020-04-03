@@ -22,6 +22,10 @@ gradlePlugin {
             id = 'dev.gradleplugins.java-gradle-plugin'
             implementationClass = 'dev.gradleplugins.internal.plugins.JavaGradlePluginDevelopmentPlugin'
         }
+        groovyGradlePlugin {
+            id = 'dev.gradleplugins.groovy-gradle-plugin'
+            implementationClass = 'dev.gradleplugins.internal.plugins.GroovyGradlePluginDevelopmentPlugin'
+        }
     }
 }
 

@@ -16,14 +16,15 @@
 
 package dev.gradleplugins
 
+import dev.gradleplugins.fixtures.sample.GradlePluginElement
 import dev.gradleplugins.fixtures.sample.GroovyBasicGradlePlugin
-import dev.gradleplugins.fixtures.SourceElement
+import dev.gradleplugins.test.fixtures.sources.SourceElement
 
 class GroovyGradlePluginDevelopmentWellBehaveFunctionalTest extends WellBehaveGradlePluginDevelopmentPluginFunctionalTest {
     final String pluginIdUnderTest = 'dev.gradleplugins.groovy-gradle-plugin'
 
     @Override
-    protected SourceElement getComponentUnderTest() {
+    protected GradlePluginElement getComponentUnderTest() {
         return new GroovyBasicGradlePlugin()
     }
 }

@@ -16,9 +16,10 @@
 
 package dev.gradleplugins
 
-import dev.gradleplugins.fixtures.SourceElement
-import dev.gradleplugins.fixtures.sample.BasicGradlePluginWithFunctionalTest
 import dev.gradleplugins.integtests.fixtures.AbstractFunctionalSpec
+import dev.gradleplugins.integtests.fixtures.ArchiveTestFixture
+import dev.gradleplugins.fixtures.sample.GradlePluginElement
+import org.hamcrest.CoreMatchers
 import org.junit.Assume
 import spock.lang.Ignore
 import spock.lang.Unroll
@@ -27,7 +28,28 @@ import static org.hamcrest.CoreMatchers.equalTo
 import static org.hamcrest.CoreMatchers.not
 
 // TODO: Add fork Gradle Executer so I can test what user really experience once the plugin is released
-abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends AbstractFunctionalSpec {
+abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends AbstractFunctionalSpec implements ArchiveTestFixture {
+    protected String getProjectName() {
+        return 'gradle-plugin'
+    }
+
+    protected String configureGradlePluginExtension() {
+        return """
+            gradlePlugin {
+                plugins {
+                    hello {
+                        id = '${componentUnderTest.pluginId}'
+                        implementationClass = 'com.example.BasicPlugin'
+                    }
+                }
+            }
+        """
+    }
+
+    def setup() {
+        settingsFile << "rootProject.name = '${projectName}'"
+    }
+
     def "fails when java-gradle-plugin core plugin is applied before dev.gradleplugins development plugin"() {
         given:
         buildFile << """
@@ -35,6 +57,8 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
                 id("java-gradle-plugin")
                 ${configureApplyPluginUnderTest()}
             }
+
+            ${configureGradlePluginExtension()}
         """
 
         when:
@@ -54,6 +78,8 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
                 id("${otherPluginId}")
                 ${configureApplyPluginUnderTest()}
             }
+
+            ${configureGradlePluginExtension()}
         """
 
         when:
@@ -63,7 +89,7 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
         outputContains("The '${pluginIdUnderTest}' cannot be applied with '${otherPluginId}', please apply just one of them.")
 
         where:
-        otherPluginId << ['dev.gradleplugins.java-gradle-plugin', 'dev.gradleplugins.groovy-gradle-plugin', 'dev.gradleplugins.kotlin-gradle-plugin']
+        otherPluginId << ['dev.gradleplugins.java-gradle-plugin', 'dev.gradleplugins.groovy-gradle-plugin']
     }
 
     def "can build a Gradle plugin"() {
@@ -79,6 +105,8 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
                     url "${System.properties['user.home']}/.m2/repository"
                 }
             }
+            
+            ${configureGradlePluginExtension()}
         """
         componentUnderTest.writeToProject(testDirectory)
 
@@ -86,13 +114,13 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
         succeeds('build')
 
         then:
-        assertTasksExecutedAndNotSkipped(':build')
-        // TODO: Assert jar content instead
-        !outputContains("No valid plugin descriptors were found in META-INF/gradle-plugins")
-        !outputContains("A valid plugin descriptor was found for com.example.hello.properties but the implementation class com.example.BasicPlugin was not found in the jar.")
-        // TODO: Valid the plugin is proper
+        result.assertTaskNotSkipped(':build')
+        jar("build/libs/${projectName}.jar").hasDescendants('com/example/BasicPlugin.class',"META-INF/gradle-plugins/${componentUnderTest.pluginId}.properties")
+        jar("build/libs/${projectName}.jar").assertFileContent("META-INF/gradle-plugins/${componentUnderTest.pluginId}.properties", CoreMatchers.startsWith('implementation-class=com.example.BasicPlugin'))
     }
 
+
+    // TODO: Assert the right version of the fixture is pulled
     def "can functional test a Gradle plugin"() {
         given:
         buildFile << """
@@ -100,25 +128,21 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
                 ${configureApplyPluginUnderTest()}
             }
 
-            // HACK: We should have a way to get the "fake" snapshot jars
             repositories {
-                maven {
-                    url "${System.properties['user.home']}/.m2/repository"
-                }
+                jcenter()
             }
+            
+            ${configureGradlePluginExtension()}
         """
-        def gradlePlugin = new BasicGradlePluginWithFunctionalTest(componentUnderTest)
-        gradlePlugin.writeToProject(testDirectory)
+        componentUnderTest.withFunctionalTest().writeToProject(testDirectory)
 
         when:
         succeeds('build')
 
         then:
-        assertTasksExecutedAndNotSkipped(':build')
-        // TODO: Assert jar content instead
-        !outputContains("No valid plugin descriptors were found in META-INF/gradle-plugins")
-        !outputContains("A valid plugin descriptor was found for com.example.hello.properties but the implementation class com.example.BasicPlugin was not found in the jar.")
-        // TODO: Valid the plugin is proper
+        result.assertTaskNotSkipped(':build')
+        jar("build/libs/${projectName}.jar").hasDescendants('com/example/BasicPlugin.class',"META-INF/gradle-plugins/${componentUnderTest.pluginId}.properties")
+        jar("build/libs/${projectName}.jar").assertFileContent("META-INF/gradle-plugins/${componentUnderTest.pluginId}.properties", CoreMatchers.startsWith('implementation-class=com.example.BasicPlugin'))
     }
 
     def "fails if `kotlin-dsl` plugin is applied"() {
@@ -129,6 +153,8 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
                 `kotlin-dsl`
                 id("${pluginIdUnderTest}")
             }
+            
+            ${configureGradlePluginExtension()}
         """
 
         when:
@@ -155,6 +181,8 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
                     assert java.targetCompatibility == JavaVersion.VERSION_1_8
                 }
             }
+
+            ${configureGradlePluginExtension()}
         """
 
         expect:
@@ -181,6 +209,8 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
                     url "${System.properties['user.home']}/.m2/repository"
                 }
             }
+            
+            ${configureGradlePluginExtension()}
         """
         pluginDirectory.file(settingsFileName) << """
             rootProject.name = "hello-gradle-plugin"
@@ -191,7 +221,7 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
                 id("${componentUnderTest.pluginId}")
             }
         """
-        settingsFile << """
+        settingsFile.text = """
             pluginManagement {
                 resolutionStrategy {
                     eachPlugin {
@@ -203,7 +233,7 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
             }
 
             includeBuild("hello-gradle-plugin")
-        """
+        """ + settingsFile.text
 
         when:
         run('help')
@@ -237,7 +267,7 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
 
     def "can use published plugin through plugin DSL"() {
         publishPluginUnderTest()
-        settingsFile << configurePluginDslForPluginUnderTest()
+        settingsFile.text = configurePluginDslForPluginUnderTest() + settingsFile.text
         buildFile << """
             plugins {
                 id("${componentUnderTest.pluginId}")
@@ -251,9 +281,10 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
         outputContains('Hello')
     }
 
+    @Ignore("This feature has being remove for now")
     def "gives a useful message when using the plugin with older Gradle distribution"() {
         publishPluginUnderTest()
-        settingsFile << configurePluginDslForPluginUnderTest()
+        settingsFile.text = configurePluginDslForPluginUnderTest() + settingsFile.text
         buildFile << """
             plugins {
                 id("${componentUnderTest.pluginId}")
@@ -276,6 +307,8 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
             plugins {
                 ${configureApplyPluginUnderTest()}
             }
+
+            ${configureGradlePluginExtension()}
         """
 
         when:
@@ -293,6 +326,8 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
             plugins {
                 ${configureApplyPluginUnderTest()}
             }
+
+            ${configureGradlePluginExtension()}
         """
 
         when:
@@ -323,6 +358,8 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
                     url "${System.properties['user.home']}/.m2/repository"
                 }
             }
+            
+            ${configureGradlePluginExtension()}
         """
         pluginDirectory.file(settingsFileName) << """
             rootProject.name = "hello-gradle-plugin"
@@ -356,5 +393,5 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
 
     protected abstract String getPluginIdUnderTest()
 
-    protected abstract SourceElement getComponentUnderTest()
+    protected abstract GradlePluginElement getComponentUnderTest()
 }
