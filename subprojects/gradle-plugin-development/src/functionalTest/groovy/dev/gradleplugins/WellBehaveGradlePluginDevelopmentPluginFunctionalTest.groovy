@@ -166,29 +166,6 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
         result.output.contains("The Gradle plugin 'kotlin-dsl' should not be applied within your build when using '${pluginIdUnderTest}'.")
     }
 
-    // TODO: Test legacy (java-gradle-plugin core plugin) migration to current project
-    // TODO: Not wellbehave test
-    def "defaults to Java 8 compatibility"() {
-        given:
-        buildFile << """
-            plugins {
-                ${configureApplyPluginUnderTest()}
-            }
-
-            tasks.register("verify") {
-                doLast {
-                    assert java.sourceCompatibility == JavaVersion.VERSION_1_8
-                    assert java.targetCompatibility == JavaVersion.VERSION_1_8
-                }
-            }
-
-            ${configureGradlePluginExtension()}
-        """
-
-        expect:
-        succeeds('verify')
-    }
-
     // TODO: Not a wellbehave test but more like using it in real life
     def "can use the plugin inside a composite build"() {
         def pluginDirectory = testDirectory.file("hello-gradle-plugin")

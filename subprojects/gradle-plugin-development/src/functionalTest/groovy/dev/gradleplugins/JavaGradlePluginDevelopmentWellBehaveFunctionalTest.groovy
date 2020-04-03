@@ -19,9 +19,7 @@ package dev.gradleplugins
 import dev.gradleplugins.fixtures.sample.GradlePluginElement
 import dev.gradleplugins.fixtures.sample.JavaBasicGradlePlugin
 
-class JavaGradlePluginDevelopmentWellBehaveFunctionalTest extends WellBehaveGradlePluginDevelopmentPluginFunctionalTest {
-    final String pluginIdUnderTest = "dev.gradleplugins.java-gradle-plugin"
-
+class JavaGradlePluginDevelopmentWellBehaveFunctionalTest extends WellBehaveGradlePluginDevelopmentPluginFunctionalTest implements JavaGradlePluginDevelopmentPlugin {
     @Override
     protected GradlePluginElement getComponentUnderTest() {
         return new JavaBasicGradlePlugin()

@@ -16,9 +16,11 @@
 
 package dev.gradleplugins.internal.plugins;
 
+import dev.gradleplugins.GroovyGradlePluginDevelopmentExtension;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaPluginExtension;
+import org.gradle.util.VersionNumber;
 
 import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.*;
 
@@ -34,48 +36,24 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
         project.getPluginManager().apply("java-gradle-plugin"); // For plugin development
         project.getPluginManager().apply("groovy-base");
 
-        configureDefaultJavaCompatibility(project.getExtensions().getByType(JavaPluginExtension.class));
+        GroovyGradlePluginDevelopmentExtension extension = registerExtraExtension(project, GroovyGradlePluginDevelopmentExtension.class);
+
+        project.afterEvaluate(proj -> {
+            if (extension.getMinimumGradleVersion().isPresent()) {
+                configureDefaultJavaCompatibility(project.getExtensions().getByType(JavaPluginExtension.class), VersionNumber.parse(extension.getMinimumGradleVersion().get()));
+            } else {
+                extension.getMinimumGradleVersion().set(project.getGradle().getGradleVersion());
+            }
+            extension.getMinimumGradleVersion().disallowChanges();
+        });
 
         project.getPluginManager().apply(GradlePluginDevelopmentFunctionalTestingPlugin.class);
 
-//        project.getRepositories().jcenter();
-        project.getDependencies().add("compileOnly", "org.codehaus.groovy:groovy:2.5.2"); // require jcenter()
+        // Using version 2.5.2
+        project.getDependencies().add("compileOnly", "org.codehaus.groovy:groovy:2.5.2");
         project.getRepositories().mavenCentral(repo -> {
             repo.mavenContent(content -> {
                 content.includeVersion("org.codehaus.groovy", "groovy", "2.5.2");
-
-//                // for groovy-ant
-//                content.includeVersion("org.apache.ant", "ant", "1.9.13");
-//                content.includeVersion("org.apache.ant", "ant-launcher", "1.9.13");
-//                content.includeVersion("org.apache.ant", "ant-parent", "1.9.13");
-//
-//                // for groovy-cli-commons
-//                content.includeVersion("commons-cli", "commons-cli", "1.4");
-//                content.includeVersion("org.apache.commons", "commons-parent", "42");
-//                content.includeVersion("org.apache", "apache", "18");
-//
-//                // for groovy-cli-picocli
-//                content.includeVersion("info.picocli", "picocli", "3.7.0");
-//
-//                // for groovy-docgenerator
-//                content.includeVersion("com.thoughtworks.qdox", "qdox", "1.12.1");
-//                content.includeVersion("org.codehaus", "codehaus-parent", "4");
-//
-//                // for groovy-groovysh
-//                content.includeVersion("jline", "jline", "2.14.6");
-//                content.includeVersion("org.sonatype.oss", "oss-parent", "9");
-//
-//                // for groovy-test
-//                content.includeVersion("junit", "junit", "4.12");
-//                content.includeVersion("org.hamcrest", "hamcrest-core", "1.3");
-//                content.includeVersion("org.hamcrest", "hamcrest-parent", "1.3");
-//
-//                // for groovy-test-junit5
-//                content.includeVersion("org.junit.platform", "junit-platform-launcher", "1.3.1");
-//                content.includeVersion("org.apiguardian", "apiguardian-api", "1.0.0");
-//                content.includeVersion("org.junit.platform", "junit-platform-engine", "1.3.1");
-//                content.includeVersion("org.junit.platform", "junit-platform-commons", "1.3.1");
-//                content.includeVersion("org.opentest4j", "opentest4j", "1.1.1");
             });
         });
 

@@ -20,8 +20,12 @@ import org.gradle.api.GradleException;
 import org.gradle.api.JavaVersion;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.plugins.PluginManager;
+import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
+import org.gradle.util.GradleVersion;
+import org.gradle.util.VersionNumber;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -63,8 +67,34 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
         });
     }
 
-    public static void configureDefaultJavaCompatibility(JavaPluginExtension java) {
-        java.setSourceCompatibility(JavaVersion.VERSION_1_8);
-        java.setTargetCompatibility(JavaVersion.VERSION_1_8);
+    private static JavaVersion toMinimumJavaVersion(VersionNumber version) {
+        switch (version.getMajor()) {
+            case 1:
+                return JavaVersion.VERSION_1_5;
+            case 2:
+                return JavaVersion.VERSION_1_6;
+            case 3:
+            case 4:
+                return JavaVersion.VERSION_1_7;
+            case 5:
+            case 6:
+                return JavaVersion.VERSION_1_8;
+            default:
+                throw new IllegalArgumentException("Version not known at the time, please check what Java version is supported");
+        }
+    }
+
+    public static void configureDefaultJavaCompatibility(JavaPluginExtension java, VersionNumber minimumGradleVersion) {
+        JavaVersion minimumJavaVersion = toMinimumJavaVersion(minimumGradleVersion);
+        java.setSourceCompatibility(minimumJavaVersion);
+        java.setTargetCompatibility(minimumJavaVersion);
+    }
+
+    public static <T> T registerExtraExtension(Project project, Class<T> type) {
+        GradlePluginDevelopmentExtension gradlePlugin = project.getExtensions().getByType(GradlePluginDevelopmentExtension.class);
+        T extension = project.getObjects().newInstance(type);
+        ((ExtensionAware)gradlePlugin).getExtensions().add("extra", extension);
+
+        return extension;
     }
 }

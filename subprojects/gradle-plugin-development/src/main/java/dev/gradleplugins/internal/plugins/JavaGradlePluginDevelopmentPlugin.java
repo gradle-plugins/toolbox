@@ -16,9 +16,13 @@
 
 package dev.gradleplugins.internal.plugins;
 
+import dev.gradleplugins.GroovyGradlePluginDevelopmentExtension;
+import dev.gradleplugins.JavaGradlePluginDevelopmentExtension;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaPluginExtension;
+import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
+import org.gradle.util.VersionNumber;
 
 import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.*;
 
@@ -34,7 +38,16 @@ public class JavaGradlePluginDevelopmentPlugin implements Plugin<Project> { //ex
 
         project.getPluginManager().apply("java-gradle-plugin"); // For plugin development
 
-        configureDefaultJavaCompatibility(project.getExtensions().getByType(JavaPluginExtension.class));
+        JavaGradlePluginDevelopmentExtension extension = registerExtraExtension(project, JavaGradlePluginDevelopmentExtension.class);
+
+        project.afterEvaluate(proj -> {
+            if (extension.getMinimumGradleVersion().isPresent()) {
+                configureDefaultJavaCompatibility(project.getExtensions().getByType(JavaPluginExtension.class), VersionNumber.parse(extension.getMinimumGradleVersion().get()));
+            } else {
+                extension.getMinimumGradleVersion().set(project.getGradle().getGradleVersion());
+            }
+            extension.getMinimumGradleVersion().disallowChanges();
+        });
 
         project.getPluginManager().apply(GradlePluginDevelopmentFunctionalTestingPlugin.class);
 
