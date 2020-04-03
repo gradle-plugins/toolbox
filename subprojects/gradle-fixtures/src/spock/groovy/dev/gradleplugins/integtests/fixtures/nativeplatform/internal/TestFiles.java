@@ -15,84 +15,22 @@
  */
 package dev.gradleplugins.integtests.fixtures.nativeplatform.internal;
 
-import org.gradle.api.internal.cache.StringInterner;
-import org.gradle.api.internal.file.*;
-import org.gradle.api.internal.file.collections.DefaultDirectoryFileTreeFactory;
-import org.gradle.api.internal.file.collections.DirectoryFileTreeFactory;
-import org.gradle.api.internal.resources.ApiTextResourceAdapter;
-import org.gradle.api.internal.tasks.DefaultTaskDependencyFactory;
-import org.gradle.api.tasks.util.PatternSet;
-import org.gradle.api.tasks.util.internal.PatternSets;
-import org.gradle.internal.Factory;
-import org.gradle.internal.concurrent.DefaultExecutorFactory;
-import org.gradle.internal.file.Deleter;
-import org.gradle.internal.file.PathToFileResolver;
-import org.gradle.internal.file.impl.DefaultDeleter;
-import org.gradle.internal.fingerprint.GenericFileTreeSnapshotter;
-import org.gradle.internal.fingerprint.impl.DefaultFileCollectionSnapshotter;
-import org.gradle.internal.fingerprint.impl.DefaultGenericFileTreeSnapshotter;
-import org.gradle.internal.hash.DefaultFileHasher;
-import org.gradle.internal.hash.DefaultStreamHasher;
-import org.gradle.internal.nativeintegration.filesystem.FileSystem;
-import org.gradle.internal.resource.local.FileResourceConnector;
-import org.gradle.internal.resource.local.FileResourceRepository;
-import org.gradle.internal.time.Time;
-import org.gradle.internal.vfs.VirtualFileSystem;
-import org.gradle.internal.vfs.impl.DefaultVirtualFileSystem;
+import org.gradle.api.internal.file.DefaultFileLookup;
+import org.gradle.api.internal.file.FileLookup;
+import org.gradle.api.internal.file.FileResolver;
+import org.gradle.api.internal.project.ProjectInternal;
+import org.gradle.internal.service.ServiceRegistry;
 import org.gradle.process.internal.DefaultExecActionFactory;
 import org.gradle.process.internal.ExecActionFactory;
 import org.gradle.process.internal.ExecFactory;
-import org.gradle.process.internal.ExecHandleFactory;
+import org.gradle.testfixtures.ProjectBuilder;
 
-import javax.annotation.Nullable;
 import java.io.File;
-import java.util.List;
-
-import static org.gradle.internal.snapshot.CaseSensitivity.CASE_INSENSITIVE;
-import static org.gradle.internal.snapshot.CaseSensitivity.CASE_SENSITIVE;
 
 public class TestFiles {
-    private static final FileSystem FILE_SYSTEM = NativeServicesTestFixture.getInstance().get(FileSystem.class);
-    private static final DefaultFileLookup FILE_LOOKUP = new DefaultFileLookup(PatternSets.getNonCachingPatternSetFactory());
-    private static final DefaultExecActionFactory EXEC_FACTORY = DefaultExecActionFactory.of(resolver(), fileCollectionFactory(), new DefaultExecutorFactory());
-
-    public static FileCollectionInternal empty() {
-        return fileCollectionFactory().empty();
-    }
-
-    public static FileCollectionInternal fixed(File... files) {
-        return fileCollectionFactory().fixed(files);
-    }
-
-    public static FileCollectionInternal fixed(List<File> files) {
-        return fileCollectionFactory().fixed(files);
-    }
-
-    public static FileLookup fileLookup() {
-        return FILE_LOOKUP;
-    }
-
-    public static FileSystem fileSystem() {
-        return FILE_SYSTEM;
-    }
-
-    public static FileResourceRepository fileRepository() {
-        return new FileResourceConnector(FILE_SYSTEM);
-    }
-
-    /**
-     * Returns a resolver with no base directory.
-     */
-    public static FileResolver resolver() {
-        return FILE_LOOKUP.getFileResolver();
-    }
-
-    /**
-     * Returns a resolver with no base directory.
-     */
-    public static PathToFileResolver pathToFileResolver() {
-        return FILE_LOOKUP.getPathToFileResolver();
-    }
+    private static final ServiceRegistry SERVICE_REGISTRY = ((ProjectInternal)ProjectBuilder.builder().build()).getServices();
+    private static final DefaultFileLookup FILE_LOOKUP = (DefaultFileLookup)SERVICE_REGISTRY.get(FileLookup.class);
+    private static final DefaultExecActionFactory EXEC_FACTORY = (DefaultExecActionFactory)SERVICE_REGISTRY.get(ExecActionFactory.class);
 
     /**
      * Returns a resolver with the given base directory.
@@ -101,79 +39,11 @@ public class TestFiles {
         return FILE_LOOKUP.getFileResolver(baseDir);
     }
 
-    /**
-     * Returns a resolver with the given base directory.
-     */
-    public static PathToFileResolver pathToFileResolver(File baseDir) {
-        return FILE_LOOKUP.getPathToFileResolver(baseDir);
-    }
-
-    public static DirectoryFileTreeFactory directoryFileTreeFactory() {
-        return new DefaultDirectoryFileTreeFactory(getPatternSetFactory(), fileSystem());
-    }
-
-    public static Deleter deleter() {
-        return new DefaultDeleter(Time.clock()::getCurrentTime, fileSystem()::isSymlink, false);
-    }
-
-    public static FileFactory fileFactory() {
-        return new DefaultFilePropertyFactory(resolver(), fileCollectionFactory());
-    }
-
-    public static ApiTextResourceAdapter.Factory textResourceAdapterFactory(@Nullable TemporaryFileProvider temporaryFileProvider) {
-        return new ApiTextResourceAdapter.Factory(
-            __ -> {
-                throw new IllegalStateException("Can't create TextUriResourceLoader");
-            },
-            temporaryFileProvider
-        );
-    }
-
-    public static DefaultStreamHasher streamHasher() {
-        return new DefaultStreamHasher();
-    }
-
-    public static DefaultFileHasher fileHasher() {
-        return new DefaultFileHasher(streamHasher());
-    }
-
-    public static GenericFileTreeSnapshotter genericFileTreeSnapshotter() {
-        return new DefaultGenericFileTreeSnapshotter(fileHasher(), new StringInterner());
-    }
-
-    public static DefaultFileCollectionSnapshotter fileCollectionSnapshotter() {
-        return new DefaultFileCollectionSnapshotter(virtualFileSystem(), genericFileTreeSnapshotter(), fileSystem());
-    }
-
-    public static VirtualFileSystem virtualFileSystem() {
-        return new DefaultVirtualFileSystem(fileHasher(), new StringInterner(), fileSystem(), fileSystem().isCaseSensitive() ? CASE_SENSITIVE : CASE_INSENSITIVE);
-    }
-
-    public static FileCollectionFactory fileCollectionFactory() {
-        return new DefaultFileCollectionFactory(pathToFileResolver(), DefaultTaskDependencyFactory.withNoAssociatedProject(), directoryFileTreeFactory(), getPatternSetFactory());
-    }
-
-    public static FileCollectionFactory fileCollectionFactory(File baseDir) {
-        return new DefaultFileCollectionFactory(pathToFileResolver(baseDir), DefaultTaskDependencyFactory.withNoAssociatedProject(), directoryFileTreeFactory(), getPatternSetFactory());
-    }
-
     public static ExecFactory execFactory() {
         return EXEC_FACTORY;
     }
 
     public static ExecActionFactory execActionFactory() {
         return execFactory();
-    }
-
-    public static ExecHandleFactory execHandleFactory() {
-        return execFactory();
-    }
-
-    public static Factory<PatternSet> getPatternSetFactory() {
-        return resolver().getPatternSetFactory();
-    }
-
-    public static String systemSpecificAbsolutePath(String path) {
-        return new File(path).getAbsolutePath();
     }
 }
