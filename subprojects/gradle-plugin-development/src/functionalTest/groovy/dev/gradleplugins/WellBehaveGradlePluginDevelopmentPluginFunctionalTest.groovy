@@ -16,9 +16,9 @@
 
 package dev.gradleplugins
 
+import dev.gradleplugins.fixtures.sample.GradlePluginElement
 import dev.gradleplugins.integtests.fixtures.AbstractFunctionalSpec
 import dev.gradleplugins.integtests.fixtures.ArchiveTestFixture
-import dev.gradleplugins.fixtures.sample.GradlePluginElement
 import org.hamcrest.CoreMatchers
 import org.junit.Assume
 import spock.lang.Ignore
@@ -99,13 +99,6 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
                 ${configureApplyPluginUnderTest()}
             }
 
-            // HACK: We should have a way to get the "fake" snapshot jars
-            repositories {
-                maven {
-                    url "${System.properties['user.home']}/.m2/repository"
-                }
-            }
-            
             ${configureGradlePluginExtension()}
         """
         componentUnderTest.writeToProject(testDirectory)

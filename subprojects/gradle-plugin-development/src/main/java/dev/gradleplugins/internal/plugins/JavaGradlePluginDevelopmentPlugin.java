@@ -37,6 +37,7 @@ public class JavaGradlePluginDevelopmentPlugin implements Plugin<Project> { //ex
         // Configure api dependencies
 
         project.getPluginManager().apply("java-gradle-plugin"); // For plugin development
+        removeGradleApiProjectDependency(project);
 
         JavaGradlePluginDevelopmentExtension extension = registerExtraExtension(project, JavaGradlePluginDevelopmentExtension.class);
 
@@ -48,6 +49,7 @@ public class JavaGradlePluginDevelopmentPlugin implements Plugin<Project> { //ex
             }
             extension.getMinimumGradleVersion().disallowChanges();
         });
+        configureGradleApiDependencies(project, extension.getMinimumGradleVersion());
 
         project.getPluginManager().apply(GradlePluginDevelopmentFunctionalTestingPlugin.class);
 

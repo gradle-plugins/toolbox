@@ -16,6 +16,7 @@
 
 package dev.gradleplugins.internal.plugins;
 
+import dev.gradleplugins.internal.DeferredRepositoryFactory;
 import dev.gradleplugins.internal.GroovyGradlePluginSpockTestSuite;
 import dev.gradleplugins.internal.GroovySpockFrameworkTestSuite;
 import org.gradle.api.Plugin;
@@ -37,74 +38,32 @@ public class SpockFrameworkTestSuiteBasePlugin implements Plugin<Project> {
             SourceSet sourceSet = maybeCreateSourceSet(testSuite, project);
             createAndAttachTestTask(testSuite, sourceSet, project);
 
+            if (testSuite.getTestedSourceSet().isPresent()) {
+                sourceSet.setCompileClasspath(sourceSet.getCompileClasspath().plus(testSuite.getTestedSourceSet().get().getOutput()));
+                sourceSet.setRuntimeClasspath(sourceSet.getRuntimeClasspath().plus(sourceSet.getOutput()).plus(sourceSet.getCompileClasspath()));
+            }
+
+            testSuite.getSpockVersion().convention("1.2-groovy-2.5");
             configureSpockFrameworkProjectDependency(testSuite, sourceSet, project);
-        });
-
-        project.getComponents().withType(GroovyGradlePluginSpockTestSuite.class, testSuite -> {
-            SourceSet sourceSet = maybeCreateSourceSet(testSuite, project);
-
-            // This is synonym of testedComponent. For GradlePlugin spock test, we automatically depends on main source set
-            SourceSetContainer sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
-            sourceSet.setCompileClasspath(sourceSet.getCompileClasspath().plus(sourceSets.getByName("main").getOutput()));
-            sourceSet.setRuntimeClasspath(sourceSet.getRuntimeClasspath().plus(sourceSet.getOutput()).plus(sourceSet.getCompileClasspath()));
-
-
-            // Configure functionalTest for GradlePluginDevelopmentExtension
-            GradlePluginDevelopmentExtension gradlePlugin = project.getExtensions().getByType(GradlePluginDevelopmentExtension.class);
-            gradlePlugin.testSourceSets(sourceSet);
-
-            configureTestKitProjectDependency(testSuite, sourceSet, project);
-            configureGradleFixturesProjectDependency(testSuite, sourceSet, project);
-        });
-    }
-
-    private static void configureTestKitProjectDependency(GroovyGradlePluginSpockTestSuite testSuite, SourceSet sourceSet, Project project) {
-        project.getConfigurations().matching(it -> it.getName().equals(sourceSet.getImplementationConfigurationName())).configureEach( it -> {
-            project.getDependencies().add(it.getName(), project.getDependencies().gradleTestKit());
         });
     }
 
     private static void configureSpockFrameworkProjectDependency(GroovySpockFrameworkTestSuite testSuite, SourceSet sourceSet, Project project) {
-        String groupId = "org.spockframework";
-        String artifactId = "spock-core";
-        String version = "1.2-groovy-2.5";
-
-        project.getConfigurations().matching(it -> it.getName().equals(sourceSet.getImplementationConfigurationName())).configureEach(it -> {
+        // TODO: Once lazy dependency is supported, see https://github.com/gradle/gradle/pull/11767
+        // project.getDependencies().add(sourceSet.getImplementationConfigurationName(), testSuite.getSpockVersion().map(version -> "org.spockframework:spock-bom:" + version));
+        // project.getDependencies().add(sourceSet.getImplementationConfigurationName(), "org.spockframework:spock-core");
+        project.afterEvaluate(proj -> {
+            project.getDependencies().add(sourceSet.getImplementationConfigurationName(), "org.codehaus.groovy:groovy-all:2.5.10"); // Use latest
+            project.getDependencies().add(sourceSet.getImplementationConfigurationName(), project.getDependencies().platform("org.spockframework:spock-bom:" + testSuite.getSpockVersion().get()));
+            project.getDependencies().add(sourceSet.getImplementationConfigurationName(), "org.spockframework:spock-core");
         });
 
-        project.getDependencies().add(sourceSet.getImplementationConfigurationName(), groupId + ":" + artifactId + ":" + version);
+        DeferredRepositoryFactory repositoryFactory = project.getObjects().newInstance(DeferredRepositoryFactory.class, project);
 
-        project.getRepositories().mavenCentral(repository -> {
-            repository.setName("Gradle Plugin Development - Spock Framework");
-            repository.mavenContent(content -> {
-                content.includeVersion("org.spockframework", "spock-core", "1.2-groovy-2.5");
-                content.includeVersion("junit", "junit", "4.12");
-                content.includeVersion("org.hamcrest", "hamcrest-core", "1.3");
-
-                // For groovy:2.5.2
-                content.includeVersionByRegex("org.codehaus.groovy", "groovy.*", "2\\.5\\.2");
-            });
-        });
+        repositoryFactory.spock();
     }
 
-    private static void configureGradleFixturesProjectDependency(GroovyGradlePluginSpockTestSuite testSuite, SourceSet sourceSet, Project project) {
-        configureProjectDependency(project, "Gradle Fixtures", sourceSet.getImplementationConfigurationName(), "dev.gradleplugins", "gradle-fixtures", "0.0.31"); // lag behind one version so the test works ;-)
-    }
-
-    private static void configureProjectDependency(Project project, String repositoryDisplayName, String configurationName, String groupId, String artifactId, String version) {
-        project.getConfigurations().matching(it -> it.getName().equals(configurationName)).configureEach(it -> {
-            ModuleDependency dep = (ModuleDependency) project.getDependencies().add(it.getName(), groupId + ":" + artifactId + ":" + version);
-            dep.capabilities(h -> h.requireCapability("dev.gradleplugins:gradle-fixtures-spock-support"));
-        });
-
-        project.getRepositories().maven(repository -> {
-            repository.setName("Gradle Plugins Development - " + repositoryDisplayName);
-            repository.setUrl(project.uri("https://dl.bintray.com/gradle-plugins/distributions"));
-            repository.mavenContent(content -> content.includeVersion(groupId, artifactId, version));
-        });
-    }
-
-    private SourceSet maybeCreateSourceSet(GroovySpockFrameworkTestSuite testSuite, Project project) {
+    public static SourceSet maybeCreateSourceSet(GroovySpockFrameworkTestSuite testSuite, Project project) {
         SourceSetContainer sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
 
         SourceSet sourceSet = sourceSets.findByName(testSuite.getName());

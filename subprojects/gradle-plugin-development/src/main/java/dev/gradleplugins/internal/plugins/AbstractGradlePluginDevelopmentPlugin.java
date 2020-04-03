@@ -16,13 +16,14 @@
 
 package dev.gradleplugins.internal.plugins;
 
-import org.gradle.api.GradleException;
-import org.gradle.api.JavaVersion;
-import org.gradle.api.Plugin;
-import org.gradle.api.Project;
+import org.gradle.api.*;
+import org.gradle.api.artifacts.SelfResolvingDependency;
+import org.gradle.api.artifacts.repositories.MavenRepositoryContentDescriptor;
+import org.gradle.api.internal.artifacts.dependencies.SelfResolvingDependencyInternal;
 import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.plugins.PluginManager;
+import org.gradle.api.provider.Provider;
 import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 import org.gradle.util.GradleVersion;
 import org.gradle.util.VersionNumber;
@@ -69,6 +70,8 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
 
     private static JavaVersion toMinimumJavaVersion(VersionNumber version) {
         switch (version.getMajor()) {
+            case 0:
+                throw new UnsupportedOperationException("I didn't have time to figure out what is the minimum Java version for Gradle version below 1.0. Feel free to open an issue and look into that for me.");
             case 1:
                 return JavaVersion.VERSION_1_5;
             case 2:
@@ -96,5 +99,34 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
         ((ExtensionAware)gradlePlugin).getExtensions().add("extra", extension);
 
         return extension;
+    }
+
+    public static void removeGradleApiProjectDependency(Project project) {
+        // Surgical procedure of removing the Gradle API and replacing it with dev.gradleplugins:gradle-api
+        project.getConfigurations().getByName("api").getDependencies().removeIf(it -> {
+            if (it instanceof SelfResolvingDependencyInternal) {
+                return ((SelfResolvingDependencyInternal) it).getTargetComponentId().getDisplayName().equals("Gradle API");
+            }
+            return false;
+        });
+    }
+
+    public static void configureGradleApiDependencies(Project project, Provider<String> minimumGradleVersion) {
+        // TODO: Once lazy dependency is supported, see https://github.com/gradle/gradle/pull/11767
+        // project.getDependencies().add("compileOnly", minimumGradleVersion.map(version -> "dev.gradleplugins:gradle-api:" + version));
+        project.afterEvaluate(proj -> {
+            project.getDependencies().add("compileOnly", "dev.gradleplugins:gradle-api:" + minimumGradleVersion.get());
+        });
+
+        // Gives a chance to the user to insert another repository before this one
+        project.afterEvaluate(proj -> {
+            project.getRepositories().maven(repository -> {
+                repository.setName("Gradle Plugin Development - Gradle APIs");
+                repository.setUrl(project.uri("https://dl.bintray.com/gradle-plugins/distributions"));
+                repository.mavenContent(content -> {
+                    content.includeModule("dev.gradleplugins", "gradle-api");
+                });
+            });
+        });
     }
 }
