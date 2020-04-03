@@ -4,10 +4,10 @@ import org.gradle.api.publish.maven.internal.artifact.FileBasedMavenArtifact
 import java.text.SimpleDateFormat
 
 plugins {
-    id 'java-gradle-plugin'
     id 'com.jfrog.bintray'
     id 'maven-publish'
 }
+apply plugin: 'dev.gradleplugins.java-gradle-plugin'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
