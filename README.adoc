@@ -9,7 +9,10 @@ Three plugins are provided:
 
 - `dev.gradleplugins.java-gradle-plugin`: Everything the `java-gradle-plugin` is not.
 - `dev.gradleplugins.groovy-gradle-plugin`: Gradle plugin written in Groovy
-- `dev.gradleplugins.kotlin-gradle-plugin`: Gradle plugin written in Kotlin
+
+NOTE: There used to be a `dev.gradleplugins.kotlin-gradle-plugin` plugin but it was removed.
+I couldn't assert it's quality and I always had issues with Gradle Kotlin plugins so I'm sticking to Groovy and Java plugin for the time being.
+Once I have more time to investigate the issues I was having I will add it back.
 
 == Contributing
 
