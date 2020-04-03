@@ -121,7 +121,7 @@ class AbstractFunctionalSpec extends Specification {
     // TODO: Given the comment on the class, this method should be removed
     boolean outputContains(String string) {
         assertHasResult()
-        result.assertOutputContains(string)
+        result.assertOutputContains(string) // TODO: It shouldn't assert here...
     }
 
     // TODO: I'm hesitent to keep the result and failure variable as they hide some of the internal (the fact that succeeds, fails or run needs to be executed first)
