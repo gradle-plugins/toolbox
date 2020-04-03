@@ -49,7 +49,7 @@ dependencies {
     api 'net.rubygrapefruit:ansi-control-sequence-util:0.2'
 
     implementation 'org.apache.commons:commons-lang3:3.9' // For StringUtils
-    implementation 'org.hamcrest:hamcrest:2.2'
+    implementation 'org.hamcrest:hamcrest:2.2' // TODO: Should be API
     api 'com.google.guava:guava:28.2-jre'
     implementation 'org.apache.ant:ant:1.9.13'
     implementation 'org.ow2.asm:asm:6.0'
@@ -61,12 +61,12 @@ dependencies {
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
-    testImplementation 'org.spockframework:spock-core:1.2-groovy-2.5'
-//    testImplementation project(':spock-test-directory-extension')
+    // TEST
+    testImplementation platform('org.spockframework:spock-bom:1.2-groovy-2.5')
+    testImplementation 'org.spockframework:spock-core'
 
 
-
-
+    // SPOCK SUPPORT
     spockSupportApi project(':gradle-fixtures')
     spockSupportApi 'org.codehaus.groovy:groovy-all:2.5.8'
 
@@ -74,8 +74,8 @@ dependencies {
 
     spockSupportCompileOnly gradleTestKit()
 
-    // TODO: At some point, we will need make this work with an "older" version of Spock depending on how backward compatible the Gradle plugin development plugins will support.
-    spockSupportApi 'org.spockframework:spock-core:1.2-groovy-2.5'
+    spockSupportApi platform('org.spockframework:spock-bom:1.2-groovy-2.5')
+    spockSupportApi 'org.spockframework:spock-core'
 }
 
 
