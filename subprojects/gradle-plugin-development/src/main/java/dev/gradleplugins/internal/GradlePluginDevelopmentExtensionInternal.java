@@ -1,0 +1,7 @@
+package dev.gradleplugins.internal;
+
+import dev.gradleplugins.GroovyGradlePluginDevelopmentExtension;
+import dev.gradleplugins.JavaGradlePluginDevelopmentExtension;
+
+public abstract class GradlePluginDevelopmentExtensionInternal implements GroovyGradlePluginDevelopmentExtension, JavaGradlePluginDevelopmentExtension {
+}

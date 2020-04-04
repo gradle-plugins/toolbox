@@ -18,6 +18,8 @@ package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.GroovyGradlePluginDevelopmentExtension;
 import dev.gradleplugins.JavaGradlePluginDevelopmentExtension;
+import dev.gradleplugins.internal.DeferredRepositoryFactory;
+import dev.gradleplugins.internal.GradlePluginDevelopmentExtensionInternal;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaPluginExtension;
@@ -34,22 +36,13 @@ public class JavaGradlePluginDevelopmentPlugin implements Plugin<Project> { //ex
         assertJavaGradlePluginIsNotPreviouslyApplied(project.getPluginManager(), PLUGIN_ID);
         assertKotlinDslPluginIsNeverApplied(project.getPluginManager(), PLUGIN_ID);
 
-        // Configure api dependencies
+        DeferredRepositoryFactory repositoryFactory = project.getObjects().newInstance(DeferredRepositoryFactory.class, project);
 
         project.getPluginManager().apply("java-gradle-plugin"); // For plugin development
         removeGradleApiProjectDependency(project);
 
-        JavaGradlePluginDevelopmentExtension extension = registerExtraExtension(project, JavaGradlePluginDevelopmentExtension.class);
-
-        project.afterEvaluate(proj -> {
-            if (extension.getMinimumGradleVersion().isPresent()) {
-                configureDefaultJavaCompatibility(project.getExtensions().getByType(JavaPluginExtension.class), VersionNumber.parse(extension.getMinimumGradleVersion().get()));
-            } else {
-                extension.getMinimumGradleVersion().set(project.getGradle().getGradleVersion());
-            }
-            extension.getMinimumGradleVersion().disallowChanges();
-        });
-        configureGradleApiDependencies(project, extension.getMinimumGradleVersion());
+        GradlePluginDevelopmentExtensionInternal extension = registerExtraExtension(project, JavaGradlePluginDevelopmentExtension.class);
+        configureExtension(extension, project, repositoryFactory);
 
         project.getPluginManager().apply(GradlePluginDevelopmentFunctionalTestingPlugin.class);
     }

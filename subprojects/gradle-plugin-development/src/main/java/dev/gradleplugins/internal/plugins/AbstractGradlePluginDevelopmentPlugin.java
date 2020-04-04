@@ -16,6 +16,8 @@
 
 package dev.gradleplugins.internal.plugins;
 
+import dev.gradleplugins.internal.DeferredRepositoryFactory;
+import dev.gradleplugins.internal.GradlePluginDevelopmentExtensionInternal;
 import org.gradle.api.*;
 import org.gradle.api.artifacts.SelfResolvingDependency;
 import org.gradle.api.artifacts.repositories.MavenRepositoryContentDescriptor;
@@ -93,9 +95,9 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
         java.setTargetCompatibility(minimumJavaVersion);
     }
 
-    public static <T> T registerExtraExtension(Project project, Class<T> type) {
+    public static <T> GradlePluginDevelopmentExtensionInternal registerExtraExtension(Project project, Class<T> type) {
         GradlePluginDevelopmentExtension gradlePlugin = project.getExtensions().getByType(GradlePluginDevelopmentExtension.class);
-        T extension = project.getObjects().newInstance(type);
+        GradlePluginDevelopmentExtensionInternal extension = project.getObjects().newInstance(GradlePluginDevelopmentExtensionInternal.class);
         ((ExtensionAware)gradlePlugin).getExtensions().add("extra", extension);
 
         return extension;
@@ -117,16 +119,18 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
         project.afterEvaluate(proj -> {
             project.getDependencies().add("compileOnly", "dev.gradleplugins:gradle-api:" + minimumGradleVersion.get());
         });
+    }
 
-        // Gives a chance to the user to insert another repository before this one
+    public static void configureExtension(GradlePluginDevelopmentExtensionInternal extension, Project project, DeferredRepositoryFactory repositoryFactory) {
         project.afterEvaluate(proj -> {
-            project.getRepositories().maven(repository -> {
-                repository.setName("Gradle Plugin Development - Gradle APIs");
-                repository.setUrl(project.uri("https://dl.bintray.com/gradle-plugins/distributions"));
-                repository.mavenContent(content -> {
-                    content.includeModule("dev.gradleplugins", "gradle-api");
-                });
-            });
+            if (extension.getMinimumGradleVersion().isPresent()) {
+                configureDefaultJavaCompatibility(project.getExtensions().getByType(JavaPluginExtension.class), VersionNumber.parse(extension.getMinimumGradleVersion().get()));
+            } else {
+                extension.getMinimumGradleVersion().set(project.getGradle().getGradleVersion());
+            }
+            extension.getMinimumGradleVersion().disallowChanges();
         });
+        configureGradleApiDependencies(project, extension.getMinimumGradleVersion());
+        repositoryFactory.gradleApi();
     }
 }

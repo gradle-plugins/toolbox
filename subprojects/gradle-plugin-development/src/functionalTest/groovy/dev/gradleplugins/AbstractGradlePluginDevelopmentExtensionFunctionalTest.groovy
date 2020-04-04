@@ -79,6 +79,21 @@ abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends Ab
         '1.12'          | '1.5'
     }
 
+    def "cannot change minimum Gradle version after configured"() {
+        given:
+        makeSingleProject()
+        buildFile << """
+            afterEvaluate {
+                gradlePlugin.extra.minimumGradleVersion = '6.2'
+            }
+        """
+
+        expect:
+        fails('help')
+        failure.assertHasDescription("A problem occurred configuring root project 'gradle-plugin'.")
+        failure.assertHasCause("The value for property 'minimumGradleVersion' cannot be changed any further.")
+    }
+
     protected abstract Class<?> getExtraExtensionClass()
 
     protected abstract String getPluginIdUnderTest()

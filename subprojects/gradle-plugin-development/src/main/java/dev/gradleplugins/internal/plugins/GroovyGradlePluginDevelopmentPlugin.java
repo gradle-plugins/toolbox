@@ -18,9 +18,11 @@ package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.GroovyGradlePluginDevelopmentExtension;
 import dev.gradleplugins.internal.DeferredRepositoryFactory;
+import dev.gradleplugins.internal.GradlePluginDevelopmentExtensionInternal;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaPluginExtension;
+import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 import org.gradle.util.GradleVersion;
 import org.gradle.util.VersionNumber;
 
@@ -34,25 +36,16 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
         assertJavaGradlePluginIsNotPreviouslyApplied(project.getPluginManager(), PLUGIN_ID);
         assertKotlinDslPluginIsNeverApplied(project.getPluginManager(), PLUGIN_ID);
 
+        DeferredRepositoryFactory repositoryFactory = project.getObjects().newInstance(DeferredRepositoryFactory.class, project);
+
         project.getPluginManager().apply("java-gradle-plugin"); // For plugin development
         removeGradleApiProjectDependency(project);
         project.getPluginManager().apply("groovy-base");
 
-        GroovyGradlePluginDevelopmentExtension extension = registerExtraExtension(project, GroovyGradlePluginDevelopmentExtension.class);
-
-        project.afterEvaluate(proj -> {
-            if (extension.getMinimumGradleVersion().isPresent()) {
-                configureDefaultJavaCompatibility(project.getExtensions().getByType(JavaPluginExtension.class), VersionNumber.parse(extension.getMinimumGradleVersion().get()));
-            } else {
-                extension.getMinimumGradleVersion().set(project.getGradle().getGradleVersion());
-            }
-            extension.getMinimumGradleVersion().disallowChanges();
-        });
-        configureGradleApiDependencies(project, extension.getMinimumGradleVersion());
+        GradlePluginDevelopmentExtensionInternal extension = registerExtraExtension(project, GroovyGradlePluginDevelopmentExtension.class);
+        configureExtension(extension, project, repositoryFactory);
 
         project.getPluginManager().apply(GradlePluginDevelopmentFunctionalTestingPlugin.class);
-
-        DeferredRepositoryFactory repositoryFactory = project.getObjects().newInstance(DeferredRepositoryFactory.class, project);
 
         // TODO: Once lazy dependency is supported, see https://github.com/gradle/gradle/pull/11767
         // project.getDependencies().add("compileOnly", extension.getMinimumGradleVersion().map(VersionNumber::parse).map(GroovyGradlePluginDevelopmentPlugin::toGroovyVersion).map(version -> "org.codehaus.groovy:groovy:" + version));

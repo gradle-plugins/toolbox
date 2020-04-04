@@ -48,20 +48,21 @@ public class SpockFrameworkTestSuiteBasePlugin implements Plugin<Project> {
             });
 
             testSuite.getSpockVersion().convention(SPOCK_FRAMEWORK_VERSION);
-            configureSpockFrameworkProjectDependency(testSuite, project, repositoryFactory);
+            configureSpockFrameworkProjectDependency(testSuite, project);
+            repositoryFactory.spock();
         });
     }
 
-    private static void configureSpockFrameworkProjectDependency(GroovySpockFrameworkTestSuite testSuite, Project project, DeferredRepositoryFactory repositoryFactory) {
+    private static void configureSpockFrameworkProjectDependency(GroovySpockFrameworkTestSuite testSuite, Project project) {
         // TODO: Once lazy dependency is supported, see https://github.com/gradle/gradle/pull/11767
-        // project.getDependencies().add(sourceSet.getImplementationConfigurationName(), testSuite.getSpockVersion().map(version -> "org.spockframework:spock-bom:" + version));
-        // project.getDependencies().add(sourceSet.getImplementationConfigurationName(), "org.spockframework:spock-core");
+        // project.getDependencies().add(testSuite.getSourceSet().getImplementationConfigurationName(), "org.codehaus.groovy:groovy-all:" + GROOVY_ALL_VERSION);
+        // project.getDependencies().add(testSuite.getSourceSet().getImplementationConfigurationName(), testSuite.getSpockVersion().map(version -> "org.spockframework:spock-bom:" + version));
+        // project.getDependencies().add(testSuite.getSourceSet().getImplementationConfigurationName(), "org.spockframework:spock-core");
         project.afterEvaluate(proj -> {
             testSuite.getSpockVersion().disallowChanges();
             project.getDependencies().add(testSuite.getSourceSet().getImplementationConfigurationName(), "org.codehaus.groovy:groovy-all:" + GROOVY_ALL_VERSION);
             project.getDependencies().add(testSuite.getSourceSet().getImplementationConfigurationName(), project.getDependencies().platform("org.spockframework:spock-bom:" + testSuite.getSpockVersion().get()));
             project.getDependencies().add(testSuite.getSourceSet().getImplementationConfigurationName(), "org.spockframework:spock-core");
         });
-        repositoryFactory.spock();
     }
 }
