@@ -4,10 +4,8 @@ import com.jfrog.bintray.gradle.tasks.BintrayUploadTask
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Configuration
 import org.gradle.api.attributes.*
 import org.gradle.api.attributes.java.TargetJvmVersion
-import org.gradle.api.component.AdhocComponentWithVariants
 import org.gradle.api.component.SoftwareComponentFactory
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
@@ -24,17 +22,6 @@ abstract class GenerateGradleApiJarPlugin implements Plugin<Project> {
         def gradleVersion = project.name
 
         project.with {
-//            apply plugin: 'java-platform'
-//            javaPlatform {
-//                allowDependencies() // so we can pull org.codehaus.groovy:groovy and align groovy-all
-//            }
-//            dependencies {
-//                constraints {
-//                    api "org.codehaus.groovy:groovy-all:${toGroovyVersion(VersionNumber.parse(gradleVersion))}"
-//                }
-//                api "org.codehaus.groovy:groovy:${toGroovyVersion(VersionNumber.parse(gradleVersion))}"
-//            }
-
             apply plugin: 'lifecycle-base'
 
             group = 'dev.gradleplugins'
@@ -55,7 +42,6 @@ abstract class GenerateGradleApiJarPlugin implements Plugin<Project> {
                     canBeResolved = false
                     canBeConsumed = true
                     extendsFrom api
-//                    outgoing.capability("dev.gradleplugins:gradle-api:${gradleVersion}")
                     outgoing.artifact(generateGradleApiJarTask.flatMap { it.outputFile })
                     attributes {
                         attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_API))
@@ -69,7 +55,9 @@ abstract class GenerateGradleApiJarPlugin implements Plugin<Project> {
                 apiSourcesElements {
                     canBeResolved = false
                     canBeConsumed = true
-//                    outgoing.capability("dev.gradleplugins:gradle-api:${gradleVersion}")
+                    outgoing.artifact(generateGradleApiJarTask.flatMap { it.outputSourceFile }) {
+                        classifier = 'sources'
+                    }
                     attributes {
                         attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_RUNTIME))
                         attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category, Category.DOCUMENTATION))
@@ -77,15 +65,6 @@ abstract class GenerateGradleApiJarPlugin implements Plugin<Project> {
                         attribute(DocsType.DOCS_TYPE_ATTRIBUTE, objects.named(DocsType, DocsType.SOURCES))
                         attributes.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, Integer.parseInt(toMinimumJavaVersion(VersionNumber.parse(gradleVersion)).majorVersion))
                     }
-                    outgoing.artifact(generateGradleApiJarTask.flatMap { it.outputSourceFile }) {
-                        classifier = 'sources'
-                    }
-                }
-                [apiElements, runtimeElements].each {
-//                    it.outgoing.capability("dev.gradleplugins:gradle-api:${gradleVersion}")
-                }
-                [enforcedApiElements, enforcedRuntimeElements].each {
-//                    it.outgoing.capability("dev.gradleplugins:gradle-api-derived-enforced-platform:${gradleVersion}")
                 }
             }
             dependencies {
@@ -96,7 +75,6 @@ abstract class GenerateGradleApiJarPlugin implements Plugin<Project> {
             }
 
             def adhocComponent = softwareComponentFactory.adhoc('gradleApi');
-//            def adhocComponent = components.javaPlatform
             adhocComponent.addVariantsFromConfiguration(configurations.apiJarElements) {}
             adhocComponent.addVariantsFromConfiguration(configurations.apiSourcesElements) {}
             project.getComponents().add(adhocComponent);
@@ -184,7 +162,7 @@ abstract class GenerateGradleApiJarPlugin implements Plugin<Project> {
     protected abstract SoftwareComponentFactory getSoftwareComponentFactory();
 
     @Nullable
-    private String resolveProperty(Project project, String envVarKey, String projectPropKey) {
+    private static String resolveProperty(Project project, String envVarKey, String projectPropKey) {
         Object propValue = System.getenv().get(envVarKey);
 
         if (propValue != null) {

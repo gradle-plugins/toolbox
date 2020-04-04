@@ -18,10 +18,6 @@ gradlePlugin {
             id = 'dev.gradleplugins.gradle-api-jar'
             implementationClass = 'dev.gradleplugins.api.GenerateGradleApiJarPlugin'
         }
-        generateGradleApiJars {
-            id = 'dev.gradleplugins.build.gradle-api-jars'
-            implementationClass = 'dev.gradleplugins.api.GradleApiJarGeneratorPlugin'
-        }
 
         publishingPlugin {
             id = 'dev.gradleplugins.experimental.publishing'
