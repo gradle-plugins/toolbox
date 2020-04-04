@@ -52,20 +52,5 @@ public class JavaGradlePluginDevelopmentPlugin implements Plugin<Project> { //ex
         configureGradleApiDependencies(project, extension.getMinimumGradleVersion());
 
         project.getPluginManager().apply(GradlePluginDevelopmentFunctionalTestingPlugin.class);
-
-//        project.getPluginManager().apply(GradlePluginDevelopmentBasePlugin.class);
-
-//        configureAnnotationProcessorSources(project.getTasks().named("fakeAnnotationProcessing", FakeAnnotationProcessorTask.class));
     }
-
-//    @Override
-//    protected String getPluginId() {
-//        return "dev.gradleplugins.java-gradle-plugin";
-//    }
-
-//    private static void configureAnnotationProcessorSources(TaskProvider<FakeAnnotationProcessorTask> processorTask) {
-//        processorTask.configure(task -> {
-//            task.getSource().from(task.getProject().getTasks().named("compileJava", JavaCompile.class).map(JavaCompile::getSource));
-//        });
-//    }
 }

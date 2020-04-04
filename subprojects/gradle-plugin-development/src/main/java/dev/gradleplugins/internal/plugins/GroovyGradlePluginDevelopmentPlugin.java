@@ -34,7 +34,6 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
         assertJavaGradlePluginIsNotPreviouslyApplied(project.getPluginManager(), PLUGIN_ID);
         assertKotlinDslPluginIsNeverApplied(project.getPluginManager(), PLUGIN_ID);
 
-//        project.getPluginManager().apply(GradlePluginDevelopmentBasePlugin.class);
         project.getPluginManager().apply("java-gradle-plugin"); // For plugin development
         removeGradleApiProjectDependency(project);
         project.getPluginManager().apply("groovy-base");
@@ -63,25 +62,12 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
 
         repositoryFactory.groovy();
 
-//        configureAnnotationProcessorSources(project.getTasks().named("fakeAnnotationProcessing", FakeAnnotationProcessorTask.class));
-
         // TODO: warn if the plugin only have has Java source and no Groovy.
         //   You specified a Groovy plugin development so we should expect Gradle plugin to be all in Groovy
         //   We could ensure GradlePlugin aren't applied to any Java source
         //   We could also check that no plugin id on `gradlePlugin` container points to a Java source
         //   We could do the same for Kotlin code
     }
-
-//    @Override
-//    protected String getPluginId() {
-//        return "dev.gradleplugins.groovy-gradle-plugin";
-//    }
-
-//    private static void configureAnnotationProcessorSources(TaskProvider<FakeAnnotationProcessorTask> processorTask) {
-//        processorTask.configure(task -> {
-//            task.getSource().from(task.getProject().getTasks().named("compileGroovy", GroovyCompile.class).map(GroovyCompile::getSource));
-//        });
-//    }
 
     private static String toGroovyVersion(VersionNumber version) {
         // Use `find ~/.gradle/wrapper -name "groovy-all-*"`
