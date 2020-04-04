@@ -11,6 +11,6 @@ buildscript {
 }
 
 allprojects {
-    version = rootProject.file('version.txt').text
+    version = rootProject.file('version.txt').text.trim()
     group = 'dev.gradleplugins'
 }
