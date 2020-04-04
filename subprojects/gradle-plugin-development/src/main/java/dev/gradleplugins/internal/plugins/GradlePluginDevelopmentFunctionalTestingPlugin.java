@@ -28,8 +28,8 @@ public class GradlePluginDevelopmentFunctionalTestingPlugin implements Plugin<Pr
             GradlePluginDevelopmentExtension gradlePlugin = project.getExtensions().getByType(GradlePluginDevelopmentExtension.class);
             gradlePlugin.testSourceSets(sourceSet);
 
-            configureTestKitProjectDependency(testSuite, sourceSet, project);
-            configureGradleFixturesProjectDependency(testSuite, sourceSet, project, repositoryFactory);
+            configureTestKitProjectDependency(testSuite, project);
+            configureGradleFixturesProjectDependency(testSuite, project, repositoryFactory);
         });
 
         SourceSetContainer sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
@@ -38,14 +38,12 @@ public class GradlePluginDevelopmentFunctionalTestingPlugin implements Plugin<Pr
         project.getComponents().add(functionalTestSuite);
     }
 
-    private static void configureTestKitProjectDependency(GroovyGradlePluginSpockTestSuite testSuite, SourceSet sourceSet, Project project) {
-        project.getConfigurations().matching(it -> it.getName().equals(sourceSet.getCompileOnlyConfigurationName())).configureEach( it -> {
-            project.getDependencies().add(it.getName(), project.getDependencies().gradleTestKit());
-        });
+    private static void configureTestKitProjectDependency(GroovyGradlePluginSpockTestSuite testSuite, Project project) {
+        project.getDependencies().add(testSuite.getSourceSet().getCompileOnlyConfigurationName(), project.getDependencies().gradleTestKit());
     }
 
-    private static void configureGradleFixturesProjectDependency(GroovyGradlePluginSpockTestSuite testSuite, SourceSet sourceSet, Project project, DeferredRepositoryFactory repositoryFactory) {
-        ModuleDependency dep = (ModuleDependency)project.getDependencies().add(sourceSet.getImplementationConfigurationName(), "dev.gradleplugins:gradle-fixtures:" + GRADLE_FIXTURES_VERSION);
+    private static void configureGradleFixturesProjectDependency(GroovyGradlePluginSpockTestSuite testSuite, Project project, DeferredRepositoryFactory repositoryFactory) {
+        ModuleDependency dep = (ModuleDependency)project.getDependencies().add(testSuite.getSourceSet().getImplementationConfigurationName(), "dev.gradleplugins:gradle-fixtures:" + GRADLE_FIXTURES_VERSION);
         dep.capabilities(h -> h.requireCapability("dev.gradleplugins:gradle-fixtures-spock-support"));
 
         repositoryFactory.gradleFixtures();
