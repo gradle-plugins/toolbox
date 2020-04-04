@@ -65,19 +65,7 @@ public class SpockFrameworkTestSuiteBasePlugin implements Plugin<Project> {
 
     public static SourceSet maybeCreateSourceSet(GroovySpockFrameworkTestSuite testSuite, Project project) {
         SourceSetContainer sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
-
-        SourceSet sourceSet = sourceSets.findByName(testSuite.getName());
-        if (sourceSet == null) {
-            sourceSet = sourceSets.create(testSuite.getName(), it -> {
-                GroovySourceSet groovyIt = new DslObject(it).getConvention().getPlugin(GroovySourceSet.class);
-                groovyIt.getGroovy().srcDir("src/" + testSuite.getName() + "/groovy");
-
-                it.getResources().srcDir("src/" + testSuite.getName() + "/resources");
-                it.setRuntimeClasspath(it.getRuntimeClasspath().plus(it.getOutput()).plus(it.getCompileClasspath()));
-            });
-        }
-
-        return sourceSet;
+        return sourceSets.maybeCreate(testSuite.getName());
     }
 
     private TaskProvider<Test> createAndAttachTestTask(GroovySpockFrameworkTestSuite testSuite, SourceSet sourceSet, Project project) {
