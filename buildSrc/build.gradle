@@ -1,16 +1,13 @@
-plugins {
-//    id 'org.gradle.kotlin.kotlin-dsl'
-    id 'java-gradle-plugin'
-    id 'groovy'
-
-    // This is a failed attempt to use the dev plugins
-//    id("dev.gradleplugins.kotlin-gradle-plugin") version "0.0.21"
+buildscript {
+    repositories {
+        maven { url = 'https://dl.bintray.com/gradle-plugins/distributions' }
+    }
+    dependencies {
+        classpath 'dev.gradleplugins:gradle-plugin-development:0.0.35'
+    }
 }
 
-// The following should be replaced by the dev plugins
-//kotlinDslPluginOptions {
-//    experimentalWarning.set(false)
-//}
+apply plugin: 'dev.gradleplugins.groovy-gradle-plugin'
 
 gradlePlugin {
     plugins {
@@ -19,46 +16,13 @@ gradlePlugin {
             implementationClass = 'dev.gradleplugins.api.GenerateGradleApiJarPlugin'
         }
 
-        publishingPlugin {
-            id = 'dev.gradleplugins.experimental.publishing'
-            implementationClass = 'dev.gradleplugins.PublishingPlugin'
-        }
-        publishingBasePlugin {
-            id = 'dev.gradleplugins.experimental.publishing-base'
-            implementationClass = 'dev.gradleplugins.PublishingBasePlugin'
-        }
-        idePlugin {
-            id = 'dev.gradleplugins.experimental.ide'
-            implementationClass = 'dev.gradleplugins.IdePlugin'
-        }
-        additionalArtifactsPlugin {
-            id = 'dev.gradleplugins.experimental.artifacts'
-            implementationClass = 'dev.gradleplugins.AdditionalArtifactsPlugin'
-        }
         shadedArtifactsPlugin {
             id = 'dev.gradleplugins.experimental.shaded-artifact'
             implementationClass = 'dev.gradleplugins.ShadedArtifactPlugin'
         }
-        githubPlugin {
-            id = 'dev.gradleplugins.experimental.scm.github'
-            implementationClass = 'dev.gradleplugins.GitHubSourceControlManagerPlugin'
-        }
-        ossLicensePlugin {
-            id = 'dev.gradleplugins.experimental.license'
-            implementationClass = 'dev.gradleplugins.OpenSourceSoftwareLicensePlugin'
-        }
-        setupPlugin {
-            id = 'dev.gradleplugins.experimental.setup'
-            implementationClass = 'dev.gradleplugins.SetupProjectPlugin'
-        }
     }
 }
 
-//dependencies {
-//    implementation('org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.61')
-//}
-
-// Non dev plugin specific configuration
 repositories {
     jcenter()
     gradlePluginPortal()
@@ -75,6 +39,4 @@ dependencies {
 
     implementation 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
     implementation 'com.github.jengelman.gradle.plugins:shadow:5.1.0'
-    implementation 'gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:0.4.2'
-    implementation 'com.gradle.publish:plugin-publish-plugin:0.10.1'
 }

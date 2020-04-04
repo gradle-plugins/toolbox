@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package dev.gradleplugins;
+package dev.gradleplugins
 
-import org.gradle.api.provider.ListProperty;
-import org.gradle.api.provider.Property;
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
 
-public interface ShadedArtifactExtension {
-    ListProperty<String> getPackagesToRelocate();
-    Property<String> getRelocatePackagePrefix();
+interface ShadedArtifactExtension {
+    ListProperty<String> getPackagesToRelocate()
+    Property<String> getRelocatePackagePrefix()
 }

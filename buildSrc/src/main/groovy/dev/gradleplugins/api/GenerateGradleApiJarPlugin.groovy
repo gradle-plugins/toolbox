@@ -123,34 +123,32 @@ abstract class GenerateGradleApiJarPlugin implements Plugin<Project> {
                 }
             }
 
-            afterEvaluate {
-                bintray {
-                    user = resolveProperty(project, "BINTRAY_USER", "dev.gradleplugins.bintray.user")
-                    key = resolveProperty(project, "BINTRAY_KEY", "dev.gradleplugins.bintray.key")
-                    publications = publishing.publications.collect { it.name }
+            bintray {
+                user = resolveProperty(project, "BINTRAY_USER", "dev.gradleplugins.bintray.user")
+                key = resolveProperty(project, "BINTRAY_KEY", "dev.gradleplugins.bintray.key")
+                publications = publishing.publications.collect { it.name }
 
-                    publish = true
-                    override = true
+                publish = true
+                override = true
 
-                    pkg {
-                        repo = 'distributions'
-                        name = 'dev.gradleplugins:gradle-api'
-                        desc = project.description
-                        userOrg = 'gradle-plugins'
-                        websiteUrl = 'https://gradleplugins.dev'
-                        issueTrackerUrl = 'https://github.com/gradle-plugins/toolbox/issues'
-                        vcsUrl = 'https://github.com/gradle-plugins/toolbox.git'
-                        labels = ['gradle', 'gradle-api', 'gradle-plugins']
-                        licenses = ['Apache-2.0']
-                        publicDownloadNumbers = false
+                pkg {
+                    repo = 'distributions'
+                    name = 'dev.gradleplugins:gradle-api'
+                    desc = project.description
+                    userOrg = 'gradle-plugins'
+                    websiteUrl = 'https://gradleplugins.dev'
+                    issueTrackerUrl = 'https://github.com/gradle-plugins/toolbox/issues'
+                    vcsUrl = 'https://github.com/gradle-plugins/toolbox.git'
+                    labels = ['gradle', 'gradle-api', 'gradle-plugins']
+                    licenses = ['Apache-2.0']
+                    publicDownloadNumbers = false
 
-                        version {
-                            released = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").format(new Date())
-                            // TODO: Sign artifacts
-                            gpg {
-                                sign = false
-                                passphrase = resolveProperty(project, "GPG_PASSPHRASE", "dev.gradleplugins.bintray.gpgPassphrase")
-                            }
+                    version {
+                        released = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").format(new Date())
+                        // TODO: Sign artifacts
+                        gpg {
+                            sign = false
+                            passphrase = resolveProperty(project, "GPG_PASSPHRASE", "dev.gradleplugins.bintray.gpgPassphrase")
                         }
                     }
                 }
