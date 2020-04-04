@@ -34,6 +34,7 @@ repositories {
 
 dependencies {
     compileOnly 'dev.gradleplugins:gradle-api:6.2.1'
+    compileOnly 'org.codehaus.groovy:groovy:2.5.8'
     functionalTestImplementation(project(':gradle-fixtures')) {
         capabilities {
             requireCapability('dev.gradleplugins:gradle-fixtures-spock-support')
