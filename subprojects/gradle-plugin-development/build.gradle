@@ -9,11 +9,6 @@ plugins {
 }
 apply plugin: 'dev.gradleplugins.java-gradle-plugin'
 
-java {
-    withSourcesJar()
-    withJavadocJar()
-}
-
 gradlePlugin {
     plugins {
         javaGradlePlugin {
@@ -27,6 +22,8 @@ gradlePlugin {
     }
     extra {
         minimumGradleVersion = '6.2.1'
+        withSourcesJar()
+        withJavadocJar()
     }
 }
 
