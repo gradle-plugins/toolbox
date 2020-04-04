@@ -32,12 +32,11 @@ gradlePlugin {
 
 repositories {
     jcenter()
-    maven { url = 'https://dl.bintray.com/gradle-plugins/distributions' }
 }
 
 dependencies {
-    compileOnly 'dev.gradleplugins:gradle-api:6.2.1'
-    compileOnly 'org.codehaus.groovy:groovy:2.5.8'
+    // Force local fixtures
+    // TODO: Maybe look into dependency substitution
     functionalTestImplementation(project(':gradle-fixtures')) {
         capabilities {
             requireCapability('dev.gradleplugins:gradle-fixtures-spock-support')

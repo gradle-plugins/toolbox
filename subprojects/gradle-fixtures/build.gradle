@@ -42,15 +42,14 @@ dependencies {
     // This is tricky as it's a API dependency but isn't published anywhere
     //   Let's put the burden on the user to declare that as well
     //   They should be declaring that dependency anyway as this library is not meant to be used outside of the Gradle plugin development plugins within Gradle runtime.
-    //   TODO: This should probably be compileOnly
     compileOnly gradleTestKit()
 
     // TODO: this is required only if you are using rich console
     api 'net.rubygrapefruit:ansi-control-sequence-util:0.2'
+    api 'org.hamcrest:hamcrest:2.2'
+    api 'com.google.guava:guava:28.2-jre'
 
     implementation 'org.apache.commons:commons-lang3:3.9' // For StringUtils
-    implementation 'org.hamcrest:hamcrest:2.2' // TODO: Should be API
-    api 'com.google.guava:guava:28.2-jre'
     implementation 'org.apache.ant:ant:1.9.13'
     implementation 'org.ow2.asm:asm:6.0'
     implementation 'commons-io:commons-io:2.6'
@@ -69,13 +68,9 @@ dependencies {
     // SPOCK SUPPORT
     spockSupportApi project(':gradle-fixtures')
     spockSupportApi 'org.codehaus.groovy:groovy-all:2.5.8'
-
-//    spockSupportImplementation 'com.google.guava:guava:28.2-jre'
-
-    spockSupportCompileOnly gradleTestKit()
-
     spockSupportApi platform('org.spockframework:spock-bom:1.2-groovy-2.5')
     spockSupportApi 'org.spockframework:spock-core'
+    spockSupportCompileOnly gradleTestKit()
 }
 
 
