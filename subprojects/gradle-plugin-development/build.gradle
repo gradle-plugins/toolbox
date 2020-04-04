@@ -25,6 +25,9 @@ gradlePlugin {
             implementationClass = 'dev.gradleplugins.internal.plugins.GroovyGradlePluginDevelopmentPlugin'
         }
     }
+    extra {
+        minimumGradleVersion = '6.2.1'
+    }
 }
 
 repositories {
