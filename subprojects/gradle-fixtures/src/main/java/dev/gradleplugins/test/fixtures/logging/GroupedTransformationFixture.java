@@ -16,13 +16,9 @@
 
 package dev.gradleplugins.test.fixtures.logging;
 
-import org.gradle.api.specs.Spec;
-
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.gradle.util.CollectionUtils.filter;
-import static org.gradle.util.CollectionUtils.join;
+import java.util.stream.Collectors;
 
 public class GroupedTransformationFixture {
     private final String initialSubjectType;
@@ -53,13 +49,7 @@ public class GroupedTransformationFixture {
     }
 
     public String getOutput() {
-        List<String> nonEmptyOutputs = filter(outputs, new Spec<String>() {
-            @Override
-            public boolean isSatisfiedBy(String string) {
-                return !string.equals("");
-            }
-        });
-        return join("\n", nonEmptyOutputs);
+        return outputs.stream().filter(string -> !string.equals("")).collect(Collectors.joining("\n"));
     }
 
     @Override

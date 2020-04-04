@@ -22,11 +22,11 @@ import net.rubygrapefruit.ansi.console.AnsiConsole;
 import net.rubygrapefruit.ansi.console.DiagnosticConsole;
 import net.rubygrapefruit.ansi.token.NewLine;
 import net.rubygrapefruit.ansi.token.Text;
-import org.gradle.api.UncheckedIOException;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.UncheckedIOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
