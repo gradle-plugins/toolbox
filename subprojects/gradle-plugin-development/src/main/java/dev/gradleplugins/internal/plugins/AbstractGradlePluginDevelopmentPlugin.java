@@ -18,16 +18,16 @@ package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.internal.DeferredRepositoryFactory;
 import dev.gradleplugins.internal.GradlePluginDevelopmentExtensionInternal;
-import org.gradle.api.*;
-import org.gradle.api.artifacts.SelfResolvingDependency;
-import org.gradle.api.artifacts.repositories.MavenRepositoryContentDescriptor;
+import org.gradle.api.GradleException;
+import org.gradle.api.JavaVersion;
+import org.gradle.api.Plugin;
+import org.gradle.api.Project;
 import org.gradle.api.internal.artifacts.dependencies.SelfResolvingDependencyInternal;
 import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.plugins.PluginManager;
 import org.gradle.api.provider.Provider;
 import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
-import org.gradle.util.GradleVersion;
 import org.gradle.util.VersionNumber;
 
 import java.util.List;
@@ -45,7 +45,7 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
     }
 
     protected abstract void doApply(Project project);
-    protected abstract String getPluginId(); // TODO: Maybe use GradlePlugin annotation
+    protected abstract String getPluginId();
 
     public static void assertOtherGradlePluginDevelopmentPluginsAreNeverApplied(PluginManager pluginManager, String currentPluginId) {
         getOtherGradlePluginDevelopmentPlugins(currentPluginId).stream().filter(pluginManager::hasPlugin).findAny().ifPresent(id -> {
