@@ -34,6 +34,7 @@ public abstract class DeferredRepositoryFactory {
 
     public void gradleApi() {
         project.afterEvaluate(DeferredRepositoryFactory::createGradleApiRepository);
+        project.afterEvaluate(DeferredRepositoryFactory::createGroovyForGradleApiRepository);
     }
 
     public static void createGradleApiRepository(Project project) {
@@ -43,6 +44,13 @@ public abstract class DeferredRepositoryFactory {
             repository.mavenContent(content -> {
                 content.includeModule("dev.gradleplugins", "gradle-api");
             });
+        });
+    }
+
+    private static void createGroovyForGradleApiRepository(Project project) {
+        project.getRepositories().mavenCentral(repo -> {
+            repo.setName("Gradle Plugin Development - Gradle APIs (Groovy)");
+            repo.mavenContent(content -> content.includeModule("org.codehaus.groovy", "groovy"));
         });
     }
 
