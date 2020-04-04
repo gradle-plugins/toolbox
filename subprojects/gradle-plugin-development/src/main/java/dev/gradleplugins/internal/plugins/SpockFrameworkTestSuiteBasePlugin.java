@@ -17,68 +17,51 @@
 package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.internal.DeferredRepositoryFactory;
-import dev.gradleplugins.internal.GroovyGradlePluginSpockTestSuite;
 import dev.gradleplugins.internal.GroovySpockFrameworkTestSuite;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.artifacts.ModuleDependency;
-import org.gradle.api.internal.plugins.DslObject;
-import org.gradle.api.tasks.GroovySourceSet;
 import org.gradle.api.tasks.SourceSet;
-import org.gradle.api.tasks.SourceSetContainer;
-import org.gradle.api.tasks.TaskProvider;
-import org.gradle.api.tasks.testing.Test;
-import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
+import org.gradle.api.tasks.TaskContainer;
+
+import static dev.gradleplugins.internal.DefaultDependencyVersions.GROOVY_ALL_VERSION;
+import static dev.gradleplugins.internal.DefaultDependencyVersions.SPOCK_FRAMEWORK_VERSION;
 
 public class SpockFrameworkTestSuiteBasePlugin implements Plugin<Project> {
     @Override
     public void apply(Project project) {
+        TaskContainer tasks = project.getTasks();
+        DeferredRepositoryFactory repositoryFactory = project.getObjects().newInstance(DeferredRepositoryFactory.class, project);
+
         project.getPluginManager().apply("groovy-base");
+
         project.getComponents().withType(GroovySpockFrameworkTestSuite.class, testSuite -> {
-            SourceSet sourceSet = maybeCreateSourceSet(testSuite, project);
-            createAndAttachTestTask(testSuite, sourceSet, project);
+            tasks.named("check", it -> it.dependsOn(testSuite.getTestTask()));
 
-            if (testSuite.getTestedSourceSet().isPresent()) {
-                sourceSet.setCompileClasspath(sourceSet.getCompileClasspath().plus(testSuite.getTestedSourceSet().get().getOutput()));
-                sourceSet.setRuntimeClasspath(sourceSet.getRuntimeClasspath().plus(sourceSet.getOutput()).plus(sourceSet.getCompileClasspath()));
-            }
+            project.afterEvaluate(proj -> {
+                testSuite.getTestedSourceSet().disallowChanges();
+                if (testSuite.getTestedSourceSet().isPresent()) {
+                    SourceSet sourceSet = testSuite.getSourceSet();
+                    SourceSet testedSourceSet = testSuite.getTestedSourceSet().get();
+                    sourceSet.setCompileClasspath(sourceSet.getCompileClasspath().plus(testedSourceSet.getOutput()));
+                    sourceSet.setRuntimeClasspath(sourceSet.getRuntimeClasspath().plus(sourceSet.getOutput()).plus(sourceSet.getCompileClasspath()));
+                }
+            });
 
-            testSuite.getSpockVersion().convention("1.2-groovy-2.5");
-            configureSpockFrameworkProjectDependency(testSuite, sourceSet, project);
+            testSuite.getSpockVersion().convention(SPOCK_FRAMEWORK_VERSION);
+            configureSpockFrameworkProjectDependency(testSuite, project, repositoryFactory);
         });
     }
 
-    private static void configureSpockFrameworkProjectDependency(GroovySpockFrameworkTestSuite testSuite, SourceSet sourceSet, Project project) {
+    private static void configureSpockFrameworkProjectDependency(GroovySpockFrameworkTestSuite testSuite, Project project, DeferredRepositoryFactory repositoryFactory) {
         // TODO: Once lazy dependency is supported, see https://github.com/gradle/gradle/pull/11767
         // project.getDependencies().add(sourceSet.getImplementationConfigurationName(), testSuite.getSpockVersion().map(version -> "org.spockframework:spock-bom:" + version));
         // project.getDependencies().add(sourceSet.getImplementationConfigurationName(), "org.spockframework:spock-core");
         project.afterEvaluate(proj -> {
-            project.getDependencies().add(sourceSet.getImplementationConfigurationName(), "org.codehaus.groovy:groovy-all:2.5.10"); // Use latest
-            project.getDependencies().add(sourceSet.getImplementationConfigurationName(), project.getDependencies().platform("org.spockframework:spock-bom:" + testSuite.getSpockVersion().get()));
-            project.getDependencies().add(sourceSet.getImplementationConfigurationName(), "org.spockframework:spock-core");
+            testSuite.getSpockVersion().disallowChanges();
+            project.getDependencies().add(testSuite.getSourceSet().getImplementationConfigurationName(), "org.codehaus.groovy:groovy-all:" + GROOVY_ALL_VERSION);
+            project.getDependencies().add(testSuite.getSourceSet().getImplementationConfigurationName(), project.getDependencies().platform("org.spockframework:spock-bom:" + testSuite.getSpockVersion().get()));
+            project.getDependencies().add(testSuite.getSourceSet().getImplementationConfigurationName(), "org.spockframework:spock-core");
         });
-
-        DeferredRepositoryFactory repositoryFactory = project.getObjects().newInstance(DeferredRepositoryFactory.class, project);
-
         repositoryFactory.spock();
-    }
-
-    public static SourceSet maybeCreateSourceSet(GroovySpockFrameworkTestSuite testSuite, Project project) {
-        SourceSetContainer sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
-        return sourceSets.maybeCreate(testSuite.getName());
-    }
-
-    private TaskProvider<Test> createAndAttachTestTask(GroovySpockFrameworkTestSuite testSuite, SourceSet sourceSet, Project project) {
-        TaskProvider<Test> testTask = project.getTasks().register(sourceSet.getName(), Test.class, it -> {
-            it.setDescription("Runs the functional tests");
-            it.setGroup("verification");
-
-            it.setTestClassesDirs(sourceSet.getOutput().getClassesDirs());
-            it.setClasspath(sourceSet.getRuntimeClasspath());
-        });
-
-        project.getTasks().named("check", it -> it.dependsOn(testTask));
-
-        return testTask;
     }
 }

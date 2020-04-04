@@ -9,7 +9,7 @@ import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 
-import static dev.gradleplugins.internal.plugins.SpockFrameworkTestSuiteBasePlugin.maybeCreateSourceSet;
+import static dev.gradleplugins.internal.DefaultDependencyVersions.GRADLE_FIXTURES_VERSION;
 
 public class GradlePluginDevelopmentFunctionalTestingPlugin implements Plugin<Project> {
     private static final String FUNCTIONAL_TEST_NAME = "functionalTest";
@@ -22,7 +22,7 @@ public class GradlePluginDevelopmentFunctionalTestingPlugin implements Plugin<Pr
         project.getPluginManager().apply(SpockFrameworkTestSuiteBasePlugin.class);
 
         project.getComponents().withType(GroovyGradlePluginSpockTestSuite.class, testSuite -> {
-            SourceSet sourceSet = maybeCreateSourceSet(testSuite, project);
+            SourceSet sourceSet = testSuite.getSourceSet();
 
             // Configure functionalTest for GradlePluginDevelopmentExtension
             GradlePluginDevelopmentExtension gradlePlugin = project.getExtensions().getByType(GradlePluginDevelopmentExtension.class);
@@ -32,8 +32,9 @@ public class GradlePluginDevelopmentFunctionalTestingPlugin implements Plugin<Pr
             configureGradleFixturesProjectDependency(testSuite, sourceSet, project, repositoryFactory);
         });
 
-        GroovyGradlePluginSpockTestSuite functionalTestSuite = project.getObjects().newInstance(GroovyGradlePluginSpockTestSuite.class, FUNCTIONAL_TEST_NAME);
-        functionalTestSuite.getTestedSourceSet().convention(project.provider(() -> project.getExtensions().getByType(SourceSetContainer.class).getByName("main")));
+        SourceSetContainer sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
+        GroovyGradlePluginSpockTestSuite functionalTestSuite = project.getObjects().newInstance(GroovyGradlePluginSpockTestSuite.class, FUNCTIONAL_TEST_NAME, sourceSets.maybeCreate(FUNCTIONAL_TEST_NAME));
+        functionalTestSuite.getTestedSourceSet().convention(project.provider(() -> sourceSets.getByName("main")));
         project.getComponents().add(functionalTestSuite);
     }
 
@@ -44,7 +45,7 @@ public class GradlePluginDevelopmentFunctionalTestingPlugin implements Plugin<Pr
     }
 
     private static void configureGradleFixturesProjectDependency(GroovyGradlePluginSpockTestSuite testSuite, SourceSet sourceSet, Project project, DeferredRepositoryFactory repositoryFactory) {
-        ModuleDependency dep = (ModuleDependency)project.getDependencies().add(sourceSet.getImplementationConfigurationName(), "dev.gradleplugins:gradle-fixtures:0.0.32");
+        ModuleDependency dep = (ModuleDependency)project.getDependencies().add(sourceSet.getImplementationConfigurationName(), "dev.gradleplugins:gradle-fixtures:" + GRADLE_FIXTURES_VERSION);
         dep.capabilities(h -> h.requireCapability("dev.gradleplugins:gradle-fixtures-spock-support"));
 
         repositoryFactory.gradleFixtures();
