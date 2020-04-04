@@ -94,6 +94,32 @@ abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends Ab
         failure.assertHasCause("The value for property 'minimumGradleVersion' cannot be changed any further.")
     }
 
+    def "can generate Javadoc Jar"() {
+        given:
+        makeSingleProject()
+        buildFile << """
+            gradlePlugin.extra {
+                withJavadocJar()
+            }
+        """
+
+        expect:
+        succeeds('javadocJar')
+    }
+
+    def "can generate source Jar"() {
+        given:
+        makeSingleProject()
+        buildFile << """
+            gradlePlugin.extra {
+                withSourcesJar()
+            }
+        """
+
+        expect:
+        succeeds('sourcesJar')
+    }
+
     protected abstract Class<?> getExtraExtensionClass()
 
     protected abstract String getPluginIdUnderTest()

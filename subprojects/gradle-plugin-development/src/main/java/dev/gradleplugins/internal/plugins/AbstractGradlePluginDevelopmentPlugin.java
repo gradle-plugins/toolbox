@@ -99,7 +99,7 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
 
     public static <T> GradlePluginDevelopmentExtensionInternal registerExtraExtension(Project project, Class<T> type) {
         GradlePluginDevelopmentExtension gradlePlugin = project.getExtensions().getByType(GradlePluginDevelopmentExtension.class);
-        GradlePluginDevelopmentExtensionInternal extension = project.getObjects().newInstance(GradlePluginDevelopmentExtensionInternal.class);
+        GradlePluginDevelopmentExtensionInternal extension = project.getObjects().newInstance(GradlePluginDevelopmentExtensionInternal.class, project.getExtensions().getByType(JavaPluginExtension.class));
         ((ExtensionAware)gradlePlugin).getExtensions().add("extra", extension);
 
         return extension;

@@ -4,4 +4,6 @@ import org.gradle.api.provider.Property;
 
 public interface GroovyGradlePluginDevelopmentExtension {
     Property<String> getMinimumGradleVersion();
+    void withSourcesJar();
+    void withJavadocJar();
 }
