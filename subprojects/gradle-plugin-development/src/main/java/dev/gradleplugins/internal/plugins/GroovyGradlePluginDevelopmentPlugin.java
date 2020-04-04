@@ -59,7 +59,7 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
         //   We could do the same for Kotlin code
     }
 
-    private static String toGroovyVersion(VersionNumber version) {
+    public static String toGroovyVersion(VersionNumber version) {
         // Use `find ~/.gradle/wrapper -name "groovy-all-*"`
         // TODO: Complete this mapping
         switch (String.format("%d.%d", version.getMajor(), version.getMinor())) {

@@ -1,8 +1,49 @@
+import groovy.json.JsonSlurper
+import groovy.transform.TupleConstructor
+import org.gradle.util.VersionNumber
+
 rootProject.name = 'toolbox'
 
 // Gradle APIs
+@TupleConstructor
+class VersionDownloadInfo {
+    def json
+
+    String getVersion() {
+        return json.version
+    }
+
+    boolean isNotSnapshot() {
+        return !json.snapshot
+    }
+
+    boolean isNotReleaseCandidate() {
+        return !json.version.contains("-rc-")
+    }
+
+    boolean isNotMilestone() {
+        return !json.version.contains("-milestone-")
+    }
+
+    boolean greaterOrEqualTo(String versionString) {
+        return VersionNumber.parse(versionString).compareTo(VersionNumber.parse(json.version)) <= 0
+    }
+}
+private Set<String> allGeneralAvailableVersion() {
+    def versionInfo = new JsonSlurper().parseText('https://services.gradle.org/versions/all'.toURL().text).collect { new VersionDownloadInfo(it) }
+    def result = versionInfo.findAll { it.notSnapshot && it.notReleaseCandidate && it.notMilestone && it.greaterOrEqualTo("6.2.1") }.collect { it.version }
+    result.add('3.5.1')
+    result.add('2.14.1')
+    return result
+}
 include('gradle-api')
 project(':gradle-api').projectDir = file('subprojects/gradle-api')
+allGeneralAvailableVersion().each { version ->
+    include("gradle-api:${version}")
+    project(":gradle-api:${version}").projectDir = file("subprojects/gradle-api/${version}")
+}
+
+// Gradle Fixtures
 include('gradle-fixtures')
 project(':gradle-fixtures').projectDir = file('subprojects/gradle-fixtures')
 

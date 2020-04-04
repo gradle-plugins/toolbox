@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static dev.gradleplugins.internal.plugins.GroovyGradlePluginDevelopmentPlugin.toGroovyVersion;
+
 public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Project> {
 
     @Override
@@ -117,6 +119,9 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
         // TODO: Once lazy dependency is supported, see https://github.com/gradle/gradle/pull/11767
         // project.getDependencies().add("compileOnly", minimumGradleVersion.map(version -> "dev.gradleplugins:gradle-api:" + version));
         project.afterEvaluate(proj -> {
+            project.getDependencies().constraints(constraints -> {
+                constraints.create("org.codehaus.groovy:groovy-all:" + toGroovyVersion(VersionNumber.parse(minimumGradleVersion.get())));
+            });
             project.getDependencies().add("compileOnly", "dev.gradleplugins:gradle-api:" + minimumGradleVersion.get());
         });
     }
