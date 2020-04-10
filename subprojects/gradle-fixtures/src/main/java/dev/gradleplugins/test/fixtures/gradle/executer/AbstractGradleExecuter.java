@@ -62,6 +62,18 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
     }
     //endregion
 
+    //region Flag `--gradle-user-home` configuration
+    @Override
+    public GradleExecuter withGradleUserHomeDirectory(File gradleUserHomeDirectory) {
+        return newInstance(configuration.withGradleUserHomeDirectory(gradleUserHomeDirectory));
+    }
+
+    @Override
+    public GradleExecuter requireOwnGradleUserHomeDirectory() {
+        return newInstance(configuration.withGradleUserHomeDirectory(testDirectory.createDirectory("user-home")));
+    }
+    //endregion
+
     //region Flag `--stack-trace` configuration
     @Override
     public GradleExecuter withStacktraceDisabled() {
@@ -239,6 +251,13 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
         if (configuration.getSettingsFile() == null) {
             ensureSettingsFileAvailable();
         }
+
+        // This will cause problems on Windows if the path to the Gradle executable that is used has a space in it (e.g. the user's dir is c:/Users/John Smith/)
+        // This is fundamentally a windows issue: You can't have arguments with spaces in them if the path to the batch script has a space
+        // We could work around this by setting -Dgradle.user.home but GRADLE-1730 (which affects 1.0-milestone-3) means that that
+        // is problematic as well. For now, we just don't support running the int tests from a path with a space in it on Windows.
+        // When we stop testing against M3 we should change to use the system property.
+        allArguments.addAll(ofNullable(configuration.getGradleUserHomeDirectory()).map(it -> asList("--gradle-user-home", it.getAbsolutePath())).orElse(emptyList()));
 
         allArguments.addAll(ofNullable(configuration.getConsoleType()).map(it -> asList("--console", it.toString().toLowerCase())).orElse(emptyList()));
 

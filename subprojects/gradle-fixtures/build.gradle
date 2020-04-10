@@ -71,6 +71,7 @@ dependencies {
     spockSupportApi platform('org.spockframework:spock-bom:1.2-groovy-2.5')
     spockSupportApi 'org.spockframework:spock-core'
     spockSupportCompileOnly gradleTestKit()
+    spockSupportApi 'org.apache.commons:commons-lang3:3.10'
 }
 
 

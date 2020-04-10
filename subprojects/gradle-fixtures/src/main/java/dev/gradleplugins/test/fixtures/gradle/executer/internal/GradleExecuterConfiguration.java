@@ -16,6 +16,7 @@ import java.util.function.Consumer;
 public class GradleExecuterConfiguration {
     @With private File workingDirectory = null;
     @With private File userHomeDirectory = null;
+    @With private File gradleUserHomeDirectory = null;
     @With private boolean showStacktrace = true;
     @With private File settingsFile = null;
     @With private File buildScript = null;
@@ -33,6 +34,6 @@ public class GradleExecuterConfiguration {
     @With @NonNull private List<Consumer<? super GradleExecuter>> afterExecute = new ArrayList<>();
 
     public GradleExecuterConfiguration() {
-        this(null, null, true, null, null, Collections.emptyList(), null, false, Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), null, false, false, null, Collections.emptyList(), Collections.emptyList());
+        this(null, null, null, true, null, null, Collections.emptyList(), null, false, Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), null, false, false, null, Collections.emptyList(), Collections.emptyList());
     }
 }

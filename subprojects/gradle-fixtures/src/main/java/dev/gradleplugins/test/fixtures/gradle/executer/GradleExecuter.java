@@ -83,6 +83,14 @@ public interface GradleExecuter {
     GradleExecuter withUserHomeDirectory(File userHomeDirectory);
 
     /**
+     * Sets the <em>Gradle</em> user home dir.
+     * Setting to null requests that the executer use the real default Gradle user home dir rather than the default used for testing.
+     *
+     * <p>Note: does not affect the daemon base dir.</p>
+     */
+    GradleExecuter withGradleUserHomeDirectory(File gradleUserHomeDirectory);
+
+    /**
      * Sets the environment variables to use when executing the build. Defaults to the environment of this process.
      */
     GradleExecuter withEnvironmentVars(Map<String, ?> environment);
@@ -142,5 +150,14 @@ public interface GradleExecuter {
      * Executes the build with {@code "--console=rich, auto, verbose"} argument.
      */
     GradleExecuter withConsole(ConsoleOutput consoleOutput);
+
+    /**
+     * Configures a unique gradle user home dir for the test.
+     *
+     * The gradle user home dir used will be underneath the {@link #getTestDirectory()} directory.
+     *
+     * <p>Note: does not affect the daemon base dir.</p>
+     */
+    GradleExecuter requireOwnGradleUserHomeDirectory();
 
 }
