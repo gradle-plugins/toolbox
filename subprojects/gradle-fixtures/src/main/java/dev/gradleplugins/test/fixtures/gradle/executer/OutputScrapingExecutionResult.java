@@ -21,6 +21,8 @@ import org.gradle.internal.featurelifecycle.LoggingDeprecatedFeatureHandler;
 import org.gradle.launcher.daemon.client.DaemonStartupMessage;
 import org.gradle.launcher.daemon.server.DaemonStateCoordinator;
 import org.gradle.launcher.daemon.server.health.LowHeapSpaceDaemonExpirationStrategy;
+import org.hamcrest.Matchers;
+import org.junit.Assert;
 import org.junit.ComparisonFailure;
 
 import java.util.*;
@@ -246,16 +248,15 @@ public class OutputScrapingExecutionResult implements ExecutionResult {
     public ExecutionResult assertTasksExecuted(Object... taskPaths) {
         Set<String> expectedTasks = new TreeSet<String>(flattenTaskPaths(taskPaths));
         Set<String> actualTasks = findExecutedTasksInOrderStarted();
-        if (!expectedTasks.equals(actualTasks)) {
-            failOnDifferentSets("Build output does not contain the expected tasks.", expectedTasks, actualTasks);
-        }
+        Assert.assertThat("Build output does not contain the expected tasks.", actualTasks, Matchers.containsInAnyOrder(expectedTasks));
         return this;
     }
 
     @Override
     public ExecutionResult assertTasksExecutedAndNotSkipped(Object... taskPaths) {
         assertTasksExecuted(taskPaths);
-        return assertTasksNotSkipped(taskPaths);
+        assertTasksNotSkipped(taskPaths);
+        return this;
     }
 
     public ExecutionResult assertTaskExecuted(String taskPath) {
@@ -288,9 +289,7 @@ public class OutputScrapingExecutionResult implements ExecutionResult {
     public ExecutionResult assertTasksSkipped(Object... taskPaths) {
         Set<String> expectedTasks = new TreeSet<String>(flattenTaskPaths(taskPaths));
         Set<String> skippedTasks = getSkippedTasks();
-        if (!expectedTasks.equals(skippedTasks)) {
-            failOnDifferentSets("Build output does not contain the expected skipped tasks.", expectedTasks, skippedTasks);
-        }
+        Assert.assertThat("Build output does not contain the expected skipped tasks.", skippedTasks, Matchers.containsInAnyOrder(expectedTasks));
         return this;
     }
 
@@ -313,9 +312,7 @@ public class OutputScrapingExecutionResult implements ExecutionResult {
     public ExecutionResult assertTasksNotSkipped(Object... taskPaths) {
         Set<String> expectedTasks = new TreeSet<String>(flattenTaskPaths(taskPaths));
         Set<String> tasks = new TreeSet<String>(getNotSkippedTasks());
-        if (!expectedTasks.equals(tasks)) {
-            failOnDifferentSets("Build output does not contain the expected non skipped tasks.", expectedTasks, tasks);
-        }
+        Assert.assertThat("Build output does not contain the expected non skipped tasks.", tasks, Matchers.containsInAnyOrder(expectedTasks));
         return this;
     }
 
