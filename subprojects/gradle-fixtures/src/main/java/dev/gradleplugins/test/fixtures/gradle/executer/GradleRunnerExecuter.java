@@ -111,6 +111,22 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
             delegate = OutputScrapingExecutionResult.from(result.getOutput(), "");
         }
 
+        private static List<String> flattenTaskPaths(Object[] taskPaths) {
+            List<String> result = new ArrayList<>();
+            flattenTaskPaths(Arrays.asList(taskPaths), result);
+            return result;
+        }
+
+        private static void flattenTaskPaths(Collection<? super Object> taskPaths, List<String> flattenTaskPaths) {
+            taskPaths.stream().forEach(it -> {
+                if (it instanceof Collection) {
+                    flattenTaskPaths((Collection<Object>)it, flattenTaskPaths);
+                } else {
+                    flattenTaskPaths.add(it.toString());
+                }
+            });
+        }
+
         @Override
         public GroupedOutputFixture getGroupedOutput() {
             return delegate.getGroupedOutput();
@@ -128,13 +144,24 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
 
         @Override
         public ExecutionResult assertTaskNotExecuted(String taskPath) {
-            delegate.assertTaskNotExecuted(taskPath);
+            Set<String> actualTasks = findExecutedTasksInOrderStarted();
+            if (actualTasks.contains(taskPath)) {
+                failOnMissingElement("Build output does contains unexpected task.", taskPath, actualTasks);
+            }
             return this;
+        }
+
+        private void failOnMissingElement(String message, String expected, Set<String> actual) {
+            failureOnUnexpectedOutput(String.format("%s%nExpected: %s%nActual: %s", message, expected, actual));
         }
 
         @Override
         public ExecutionResult assertTasksExecuted(Object... taskPaths) {
-            delegate.assertTasksExecuted(taskPaths);
+            Set<String> expectedTasks = new TreeSet<String>(flattenTaskPaths(taskPaths));
+            Set<String> actualTasks = findExecutedTasksInOrderStarted();
+            if (!expectedTasks.equals(actualTasks)) {
+                failOnDifferentSets("Build output does not contain the expected tasks.", expectedTasks, actualTasks);
+            }
             return this;
         }
 
@@ -146,14 +173,34 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
 
         @Override
         public ExecutionResult assertTasksNotSkipped(Object... taskPaths) {
-            delegate.assertTasksNotSkipped(taskPaths);
+            Set<String> expectedTasks = new TreeSet<String>(flattenTaskPaths(taskPaths));
+            Set<String> tasks = new TreeSet<String>(getNotSkippedTasks());
+            if (!expectedTasks.equals(tasks)) {
+                failOnDifferentSets("Build output does not contain the expected non skipped tasks.", expectedTasks, tasks);
+            }
             return this;
         }
 
         @Override
         public ExecutionResult assertTasksSkipped(Object... taskPaths) {
-            delegate.assertTasksSkipped(taskPaths);
+            Set<String> expectedTasks = new TreeSet<String>(flattenTaskPaths(taskPaths));
+            Set<String> skippedTasks = getSkippedTasks();
+            if (!expectedTasks.equals(skippedTasks)) {
+                failOnDifferentSets("Build output does not contain the expected skipped tasks.", expectedTasks, skippedTasks);
+            }
             return this;
+        }
+
+        private void failOnDifferentSets(String message, Set<String> expected, Set<String> actual) {
+            failureOnUnexpectedOutput(String.format("%s%nExpected: %s%nActual: %s", message, expected, actual));
+        }
+
+        private void failureOnUnexpectedOutput(String message) {
+            throw new AssertionError(unexpectedOutputMessage(message));
+        }
+
+        private String unexpectedOutputMessage(String message) {
+            return String.format("%s%nOutput:%n=======%n%s%nError:%n======%n%s", message, getOutput(), "Using TestKit Runner which mixin both error output");
         }
 
         @Override
