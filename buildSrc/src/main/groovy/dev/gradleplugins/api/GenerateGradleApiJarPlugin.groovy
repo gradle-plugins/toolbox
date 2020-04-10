@@ -38,7 +38,7 @@ abstract class GenerateGradleApiJarPlugin implements Plugin<Project> {
                     canBeConsumed = false
                     canBeResolved = false
                 }
-                apiJarElements {
+                apiElements {
                     canBeResolved = false
                     canBeConsumed = true
                     extendsFrom api
@@ -52,7 +52,21 @@ abstract class GenerateGradleApiJarPlugin implements Plugin<Project> {
                     }
 
                 }
-                apiSourcesElements {
+                runtimeElements {
+                    canBeResolved = false
+                    canBeConsumed = true
+                    extendsFrom api
+                    outgoing.artifact(generateGradleApiJarTask.flatMap { it.outputFile })
+                    attributes {
+                        attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_RUNTIME))
+                        attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category, Category.LIBRARY))
+                        attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling, Bundling.EXTERNAL))
+                        attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, objects.named(LibraryElements, LibraryElements.JAR))
+                        attributes.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, Integer.parseInt(toMinimumJavaVersion(VersionNumber.parse(gradleVersion)).majorVersion))
+                    }
+
+                }
+                sourcesElements {
                     canBeResolved = false
                     canBeConsumed = true
                     outgoing.artifact(generateGradleApiJarTask.flatMap { it.outputSourceFile }) {
@@ -75,8 +89,9 @@ abstract class GenerateGradleApiJarPlugin implements Plugin<Project> {
             }
 
             def adhocComponent = softwareComponentFactory.adhoc('gradleApi');
-            adhocComponent.addVariantsFromConfiguration(configurations.apiJarElements) {}
-            adhocComponent.addVariantsFromConfiguration(configurations.apiSourcesElements) {}
+            adhocComponent.addVariantsFromConfiguration(configurations.apiElements) {}
+            adhocComponent.addVariantsFromConfiguration(configurations.runtimeElements) {}
+            adhocComponent.addVariantsFromConfiguration(configurations.sourcesElements) {}
             project.getComponents().add(adhocComponent);
 
             apply plugin: 'maven-publish'
