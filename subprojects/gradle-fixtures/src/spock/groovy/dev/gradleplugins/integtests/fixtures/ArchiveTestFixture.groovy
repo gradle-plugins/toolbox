@@ -6,7 +6,7 @@ import dev.gradleplugins.test.fixtures.archive.ZipTestFixture
 import dev.gradleplugins.test.fixtures.file.TestFile
 
 trait ArchiveTestFixture {
-    abstract TestFile file(String path);
+    abstract TestFile file(String path)
 
     JarTestFixture jar(String path) {
         return new JarTestFixture(file(path))
