@@ -132,7 +132,7 @@ class AbstractFunctionalSpec extends Specification {
     protected static String configurePluginClasspathAsBuildScriptDependencies() {
         return """buildscript {
     dependencies {
-        classpath files(${implementationClassPath.collect { "'${it.replace('\\', '\\\\')}'" }.join(', ')})
+        classpath files(${implementationClassPath.collect { "'${it.absolutePath.replace('\\', '\\\\')}'" }.join(', ')})
     }
 }
 """
