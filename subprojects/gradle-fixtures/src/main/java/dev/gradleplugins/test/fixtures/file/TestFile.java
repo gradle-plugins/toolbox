@@ -405,6 +405,11 @@ public class TestFile extends File {
         }
     }
 
+    public void unzipTo(File target) {
+        assertIsFile();
+        new TestFileHelper(this).unzipTo(target, false);
+    }
+
     public Snapshot snapshot() {
         assertIsFile();
         return new Snapshot(lastModified(), md5(this));
