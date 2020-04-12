@@ -3,13 +3,11 @@ package dev.gradleplugins.test.fixtures.gradle.executer;
 import dev.gradleplugins.test.fixtures.file.TestFile;
 import dev.gradleplugins.test.fixtures.gradle.executer.internal.GradleExecuterConfiguration;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.SystemUtils;
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class GradleWrapperExecuter extends AbstractGradleExecuter {
@@ -30,7 +28,11 @@ public class GradleWrapperExecuter extends AbstractGradleExecuter {
     protected ExecutionResult doRun() {
         try {
             List<String> command = new ArrayList<>();
-            command.add("./gradlew");
+            if (SystemUtils.IS_OS_WINDOWS) {
+                command.add(".\\gradlew.bat");
+            } else {
+                command.add("./gradlew");
+            }
             command.addAll(getAllArguments());
             ProcessBuilder processBuilder = new ProcessBuilder().command(command).directory(getWorkingDirectory());
             if (!configuration.getEnvironment().isEmpty()) {
