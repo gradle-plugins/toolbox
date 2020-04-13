@@ -410,7 +410,7 @@ public class TestFile extends File {
 
     public void unzipTo(File target) {
         assertIsFile();
-        new TestFileHelper(this).unzipTo(target, false);
+        new TestFileHelper(this).unzipTo(target, !SystemUtils.IS_OS_WINDOWS);
     }
 
     public Snapshot snapshot() {

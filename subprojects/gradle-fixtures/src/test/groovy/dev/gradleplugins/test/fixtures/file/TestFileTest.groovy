@@ -16,8 +16,8 @@
 
 package dev.gradleplugins.test.fixtures.file
 
-import dev.gradleplugins.spock.lang.TestNameTestDirectoryProvider
 import org.junit.Rule
+import org.junit.rules.TemporaryFolder
 import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.Subject
@@ -27,11 +27,11 @@ import java.nio.file.LinkOption
 
 abstract class AbstractTestFileSpec extends Specification {
     @Rule
-    protected final TestNameTestDirectoryProvider temporaryFolder = new TestNameTestDirectoryProvider(getClass())
+    TemporaryFolder temporaryFolder = new TemporaryFolder()
 
     protected File getTestDirectory() {
         // Ensure the type of testDirectory is a File implementation and not a TestFile.
-        return new File(temporaryFolder.testDirectory.absolutePath)
+        return new File(temporaryFolder.root.absolutePath)
     }
 
     protected TestFile of(File file) {
