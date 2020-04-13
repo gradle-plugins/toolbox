@@ -16,16 +16,19 @@
 
 package dev.gradleplugins.test.fixtures.file;
 
+import com.google.common.hash.HashCode;
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
+import com.google.common.hash.HashingOutputStream;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.Executor;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.output.NullOutputStream;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.tools.ant.util.TeeOutputStream;
 import org.codehaus.groovy.runtime.ResourceGroovyMethods;
-import org.gradle.internal.hash.HashCode;
-import org.gradle.internal.hash.Hashing;
-import org.gradle.internal.hash.HashingOutputStream;
 import org.hamcrest.Matchers;
 
 import java.io.ByteArrayOutputStream;
@@ -416,7 +419,8 @@ public class TestFile extends File {
     }
 
     public static HashCode md5(File file) {
-        HashingOutputStream hashingStream = Hashing.primitiveStreamHasher();
+        HashFunction hf = Hashing.md5();
+        HashingOutputStream hashingStream = new HashingOutputStream(hf, NullOutputStream.NULL_OUTPUT_STREAM);
         try {
             Files.copy(file.toPath(), hashingStream);
         } catch (IOException e) {
