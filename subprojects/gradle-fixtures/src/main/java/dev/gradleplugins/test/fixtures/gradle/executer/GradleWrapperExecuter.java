@@ -29,7 +29,7 @@ public class GradleWrapperExecuter extends AbstractGradleExecuter {
         try {
             List<String> command = new ArrayList<>();
             if (SystemUtils.IS_OS_WINDOWS) {
-                command.add(".\\gradlew.bat");
+                command.addAll(Arrays.asList("cmd", "/c", "gradlew.bat"));
             } else {
                 command.add("./gradlew");
             }
