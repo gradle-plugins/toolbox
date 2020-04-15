@@ -2,12 +2,12 @@ package dev.gradleplugins.test.fixtures.gradle;
 
 import dev.gradleplugins.test.fixtures.file.TestFile;
 import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter;
-import dev.gradleplugins.test.fixtures.gradle.executer.GradleRunnerExecuter;
-import dev.gradleplugins.test.fixtures.gradle.executer.GradleWrapperExecuter;
+import dev.gradleplugins.test.fixtures.gradle.executer.internal.GradleRunnerExecuter;
+import dev.gradleplugins.test.fixtures.gradle.executer.internal.GradleWrapperExecuter;
 
 public class GradleExecuterFactory {
     public GradleExecuter testKit(TestFile testDirectory) {
-        return new GradleRunnerExecuter(testDirectory);
+        return new GradleRunnerExecuter(null, testDirectory);
     }
 
     public GradleExecuter wrapper(TestFile testDirectory) {

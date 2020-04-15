@@ -1,7 +1,8 @@
 package dev.gradleplugins.test.fixtures.gradle.executer.internal;
 
+import dev.gradleplugins.test.fixtures.gradle.executer.GradleDistribution;
 import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter;
-import dev.gradleplugins.test.fixtures.logging.ConsoleOutput;
+import dev.gradleplugins.test.fixtures.gradle.logging.ConsoleOutput;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
@@ -14,6 +15,7 @@ import java.util.function.Consumer;
 @Data
 @AllArgsConstructor
 public class GradleExecuterConfiguration {
+    private GradleDistribution distribution;
     @With private File workingDirectory = null;
     @With private File userHomeDirectory = null;
     @With private File gradleUserHomeDirectory = null;
@@ -33,7 +35,7 @@ public class GradleExecuterConfiguration {
     @With @NonNull private List<Consumer<? super GradleExecuter>> beforeExecute = new ArrayList<>();
     @With @NonNull private List<Consumer<? super GradleExecuter>> afterExecute = new ArrayList<>();
 
-    public GradleExecuterConfiguration() {
-        this(null, null, null, true, null, null, Collections.emptyList(), null, false, Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), null, false, false, null, Collections.emptyList(), Collections.emptyList());
+    public GradleExecuterConfiguration(GradleDistribution distribution) {
+        this(distribution, null, null, null, true, null, null, Collections.emptyList(), null, false, Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), null, false, false, null, Collections.emptyList(), Collections.emptyList());
     }
 }

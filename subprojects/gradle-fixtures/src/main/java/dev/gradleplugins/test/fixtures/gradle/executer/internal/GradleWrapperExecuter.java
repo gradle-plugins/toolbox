@@ -1,7 +1,7 @@
-package dev.gradleplugins.test.fixtures.gradle.executer;
+package dev.gradleplugins.test.fixtures.gradle.executer.internal;
 
 import dev.gradleplugins.test.fixtures.file.TestFile;
-import dev.gradleplugins.test.fixtures.gradle.executer.internal.GradleExecuterConfiguration;
+import dev.gradleplugins.test.fixtures.gradle.executer.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
 
@@ -11,8 +11,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class GradleWrapperExecuter extends AbstractGradleExecuter {
+    // TODO: The distribution should be model after something that will recognize the wrapper properties file and get the information from there
     public GradleWrapperExecuter(TestFile testDirectory) {
-        super(testDirectory);
+        super(null, testDirectory);
     }
 
     private GradleWrapperExecuter(TestFile testDirectory, GradleExecuterConfiguration configuration) {

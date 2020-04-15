@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.gradleplugins.test.fixtures.gradle.executer;
+package dev.gradleplugins.test.fixtures.gradle.executer.internal;
 
 import dev.gradleplugins.test.fixtures.Pair;
-import dev.gradleplugins.test.fixtures.logging.GroupedOutputFixture;
+import dev.gradleplugins.test.fixtures.gradle.executer.ExecutionResult;
+import dev.gradleplugins.test.fixtures.gradle.executer.TaskOrderSpecs;
+import dev.gradleplugins.test.fixtures.gradle.logging.GroupedOutputFixture;
 import org.gradle.internal.featurelifecycle.LoggingDeprecatedFeatureHandler;
 import org.gradle.launcher.daemon.client.DaemonStartupMessage;
 import org.gradle.launcher.daemon.server.DaemonStateCoordinator;

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package dev.gradleplugins.test.fixtures.gradle.executer;
+package dev.gradleplugins.test.fixtures.gradle.executer.internal;
 
+import dev.gradleplugins.test.fixtures.gradle.executer.ExecutionFailure;
 import org.hamcrest.Matcher;
 
 import java.util.regex.Pattern;

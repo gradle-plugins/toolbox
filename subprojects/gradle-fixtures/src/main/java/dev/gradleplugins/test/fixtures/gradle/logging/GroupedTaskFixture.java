@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.gradleplugins.test.fixtures.logging;
+package dev.gradleplugins.test.fixtures.gradle.logging;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.gradleplugins.test.fixtures.gradle.executer;
+package dev.gradleplugins.test.fixtures.gradle.executer.internal;
 
 import dev.gradleplugins.test.fixtures.Pair;
 import net.rubygrapefruit.ansi.AnsiParser;

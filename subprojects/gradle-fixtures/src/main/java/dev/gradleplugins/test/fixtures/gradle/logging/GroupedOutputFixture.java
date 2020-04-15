@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package dev.gradleplugins.test.fixtures.logging;
+package dev.gradleplugins.test.fixtures.gradle.logging;
 
-import dev.gradleplugins.test.fixtures.gradle.executer.LogContent;
+import dev.gradleplugins.test.fixtures.gradle.executer.internal.LogContent;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;

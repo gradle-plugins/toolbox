@@ -17,7 +17,7 @@
 package dev.gradleplugins.test.fixtures.gradle.executer;
 
 import dev.gradleplugins.test.fixtures.file.TestFile;
-import dev.gradleplugins.test.fixtures.logging.ConsoleOutput;
+import dev.gradleplugins.test.fixtures.gradle.logging.ConsoleOutput;
 
 import java.io.File;
 import java.util.List;

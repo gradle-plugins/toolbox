@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package dev.gradleplugins.test.fixtures.gradle.executer;
+package dev.gradleplugins.test.fixtures.gradle.executer.internal;
+
+import dev.gradleplugins.test.fixtures.gradle.executer.ExecutionFailure;
 
 import static org.hamcrest.CoreMatchers.startsWith;
 

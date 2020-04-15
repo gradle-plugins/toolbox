@@ -1,6 +1,6 @@
 package dev.gradleplugins.test.fixtures.gradle.executer;
 
-import dev.gradleplugins.test.fixtures.logging.GroupedOutputFixture;
+import dev.gradleplugins.test.fixtures.gradle.logging.GroupedOutputFixture;
 
 public interface ExecutionResult {
     /**

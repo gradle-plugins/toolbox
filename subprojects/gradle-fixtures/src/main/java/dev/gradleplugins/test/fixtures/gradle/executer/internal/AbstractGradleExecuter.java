@@ -1,12 +1,16 @@
-package dev.gradleplugins.test.fixtures.gradle.executer;
+package dev.gradleplugins.test.fixtures.gradle.executer.internal;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import dev.gradleplugins.test.fixtures.file.TestFile;
-import dev.gradleplugins.test.fixtures.gradle.executer.internal.GradleExecuterConfiguration;
-import dev.gradleplugins.test.fixtures.logging.ConsoleOutput;
+import dev.gradleplugins.test.fixtures.gradle.executer.ExecutionFailure;
+import dev.gradleplugins.test.fixtures.gradle.executer.ExecutionResult;
+import dev.gradleplugins.test.fixtures.gradle.executer.GradleDistribution;
+import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter;
+import dev.gradleplugins.test.fixtures.gradle.logging.ConsoleOutput;
 import lombok.NonNull;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,8 +28,9 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
     protected GradleExecuterConfiguration configuration;
     private final TestFile testDirectory;
 
-    public AbstractGradleExecuter(@NonNull TestFile testDirectory) {
-        this(testDirectory, new GradleExecuterConfiguration());
+    // TODO: Remove nullability at some point
+    public AbstractGradleExecuter(@Nullable GradleDistribution distribution, @NonNull TestFile testDirectory) {
+        this(testDirectory, new GradleExecuterConfiguration(distribution));
     }
 
     protected AbstractGradleExecuter(TestFile testDirectory, GradleExecuterConfiguration configuration) {

@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.gradleplugins.test.fixtures.gradle.executer;
+package dev.gradleplugins.test.fixtures.gradle.executer.internal;
 
 import dev.gradleplugins.test.fixtures.Pair;
+import dev.gradleplugins.test.fixtures.gradle.executer.ExecutionFailure;
 import org.gradle.util.TextUtil;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package dev.gradleplugins.test.fixtures.gradle.executer;
+package dev.gradleplugins.test.fixtures.gradle.executer.internal;
 
 import dev.gradleplugins.test.fixtures.file.TestFile;
-import dev.gradleplugins.test.fixtures.gradle.executer.internal.GradleExecuterConfiguration;
-import dev.gradleplugins.test.fixtures.logging.GroupedOutputFixture;
+import dev.gradleplugins.test.fixtures.gradle.executer.*;
+import dev.gradleplugins.test.fixtures.gradle.logging.GroupedOutputFixture;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.BuildTask;
 import org.gradle.testkit.runner.GradleRunner;
@@ -26,6 +26,7 @@ import org.gradle.testkit.runner.TaskOutcome;
 import org.hamcrest.Matcher;
 import org.junit.Assert;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,8 +36,9 @@ import static org.hamcrest.CoreMatchers.hasItem;
 //    We should instead offer a factory to construct the right executer
 //    The contextual executer would also be beneficial here.
 public class GradleRunnerExecuter extends AbstractGradleExecuter {
-    public GradleRunnerExecuter(TestFile testDirectory) {
-        super(testDirectory);
+    // TODO: Remove nullability at some point
+    public GradleRunnerExecuter(@Nullable GradleDistribution distribution, TestFile testDirectory) {
+        super(distribution, testDirectory);
     }
 
     private GradleRunnerExecuter(TestFile testDirectory, GradleExecuterConfiguration configuration) {
@@ -82,7 +84,9 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
             runner.withDebug(true);
         }
 
-        if (configuration.getGradleVersion() != null) {
+        if (configuration.getDistribution() != null) {
+            runner.withGradleVersion(configuration.getDistribution().getVersion().getVersion());
+        } else if (configuration.getGradleVersion() != null) {
             runner.withGradleVersion(configuration.getGradleVersion());
         }
 
@@ -98,7 +102,9 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
     }
 
     // TODO: This is not how we want to solve this use case!
+    @Deprecated
     public GradleExecuter usingGradleVersion(String gradleVersion) {
+        System.out.println("WARNING: Stop using this method, we are modling the GradleDistribution better to have a cross-executor solution");
         return newInstance(configuration.withGradleVersion(gradleVersion));
     }
 

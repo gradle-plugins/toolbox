@@ -16,7 +16,6 @@
 package dev.gradleplugins.test.fixtures.gradle.executer.internal;
 
 import dev.gradleplugins.test.fixtures.file.TestFile;
-import dev.gradleplugins.test.fixtures.gradle.executer.internal.DownloadableGradleDistribution;
 import org.gradle.util.DistributionLocator;
 
 import java.io.UncheckedIOException;

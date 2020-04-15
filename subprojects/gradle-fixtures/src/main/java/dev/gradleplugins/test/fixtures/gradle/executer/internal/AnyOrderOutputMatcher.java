@@ -15,7 +15,7 @@
  */
 
 
-package dev.gradleplugins.test.fixtures.gradle.executer;
+package dev.gradleplugins.test.fixtures.gradle.executer.internal;
 
 import org.junit.Assert;
 
