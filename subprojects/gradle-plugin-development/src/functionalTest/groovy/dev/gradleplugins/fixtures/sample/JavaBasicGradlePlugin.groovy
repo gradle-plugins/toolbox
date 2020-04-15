@@ -35,28 +35,7 @@ public class BasicPlugin implements Plugin<Project> {
 """))
 
     @Override
-    GradlePluginElement withFunctionalTest() {
-        def delegate = ofElements(this, new BasicGradlePluginTestKitFunctionalTest())
-        return new GradlePluginElement() {
-            @Override
-            String getPluginId() {
-                return JavaBasicGradlePlugin.this.pluginId
-            }
-
-            @Override
-            GradlePluginElement withFunctionalTest() {
-                return this
-            }
-
-            @Override
-            List<SourceFile> getFiles() {
-                throw new UnsupportedOperationException()
-            }
-
-            @Override
-            void writeToProject(TestFile projectDir) {
-                delegate.writeToProject(projectDir)
-            }
-        }
+    TestableGradlePluginElement withFunctionalTest() {
+        return new TestableGradlePluginElement(this)
     }
 }

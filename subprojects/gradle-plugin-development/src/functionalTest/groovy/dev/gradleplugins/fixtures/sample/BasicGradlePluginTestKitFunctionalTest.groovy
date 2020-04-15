@@ -17,14 +17,22 @@
 package dev.gradleplugins.fixtures.sample
 
 import dev.gradleplugins.integtests.fixtures.AbstractFunctionalSpec
+import dev.gradleplugins.integtests.fixtures.GradleCompatibilityTestRunner
 import dev.gradleplugins.test.fixtures.sources.SourceElement
 import dev.gradleplugins.test.fixtures.sources.SourceFile
 
 class BasicGradlePluginTestKitFunctionalTest extends SourceElement {
-    final List<SourceFile> files = Collections.singletonList(sourceFile('groovy', 'com/example/BasicPluginFunctionalTest.groovy', """package com.example
+    @Override
+    List<SourceFile> getFiles() {
+        return Collections.singletonList(sourceFile('groovy', 'com/example/BasicPluginFunctionalTest.groovy', """package com.example
 import ${AbstractFunctionalSpec.canonicalName}
 
-class BasicPluginFunctionalTest extends ${AbstractFunctionalSpec.simpleName} {
+${content}
+"""))
+    }
+
+    private static String getContent() {
+        return """class BasicPluginFunctionalTest extends ${AbstractFunctionalSpec.simpleName} {
     def "can do basic test"() {
         given:
         buildFile << '''
@@ -39,11 +47,27 @@ class BasicPluginFunctionalTest extends ${AbstractFunctionalSpec.simpleName} {
         then:
         result.output.contains('Hello')
     }
-}
-"""))
+}"""
+    }
 
     @Override
     String getSourceSetName() {
         return "functionalTest"
+    }
+
+    BasicGradlePluginTestKitFunctionalTest withTestingStrategySupport() {
+        return new BasicGradlePluginTestKitFunctionalTest() {
+            @Override
+            List<SourceFile> getFiles() {
+                return Collections.singletonList(sourceFile('groovy', 'com/example/BasicPluginFunctionalTest.groovy', """package com.example
+import ${AbstractFunctionalSpec.canonicalName}
+import ${GradleCompatibilityTestRunner.canonicalName}
+import org.junit.runner.RunWith
+
+@RunWith(${GradleCompatibilityTestRunner.simpleName})
+${content}
+"""))
+            }
+        }
     }
 }
