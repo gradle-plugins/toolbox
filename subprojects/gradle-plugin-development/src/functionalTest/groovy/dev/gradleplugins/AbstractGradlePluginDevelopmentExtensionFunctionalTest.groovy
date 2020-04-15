@@ -1,11 +1,10 @@
 package dev.gradleplugins
 
 import dev.gradleplugins.fixtures.sample.GradlePluginElement
-import dev.gradleplugins.integtests.fixtures.AbstractFunctionalSpec
 import spock.lang.Unroll
 import spock.util.environment.Jvm
 
-abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends AbstractFunctionalSpec {
+abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends AbstractGradlePluginDevelopmentFunctionalSpec {
     def "register an extra extension on gradlePlugin extension"() {
         given:
         makeSingleProject()

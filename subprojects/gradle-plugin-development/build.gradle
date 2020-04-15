@@ -31,6 +31,11 @@ repositories {
     jcenter()
 }
 
+tasks.named('functionalTest', Test) {
+    dependsOn(':gradle-fixtures:publishAllPublicationsToLocalRepositoryRepository')
+    it.systemProperty('localRepository', layout.buildDirectory.dir('repository').get().asFile)
+}
+
 dependencies {
     // Force local fixtures
     // TODO: Maybe look into dependency substitution

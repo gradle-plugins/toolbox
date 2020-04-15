@@ -85,7 +85,10 @@ publishing {
         }
     }
     repositories {
-        mavenLocal()
+        maven {
+            name = 'LocalRepository'
+            url = file('../gradle-plugin-development/build/repository')
+        }
     }
 }
 

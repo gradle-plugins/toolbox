@@ -28,7 +28,7 @@ import static org.hamcrest.CoreMatchers.equalTo
 import static org.hamcrest.CoreMatchers.not
 
 // TODO: Add fork Gradle Executer so I can test what user really experience once the plugin is released
-abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends AbstractFunctionalSpec implements ArchiveTestFixture {
+abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends AbstractGradlePluginDevelopmentFunctionalSpec implements ArchiveTestFixture {
     protected String getProjectName() {
         return 'gradle-plugin'
     }
@@ -238,7 +238,7 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
     def "can use published plugin through plugin DSL"() {
         publishPluginUnderTest()
         settingsFile.text = configurePluginDslForPluginUnderTest() + settingsFile.text
-        buildFile << """
+        buildFile.text = """
             plugins {
                 id("${componentUnderTest.pluginId}")
             }
@@ -255,7 +255,7 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
     def "gives a useful message when using the plugin with older Gradle distribution"() {
         publishPluginUnderTest()
         settingsFile.text = configurePluginDslForPluginUnderTest() + settingsFile.text
-        buildFile << """
+        buildFile.text = """
             plugins {
                 id("${componentUnderTest.pluginId}")
             }
