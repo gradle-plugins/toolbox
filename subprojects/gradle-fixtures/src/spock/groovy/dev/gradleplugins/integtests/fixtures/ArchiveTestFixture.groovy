@@ -5,6 +5,7 @@ import dev.gradleplugins.test.fixtures.archive.TarTestFixture
 import dev.gradleplugins.test.fixtures.archive.ZipTestFixture
 import dev.gradleplugins.test.fixtures.file.TestFile
 
+// TODO: Rename to ArchiveFixtures (important with the s)
 trait ArchiveTestFixture {
     abstract TestFile file(String path)
 

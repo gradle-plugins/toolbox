@@ -5,6 +5,7 @@ import dev.gradleplugins.test.fixtures.file.TestFile
 import org.apache.commons.lang3.ArchUtils
 import org.apache.commons.lang3.SystemUtils
 
+// TODO: Rename to NativeFixtures
 trait NativeTestFixture {
     abstract InstalledToolChain getToolChain()
     abstract TestFile file(String path)
