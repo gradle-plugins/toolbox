@@ -54,6 +54,9 @@ public interface GradleExecuter {
 
     /**
      * Sets the additional command-line arguments to use when executing the build. Defaults to an empty list.
+     *
+     * @param args the new arguments to use, the old ones are discarded
+     * @return a new {@link GradleExecuter} instance with the new configuration.
      */
     GradleExecuter withArguments(List<String> args);
 
