@@ -43,12 +43,12 @@ class NativeInstallationFixture {
     }
 
     NativeInstallationFixture assertInstalled() {
-        installDir.assertIsDir()
+        installDir.assertIsDirectory()
         final script = scriptFile()
         assert script
 
         def libDir = installDir.file("lib")
-        libDir.assertIsDir()
+        libDir.assertIsDirectory()
         libDir.file(os.getExecutableName(script.name)).assertIsFile()
         this
     }
@@ -65,7 +65,7 @@ class NativeInstallationFixture {
     }
 
     private ArrayList<TestFile> getLibraryFiles() {
-        installDir.assertIsDir()
+        installDir.assertIsDirectory()
         def libDir = installDir.file("lib")
         libDir.assertIsDir()
         def libFiles
