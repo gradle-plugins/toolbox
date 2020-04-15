@@ -17,6 +17,7 @@
 package dev.gradleplugins.integtests.fixtures.nativeplatform
 
 import dev.gradleplugins.integtests.fixtures.AbstractFunctionalSpec
+import dev.gradleplugins.integtests.fixtures.AbstractGradleSpecification
 import dev.gradleplugins.integtests.fixtures.nativeplatform.NativeToolChainTestRunner
 import dev.gradleplugins.test.fixtures.file.TestFile
 import dev.gradleplugins.test.fixtures.sources.SourceFile
@@ -31,7 +32,7 @@ import org.junit.runner.RunWith
  */
 @RunWith(NativeToolChainTestRunner.class)
 //@Category(ContextualMultiVersionTest.class)
-abstract class AbstractInstalledToolChainIntegrationSpec extends AbstractFunctionalSpec implements HostPlatform {
+abstract class AbstractInstalledToolChainIntegrationSpec extends AbstractGradleSpecification implements HostPlatform {
     static AvailableToolChains.InstalledToolChain toolChain
     File initScript
 

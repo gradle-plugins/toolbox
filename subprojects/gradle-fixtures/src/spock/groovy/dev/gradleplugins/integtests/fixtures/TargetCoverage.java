@@ -1,11 +1,11 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      https://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,9 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package dev.gradleplugins.integtests.fixtures;
 
-package dev.gradleplugins.integtests.fixtures
+import groovy.lang.Closure;
 
-@Deprecated
-class AbstractFunctionalSpec extends AbstractGradleSpecification {
+import java.lang.annotation.*;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+@Inherited
+/**
+ * Similar to {@link TargetVersions} but accepts a closure and hence allows to manage versions more flexibly.
+ */
+public @interface TargetCoverage {
+    Class<Closure> value();
 }

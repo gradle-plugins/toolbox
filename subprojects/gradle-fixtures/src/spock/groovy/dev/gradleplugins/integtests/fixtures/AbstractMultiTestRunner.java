@@ -44,7 +44,7 @@ import java.util.*;
  * A base class for those test runners which execute a test multiple times.
  */
 public abstract class AbstractMultiTestRunner extends Runner implements Filterable {
-    protected final Class<?> target;
+    private final Class<?> target;
     private final List<Execution> executions = new ArrayList<Execution>();
     private final boolean runAllExecutions;
     private Description description;

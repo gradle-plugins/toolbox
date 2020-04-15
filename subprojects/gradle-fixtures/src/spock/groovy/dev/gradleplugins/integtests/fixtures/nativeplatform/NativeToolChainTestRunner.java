@@ -18,15 +18,18 @@ package dev.gradleplugins.integtests.fixtures.nativeplatform;
 
 
 import dev.gradleplugins.integtests.fixtures.AbstractContextualMultiVersionSpecRunner;
+import dev.gradleplugins.integtests.fixtures.AbstractMultiVersionSpecRunner;
 import org.gradle.api.specs.Spec;
 import org.gradle.util.CollectionUtils;
 
 import java.util.*;
 
 public class NativeToolChainTestRunner extends AbstractContextualMultiVersionSpecRunner<AvailableToolChains.ToolChainCandidate> {
+    private final Class<? extends AbstractInstalledToolChainIntegrationSpec> target;
 
     public NativeToolChainTestRunner(Class<? extends AbstractInstalledToolChainIntegrationSpec> target) {
         super(target);
+        this.target = target;
     }
 
     @Override

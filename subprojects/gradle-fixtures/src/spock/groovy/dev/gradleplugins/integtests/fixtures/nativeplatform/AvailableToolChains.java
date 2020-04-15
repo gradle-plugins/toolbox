@@ -17,7 +17,7 @@
 package dev.gradleplugins.integtests.fixtures.nativeplatform;
 
 import com.google.common.collect.ImmutableSet;
-import dev.gradleplugins.integtests.fixtures.AbstractContextualMultiVersionSpecRunner;
+import dev.gradleplugins.integtests.fixtures.AbstractMultiVersionSpecRunner;
 import dev.gradleplugins.integtests.fixtures.nativeplatform.internal.NativeServicesTestFixture;
 import dev.gradleplugins.integtests.fixtures.nativeplatform.internal.TestFiles;
 import dev.gradleplugins.integtests.fixtures.nativeplatform.msvcpp.VisualStudioLocatorTestFixture;
@@ -314,7 +314,7 @@ public class AvailableToolChains {
         }
     }
 
-    public static abstract class ToolChainCandidate implements AbstractContextualMultiVersionSpecRunner.VersionedTool {
+    public static abstract class ToolChainCandidate implements AbstractMultiVersionSpecRunner.VersionedTool {
         @Override
         public String toString() {
             return getDisplayName();
