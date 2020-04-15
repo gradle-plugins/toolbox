@@ -73,6 +73,8 @@ dependencies {
     spockSupportCompileOnly gradleTestKit()
     spockSupportApi 'org.apache.commons:commons-lang3:3.10'
     spockSupportImplementation 'commons-io:commons-io:2.6'
+    spockSupportImplementation 'org.jsoup:jsoup:1.13.1'
+
     spockSupportCompileOnly "org.projectlombok:lombok:${lombokVersion}"
     spockSupportAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 }
