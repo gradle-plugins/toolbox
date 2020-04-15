@@ -37,6 +37,9 @@ tasks.named('functionalTest', Test) {
 }
 
 dependencies {
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
     // Force local fixtures
     // TODO: Maybe look into dependency substitution
     functionalTestImplementation(project(':gradle-fixtures')) {
