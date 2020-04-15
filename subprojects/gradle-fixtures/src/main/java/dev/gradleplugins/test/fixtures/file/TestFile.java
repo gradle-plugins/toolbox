@@ -20,6 +20,7 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.common.hash.HashingOutputStream;
+import dev.gradleplugins.test.fixtures.util.RetryUtil;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.Executor;
@@ -35,6 +36,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -405,6 +407,27 @@ public class TestFile extends File {
             return new ExecOutput(exitCode, stdout.toString(), stderr.toString());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        }
+    }
+
+    public void copyFrom(File target) {
+        new TestFile(target).copyTo(this);
+    }
+
+    public void copyFrom(final URL resource) {
+        final TestFile testFile = this;
+        try {
+            RetryUtil.retry(new Runnable() {
+                public void run() {
+                    try {
+                        FileUtils.copyURLToFile(resource, testFile);
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(e);
+                    }
+                }
+            });
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
