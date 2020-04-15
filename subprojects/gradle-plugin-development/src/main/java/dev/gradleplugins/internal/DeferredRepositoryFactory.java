@@ -60,6 +60,32 @@ public abstract class DeferredRepositoryFactory {
             repository.setUrl(project.uri("https://dl.bintray.com/gradle-plugins/distributions"));
             repository.mavenContent(content -> content.includeModule("dev.gradleplugins", "gradle-fixtures"));
         });
+        project.getRepositories().jcenter(repository -> {
+            repository.setName("Gradle Plugins Development - Gradle Fixtures Dependencies");
+            repository.mavenContent(content -> allowGradleFixturesDependencies().accept(content));
+        });
+    }
+
+    private static Consumer<MavenRepositoryContentDescriptor> allowGradleFixturesDependencies() {
+        return content -> {
+            content.includeModule("net.rubygrapefruit", "ansi-control-sequence-util");
+            content.includeModule("org.apache.commons", "commons-lang3");
+            content.includeModule("org.hamcrest", "hamcrest");
+            content.includeModule("com.google.guava", "guava");
+            content.includeModule("com.google.guava", "guava-parent");
+            content.includeModule("com.google.j2objc", "j2objc-annotations");
+            content.includeModule("com.google.errorprone", "error_prone_annotations");
+            content.includeModule("org.checkerframework", "checker-qual");
+            content.includeModule("com.google.code.findbugs", "jsr305");
+            content.includeModule("com.google.guava", "listenablefuture");
+            content.includeModule("com.google.guava", "failureaccess");
+
+            content.includeModule("org.ow2.asm", "asm");
+            content.includeModule("org.jsoup", "jsoup");
+            content.includeModule("commons-io", "commons-io");
+            content.includeModule("org.apache.commons", "commons-exec");
+//            content.includeModule("org.junit.jupiter", "junit-jupiter-engine");
+        };
     }
 
     private static void createGroovyRepository(Project project) {
@@ -78,6 +104,7 @@ public abstract class DeferredRepositoryFactory {
 
     public static Consumer<MavenRepositoryContentDescriptor> allowSpock() {
         return content -> {
+            content.includeModule("org.spockframework", "spock-bom");
             content.includeModule("org.spockframework", "spock-core");
             content.includeModule("junit", "junit"); // Required by spock
             content.includeModule("org.hamcrest", "hamcrest-core"); // Required by junit
@@ -111,6 +138,12 @@ public abstract class DeferredRepositoryFactory {
             content.includeModule("org.junit.platform", "junit-platform-engine");
             content.includeModule("org.opentest4j", "opentest4j");
             content.includeModule("org.junit.platform", "junit-platform-commons");
+
+            // Groovy 2.5.8
+            content.includeModule("org.testng", "testng");
+            content.includeModule("com.beust", "jcommander");
+            content.includeModule("org.junit.jupiter", "junit-jupiter-api");
+            content.includeModule("org.junit.jupiter", "junit-jupiter-engine");
         };
     }
 }
