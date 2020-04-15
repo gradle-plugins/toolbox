@@ -18,54 +18,60 @@ package dev.gradleplugins.integtests.fixtures.nativeplatform;
 
 import dev.gradleplugins.test.fixtures.file.ExecOutput;
 import dev.gradleplugins.test.fixtures.file.TestFile;
+import org.apache.commons.io.FilenameUtils;
 import org.gradle.internal.os.OperatingSystem;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 public class NativeInstallationFixture {
-    private final TestFile installDir;
+    private final TestFile installDirectory;
     private final OperatingSystem os;
 
-	public NativeInstallationFixture(TestFile installDir, OperatingSystem os) {
-        this.installDir = installDir;
+	public NativeInstallationFixture(TestFile installDirectory, OperatingSystem os) {
+        this.installDirectory = installDirectory;
         this.os = os;
     }
 
     public ExecOutput exec(Object... args) {
         assertInstalled();
-        return scriptFile().exec(args);
+        return scriptFile().get().exec(args);
     }
 
-    @Nullable
-    private TestFile scriptFile() {
+    private Optional<TestFile> scriptFile() {
+	    File[] files = installDirectory.listFiles(File::isFile);
+	    checkNotNull(files, "Couldn't list files inside '%s'", installDirectory.getAbsolutePath());
+
+        Stream<TestFile> fileStream = Arrays.stream(files).map(TestFile::of);
         if (os.isWindows()) {
-            return TestFile.of(Arrays.stream(installDir.listFiles()).filter(it -> it.isFile() && it.getName().endsWith(".bat")).findFirst().orElse(null));
-        } else {
-            return TestFile.of(Arrays.stream(installDir.listFiles()).filter(it -> it.isFile()).findFirst().orElse(null));
+            fileStream = fileStream.filter(it -> FilenameUtils.isExtension(it.getName(), "bat"));
         }
+
+        return fileStream.findFirst();
     }
 
     public NativeInstallationFixture assertInstalled() {
-        installDir.assertIsDirectory();
-        final TestFile script = scriptFile();
-        assert script != null;
+        installDirectory.assertIsDirectory();
+        final Optional<TestFile> script = scriptFile();
+        assert script.isPresent();
 
-        TestFile libDir = installDir.file("lib");
+        TestFile libDir = installDirectory.file("lib");
         libDir.assertIsDirectory();
-        libDir.file(os.getExecutableName(script.getName())).assertIsFile();
+        libDir.file(os.getExecutableName(script.get().getName())).assertIsFile();
         return this;
     }
 
     public NativeInstallationFixture assertNotInstalled() {
-        installDir.assertDoesNotExist();
+        installDirectory.assertDoesNotExist();
         return this;
     }
 
@@ -76,8 +82,8 @@ public class NativeInstallationFixture {
     }
 
     private List<File> getLibraryFiles() {
-        installDir.assertIsDirectory();
-        TestFile libDir = installDir.file("lib");
+        installDirectory.assertIsDirectory();
+        TestFile libDir = installDirectory.file("lib");
         libDir.assertIsDirectory();
         List<File> libFiles;
         if (os.isWindows()) {
