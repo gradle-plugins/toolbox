@@ -16,7 +16,6 @@
 
 package dev.gradleplugins.fixtures.sample
 
-import dev.gradleplugins.test.fixtures.file.TestFile
 import dev.gradleplugins.test.fixtures.sources.SourceFile
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -36,6 +35,6 @@ public class BasicPlugin implements Plugin<Project> {
 
     @Override
     TestableGradlePluginElement withFunctionalTest() {
-        return new TestableGradlePluginElement(this)
+        return new TestableGradlePluginElement(this, new BasicGradlePluginTestKitFunctionalTest())
     }
 }

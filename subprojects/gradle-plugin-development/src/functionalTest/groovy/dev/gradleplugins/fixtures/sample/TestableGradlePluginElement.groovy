@@ -1,15 +1,16 @@
 package dev.gradleplugins.fixtures.sample
 
 import dev.gradleplugins.test.fixtures.file.TestFile
+import dev.gradleplugins.test.fixtures.sources.SourceElement
 import dev.gradleplugins.test.fixtures.sources.SourceFile
 
 class TestableGradlePluginElement extends GradlePluginElement {
     private final GradlePluginElement main
-    private final BasicGradlePluginTestKitFunctionalTest functionalTest
+    private final SourceElement functionalTest
 
-    TestableGradlePluginElement(GradlePluginElement main) {
+    TestableGradlePluginElement(GradlePluginElement main, SourceElement functionalTest) {
         this.main = main
-        this.functionalTest = new BasicGradlePluginTestKitFunctionalTest()
+        this.functionalTest = functionalTest
     }
 
     @Override
@@ -33,16 +34,6 @@ class TestableGradlePluginElement extends GradlePluginElement {
     }
 
     GradlePluginElement withTestingStrategySupport() {
-        return new TestableGradlePluginElement(main) {
-            @Override
-            void writeToProject(TestFile projectDir) {
-                ofElements(main, functionalTest.withTestingStrategySupport()).writeToProject(projectDir)
-            }
-
-            @Override
-            GradlePluginElement withTestingStrategySupport() {
-                return this
-            }
-        }
+        return new TestableGradlePluginElement(main, functionalTest.withTestingStrategySupport())
     }
 }

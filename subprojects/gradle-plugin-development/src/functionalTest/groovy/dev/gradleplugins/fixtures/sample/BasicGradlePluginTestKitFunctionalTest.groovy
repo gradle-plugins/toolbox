@@ -16,7 +16,7 @@
 
 package dev.gradleplugins.fixtures.sample
 
-import dev.gradleplugins.integtests.fixtures.AbstractFunctionalSpec
+import dev.gradleplugins.integtests.fixtures.AbstractGradleSpecification
 import dev.gradleplugins.integtests.fixtures.GradleCompatibilityTestRunner
 import dev.gradleplugins.test.fixtures.sources.SourceElement
 import dev.gradleplugins.test.fixtures.sources.SourceFile
@@ -25,14 +25,14 @@ class BasicGradlePluginTestKitFunctionalTest extends SourceElement {
     @Override
     List<SourceFile> getFiles() {
         return Collections.singletonList(sourceFile('groovy', 'com/example/BasicPluginFunctionalTest.groovy', """package com.example
-import ${AbstractFunctionalSpec.canonicalName}
+import ${AbstractGradleSpecification.canonicalName}
 
 ${content}
 """))
     }
 
     private static String getContent() {
-        return """class BasicPluginFunctionalTest extends ${AbstractFunctionalSpec.simpleName} {
+        return """class BasicPluginFunctionalTest extends ${AbstractGradleSpecification.simpleName} {
     def "can do basic test"() {
         given:
         buildFile << '''
@@ -60,7 +60,7 @@ ${content}
             @Override
             List<SourceFile> getFiles() {
                 return Collections.singletonList(sourceFile('groovy', 'com/example/BasicPluginFunctionalTest.groovy', """package com.example
-import ${AbstractFunctionalSpec.canonicalName}
+import ${AbstractGradleSpecification.canonicalName}
 import ${GradleCompatibilityTestRunner.canonicalName}
 import org.junit.runner.RunWith
 
