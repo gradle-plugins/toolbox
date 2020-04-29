@@ -22,7 +22,9 @@ import dev.gradleplugins.test.fixtures.file.TestFile
 import dev.gradleplugins.test.fixtures.gradle.executer.ExecutionFailure
 import dev.gradleplugins.test.fixtures.gradle.executer.ExecutionResult
 import dev.gradleplugins.test.fixtures.gradle.executer.GradleDistribution
+import dev.gradleplugins.test.fixtures.gradle.executer.GradleDistributionFactory
 import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter
+import dev.gradleplugins.test.fixtures.gradle.executer.internal.DefaultGradleDistribution
 import dev.gradleplugins.test.fixtures.gradle.executer.internal.GradleRunnerExecuter
 import dev.gradleplugins.test.fixtures.maven.M2Installation
 import groovy.transform.PackageScope
@@ -35,6 +37,7 @@ import java.util.function.Consumer
 //    This class should only ties things together for fast starting with gradle, however, each pieces should be usable on it's own and compose into something else if the user wants.
 @CleanupTestDirectory
 class AbstractGradleSpecification extends Specification {
+    public static final String DEFAULT_GRADLE_VERSION_SYSPROP_NAME = "dev.gradleplugins.defaultGradleVersion";
     @Rule
     final TestNameTestDirectoryProvider temporaryFolder = new TestNameTestDirectoryProvider(getClass())
     final M2Installation m2 = new M2Installation(TestFile.of(temporaryFolder.testDirectory))
@@ -55,8 +58,19 @@ class AbstractGradleSpecification extends Specification {
         useKotlinDsl = true
     }
 
+    protected GradleDistribution getGradleDistributionUnderTest() {
+        if (gradleDistribution != null) {
+            return gradleDistribution
+        }
+        String defaultGradleVersionUnderTest = System.getProperty(DEFAULT_GRADLE_VERSION_SYSPROP_NAME, null)
+        if (defaultGradleVersionUnderTest == null) {
+            return null
+        }
+        return GradleDistributionFactory.distribution(defaultGradleVersionUnderTest)
+    }
+
     private GradleExecuter createExecuter() {
-        return new GradleRunnerExecuter(gradleDistribution, TestFile.of(temporaryFolder.testDirectory)).withPluginClasspath()
+        return new GradleRunnerExecuter(gradleDistributionUnderTest, TestFile.of(temporaryFolder.testDirectory)).withPluginClasspath()
     }
 
     protected TestFile getProjectDir() {
