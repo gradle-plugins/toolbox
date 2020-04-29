@@ -1,12 +1,13 @@
 package dev.gradleplugins.internal;
 
+import dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension;
 import dev.gradleplugins.GroovyGradlePluginDevelopmentExtension;
 import dev.gradleplugins.JavaGradlePluginDevelopmentExtension;
 import org.gradle.api.plugins.JavaPluginExtension;
 
 import javax.inject.Inject;
 
-public abstract class GradlePluginDevelopmentExtensionInternal implements GroovyGradlePluginDevelopmentExtension, JavaGradlePluginDevelopmentExtension {
+public abstract class GradlePluginDevelopmentExtensionInternal implements GroovyGradlePluginDevelopmentExtension, JavaGradlePluginDevelopmentExtension, GradlePluginDevelopmentCompatibilityExtension {
     private final JavaPluginExtension java;
 
     @Inject

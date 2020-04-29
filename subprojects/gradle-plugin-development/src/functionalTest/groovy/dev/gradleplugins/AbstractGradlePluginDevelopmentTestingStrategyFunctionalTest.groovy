@@ -1,71 +1,68 @@
 package dev.gradleplugins
 
-import dev.gradleplugins.fixtures.sample.GradlePluginElement
+import dev.gradleplugins.fixtures.sample.*
 import dev.gradleplugins.fixtures.test.DefaultTestExecutionResult
-import dev.gradleplugins.test.fixtures.scan.GradleEnterpriseBuildScan
 import groovy.json.JsonSlurper
+import org.hamcrest.Matchers
 import spock.lang.Unroll
 
 abstract class AbstractGradlePluginDevelopmentTestingStrategyFunctionalTest extends AbstractGradlePluginDevelopmentFunctionalSpec {
-    def "minimum supported version is passed to the test"(minimumGradleVersion) {
+    def "checks executes all testing strategy tasks"() {
         given:
         makeSingleProject()
         componentUnderTest.writeToProject(testDirectory)
 
         and:
         buildFile << """
-            gradlePlugin {
-                extra {
-                    minimumGradleVersion = '${minimumGradleVersion}'
-                }
-            }
-        """
-
-        and:
-        buildFile << """
-            tasks.register('verify') {
-                doLast {
-                    assert tasks.functionalTest.systemProperties.'dev.gradleplugins.minimumGradleVersion' == '${minimumGradleVersion}'
-                }
-            }
-        """
-
-        expect:
-        succeeds('verify')
-
-        where:
-        minimumGradleVersion << ['6.2', '2.14', '5.6.1']
-    }
-
-    def "sets coverage to defaults when nothing is specified"() {
-        given:
-        makeSingleProject()
-        componentUnderTest.writeToProject(testDirectory)
-
-        and:
-        buildFile << '''
             gradlePlugin {
                 extra {
                     minimumGradleVersion = '6.2'
                 }
             }
-        '''
+            
+            components.functionalTest {
+                testingStrategies = [strategies.coverageForMinimumVersion, strategies.coverageForLatestGlobalAvailableVersion]
+            }
+        """
+
+        when:
+        succeeds('check')
+
+        then:
+        result.assertTaskNotSkipped(':functionalTestMinimumGradle')
+        result.assertTaskNotSkipped(':functionalTestLatestGlobalAvailable')
+        result.assertTaskNotSkipped(':check')
+    }
+
+    def "does not execute test using default Gradle version"() {
+        given:
+        makeSingleProject()
+        componentUnderTest.writeToProject(testDirectory)
 
         and:
-        buildFile << '''
-            tasks.register('verify') {
-                doLast {
-                    assert tasks.functionalTest.systemProperties.'dev.gradleplugins.gradleVersions' == 'default'
+        buildFile << """
+            gradlePlugin {
+                extra {
+                    minimumGradleVersion = '6.2'
                 }
             }
-        '''
+        """
 
-        expect:
-        succeeds('verify')
+        when:
+        succeeds('check')
+
+        then:
+        result.assertTaskNotSkipped(':functionalTest')
+
+        and:
+        testResult.assertTestClassesExecuted('com.example.VersionAwareFunctionalTest')
+        testResult.testClass('com.example.VersionAwareFunctionalTest').assertTestPassed('print gradle version from within the executor')
+        testResult.testClass('com.example.VersionAwareFunctionalTest').assertStdout(Matchers.containsString("No default Gradle version"))
+        testResult.testClass('com.example.VersionAwareFunctionalTest').assertTestCount(1, 0, 0)
     }
 
     @Unroll
-    def "sets coverage tags on functional test tasks"(testingStrategy, expectedCoverageContext) {
+    def "can execute test using the coverage default Gradle version"(coverage, expectedVersion) {
         given:
         makeSingleProject()
         componentUnderTest.writeToProject(testDirectory)
@@ -79,178 +76,36 @@ abstract class AbstractGradlePluginDevelopmentTestingStrategyFunctionalTest exte
             }
             
             components.functionalTest {
-                testingStrategy = ${GradlePluginTestingStrategyFactory.canonicalName}.${testingStrategy}
+                testingStrategies = [strategies.${coverage}]
             }
         """
+
+        when:
+        succeeds('functionalTest')
+
+        then:
+        result.assertTaskNotSkipped(':functionalTest')
 
         and:
-        buildFile << """
-            tasks.register('verify') {
-                doLast {
-                    assert tasks.functionalTest.systemProperties.'dev.gradleplugins.gradleVersions' == '${expectedCoverageContext}'
-                }
-            }
-        """
-
-        expect:
-        succeeds('verify')
+        testResult.assertTestClassesExecuted('com.example.VersionAwareFunctionalTest')
+        testResult.testClass('com.example.VersionAwareFunctionalTest').assertTestPassed('print gradle version from within the executor')
+        testResult.testClass('com.example.VersionAwareFunctionalTest').assertStdout(Matchers.containsString("Default Gradle version: ${expectedVersion}"))
+        testResult.testClass('com.example.VersionAwareFunctionalTest').assertStdout(Matchers.containsString("Using Gradle version: ${expectedVersion}"))
+        testResult.testClass('com.example.VersionAwareFunctionalTest').assertTestCount(1, 0, 0)
 
         where:
-        testingStrategy                                         | expectedCoverageContext
-        'latestMinorVersions()'                                 | 'latestMinor'
-        'allReleasedVersions()'                                 | 'all'
-        'allReleasedVersions().includeLatestNightlyVersion()'   | 'all,latestNightly'
-        'latestMinorVersions().includeLatestNightlyVersion()'   | 'latestMinor,latestNightly'
-        'latestNightlyVersion()'                                | 'latestNightly'
-    }
-
-    def "runs tests for all released versions"() {
-        given:
-        makeSingleProject()
-        componentUnderTest.withFunctionalTest().withTestingStrategySupport().writeToProject(testDirectory)
-
-        and:
-        buildFile << """
-            gradlePlugin {
-                extra {
-                    minimumGradleVersion = '6.2'
-                }
-            }
-            
-            components.functionalTest {
-                testingStrategy = ${GradlePluginTestingStrategyFactory.canonicalName}.allReleasedVersions()
-            }
-        """
-
-        when:
-        executer = new GradleEnterpriseBuildScan().apply(executer)
-        succeeds('functionalTest')
-
-        then:
-        testResult.assertTestClassesExecuted('com.example.BasicPluginFunctionalTest')
-        testResult.testClass('com.example.BasicPluginFunctionalTest').assertTestPassed('can do basic test [6.2]')
-        testResult.testClass('com.example.BasicPluginFunctionalTest').assertTestPassed('can do basic test [6.2.1]')
-        testResult.testClass('com.example.BasicPluginFunctionalTest').assertTestPassed('can do basic test [6.2.2]')
-        testResult.testClass('com.example.BasicPluginFunctionalTest').assertTestPassed('can do basic test [6.3]')
-        testResult.testClass('com.example.BasicPluginFunctionalTest').assertTestCount(4, 0, 0)
-    }
-
-    def "runs tests only for the latest minor of each major versions"() {
-        given:
-        makeSingleProject()
-        componentUnderTest.withFunctionalTest().withTestingStrategySupport().writeToProject(testDirectory)
-
-        and:
-        buildFile << """
-            gradlePlugin {
-                extra {
-                    minimumGradleVersion = '5.5'
-                }
-            }
-            
-            components.functionalTest {
-                testingStrategy = ${GradlePluginTestingStrategyFactory.canonicalName}.latestMinorVersions()
-            }
-        """
-
-        when:
-        executer = new GradleEnterpriseBuildScan().apply(executer)
-        succeeds('functionalTest')
-
-        then:
-        testResult.assertTestClassesExecuted('com.example.BasicPluginFunctionalTest')
-        testResult.testClass('com.example.BasicPluginFunctionalTest').assertTestPassed('can do basic test [5.6.4]')
-        testResult.testClass('com.example.BasicPluginFunctionalTest').assertTestPassed('can do basic test [6.3]')
-        testResult.testClass('com.example.BasicPluginFunctionalTest').assertTestCount(2, 0, 0)
-    }
-
-    def "runs tests only for the latest nightly"() {
-        given:
-        makeSingleProject()
-        componentUnderTest.withFunctionalTest().withTestingStrategySupport().writeToProject(testDirectory)
-
-        and:
-        buildFile << """
-            gradlePlugin {
-                extra {
-                    minimumGradleVersion = '6.2'
-                }
-            }
-            
-            components.functionalTest {
-                testingStrategy = ${GradlePluginTestingStrategyFactory.canonicalName}.latestNightlyVersion()
-            }
-        """
-
-        when:
-        executer = new GradleEnterpriseBuildScan().apply(executer)
-        succeeds('functionalTest')
-
-        then:
-        testResult.assertTestClassesExecuted('com.example.BasicPluginFunctionalTest')
-        testResult.testClass('com.example.BasicPluginFunctionalTest').assertTestPassed("can do basic test [${latestNightlyVersion}]")
-        testResult.testClass('com.example.BasicPluginFunctionalTest').assertTestCount(1, 0, 0)
-    }
-
-    def "runs tests only for the minimum Gradle version"() {
-        given:
-        makeSingleProject()
-        componentUnderTest.withFunctionalTest().withTestingStrategySupport().writeToProject(testDirectory)
-
-        and:
-        buildFile << """
-            gradlePlugin {
-                extra {
-                    minimumGradleVersion = '6.2'
-                }
-            }
-            
-            components.functionalTest {
-                testingStrategy = ${GradlePluginTestingStrategyFactory.canonicalName}.onlyMinimumVersion()
-            }
-        """
-
-        when:
-        executer = new GradleEnterpriseBuildScan().apply(executer)
-        succeeds('functionalTest')
-
-        then:
-        testResult.assertTestClassesExecuted('com.example.BasicPluginFunctionalTest')
-        testResult.testClass('com.example.BasicPluginFunctionalTest').assertTestPassed("can do basic test [6.2]")
-        testResult.testClass('com.example.BasicPluginFunctionalTest').assertTestCount(1, 0, 0)
-    }
-
-    def "runs tests for the minimum Gradle version and latest nightly"() {
-        given:
-        makeSingleProject()
-        componentUnderTest.withFunctionalTest().withTestingStrategySupport().writeToProject(testDirectory)
-
-        and:
-        buildFile << """
-            gradlePlugin {
-                extra {
-                    minimumGradleVersion = '6.2'
-                }
-            }
-            
-            components.functionalTest {
-                testingStrategy = ${GradlePluginTestingStrategyFactory.canonicalName}.onlyMinimumVersion().includeLatestNightlyVersion()
-            }
-        """
-
-        when:
-        executer = new GradleEnterpriseBuildScan().apply(executer)
-        succeeds('functionalTest')
-
-        then:
-        testResult.assertTestClassesExecuted('com.example.BasicPluginFunctionalTest')
-        testResult.testClass('com.example.BasicPluginFunctionalTest').assertTestPassed('can do basic test [6.2]')
-        testResult.testClass('com.example.BasicPluginFunctionalTest').assertTestPassed("can do basic test [${latestNightlyVersion}]")
-        testResult.testClass('com.example.BasicPluginFunctionalTest').assertTestCount(2, 0, 0)
+        coverage                                    | expectedVersion
+        'coverageForMinimumVersion'                 | '6.2'
+        'coverageForLatestNightlyVersion'           | latestNightlyVersion
+        'coverageForLatestGlobalAvailableVersion'   | latestGlobalAvailableVersion
     }
 
     private String getLatestNightlyVersion() {
         return new JsonSlurper().parse(new URL('https://services.gradle.org/versions/nightly')).version
+    }
+
+    private String getLatestGlobalAvailableVersion() {
+        return new JsonSlurper().parse(new URL('https://services.gradle.org/versions/current')).version
     }
 
     protected DefaultTestExecutionResult getTestResult() {
@@ -277,5 +132,19 @@ abstract class AbstractGradlePluginDevelopmentTestingStrategyFunctionalTest exte
                 }
             }
         """
+    }
+}
+
+class GroovyGradlePluginDevelopmentTestingStrategyFunctionalTest extends AbstractGradlePluginDevelopmentTestingStrategyFunctionalTest implements GroovyGradlePluginDevelopmentPlugin {
+    @Override
+    protected GradlePluginElement getComponentUnderTest() {
+        return new TestableGradlePluginElement(new GroovyBasicGradlePlugin(), new GradleVersionAwareTestKitFunctionalTest())
+    }
+}
+
+class JavaGradlePluginDevelopmentTestingStrategyFunctionalTest extends AbstractGradlePluginDevelopmentTestingStrategyFunctionalTest implements JavaGradlePluginDevelopmentPlugin {
+    @Override
+    protected GradlePluginElement getComponentUnderTest() {
+        return new TestableGradlePluginElement(new JavaBasicGradlePlugin(), new GradleVersionAwareTestKitFunctionalTest())
     }
 }

@@ -1,15 +1,16 @@
 package dev.gradleplugins;
 
 import org.gradle.api.provider.Property;
+import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.SourceSet;
 
 public interface GradlePluginSpockFrameworkTestSuite {
     /**
-     * Configure the testing strategy for this test suite.
+     * Configure the testing strategies for this test suite.
      *
      * @return a property for configuring the {@link GradlePluginTestingStrategy}
      */
-    Property<GradlePluginTestingStrategy> getTestingStrategy();
+    SetProperty<GradlePluginTestingStrategy> getTestingStrategies();
 
     /**
      * Configure the Gradle plugin source set to test by this test suite.
@@ -24,4 +25,11 @@ public interface GradlePluginSpockFrameworkTestSuite {
      * @return a property for configuring the Spock framework version
      */
     Property<String> getSpockVersion();
+
+    /**
+     * Returns a factory for creating the various testing strategies.
+     *
+     * @return a {@link GradlePluginTestingStrategyFactory} instance, never null.
+     */
+    GradlePluginTestingStrategyFactory getStrategies();
 }

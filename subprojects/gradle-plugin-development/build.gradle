@@ -39,6 +39,8 @@ tasks.named('functionalTest', Test) {
 dependencies {
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    implementation 'org.apache.commons:commons-lang3:3.5'
+    implementation 'com.google.code.gson:gson:2.8.6'
 
     // Force local fixtures
     // TODO: Maybe look into dependency substitution
@@ -47,6 +49,15 @@ dependencies {
             requireCapability('dev.gradleplugins:gradle-fixtures-spock-support')
         }
     }
+
+    testImplementation 'dev.gradleplugins:gradle-api:6.2.1'
+
+    // The following are required if you want to run with ProjectBuilder
+    testImplementation 'org.jetbrains.kotlin:kotlin-stdlib:1.3.71' // Because of java.lang.NoClassDefFoundError: kotlin/jvm/functions/Function0 from ProjectBuilder
+    testImplementation 'org.codehaus.groovy:groovy-all:2.5.8' // Required by gradle-api
+
+    testImplementation platform('org.spockframework:spock-bom:1.2-groovy-2.5')
+    testImplementation 'org.spockframework:spock-core'
 }
 
 // Temporary workaround for https://github.com/bintray/gradle-bintray-plugin/issues/229

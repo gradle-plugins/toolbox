@@ -1,27 +1,16 @@
 package dev.gradleplugins.internal;
 
 import dev.gradleplugins.GradlePluginTestingStrategy;
-import dev.gradleplugins.GradlePluginTestingStrategyFactory;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.gradle.internal.impldep.com.google.common.collect.ImmutableList;
+import lombok.RequiredArgsConstructor;
+import org.gradle.api.Named;
 
-import java.util.*;
+import javax.inject.Inject;
 
-@AllArgsConstructor
-public class GradlePluginTestingStrategyInternal implements GradlePluginTestingStrategy {
-    @Getter final Set<String> versionCoverage;
-
-    public static class NightlyAwareGradlePluginTestingStrategyBuilderInternal extends GradlePluginTestingStrategyInternal implements GradlePluginTestingStrategyFactory.NightlyAwareGradlePluginTestingStrategyBuilder {
-        public NightlyAwareGradlePluginTestingStrategyBuilderInternal(Set<String> versionCoverage) {
-            super(versionCoverage);
-        }
-
-        public GradlePluginTestingStrategy includeLatestNightlyVersion() {
-            Set<String> newVersionCoverage = new LinkedHashSet<>();
-            newVersionCoverage.addAll(getVersionCoverage());
-            newVersionCoverage.add("latestNightly");
-            return new GradlePluginTestingStrategyInternal(newVersionCoverage);
-        }
-    }
+@RequiredArgsConstructor(onConstructor_={@Inject})
+public abstract class GradlePluginTestingStrategyInternal implements GradlePluginTestingStrategy, Named {
+    public static final String MINIMUM_GRADLE = "minimumGradle";
+    public static final String LATEST_NIGHTLY = "latestNightly";
+    public static final String LATEST_GLOBAL_AVAILABLE = "latestGlobalAvailable";
+    @Getter private final String name;
 }
