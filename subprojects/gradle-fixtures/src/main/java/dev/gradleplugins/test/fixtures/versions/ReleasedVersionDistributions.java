@@ -16,28 +16,20 @@
 
 package dev.gradleplugins.test.fixtures.versions;
 
+import com.google.gson.Gson;
 import dev.gradleplugins.test.fixtures.gradle.executer.GradleDistribution;
 import dev.gradleplugins.test.fixtures.gradle.executer.GradleDistributionFactory;
-import org.apache.commons.io.IOUtils;
-import org.gradle.api.Transformer;
-import org.gradle.api.specs.Spec;
-import org.gradle.internal.impldep.com.google.gson.Gson;
-import org.gradle.util.CollectionUtils;
 import org.gradle.util.GradleVersion;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
-
-import static org.gradle.util.CollectionUtils.sort;
 
 /**
  * Provides access to {@link GradleDistribution}s for versions of Gradle that have been released.

@@ -84,6 +84,8 @@ public abstract class DeferredRepositoryFactory {
             content.includeModule("org.jsoup", "jsoup");
             content.includeModule("commons-io", "commons-io");
             content.includeModule("org.apache.commons", "commons-exec");
+            content.includeModule("com.google.code.gson", "gson");
+            content.includeModule("com.google.code.gson", "gson-parent");
 //            content.includeModule("org.junit.jupiter", "junit-jupiter-engine");
         };
     }

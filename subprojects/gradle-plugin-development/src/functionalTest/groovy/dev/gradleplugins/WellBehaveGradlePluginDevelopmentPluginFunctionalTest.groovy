@@ -17,7 +17,6 @@
 package dev.gradleplugins
 
 import dev.gradleplugins.fixtures.sample.GradlePluginElement
-import dev.gradleplugins.integtests.fixtures.AbstractFunctionalSpec
 import dev.gradleplugins.integtests.fixtures.ArchiveTestFixture
 import org.hamcrest.CoreMatchers
 import org.junit.Assume
