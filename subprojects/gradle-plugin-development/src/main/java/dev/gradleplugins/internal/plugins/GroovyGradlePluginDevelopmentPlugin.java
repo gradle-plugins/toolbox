@@ -89,7 +89,10 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
             case "6.2":
                 return "2.5.8"; //"org.gradle.groovy:groovy-all:1.3-2.5.8";
             case "6.3":
+            case "6.4":
                 return "2.5.10"; //"org.gradle.groovy:groovy-all:1.3-2.5.10";
+            case "6.5":
+                return "2.5.11"; //"org.gradle.groovy:groovy-all:1.3-2.5.11";
             default:
                 throw new IllegalArgumentException("Version not known at the time, please check groovy-all version");
         }
