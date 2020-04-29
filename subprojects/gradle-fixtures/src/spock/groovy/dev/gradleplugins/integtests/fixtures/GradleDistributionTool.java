@@ -34,6 +34,9 @@ public class GradleDistributionTool implements AbstractMultiVersionSpecRunner.Ve
 
     @Override
     public boolean matches(String criteria) {
+        if (criteria.equals("snapshot") && distribution.getVersion().isSnapshot()) {
+            return true;
+        }
         return GradleVersion.version(criteria).equals(distribution.getVersion());
     }
 
