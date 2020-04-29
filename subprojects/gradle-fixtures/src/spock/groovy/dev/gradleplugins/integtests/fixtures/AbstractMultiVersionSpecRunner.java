@@ -18,11 +18,14 @@ package dev.gradleplugins.integtests.fixtures;
 
 import lombok.Value;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public abstract class AbstractMultiVersionSpecRunner<T extends AbstractMultiVersionSpecRunner.VersionedTool> extends AbstractMultiTestRunner {
     public static final CoverageContext UNKNOWN = new CoverageContext(null);
+    private final Class<?> target;
     private final Set<CoverageContext> coverageContexts;
+    private final IgnoreVersionIf ignoreIf;
 
     protected abstract Collection<T> getAllVersions();
 
@@ -32,7 +35,9 @@ public abstract class AbstractMultiVersionSpecRunner<T extends AbstractMultiVers
 
     public AbstractMultiVersionSpecRunner(Class<?> target, Set<CoverageContext> coverageContexts) {
         super(target);
+        this.target = target;
         this.coverageContexts = coverageContexts;
+        this.ignoreIf = target.getAnnotation(IgnoreVersionIf.class);
     }
 
     protected abstract String getVersions();
@@ -58,11 +63,7 @@ public abstract class AbstractMultiVersionSpecRunner<T extends AbstractMultiVers
 
         Collection<T> versionsUnderTest = versionUnderTestForContext(coverageContext);
 
-        for (T version : versionsUnderTest) {
-            for (Execution execution : createExecutionsFor(version)) {
-                add(execution);
-            }
-        }
+        createNonIgnoredExecutions(versionsUnderTest);
     }
 
     private void createSelectedExecutions(List<String> selectionCriteria) {
@@ -82,7 +83,20 @@ public abstract class AbstractMultiVersionSpecRunner<T extends AbstractMultiVers
             }
         }
         
+        createNonIgnoredExecutions(versionsUnderTest);
+    }
+
+    private void createNonIgnoredExecutions(Collection<T> versionsUnderTest) {
         for (T version : versionsUnderTest) {
+            try {
+                boolean shouldIgnore = (Boolean) ignoreIf.value().getConstructor(Class.class, Class.class).newInstance(target, target).call();
+                if (shouldIgnore) {
+                    continue;
+                }
+            } catch (InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+
             for (Execution execution : createExecutionsFor(version)) {
                 add(execution);
             }
