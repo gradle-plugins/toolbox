@@ -95,6 +95,7 @@ public class TestFileHelper {
                     throw new UncheckedIOException(e);
                 }
             });
+            outputThread.start();
             Thread errorThread = new Thread(() -> {
                 try {
                     ByteStreams.copy(process.getErrorStream(), error);
@@ -102,6 +103,7 @@ public class TestFileHelper {
                     throw new UncheckedIOException(e);
                 }
             });
+            errorThread.start();
 
             try {
                 int exitCode = process.waitFor();
