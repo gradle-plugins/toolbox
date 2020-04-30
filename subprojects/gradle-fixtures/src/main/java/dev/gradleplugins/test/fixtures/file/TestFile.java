@@ -139,6 +139,21 @@ public class TestFile extends File {
         return this;
     }
 
+    public TestFile cleanDirectory() throws IOException {
+        assertIsDirectory();
+        File[] files = listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    of(file).forceDeleteDirectory();
+                } else {
+                    file.delete();
+                }
+            }
+        }
+        return this;
+    }
+
     /**
      * Recursively delete this directory, reporting all failed paths.
      * @return this instance
