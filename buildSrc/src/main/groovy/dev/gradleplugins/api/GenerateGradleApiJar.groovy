@@ -51,7 +51,7 @@ public abstract class GenerateGradleApiJar extends DefaultTask {
 
     @TaskAction
     private void doGenerate() {
-        getWorkerExecutor().noIsolation().submit(GenerateGradleApiJarAction.class) { param ->
+        getWorkerExecutor().processIsolation().submit(GenerateGradleApiJarAction.class) { param ->
             param.getOutputFile().set(getOutputFile());
             param.getVersion().set(getVersion());
             param.outputSourceFile.set(outputSourceFile)
