@@ -160,7 +160,11 @@ public class TestFile extends File {
      * @throws IOException if unable to delete the directory
      */
     // TODO: Test this method
+    @Deprecated
     public TestFile forceDeleteDir() throws IOException {
+        return forceDeleteDirectory();
+    }
+    public TestFile forceDeleteDirectory() throws IOException {
         if (isDirectory()) {
 
             if (Files.isSymbolicLink(toPath())) {
