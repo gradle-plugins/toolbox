@@ -1,13 +1,17 @@
 package dev.gradleplugins.test.fixtures.file;
 
+import com.google.common.io.ByteStreams;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.Expand;
+import org.codehaus.groovy.util.ComplexKeyHashMap;
+import org.codehaus.groovy.util.SingleKeyHashMap;
+import org.hamcrest.Matchers;
 
 import java.io.*;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -64,5 +68,73 @@ public class TestFileHelper {
 
     private boolean isUnix() {
         return !SystemUtils.IS_OS_WINDOWS;
+    }
+
+    public ExecOutput exec(List<?> args) {
+        return execute(args, null);
+    }
+
+    public ExecOutput execute(List<?> args, List<?> env) {
+        List<String> commandLine = new ArrayList<>();
+        commandLine.add(file.getAbsolutePath());
+        commandLine.addAll(args.stream().map(Object::toString).collect(Collectors.toList()));
+        ProcessBuilder processBuilder = new ProcessBuilder().command(commandLine);
+        Map<String, String> environment = env.stream().map(TestFileHelper::toEntry).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        processBuilder.environment().putAll(environment);
+        try {
+            Process process = processBuilder.start();
+
+            // Prevent process from hanging by consuming the output as we go.
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            ByteArrayOutputStream error = new ByteArrayOutputStream();
+
+            Thread outputThread = new Thread(() -> {
+                try {
+                    ByteStreams.copy(process.getInputStream(), output);
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            });
+            Thread errorThread = new Thread(() -> {
+                try {
+                    ByteStreams.copy(process.getErrorStream(), error);
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            });
+
+            try {
+                int exitCode = process.waitFor();
+                outputThread.join();
+                errorThread.join();
+                return new ExecOutput(exitCode, output.toString(), error.toString());
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private static Map.Entry<String, String> toEntry(Object o) {
+        String[] tokens = o.toString().split("=");
+        assertThat(tokens.length, Matchers.equalTo(2));
+        return new HashMap.SimpleEntry<>(tokens[0], tokens[1]);
+    }
+
+    public ExecOutput executeSuccess(List<?> args, List<?> env) {
+        ExecOutput result = execute(args, env);
+        if (result.getExitCode() != 0) {
+            throw new RuntimeException(String.format("Could not execute %s. Error: %s, Output: %s", file.getAbsolutePath(), result.getError(), result.getOut()));
+        }
+        return result;
+    }
+
+    public ExecOutput executeFailure(List<?> args, List<?> env) {
+        ExecOutput result = execute(args, env);
+        if (result.getExitCode() == 0) {
+            throw new RuntimeException(String.format("Unexpected success, executing %s. Error: %s, Output: %s", file.getAbsolutePath(), result.getError(), result.getOut()));
+        }
+        return result;
     }
 }

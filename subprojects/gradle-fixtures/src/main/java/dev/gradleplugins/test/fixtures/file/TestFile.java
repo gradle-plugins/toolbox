@@ -45,6 +45,7 @@ import java.util.stream.Collectors;
 
 import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
 
 public class TestFile extends File {
@@ -65,7 +66,7 @@ public class TestFile extends File {
     // TODO: Unit test this method
     //   Above all, figure out what the default behavior (aka the canonical of the file)
     public static TestFile of(File file, LinkOption... options) {
-        if (Arrays.asList(options).contains(LinkOption.NOFOLLOW_LINKS)) {
+        if (asList(options).contains(LinkOption.NOFOLLOW_LINKS)) {
             return new TestFile(file, false);
         }
         return new TestFile(file);
@@ -94,7 +95,7 @@ public class TestFile extends File {
         Set<String> actual = new TreeSet<String>();
         assertIsDirectory();
         visit(actual, "", this);
-        Set<String> expected = new TreeSet<String>(Arrays.asList(descendants));
+        Set<String> expected = new TreeSet<String>(asList(descendants));
 
         Set<String> extras = new TreeSet<String>(actual);
         extras.removeAll(expected);
@@ -362,59 +363,15 @@ public class TestFile extends File {
     }
 
     public ExecOutput exec(Object... args) {
-        CommandLine commandLine = new CommandLine(this);
-        commandLine.addArguments(Arrays.toString(args));
-        Executor executor = new DefaultExecutor();
-        ByteArrayOutputStream stdout = new ByteArrayOutputStream();
-        ByteArrayOutputStream stderr = new ByteArrayOutputStream();
-        executor.setStreamHandler(new PumpStreamHandler(new TeeOutputStream(stdout, System.out), new TeeOutputStream(stderr, System.err)));
-        executor.setExitValue(0);
-        try {
-            int exitCode = executor.execute(commandLine, System.getenv());
-            return new ExecOutput(exitCode, stdout.toString(), stderr.toString());
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        return new TestFileHelper(this).exec(asList(args));
     }
 
-    public ExecOutput execWithFailure(List<Object> args, List<Object> env) {
-        CommandLine commandLine = new CommandLine(this);
-        commandLine.addArguments(Arrays.toString(args.toArray(new Object[0])));
-        Executor executor = new DefaultExecutor();
-        ByteArrayOutputStream stdout = new ByteArrayOutputStream();
-        ByteArrayOutputStream stderr = new ByteArrayOutputStream();
-        executor.setStreamHandler(new PumpStreamHandler(new TeeOutputStream(stdout, System.out), new TeeOutputStream(stderr, System.err)));
-        try {
-            Map<String, String> environment = env.stream().map(TestFile::toEntry).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-            int exitCode = executor.execute(commandLine, environment);
-            assertThat(exitCode, Matchers.not(Matchers.equalTo(0)));
-            return new ExecOutput(exitCode, stdout.toString(), stderr.toString());
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    public ExecOutput execWithFailure(List<?> args, List<?> env) {
+        return new TestFileHelper(this).executeFailure(args, env);
     }
 
-    private static Map.Entry<String, String> toEntry(Object o) {
-        String[] tokens = o.toString().split("=");
-        assertThat(tokens.length, Matchers.equalTo(2));
-        return new HashMap.SimpleEntry<>(tokens[0], tokens[1]);
-    }
-
-    public ExecOutput execute(List<Object> args, List<Object> env) {
-        CommandLine commandLine = new CommandLine(this);
-        commandLine.addArguments(args.stream().map(Objects::toString).collect(Collectors.toList()).toArray(new String[0]));
-        Executor executor = new DefaultExecutor();
-        ByteArrayOutputStream stdout = new ByteArrayOutputStream();
-        ByteArrayOutputStream stderr = new ByteArrayOutputStream();
-        executor.setStreamHandler(new PumpStreamHandler(new TeeOutputStream(stdout, System.out), new TeeOutputStream(stderr, System.err)));
-        try {
-            Map<String, String> environment = env.stream().map(TestFile::toEntry).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-            int exitCode = executor.execute(commandLine, environment);
-            assertThat(exitCode, Matchers.equalTo(0));
-            return new ExecOutput(exitCode, stdout.toString(), stderr.toString());
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    public ExecOutput execute(List<?> args, List<?> env) {
+        return new TestFileHelper(this).execute(args, env);
     }
 
     public void copyFrom(File target) {
