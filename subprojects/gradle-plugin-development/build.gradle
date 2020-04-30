@@ -36,6 +36,7 @@ components.functionalTest {
         dependsOn(':gradle-fixtures:publishAllPublicationsToLocalRepositoryRepository')
         it.systemProperty('localRepository', layout.buildDirectory.dir('repository').get().asFile)
     }
+    testingStrategies = [strategies.coverageForMinimumVersion, strategies.coverageForLatestGlobalAvailableVersion]
 }
 
 dependencies {
