@@ -34,14 +34,14 @@ abstract class GenerateGradleApiJarPlugin implements Plugin<Project> {
             }
 
             configurations {
-                api {
+                compileOnly {
                     canBeConsumed = false
                     canBeResolved = false
                 }
                 apiElements {
                     canBeResolved = false
                     canBeConsumed = true
-                    extendsFrom api
+                    extendsFrom compileOnly
                     outgoing.artifact(generateGradleApiJarTask.flatMap { it.outputFile })
                     attributes {
                         attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_API))
@@ -52,10 +52,16 @@ abstract class GenerateGradleApiJarPlugin implements Plugin<Project> {
                     }
 
                 }
+
+                runtimeOnly {
+                    canBeConsumed = false
+                    canBeResolved = false
+                }
+
                 runtimeElements {
                     canBeResolved = false
                     canBeConsumed = true
-                    extendsFrom api
+                    extendsFrom runtimeOnly
                     outgoing.artifact(generateGradleApiJarTask.flatMap { it.outputFile })
                     attributes {
                         attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_RUNTIME))
@@ -82,10 +88,13 @@ abstract class GenerateGradleApiJarPlugin implements Plugin<Project> {
                 }
             }
             dependencies {
-                constraints {
-                    api "org.codehaus.groovy:groovy-all:${toGroovyVersion(VersionNumber.parse(gradleVersion))}"
+                compileOnly "org.codehaus.groovy:groovy:${toGroovyVersion(VersionNumber.parse(gradleVersion))}"
+                runtimeOnly "org.codehaus.groovy:groovy-all:${toGroovyVersion(VersionNumber.parse(gradleVersion))}"
+
+                def kotlinVersion = toKotlinVersion(VersionNumber.parse(gradleVersion))
+                if (kotlinVersion != null) {
+                    runtimeOnly "org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}"
                 }
-                api "org.codehaus.groovy:groovy:${toGroovyVersion(VersionNumber.parse(gradleVersion))}"
             }
 
             def adhocComponent = softwareComponentFactory.adhoc('gradleApi');
@@ -221,9 +230,51 @@ abstract class GenerateGradleApiJarPlugin implements Plugin<Project> {
             case "6.2":
                 return "2.5.8"; //"org.gradle.groovy:groovy-all:1.3-2.5.8";
             case "6.3":
+            case "6.4":
                 return "2.5.10"; //"org.gradle.groovy:groovy-all:1.3-2.5.10";
+            case "6.5":
+                return "2.5.11"; //"org.gradle.groovy:groovy-all:1.3-2.5.11";
             default:
-                throw new IllegalArgumentException("Version not known at the time, please check groovy-all version");
+                throw new IllegalArgumentException(String.format("Version not known at the time, please check groovy-all version for Gradle %s", version.toString()));
+        }
+    }
+
+    private static String toKotlinVersion(VersionNumber version) {
+        // Use `find ~/.gradle/wrapper -name "kotlin-stdlib-*"`
+        // TODO: Complete this mapping
+        switch (String.format("%d.%d", version.getMajor(), version.getMinor())) {
+            case "2.14":
+                return null;
+            case "3.5":
+                return "1.1.0";
+            case "4.5":
+                return "1.2.0";
+            case "4.10":
+                return "1.2.61";
+            case "5.0":
+                return "1.3.10";
+            case "5.1":
+                return "1.3.11";
+            case "5.2":
+                return "1.3.20";
+            case "5.3":
+            case "5.4":
+                return "1.3.21";
+            case "5.5":
+                return "1.3.31";
+            case "5.6":
+                return "1.3.41";
+            case "6.0":
+                return "1.3.50";
+            case "6.1":
+            case "6.2":
+                return "1.3.61";
+            case "6.3":
+                return "1.3.70";
+            case "6.4":
+                return "1.3.71";
+            default:
+                throw new IllegalArgumentException(String.format("Version not known at the time, please check kotlin-stdlib version for Gradle %s", version.toString()));
         }
     }
 
