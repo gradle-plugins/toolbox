@@ -48,6 +48,8 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.junit.Assert.*;
 
 public class TestFile extends File {
+    private boolean useNativeTools = false;
+
     public TestFile(File file, Object... path) {
         super(join(file, path).getAbsolutePath());
     }
@@ -67,6 +69,11 @@ public class TestFile extends File {
             return new TestFile(file, false);
         }
         return new TestFile(file);
+    }
+
+    public TestFile usingNativeTools() {
+        useNativeTools = true;
+        return this;
     }
 
     public TestFile assertExists() {
@@ -433,7 +440,7 @@ public class TestFile extends File {
 
     public void unzipTo(File target) {
         assertIsFile();
-        new TestFileHelper(this).unzipTo(target, !SystemUtils.IS_OS_WINDOWS);
+        new TestFileHelper(this).unzipTo(target, useNativeTools);
     }
 
     public Snapshot snapshot() {
