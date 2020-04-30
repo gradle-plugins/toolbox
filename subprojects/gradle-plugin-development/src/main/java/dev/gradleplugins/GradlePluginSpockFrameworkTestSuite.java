@@ -1,5 +1,6 @@
 package dev.gradleplugins;
 
+import org.gradle.api.Action;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.SourceSet;
@@ -35,4 +36,8 @@ public interface GradlePluginSpockFrameworkTestSuite {
     GradlePluginTestingStrategyFactory getStrategies();
 
     TaskView<Test> getTestTasks();
+
+    GradlePluginSpockFrameworkTestSuiteDependencies getDependencies();
+
+    void dependencies(Action<? super GradlePluginSpockFrameworkTestSuiteDependencies> action);
 }
