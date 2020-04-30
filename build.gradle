@@ -3,10 +3,11 @@
 // The result is a dependency cycle with an error message wrongly pointing to miss built plugin project.
 buildscript {
     repositories {
+        gradlePluginPortal()
         maven { url = 'https://dl.bintray.com/gradle-plugins/distributions' }
     }
     dependencies {
-        classpath 'dev.gradleplugins:gradle-plugin-development:0.0.49'
+        classpath 'dev.gradleplugins:gradle-plugin-development:0.0.50'
     }
 }
 
