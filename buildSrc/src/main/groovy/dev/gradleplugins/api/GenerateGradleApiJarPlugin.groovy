@@ -177,6 +177,10 @@ abstract class GenerateGradleApiJarPlugin implements Plugin<Project> {
                     }
                 }
             }
+
+            tasks.register('uploadGradleApiJars') {
+                dependsOn('bintrayUpload')
+            }
         }
     }
 
