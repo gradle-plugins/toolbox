@@ -119,7 +119,7 @@ public class TestFileHelper {
     }
 
     private static Map.Entry<String, String> toEntry(Object o) {
-        String[] tokens = o.toString().split("=");
+        String[] tokens = o.toString().split("=", -1);
         assertThat(tokens.length, Matchers.equalTo(2));
         return new HashMap.SimpleEntry<>(tokens[0], tokens[1]);
     }
