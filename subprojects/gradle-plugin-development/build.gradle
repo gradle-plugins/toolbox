@@ -31,15 +31,8 @@ repositories {
     jcenter()
 }
 
-//components.functionalTest {
-//    testTasks.configureEach {
-//        dependsOn(':gradle-fixtures:publishAllPublicationsToLocalRepositoryRepository')
-//        it.systemProperty('localRepository', layout.buildDirectory.dir('repository').get().asFile)
-//    }
-//}
-
-afterEvaluate {
-    tasks.named('functionalTest', Test) {
+components.functionalTest {
+    testTasks.configureEach {
         dependsOn(':gradle-fixtures:publishAllPublicationsToLocalRepositoryRepository')
         it.systemProperty('localRepository', layout.buildDirectory.dir('repository').get().asFile)
     }
