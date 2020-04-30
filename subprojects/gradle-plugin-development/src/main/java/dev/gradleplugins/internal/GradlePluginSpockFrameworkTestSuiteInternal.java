@@ -6,7 +6,10 @@ import dev.gradleplugins.GradlePluginTestingStrategyFactory;
 import dev.gradleplugins.TaskView;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.Action;
+import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.artifacts.ExternalModuleDependency;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
 import org.gradle.api.component.SoftwareComponent;
@@ -15,6 +18,7 @@ import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.testing.Test;
+import org.gradle.plugin.devel.tasks.PluginUnderTestMetadata;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -22,7 +26,7 @@ import java.util.List;
 
 public abstract class GradlePluginSpockFrameworkTestSuiteInternal implements GradlePluginSpockFrameworkTestSuite, SoftwareComponent {
     private final GradlePluginTestingStrategyFactory strategyFactory = getObjects().newInstance(GradlePluginTestingStrategyFactoryInternal.class);
-    @Getter private final GradlePluginSpockFrameworkTestSuiteDependencies dependencies;
+    @Getter private final Dependencies dependencies;
     @Getter private final String name;
     @Getter private final SourceSet sourceSet;
     @Getter private final List<Action<? super Test>> testTaskActions = new ArrayList<>();
@@ -38,6 +42,9 @@ public abstract class GradlePluginSpockFrameworkTestSuiteInternal implements Gra
         this.name = name;
         this.sourceSet = sourceSet;
         this.dependencies = getObjects().newInstance(Dependencies.class, sourceSet);
+        getTasks().named("pluginUnderTestMetadata", PluginUnderTestMetadata.class, task -> {
+            task.getPluginClasspath().from(dependencies.pluginUnderTestMetadata);
+        });
     }
 
     @Override
@@ -67,12 +74,21 @@ public abstract class GradlePluginSpockFrameworkTestSuiteInternal implements Gra
         action.execute(dependencies);
     }
 
-    @RequiredArgsConstructor(onConstructor_={@Inject})
     protected abstract static class Dependencies implements GradlePluginSpockFrameworkTestSuiteDependencies {
         private final SourceSet sourceSet;
+        private final Configuration pluginUnderTestMetadata;
+
+        @Inject
+        protected abstract ConfigurationContainer getConfigurations();
 
         @Inject
         protected abstract DependencyHandler getDependencies();
+
+        @Inject
+        public Dependencies(SourceSet sourceSet) {
+            this.sourceSet = sourceSet;
+            this.pluginUnderTestMetadata = getConfigurations().create(sourceSet.getName() + StringUtils.capitalize("pluginUnderTestMetadata"));
+        }
 
         @Override
         public void implementation(Object notation) {
@@ -94,6 +110,11 @@ public abstract class GradlePluginSpockFrameworkTestSuiteInternal implements Gra
         @Override
         public void annotationProcessor(Object notation) {
             getDependencies().add(sourceSet.getAnnotationProcessorConfigurationName(), notation);
+        }
+
+        @Override
+        public void pluginUnderTestMetadata(Object notation) {
+            getDependencies().add(pluginUnderTestMetadata.getName(), notation);
         }
     }
 }

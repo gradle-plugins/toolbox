@@ -11,4 +11,6 @@ public interface GradlePluginSpockFrameworkTestSuiteDependencies {
     void compileOnly(Object notation);
 
     void annotationProcessor(Object notation);
+
+    void pluginUnderTestMetadata(Object notation);
 }
