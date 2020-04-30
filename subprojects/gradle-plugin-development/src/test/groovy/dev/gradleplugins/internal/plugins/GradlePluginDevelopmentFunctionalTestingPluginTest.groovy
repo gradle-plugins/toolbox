@@ -85,6 +85,25 @@ abstract class AbstractGradlePluginDevelopmentFunctionalTestingPluginTest extend
         'coverageForLatestGlobalAvailableVersion'   | latestGlobalAvailableVersion
     }
 
+    def "can configure the test tasks before the project is evaluated"() {
+        given:
+        project.apply plugin: pluginIdUnderTest
+
+        when:
+        project.components.functionalTest {
+            testTasks.configureEach {
+                systemProperty('dev.gradleplugins.samples', 'test-value')
+            }
+        }
+        then:
+        noExceptionThrown()
+
+        when:
+        project.evaluate()
+        then:
+        project.tasks.functionalTest.systemProperties['dev.gradleplugins.samples'] == 'test-value'
+    }
+
     private String getLatestNightlyVersion() {
         return new JsonSlurper().parse(new URL('https://services.gradle.org/versions/nightly')).version
     }

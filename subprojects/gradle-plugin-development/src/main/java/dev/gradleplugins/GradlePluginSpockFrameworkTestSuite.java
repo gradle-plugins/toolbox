@@ -3,6 +3,7 @@ package dev.gradleplugins;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.SourceSet;
+import org.gradle.api.tasks.testing.Test;
 
 public interface GradlePluginSpockFrameworkTestSuite {
     /**
@@ -32,4 +33,6 @@ public interface GradlePluginSpockFrameworkTestSuite {
      * @return a {@link GradlePluginTestingStrategyFactory} instance, never null.
      */
     GradlePluginTestingStrategyFactory getStrategies();
+
+    TaskView<Test> getTestTasks();
 }

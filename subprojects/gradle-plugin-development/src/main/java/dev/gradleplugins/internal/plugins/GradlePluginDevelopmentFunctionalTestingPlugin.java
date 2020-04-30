@@ -65,14 +65,17 @@ public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements 
                 Set<GradlePluginTestingStrategy> strategies = testSuite.getTestingStrategies().get();
                 if (strategies.isEmpty()) {
                     TaskProvider<Test> testTask = createTestTask(testSuite);
+                    testTask.configure(applyTestActions(testSuite));
                     getTasks().named("check", it -> it.dependsOn(testTask));
                 } else if (strategies.size() == 1) {
                     TaskProvider<Test> testTask = createTestTask(testSuite);
+                    testTask.configure(applyTestActions(testSuite));
                     testTask.configure(testingStrategy(testSuite, (GradlePluginTestingStrategyInternal) strategies.iterator().next()));
                     getTasks().named("check", it -> it.dependsOn(testTask));
                 } else {
                     for (GradlePluginTestingStrategy strategy : strategies) {
                         TaskProvider<Test> testTask = createTestTask(testSuite, ((GradlePluginTestingStrategyInternal)strategy).getName());
+                        testTask.configure(applyTestActions(testSuite));
                         testTask.configure(testingStrategy(testSuite, (GradlePluginTestingStrategyInternal) strategy));
                         getTasks().named("check", it -> it.dependsOn(testTask));
                     }
@@ -86,6 +89,14 @@ public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements 
         functionalTestSuite.getTestedGradlePlugin().set((GradlePluginDevelopmentExtensionInternal) ((ExtensionAware)project.getExtensions().getByType(GradlePluginDevelopmentExtension.class)).getExtensions().getByName("extra"));
         functionalTestSuite.getTestedGradlePlugin().disallowChanges();
         project.getComponents().add(functionalTestSuite);
+    }
+
+    private Action<Test> applyTestActions(GradlePluginSpockFrameworkTestSuiteInternal testSuite) {
+        return task -> {
+            for (Action<? super Test> action : testSuite.getTestTaskActions()) {
+                action.execute(task);
+            }
+        };
     }
 
     private Action<Test> testingStrategy(GradlePluginSpockFrameworkTestSuiteInternal testSuite, GradlePluginTestingStrategyInternal strategy) {
