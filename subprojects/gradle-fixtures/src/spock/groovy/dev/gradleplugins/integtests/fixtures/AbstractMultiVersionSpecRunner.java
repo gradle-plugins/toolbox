@@ -88,13 +88,15 @@ public abstract class AbstractMultiVersionSpecRunner<T extends AbstractMultiVers
 
     private void createNonIgnoredExecutions(Collection<T> versionsUnderTest) {
         for (T version : versionsUnderTest) {
-            try {
-                boolean shouldIgnore = (Boolean) ignoreIf.value().getConstructor(Class.class, Class.class).newInstance(target, target).call();
-                if (shouldIgnore) {
-                    continue;
+            if (ignoreIf != null) {
+                try {
+                    boolean shouldIgnore = (Boolean) ignoreIf.value().getConstructor(Class.class, Class.class).newInstance(target, target).call();
+                    if (shouldIgnore) {
+                        continue;
+                    }
+                } catch (InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
+                    throw new RuntimeException(e);
                 }
-            } catch (InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
-                throw new RuntimeException(e);
             }
 
             for (Execution execution : createExecutionsFor(version)) {
