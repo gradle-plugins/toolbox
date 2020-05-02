@@ -38,7 +38,7 @@ public abstract class DownloadableGradleDistribution extends DefaultGradleDistri
                             public File load(Key key) {
                                 System.out.println("downloading " + key.url.toString());
                                 key.getBinDistribution().copyFrom(key.url);
-                                key.getBinDistribution()/*.usingNativeTools()*/.unzipTo(key.versionDir);
+                                key.getBinDistribution().usingNativeTools().unzipTo(key.versionDir);
                                 return key.getBinDistribution();
                             }
                         });
