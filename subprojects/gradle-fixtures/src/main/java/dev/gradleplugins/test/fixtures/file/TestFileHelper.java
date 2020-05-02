@@ -77,10 +77,14 @@ public class TestFileHelper {
     public ExecOutput execute(List<?> args, List<?> env) {
         List<String> commandLine = new ArrayList<>();
         commandLine.add(file.getAbsolutePath());
-        commandLine.addAll(args.stream().map(Object::toString).collect(Collectors.toList()));
+        if (args != null) {
+            commandLine.addAll(args.stream().map(Object::toString).collect(Collectors.toList()));
+        }
         ProcessBuilder processBuilder = new ProcessBuilder().command(commandLine);
-        Map<String, String> environment = env.stream().map(TestFileHelper::toEntry).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        processBuilder.environment().putAll(environment);
+        if (env != null) {
+            Map<String, String> environment = env.stream().map(TestFileHelper::toEntry).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            processBuilder.environment().putAll(environment);
+        }
         try {
             Process process = processBuilder.start();
 
