@@ -77,6 +77,18 @@ class TestFileHelperTest extends Specification {
         result.exitCode == 0
     }
 
+    @IgnoreIf({ SystemUtils.IS_OS_WINDOWS }) // Because I'm lazy and it's good enough for now
+    def "can execute commands with null environment variable value"() {
+        when:
+        def result = TestFile.of(findInPath('ls')).execute(null, ["FOO="])
+
+        then:
+        noExceptionThrown()
+
+        and:
+        result.exitCode == 0
+    }
+
     File findInPath(String command) {
         return System.getenv('PATH').split(File.pathSeparator).collect { new File("$it/$command") }.find { it.exists() }
     }

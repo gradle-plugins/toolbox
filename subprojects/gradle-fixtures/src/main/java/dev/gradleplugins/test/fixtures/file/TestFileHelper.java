@@ -124,7 +124,9 @@ public class TestFileHelper {
 
     private static Map.Entry<String, String> toEntry(Object o) {
         String[] tokens = StringUtils.split(o.toString(), "=", 2);
-        assertThat(tokens.length, Matchers.equalTo(2));
+        if (tokens.length == 1) {
+            return new HashMap.SimpleEntry<>(tokens[0], "");
+        }
         return new HashMap.SimpleEntry<>(tokens[0], tokens[1]);
     }
 
