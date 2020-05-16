@@ -60,3 +60,26 @@ project(':gradle-plugin-development').projectDir = file('subprojects/gradle-plug
 //project(':gradle-plugin-development-annotation').projectDir = file('subprojects/gradle-plugin-development-annotation')
 //include('gradle-plugin-development-stubs')
 //project(':gradle-plugin-development-stubs').projectDir = file('subprojects/gradle-plugin-development-stubs')
+
+plugins.withId('com.gradle.enterprise') {
+    gradleEnterprise {
+        buildScan {
+            termsOfServiceUrl = "https://gradle.com/terms-of-service"
+            termsOfServiceAgree = "yes"
+
+            if (System.getenv('CI')) {
+                tag 'CI'
+                value('Git Commit SHA', System.getenv('CI_COMMIT_SHA'))
+                value('GitLab Runner', System.getenv('CI_RUNNER_DESCRIPTION'))
+            } else {
+                tag 'LOCAL'
+            }
+
+            obfuscation {
+                username { name -> 'super-human' }
+                hostname { host -> 'somewhere' }
+                ipAddresses { addresses -> addresses.collect { '1.2.3.4' } }
+            }
+        }
+    }
+}
