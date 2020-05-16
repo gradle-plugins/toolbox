@@ -16,16 +16,15 @@
 
 package dev.gradleplugins.integtests.fixtures.nativeplatform
 
-import dev.gradleplugins.integtests.fixtures.AbstractFunctionalSpec
 import dev.gradleplugins.integtests.fixtures.AbstractGradleSpecification
 import dev.gradleplugins.integtests.fixtures.nativeplatform.NativeToolChainTestRunner
-import dev.gradleplugins.integtests.fixtures.nativeplatform.internal.TestFiles
 import dev.gradleplugins.test.fixtures.file.TestFile
 import dev.gradleplugins.test.fixtures.sources.SourceElement
 import dev.gradleplugins.test.fixtures.sources.SourceFile
+import org.apache.commons.io.FilenameUtils
+import org.gradle.internal.hash.HashUtil
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.internal.time.Time
-import org.gradle.nativeplatform.internal.CompilerOutputFileNamingSchemeFactory
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 import org.junit.runner.RunWith
 
@@ -132,12 +131,11 @@ abstract class AbstractInstalledToolChainIntegrationSpec extends AbstractGradleS
         return intermediateFileFor(sourceFile, rootObjectFilesDir, OperatingSystem.current().isWindows() ? ".obj" : ".o")
     }
 
-    def intermediateFileFor(File sourceFile, String intermediateFilesDir, String intermediateFileSuffix) {
-        File intermediateFile = new CompilerOutputFileNamingSchemeFactory(TestFiles.resolver(testDirectory)).create()
-            .withObjectFileNameSuffix(intermediateFileSuffix)
-            .withOutputBaseFolder(file(intermediateFilesDir))
-            .map(file(sourceFile))
-        return file(getTestDirectory().toURI().relativize(intermediateFile.toURI()))
+    TestFile intermediateFileFor(File sourceFile, String intermediateFilesDir, String intermediateFileSuffix) {
+        String baseName = FilenameUtils.removeExtension(sourceFile.getName())
+        String relativePath = getTestDirectory().toURI().relativize(sourceFile.toURI())
+        String uniqueName = HashUtil.createCompactMD5(relativePath)
+        return file(intermediateFilesDir, uniqueName, "${baseName}${intermediateFileSuffix}")
     }
 
     List<NativeBinaryFixture> objectFiles(SourceElement sourceElement, String rootObjectFilesDir = "build/obj/${sourceElement.sourceSetName}/debug") {
@@ -145,8 +143,8 @@ abstract class AbstractInstalledToolChainIntegrationSpec extends AbstractGradleS
 
         String sourceSetName = sourceElement.getSourceSetName()
         for (SourceFile sourceFile : sourceElement.getFiles()) {
-            def swiftFile = file("src", sourceSetName, sourceFile.path, sourceFile.name)
-            result.add(new NativeBinaryFixture(objectFileFor(swiftFile, rootObjectFilesDir), toolChain))
+            def relativeSourceFile = file("src", sourceSetName, sourceFile.path, sourceFile.name)
+            result.add(new NativeBinaryFixture(objectFileFor(relativeSourceFile, rootObjectFilesDir), toolChain))
         }
 
         return result
