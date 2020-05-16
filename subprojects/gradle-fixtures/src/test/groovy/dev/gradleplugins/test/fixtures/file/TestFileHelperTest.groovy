@@ -31,7 +31,7 @@ class TestFileHelperTest extends Specification {
         assert new ZipTestFixture(zipFile).hasDescendants('file-with-executable-permission')
 
         when:
-        TestFile.of(zipFile).unzipTo(temporaryFolder.root)
+        TestFile.of(zipFile).usingNativeTools().unzipTo(temporaryFolder.root)
 
         then:
         file.exists()

@@ -69,7 +69,7 @@ dependencies {
     spockSupportApi 'org.codehaus.groovy:groovy-all:2.5.8'
     spockSupportApi platform('org.spockframework:spock-bom:1.2-groovy-2.5')
     spockSupportApi 'org.spockframework:spock-core'
-    spockSupportApi 'dev.gradleplugins:gradle-api:6.2.1' // Required because of the AbstractInstalledToolChainIntegrationSpec which is extremely tied to the internal of Gradle
+    spockSupportCompileOnly 'dev.gradleplugins:gradle-api:6.2.1' // Required because of the AbstractInstalledToolChainIntegrationSpec which is extremely tied to the internal of Gradle
     spockSupportCompileOnly gradleTestKit()
     spockSupportApi 'org.apache.commons:commons-lang3:3.10'
     spockSupportImplementation 'commons-io:commons-io:2.6'

@@ -75,12 +75,15 @@ public abstract class DeferredRepositoryFactory {
             content.includeModule("com.google.guava", "guava-parent");
             content.includeModule("com.google.j2objc", "j2objc-annotations");
             content.includeModule("com.google.errorprone", "error_prone_annotations");
+            content.includeModule("com.google.errorprone", "error_prone_parent");
             content.includeModule("org.checkerframework", "checker-qual");
             content.includeModule("com.google.code.findbugs", "jsr305");
             content.includeModule("com.google.guava", "listenablefuture");
             content.includeModule("com.google.guava", "failureaccess");
 
             content.includeModule("org.ow2.asm", "asm");
+            content.includeModule("org.ow2.asm", "asm-parent");
+            content.includeModule("org.ow2", "ow2");
             content.includeModule("org.jsoup", "jsoup");
             content.includeModule("commons-io", "commons-io");
             content.includeModule("org.apache.commons", "commons-exec");
