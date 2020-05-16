@@ -19,6 +19,7 @@ package dev.gradleplugins.integtests.fixtures.nativeplatform
 import dev.gradleplugins.integtests.fixtures.AbstractFunctionalSpec
 import dev.gradleplugins.integtests.fixtures.AbstractGradleSpecification
 import dev.gradleplugins.integtests.fixtures.nativeplatform.NativeToolChainTestRunner
+import dev.gradleplugins.integtests.fixtures.nativeplatform.internal.TestFiles
 import dev.gradleplugins.test.fixtures.file.TestFile
 import dev.gradleplugins.test.fixtures.sources.SourceElement
 import dev.gradleplugins.test.fixtures.sources.SourceFile
