@@ -20,6 +20,7 @@ import dev.gradleplugins.integtests.fixtures.AbstractFunctionalSpec
 import dev.gradleplugins.integtests.fixtures.AbstractGradleSpecification
 import dev.gradleplugins.integtests.fixtures.nativeplatform.NativeToolChainTestRunner
 import dev.gradleplugins.test.fixtures.file.TestFile
+import dev.gradleplugins.test.fixtures.sources.SourceElement
 import dev.gradleplugins.test.fixtures.sources.SourceFile
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.internal.time.Time
@@ -138,7 +139,7 @@ abstract class AbstractInstalledToolChainIntegrationSpec extends AbstractGradleS
         return file(getTestDirectory().toURI().relativize(intermediateFile.toURI()))
     }
 
-    List<NativeBinaryFixture> objectFiles(def sourceElement, String rootObjectFilesDir = "build/obj/${sourceElement.sourceSetName}/debug") {
+    List<NativeBinaryFixture> objectFiles(SourceElement sourceElement, String rootObjectFilesDir = "build/obj/${sourceElement.sourceSetName}/debug") {
         List<NativeBinaryFixture> result = new ArrayList<NativeBinaryFixture>()
 
         String sourceSetName = sourceElement.getSourceSetName()
