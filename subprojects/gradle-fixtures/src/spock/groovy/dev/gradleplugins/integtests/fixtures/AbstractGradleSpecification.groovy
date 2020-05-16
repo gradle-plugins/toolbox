@@ -112,8 +112,11 @@ class AbstractGradleSpecification extends Specification {
     /**
      * NOTE: The method is public so it can align with Trait classes like {@link ArchiveTestFixture}.
      */
-    TestFile file(String relativePath) {
-        return getTestDirectory().file(relativePath)
+    TestFile file(Object... path) {
+        if (path.length == 1 && path[0] instanceof TestFile) {
+            return path[0] as TestFile
+        }
+        getTestDirectory().file(path)
     }
 
     protected String getBuildFileName() {

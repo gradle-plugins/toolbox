@@ -7,7 +7,7 @@ import dev.gradleplugins.test.fixtures.file.TestFile
 
 // TODO: Rename to ArchiveFixtures (important with the s)
 trait ArchiveTestFixture {
-    abstract TestFile file(String path)
+    abstract TestFile file(Object... path)
 
     JarTestFixture jar(String path) {
         return new JarTestFixture(file(path))
