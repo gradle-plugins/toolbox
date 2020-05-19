@@ -72,6 +72,9 @@ public abstract class SourceElement extends Element {
      * Returns a source element that contains the union of the given elements.
      */
     public static SourceElement ofElements(final SourceElement... elements) {
+        return ofElements(Arrays.asList(elements));
+    }
+    public static SourceElement ofElements(Iterable<SourceElement> elements) {
         return new SourceElement() {
             @Override
             public List<SourceFile> getFiles() {

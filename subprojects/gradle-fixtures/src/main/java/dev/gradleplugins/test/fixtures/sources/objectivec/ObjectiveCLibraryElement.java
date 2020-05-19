@@ -16,51 +16,11 @@
 
 package dev.gradleplugins.test.fixtures.sources.objectivec;
 
-import dev.gradleplugins.test.fixtures.sources.SourceElement;
-import dev.gradleplugins.test.fixtures.sources.SourceFile;
-
-import java.util.ArrayList;
-import java.util.List;
+import dev.gradleplugins.test.fixtures.sources.NativeLibraryElement;
 
 /**
- * A C++ source file with optional public and private headers.
+ * A Objective-C source file with optional public and private headers.
  */
-public abstract class ObjectiveCLibraryElement extends ObjectiveCSourceElement {
-    public abstract SourceElement getPublicHeaders();
+public abstract class ObjectiveCLibraryElement extends NativeLibraryElement {
 
-    public SourceElement getPrivateHeaders() {
-        return empty();
-    }
-
-    @Override
-    public SourceElement getHeaders() {
-        return ofElements(getPublicHeaders(), getPrivateHeaders());
-    }
-
-    /**
-     * Returns a copy of this library with the public headers the 'public' headers directory.
-     */
-    public ObjectiveCLibraryElement asLib() {
-        final ObjectiveCLibraryElement delegate = this;
-        return new ObjectiveCLibraryElement() {
-            @Override
-            public SourceElement getPublicHeaders() {
-                List<SourceFile> headers = new ArrayList<SourceFile>();
-                for (SourceFile sourceFile : delegate.getPublicHeaders().getFiles()) {
-                    headers.add(sourceFile("public", sourceFile.getName(), sourceFile.getContent()));
-                }
-                return SourceElement.ofFiles(headers);
-            }
-
-            @Override
-            public SourceElement getPrivateHeaders() {
-                return delegate.getPrivateHeaders();
-            }
-
-            @Override
-            public SourceElement getSources() {
-                return delegate.getSources();
-            }
-        };
-    }
 }

@@ -16,27 +16,8 @@
 
 package dev.gradleplugins.test.fixtures.sources.c;
 
-import dev.gradleplugins.test.fixtures.sources.SourceElement;
-import dev.gradleplugins.test.fixtures.sources.SourceFile;
+import dev.gradleplugins.test.fixtures.sources.NativeSourceElement;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+public abstract class CSourceElement extends NativeSourceElement {
 
-public abstract class CSourceElement extends SourceElement {
-    public abstract SourceElement getHeaders();
-
-    public abstract SourceElement getSources();
-
-    @Override
-    public List<SourceFile> getFiles() {
-        List<SourceFile> files = new ArrayList<>();
-        files.addAll(getSources().getFiles());
-        files.addAll(getHeaders().getFiles());
-        return files;
-    }
-
-    public List<String> getSourceFileNamesWithoutHeaders() {
-        return getSourceFileNames().stream().filter(sourceFileName -> !sourceFileName.endsWith(".h")).collect(Collectors.toList());
-    }
 }
