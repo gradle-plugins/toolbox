@@ -22,6 +22,7 @@ import com.google.common.hash.Hashing;
 import com.google.common.hash.HashingOutputStream;
 import dev.gradleplugins.test.fixtures.util.RetryUtil;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.output.NullOutputStream;
 import org.codehaus.groovy.runtime.ResourceGroovyMethods;
 
@@ -96,7 +97,6 @@ public class TestFile extends File {
         assertEquals(String.format("For dir: %s\n extra files: %s, missing files: %s, expected: %s", this, extras, missing, expected), expected, actual);
 
         return this;
-
     }
 
     private void visit(Set<String> names, String prefix, File file) {
@@ -408,6 +408,18 @@ public class TestFile extends File {
     public void unzipTo(File target) {
         assertIsFile();
         new TestFileHelper(this).unzipTo(target, useNativeTools);
+    }
+
+    public TestFile withExtension(String extension) {
+        // Shim for the gradle/gradle implementation where the extension would contains the dot.
+        if (extension.startsWith(".")) {
+            extension = extension.substring(1);
+        }
+
+        if (FilenameUtils.isExtension(getName(), extension)) {
+            return this;
+        }
+        return getParentFile().file(FilenameUtils.removeExtension(getName()) + FilenameUtils.EXTENSION_SEPARATOR + extension);
     }
 
     public Snapshot snapshot() {
