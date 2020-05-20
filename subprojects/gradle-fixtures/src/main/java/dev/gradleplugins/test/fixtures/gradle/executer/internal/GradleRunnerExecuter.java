@@ -145,7 +145,7 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
 
         @Override
         public String getOutput() {
-            return result.getOutput();
+            return delegate.getOutput();
         }
 
         @Override
@@ -211,18 +211,19 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
 
         @Override
         public ExecutionResult assertOutputContains(String expectedOutput) {
-            assert result.getOutput().contains(expectedOutput.trim());
+            delegate.assertOutputContains(expectedOutput);
             return this;
         }
 
         @Override
         public ExecutionResult assertNotOutput(String expectedOutput) {
-            assert !result.getOutput().contains(expectedOutput.trim());
+            delegate.assertNotOutput(expectedOutput);
             return this;
         }
 
         @Override
         public ExecutionResult assertHasPostBuildOutput(String expectedOutput) {
+            delegate.assertHasPostBuildOutput(expectedOutput);
             return this;
         }
 
