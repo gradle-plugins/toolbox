@@ -133,7 +133,7 @@ abstract class AbstractInstalledToolChainIntegrationSpec extends AbstractGradleS
 
     TestFile intermediateFileFor(File sourceFile, String intermediateFilesDir, String intermediateFileSuffix) {
         String baseName = FilenameUtils.removeExtension(sourceFile.getName())
-        String relativePath = getTestDirectory().toURI().relativize(sourceFile.toURI())
+        String relativePath = FilenameUtils.separatorsToSystem(getTestDirectory().toURI().relativize(sourceFile.toURI()).toString())
         String uniqueName = HashUtil.createCompactMD5(relativePath)
         return file(intermediateFilesDir, uniqueName, "${baseName}${intermediateFileSuffix}")
     }
