@@ -16,6 +16,7 @@
 
 package dev.gradleplugins.spock.lang;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -45,7 +46,12 @@ abstract class AbstractTestDirectoryProvider implements TestRule, TestDirectoryP
 
     public AbstractTestDirectoryProvider(File root, Class<?> testClass) {
         this.root = root;
-        this.className = testClass.getSimpleName();
+        String safeClassName = testClass.getSimpleName();
+        // Windows is annoying with filename too long, let's restrict the class name as well.
+        if (SystemUtils.IS_OS_WINDOWS && safeClassName.length() > 20) {
+            safeClassName = safeClassName.substring(0, 10) + "..." + safeClassName.substring(safeClassName.length() - 9);
+        }
+        this.className = safeClassName;
     }
 
     @Override
