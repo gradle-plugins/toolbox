@@ -277,6 +277,8 @@ abstract class GenerateGradleApiJarPlugin implements Plugin<Project> {
                 return "1.3.70";
             case "6.4":
                 return "1.3.71";
+            case "6.5":
+                return "1.3.72";
             default:
                 throw new IllegalArgumentException(String.format("Version not known at the time, please check kotlin-stdlib version for Gradle %s", version.toString()));
         }
