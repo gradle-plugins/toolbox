@@ -734,6 +734,8 @@ public class AvailableToolChains {
         @Override
         public boolean meets(ToolChainRequirement requirement) {
             switch (requirement) {
+                case AVAILABLE:
+                    return true;
                 case SWIFTC:
                     return true;
                 case SWIFTC_3:
