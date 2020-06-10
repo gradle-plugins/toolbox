@@ -99,7 +99,7 @@ abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends Ab
         given:
         makeSingleProject()
         buildFile << """
-            gradlePlugin.extra {
+            gradlePlugin.${languageName} {
                 withJavadocJar()
             }
         """
@@ -112,7 +112,7 @@ abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends Ab
         given:
         makeSingleProject()
         buildFile << """
-            gradlePlugin.extra {
+            gradlePlugin.${languageName} {
                 withSourcesJar()
             }
         """
@@ -152,6 +152,8 @@ abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends Ab
 
     protected abstract GradlePluginElement getComponentUnderTest()
 
+    protected abstract String getLanguageName()
+
     protected void makeSingleProject() {
         // NOTE: The project is written to be Kotlin/Groovy DSL compatible
         settingsFile << 'rootProject.name = "gradle-plugin"'
@@ -175,11 +177,34 @@ class GroovyGradlePluginDevelopmentExtensionFunctionalTest extends AbstractGradl
     protected GradlePluginElement getComponentUnderTest() {
         return new GroovyBasicGradlePlugin()
     }
+
+    @Override
+    protected String getLanguageName() {
+        return 'groovy'
+    }
+
+    def "can generate Groovydoc Jar"() {
+        given:
+        makeSingleProject()
+        buildFile << """
+            gradlePlugin.groovy {
+                withGroovydocJar()
+            }
+        """
+
+        expect:
+        succeeds('groovydocJar')
+    }
 }
 
 class JavaGradlePluginDevelopmentExtensionFunctionalTest extends AbstractGradlePluginDevelopmentExtensionFunctionalTest implements JavaGradlePluginDevelopmentPlugin {
     @Override
     protected GradlePluginElement getComponentUnderTest() {
         return new JavaBasicGradlePlugin()
+    }
+
+    @Override
+    protected String getLanguageName() {
+        return 'java'
     }
 }

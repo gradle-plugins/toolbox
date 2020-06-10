@@ -20,8 +20,12 @@ import dev.gradleplugins.GradleRuntimeCompatibility;
 import dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension;
 import dev.gradleplugins.GroovyGradlePluginDevelopmentExtension;
 import dev.gradleplugins.internal.DeferredRepositoryFactory;
+import dev.gradleplugins.internal.GradlePluginDevelopmentExtensionInternal;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.plugins.ExtensionAware;
+import org.gradle.api.plugins.JavaPluginExtension;
+import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 
 import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.*;
 
@@ -37,9 +41,9 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
 
         project.getPluginManager().apply("java-gradle-plugin"); // For plugin development
         removeGradleApiProjectDependency(project);
-        project.getPluginManager().apply("groovy-base");
+        project.getPluginManager().apply("groovy");
 
-        registerExtraExtension(project, GroovyGradlePluginDevelopmentExtension.class);
+        registerLanguageExtension(project, "groovy", GroovyGradlePluginDevelopmentExtension.class);
         GradlePluginDevelopmentCompatibilityExtension extension = registerCompatibilityExtension(project);
         configureExtension(extension, project, repositoryFactory);
 

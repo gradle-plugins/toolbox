@@ -28,6 +28,7 @@ import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.plugins.PluginManager;
 import org.gradle.api.provider.Provider;
+import org.gradle.internal.Cast;
 import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 import org.gradle.util.VersionNumber;
 
@@ -88,10 +89,10 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
         return extension;
     }
 
-    public static <T> GradlePluginDevelopmentExtensionInternal registerExtraExtension(Project project, Class<T> type) {
+    public static <T> GradlePluginDevelopmentExtensionInternal registerLanguageExtension(Project project, String languageName, Class<T> type) {
         GradlePluginDevelopmentExtension gradlePlugin = project.getExtensions().getByType(GradlePluginDevelopmentExtension.class);
         GradlePluginDevelopmentExtensionInternal extension = project.getObjects().newInstance(GradlePluginDevelopmentExtensionInternal.class, project.getExtensions().getByType(JavaPluginExtension.class));
-        ((ExtensionAware)gradlePlugin).getExtensions().add("extra", extension);
+        ((ExtensionAware)gradlePlugin).getExtensions().add(type, languageName, type.cast(extension));
 
         return extension;
     }
