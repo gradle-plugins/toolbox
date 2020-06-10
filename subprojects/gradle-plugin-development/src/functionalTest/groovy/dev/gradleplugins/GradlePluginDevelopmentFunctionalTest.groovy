@@ -1,5 +1,6 @@
 package dev.gradleplugins
 
+import dev.gradleplugins.fixtures.sample.GroovyBasicGradlePlugin
 import dev.gradleplugins.fixtures.sample.JavaBasicGradlePlugin
 import dev.gradleplugins.integtests.fixtures.AbstractGradleSpecification
 import dev.gradleplugins.test.fixtures.gradle.GradleScriptDsl
@@ -220,6 +221,75 @@ class GradlePluginDevelopmentFunctionalTest extends AbstractGradleSpecification 
 
         then:
         result.assertOutputContains("The Gradle Plugin Development team recommends using 'dev.gradleplugins.java-gradle-plugin' instead of 'java-gradle-plugin' in project ':'.")
+    }
+
+    def "warn when using java-gradle-plugin with groovy main sources without dev.gradleplugins.groovy-gradle-plugin"() {
+        given:
+        settingsFile << """
+            plugins {
+                id 'dev.gradleplugins.gradle-plugin-development'
+            }
+        """
+        buildFile << """
+            plugins {
+                id 'java-gradle-plugin'
+                id 'groovy'
+            }
+        """
+        new GroovyBasicGradlePlugin().writeToProject(testDirectory)
+
+        when:
+        def result = succeeds('assemble')
+
+        then:
+        result.assertOutputContains("The Gradle Plugin Development team recommends using 'dev.gradleplugins.groovy-gradle-plugin' instead of 'java-gradle-plugin' and 'groovy'/'groovy-base' in project ':'.")
+    }
+
+    def "warn when using java-gradle-plugin with groovy plugin and no Groovy source without dev.gradleplugins.groovy-gradle-plugin"() {
+        given:
+        settingsFile << """
+            plugins {
+                id 'dev.gradleplugins.gradle-plugin-development'
+            }
+        """
+        buildFile << """
+            plugins {
+                id 'java-gradle-plugin'
+                id 'groovy'
+            }
+        """
+        new JavaBasicGradlePlugin().writeToProject(testDirectory)
+
+        when:
+        def result = succeeds('assemble')
+
+        then:
+        result.assertOutputContains("The Gradle Plugin Development team recommends using 'dev.gradleplugins.java-gradle-plugin' instead of 'java-gradle-plugin' in project ':'.")
+    }
+
+    def "does not warn when using kotlin-dsl plugin"() {
+        given:
+        settingsFile << """
+            plugins {
+                id 'dev.gradleplugins.gradle-plugin-development'
+            }
+        """
+        file(GradleScriptDsl.KOTLIN_DSL.buildFileName) << """
+            plugins {
+                `kotlin-dsl`
+            }
+
+            repositories {
+                jcenter()
+            }
+        """
+        new JavaBasicGradlePlugin().writeToProject(testDirectory)
+
+        when:
+        def result = succeeds('assemble')
+
+        then:
+        result.assertNotOutput("The Gradle Plugin Development team recommends using")
     }
 
     @Unroll

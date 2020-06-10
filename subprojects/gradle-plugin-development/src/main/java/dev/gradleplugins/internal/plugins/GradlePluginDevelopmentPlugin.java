@@ -10,10 +10,15 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
 import org.gradle.api.artifacts.dsl.RepositoryHandler;
 import org.gradle.api.initialization.Settings;
+import org.gradle.api.internal.plugins.DslObject;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
+import org.gradle.api.tasks.GroovySourceSet;
+import org.gradle.api.tasks.SourceSet;
+import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.internal.exceptions.DefaultMultiCauseException;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
@@ -66,9 +71,22 @@ public abstract class GradlePluginDevelopmentPlugin implements Plugin<Object> {
     }
 
     private void warnWhenUsingCoreGradlePluginDevelopment(Project project) {
-        if (project.getPluginManager().hasPlugin("java-gradle-plugin") && !project.getPluginManager().hasPlugin("dev.gradleplugins.java-gradle-plugin")) {
+        if (project.getPluginManager().hasPlugin("org.gradle.kotlin.kotlin-dsl")) {
+            // Ignores anything to do with kotlin-dsl plugin
+        } else if (!project.getPluginManager().hasPlugin("dev.gradleplugins.groovy-gradle-plugin") && project.getPluginManager().hasPlugin("java-gradle-plugin") && project.getPluginManager().hasPlugin("groovy-base") && hasGroovySources(project)) {
+            LOGGER.warn(String.format("The Gradle Plugin Development team recommends using 'dev.gradleplugins.groovy-gradle-plugin' instead of 'java-gradle-plugin' and 'groovy'/'groovy-base' in project '%s'.", project.getPath()));
+        } else if (project.getPluginManager().hasPlugin("java-gradle-plugin") && !project.getPluginManager().hasPlugin("dev.gradleplugins.java-gradle-plugin")) {
             LOGGER.warn(String.format("The Gradle Plugin Development team recommends using 'dev.gradleplugins.java-gradle-plugin' instead of 'java-gradle-plugin' in project '%s'.", project.getPath()));
         }
+    }
+
+    private boolean hasGroovySources(Project project) {
+        SourceSet sourceSet = project.getExtensions().getByType(SourceSetContainer.class).getByName("main");
+        GroovySourceSet groovySourceSet = new DslObject(sourceSet).getConvention().findPlugin(GroovySourceSet.class);
+        if (groovySourceSet == null) {
+            return false;
+        }
+        return groovySourceSet.getAllGroovy().getSrcDirs().stream().anyMatch(File::exists);
     }
 
     private interface GradleFailureVisitor {
