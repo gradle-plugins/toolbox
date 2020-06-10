@@ -121,23 +121,49 @@ abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends Ab
         succeeds('sourcesJar')
     }
 
+    def "can access compatibility extension from Kotlin DSL"() {
+        given:
+        useKotlinDsl()
+        makeSingleProject()
+        buildFile << """
+            gradlePlugin.compatibility.minimumGradleVersion.set("2.14")
+            gradlePlugin.compatibility {
+                minimumGradleVersion.set("2.14")
+            }
+            gradlePlugin {
+                compatibility.minimumGradleVersion.set("2.14")
+                compatibility {
+                    minimumGradleVersion.set("2.14")
+                }
+            }
+
+            tasks.register("verify") {
+                doLast {
+                    assert(gradlePlugin.compatibility.minimumGradleVersion.get() == "2.14")
+                }
+            }
+        """
+
+        expect:
+        succeeds('verify')
+    }
+
     protected abstract String getPluginIdUnderTest()
 
     protected abstract GradlePluginElement getComponentUnderTest()
 
     protected void makeSingleProject() {
-        settingsFile << "rootProject.name = 'gradle-plugin'"
+        // NOTE: The project is written to be Kotlin/Groovy DSL compatible
+        settingsFile << 'rootProject.name = "gradle-plugin"'
         buildFile << """
             plugins {
-                id '${pluginIdUnderTest}'
+                id("${pluginIdUnderTest}")
             }
 
             gradlePlugin {
-                plugins {
-                    hello {
-                        id = '${componentUnderTest.pluginId}'
-                        implementationClass = 'com.example.BasicPlugin'
-                    }
+                plugins.create("hello") {
+                    id = "${componentUnderTest.pluginId}"
+                    implementationClass = "com.example.BasicPlugin"
                 }
             }
         """
