@@ -16,6 +16,7 @@
 
 package dev.gradleplugins.internal.plugins;
 
+import dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension;
 import dev.gradleplugins.JavaGradlePluginDevelopmentExtension;
 import dev.gradleplugins.internal.DeferredRepositoryFactory;
 import dev.gradleplugins.internal.GradlePluginDevelopmentExtensionInternal;
@@ -37,7 +38,8 @@ public class JavaGradlePluginDevelopmentPlugin implements Plugin<Project> { //ex
         project.getPluginManager().apply("java-gradle-plugin"); // For plugin development
         removeGradleApiProjectDependency(project);
 
-        GradlePluginDevelopmentExtensionInternal extension = registerExtraExtension(project, JavaGradlePluginDevelopmentExtension.class);
+        registerExtraExtension(project, JavaGradlePluginDevelopmentExtension.class);
+        GradlePluginDevelopmentCompatibilityExtension extension = registerCompatibilityExtension(project);
         configureExtension(extension, project, repositoryFactory);
 
         project.getPluginManager().apply(GradlePluginDevelopmentFunctionalTestingPlugin.class);

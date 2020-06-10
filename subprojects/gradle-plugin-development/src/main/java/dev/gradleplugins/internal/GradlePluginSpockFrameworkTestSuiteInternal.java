@@ -1,9 +1,6 @@
 package dev.gradleplugins.internal;
 
-import dev.gradleplugins.GradlePluginSpockFrameworkTestSuite;
-import dev.gradleplugins.GradlePluginSpockFrameworkTestSuiteDependencies;
-import dev.gradleplugins.GradlePluginTestingStrategyFactory;
-import dev.gradleplugins.TaskView;
+import dev.gradleplugins.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -52,7 +49,7 @@ public abstract class GradlePluginSpockFrameworkTestSuiteInternal implements Gra
         return strategyFactory;
     }
 
-    public abstract Property<GradlePluginDevelopmentExtensionInternal> getTestedGradlePlugin();
+    public abstract Property<GradlePluginDevelopmentCompatibilityExtension> getTestedGradlePlugin();
 
     @Override
     public TaskView<Test> getTestTasks() {

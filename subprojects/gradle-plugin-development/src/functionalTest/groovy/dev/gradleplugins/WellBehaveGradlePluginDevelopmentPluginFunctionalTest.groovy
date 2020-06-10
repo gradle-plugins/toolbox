@@ -17,6 +17,8 @@
 package dev.gradleplugins
 
 import dev.gradleplugins.fixtures.sample.GradlePluginElement
+import dev.gradleplugins.fixtures.sample.GroovyBasicGradlePlugin
+import dev.gradleplugins.fixtures.sample.JavaBasicGradlePlugin
 import dev.gradleplugins.integtests.fixtures.ArchiveTestFixture
 import org.hamcrest.CoreMatchers
 import org.junit.Assume
@@ -61,10 +63,10 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
         """
 
         when:
-        fails 'help'
+        def failure = fails 'help'
 
         then:
-        outputContains("The Gradle core plugin 'java-gradle-plugin' should not be applied within your build when using '${pluginIdUnderTest}'.")
+        failure.assertHasCause("The Gradle core plugin 'java-gradle-plugin' should not be applied within your build when using '${pluginIdUnderTest}'.")
     }
 
     @Unroll
@@ -82,10 +84,10 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
         """
 
         when:
-        fails 'help'
+        def failure = fails 'help'
 
         then:
-        outputContains("The '${pluginIdUnderTest}' cannot be applied with '${otherPluginId}', please apply just one of them.")
+        failure.assertHasCause("The '${pluginIdUnderTest}' cannot be applied with '${otherPluginId}', please apply just one of them.")
 
         where:
         otherPluginId << ['dev.gradleplugins.java-gradle-plugin', 'dev.gradleplugins.groovy-gradle-plugin']
@@ -363,4 +365,18 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
     protected abstract String getPluginIdUnderTest()
 
     protected abstract GradlePluginElement getComponentUnderTest()
+}
+
+class JavaGradlePluginDevelopmentWellBehaveFunctionalTest extends WellBehaveGradlePluginDevelopmentPluginFunctionalTest implements JavaGradlePluginDevelopmentPlugin {
+    @Override
+    protected GradlePluginElement getComponentUnderTest() {
+        return new JavaBasicGradlePlugin()
+    }
+}
+
+class GroovyGradlePluginDevelopmentWellBehaveFunctionalTest extends WellBehaveGradlePluginDevelopmentPluginFunctionalTest implements GroovyGradlePluginDevelopmentPlugin {
+    @Override
+    protected GradlePluginElement getComponentUnderTest() {
+        return new GroovyBasicGradlePlugin()
+    }
 }

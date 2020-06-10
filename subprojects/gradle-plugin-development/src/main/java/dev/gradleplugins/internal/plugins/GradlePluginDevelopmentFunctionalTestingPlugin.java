@@ -1,5 +1,6 @@
 package dev.gradleplugins.internal.plugins;
 
+import dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension;
 import dev.gradleplugins.GradlePluginTestingStrategy;
 import dev.gradleplugins.internal.*;
 import org.apache.commons.lang3.StringUtils;
@@ -86,7 +87,7 @@ public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements 
         SourceSetContainer sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
         GradlePluginSpockFrameworkTestSuiteInternal functionalTestSuite = project.getObjects().newInstance(GradlePluginSpockFrameworkTestSuiteInternal.class, FUNCTIONAL_TEST_NAME, sourceSets.maybeCreate(FUNCTIONAL_TEST_NAME));
         functionalTestSuite.getTestedSourceSet().convention(project.provider(() -> sourceSets.getByName("main")));
-        functionalTestSuite.getTestedGradlePlugin().set((GradlePluginDevelopmentExtensionInternal) ((ExtensionAware)project.getExtensions().getByType(GradlePluginDevelopmentExtension.class)).getExtensions().getByName("extra"));
+        functionalTestSuite.getTestedGradlePlugin().set((GradlePluginDevelopmentCompatibilityExtension) ((ExtensionAware)project.getExtensions().getByType(GradlePluginDevelopmentExtension.class)).getExtensions().getByName("compatibility"));
         functionalTestSuite.getTestedGradlePlugin().disallowChanges();
         project.getComponents().add(functionalTestSuite);
     }

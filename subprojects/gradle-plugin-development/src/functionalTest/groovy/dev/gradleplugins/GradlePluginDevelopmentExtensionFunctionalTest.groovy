@@ -1,17 +1,19 @@
 package dev.gradleplugins
 
 import dev.gradleplugins.fixtures.sample.GradlePluginElement
+import dev.gradleplugins.fixtures.sample.GroovyBasicGradlePlugin
+import dev.gradleplugins.fixtures.sample.JavaBasicGradlePlugin
 import spock.lang.Unroll
 import spock.util.environment.Jvm
 
 abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends AbstractGradlePluginDevelopmentFunctionalSpec {
-    def "register an extra extension on gradlePlugin extension"() {
+    def "register an compatibility extension on gradlePlugin extension"() {
         given:
         makeSingleProject()
         buildFile << """
             tasks.register('verify') {
                 doLast {
-                    assert gradlePlugin.extra instanceof ${extraExtensionClass.canonicalName}
+                    assert gradlePlugin.compatibility instanceof ${GradlePluginDevelopmentCompatibilityExtension.canonicalName}
                 }
             }
         """
@@ -26,7 +28,7 @@ abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends Ab
         buildFile << """
             tasks.register('verify') {
                 doLast {
-                    assert gradlePlugin.extra.minimumGradleVersion.get() == project.gradle.gradleVersion
+                    assert gradlePlugin.compatibility.minimumGradleVersion.get() == project.gradle.gradleVersion
                 }
             }
         """
@@ -56,7 +58,7 @@ abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends Ab
         given:
         makeSingleProject()
         buildFile << """
-            gradlePlugin.extra.minimumGradleVersion = '${gradleVersion}'
+            gradlePlugin.compatibility.minimumGradleVersion = '${gradleVersion}'
             tasks.register('verify') {
                 doLast {
                     assert java.sourceCompatibility.toString() == '${javaVersion}'
@@ -83,7 +85,7 @@ abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends Ab
         makeSingleProject()
         buildFile << """
             afterEvaluate {
-                gradlePlugin.extra.minimumGradleVersion = '6.2'
+                gradlePlugin.compatibility.minimumGradleVersion = '6.2'
             }
         """
 
@@ -119,8 +121,6 @@ abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends Ab
         succeeds('sourcesJar')
     }
 
-    protected abstract Class<?> getExtraExtensionClass()
-
     protected abstract String getPluginIdUnderTest()
 
     protected abstract GradlePluginElement getComponentUnderTest()
@@ -141,5 +141,19 @@ abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends Ab
                 }
             }
         """
+    }
+}
+
+class GroovyGradlePluginDevelopmentExtensionFunctionalTest extends AbstractGradlePluginDevelopmentExtensionFunctionalTest implements GroovyGradlePluginDevelopmentPlugin {
+    @Override
+    protected GradlePluginElement getComponentUnderTest() {
+        return new GroovyBasicGradlePlugin()
+    }
+}
+
+class JavaGradlePluginDevelopmentExtensionFunctionalTest extends AbstractGradlePluginDevelopmentExtensionFunctionalTest implements JavaGradlePluginDevelopmentPlugin {
+    @Override
+    protected GradlePluginElement getComponentUnderTest() {
+        return new JavaBasicGradlePlugin()
     }
 }

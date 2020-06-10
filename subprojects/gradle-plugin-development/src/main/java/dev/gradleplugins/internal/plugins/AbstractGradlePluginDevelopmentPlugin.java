@@ -16,6 +16,7 @@
 
 package dev.gradleplugins.internal.plugins;
 
+import dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension;
 import dev.gradleplugins.internal.DeferredRepositoryFactory;
 import dev.gradleplugins.internal.GradlePluginDevelopmentExtensionInternal;
 import org.gradle.api.GradleException;
@@ -34,7 +35,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static dev.gradleplugins.internal.plugins.GroovyGradlePluginDevelopmentPlugin.toGroovyVersion;
+import static dev.gradleplugins.GradleRuntimeCompatibility.groovyVersionOf;
+import static dev.gradleplugins.GradleRuntimeCompatibility.minimumJavaVersionFor;
 
 public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Project> {
 
@@ -72,29 +74,18 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
         });
     }
 
-    private static JavaVersion toMinimumJavaVersion(VersionNumber version) {
-        switch (version.getMajor()) {
-            case 0:
-                throw new UnsupportedOperationException("I didn't have time to figure out what is the minimum Java version for Gradle version below 1.0. Feel free to open an issue and look into that for me.");
-            case 1:
-                return JavaVersion.VERSION_1_5;
-            case 2:
-                return JavaVersion.VERSION_1_6;
-            case 3:
-            case 4:
-                return JavaVersion.VERSION_1_7;
-            case 5:
-            case 6:
-                return JavaVersion.VERSION_1_8;
-            default:
-                throw new IllegalArgumentException("Version not known at the time, please check what Java version is supported");
-        }
-    }
-
     public static void configureDefaultJavaCompatibility(JavaPluginExtension java, VersionNumber minimumGradleVersion) {
-        JavaVersion minimumJavaVersion = toMinimumJavaVersion(minimumGradleVersion);
+        JavaVersion minimumJavaVersion = minimumJavaVersionFor(minimumGradleVersion);
         java.setSourceCompatibility(minimumJavaVersion);
         java.setTargetCompatibility(minimumJavaVersion);
+    }
+
+    public static GradlePluginDevelopmentCompatibilityExtension registerCompatibilityExtension(Project project) {
+        GradlePluginDevelopmentExtension gradlePlugin = project.getExtensions().getByType(GradlePluginDevelopmentExtension.class);
+        GradlePluginDevelopmentCompatibilityExtension extension = project.getObjects().newInstance(GradlePluginDevelopmentCompatibilityExtension.class);
+        ((ExtensionAware)gradlePlugin).getExtensions().add("compatibility", extension);
+
+        return extension;
     }
 
     public static <T> GradlePluginDevelopmentExtensionInternal registerExtraExtension(Project project, Class<T> type) {
@@ -120,13 +111,13 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
         // project.getDependencies().add("compileOnly", minimumGradleVersion.map(version -> "dev.gradleplugins:gradle-api:" + version));
         project.afterEvaluate(proj -> {
             project.getDependencies().constraints(constraints -> {
-                constraints.create("org.codehaus.groovy:groovy-all:" + toGroovyVersion(VersionNumber.parse(minimumGradleVersion.get())));
+                constraints.create("org.codehaus.groovy:groovy-all:" + groovyVersionOf(minimumGradleVersion.get()));
             });
             project.getDependencies().add("compileOnly", "dev.gradleplugins:gradle-api:" + minimumGradleVersion.get());
         });
     }
 
-    public static void configureExtension(GradlePluginDevelopmentExtensionInternal extension, Project project, DeferredRepositoryFactory repositoryFactory) {
+    public static void configureExtension(GradlePluginDevelopmentCompatibilityExtension extension, Project project, DeferredRepositoryFactory repositoryFactory) {
         project.afterEvaluate(proj -> {
             if (extension.getMinimumGradleVersion().isPresent()) {
                 configureDefaultJavaCompatibility(project.getExtensions().getByType(JavaPluginExtension.class), VersionNumber.parse(extension.getMinimumGradleVersion().get()));

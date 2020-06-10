@@ -15,7 +15,7 @@ abstract class AbstractGradlePluginDevelopmentTestingStrategyFunctionalTest exte
         and:
         buildFile << """
             gradlePlugin {
-                extra {
+                compatibility {
                     minimumGradleVersion = '6.2'
                 }
             }
@@ -42,7 +42,7 @@ abstract class AbstractGradlePluginDevelopmentTestingStrategyFunctionalTest exte
         and:
         buildFile << """
             gradlePlugin {
-                extra {
+                compatibility {
                     minimumGradleVersion = '6.2'
                 }
             }
@@ -70,7 +70,7 @@ abstract class AbstractGradlePluginDevelopmentTestingStrategyFunctionalTest exte
         and:
         buildFile << """
             gradlePlugin {
-                extra {
+                compatibility {
                     minimumGradleVersion = '6.2'
                 }
             }

@@ -16,12 +16,12 @@
 
 package dev.gradleplugins.internal.plugins;
 
+import dev.gradleplugins.GradleRuntimeCompatibility;
+import dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension;
 import dev.gradleplugins.GroovyGradlePluginDevelopmentExtension;
 import dev.gradleplugins.internal.DeferredRepositoryFactory;
-import dev.gradleplugins.internal.GradlePluginDevelopmentExtensionInternal;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.util.VersionNumber;
 
 import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.*;
 
@@ -39,7 +39,8 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
         removeGradleApiProjectDependency(project);
         project.getPluginManager().apply("groovy-base");
 
-        GradlePluginDevelopmentExtensionInternal extension = registerExtraExtension(project, GroovyGradlePluginDevelopmentExtension.class);
+        registerExtraExtension(project, GroovyGradlePluginDevelopmentExtension.class);
+        GradlePluginDevelopmentCompatibilityExtension extension = registerCompatibilityExtension(project);
         configureExtension(extension, project, repositoryFactory);
 
         project.getPluginManager().apply(GradlePluginDevelopmentFunctionalTestingPlugin.class);
@@ -47,7 +48,7 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
         // TODO: Once lazy dependency is supported, see https://github.com/gradle/gradle/pull/11767
         // project.getDependencies().add("compileOnly", extension.getMinimumGradleVersion().map(VersionNumber::parse).map(GroovyGradlePluginDevelopmentPlugin::toGroovyVersion).map(version -> "org.codehaus.groovy:groovy:" + version));
         project.afterEvaluate(proj -> {
-            project.getDependencies().add("compileOnly", "org.codehaus.groovy:groovy-all:" + extension.getMinimumGradleVersion().map(VersionNumber::parse).map(GroovyGradlePluginDevelopmentPlugin::toGroovyVersion).get());
+            project.getDependencies().add("compileOnly", "org.codehaus.groovy:groovy-all:" + extension.getMinimumGradleVersion().map(GradleRuntimeCompatibility::groovyVersionOf).get());
         });
 
         repositoryFactory.groovy();
@@ -57,44 +58,5 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
         //   We could ensure GradlePlugin aren't applied to any Java source
         //   We could also check that no plugin id on `gradlePlugin` container points to a Java source
         //   We could do the same for Kotlin code
-    }
-
-    public static String toGroovyVersion(VersionNumber version) {
-        // Use `find ~/.gradle/wrapper -name "groovy-all-*"`
-        // TODO: Complete this mapping
-        switch (String.format("%d.%d", version.getMajor(), version.getMinor())) {
-            case "1.12":
-                return "1.8.6";
-            case "2.14":
-                return "2.4.4";
-            case "3.0":
-                return "2.4.7";
-            case "3.5":
-                return "2.4.10";
-            case "4.0":
-                return "2.4.11";
-            case "4.3":
-                return "2.4.12";
-            case "5.0":
-            case "5.1":
-            case "5.2":
-            case "5.3":
-            case "5.4":
-            case "5.5":
-                return "2.5.4"; //"org.gradle.groovy:groovy-all:1.0-2.5.4";
-            case "5.6":
-                return "2.5.4"; //"org.gradle.groovy:groovy-all:1.3-2.5.4";
-            case "6.0":
-            case "6.1":
-            case "6.2":
-                return "2.5.8"; //"org.gradle.groovy:groovy-all:1.3-2.5.8";
-            case "6.3":
-            case "6.4":
-                return "2.5.10"; //"org.gradle.groovy:groovy-all:1.3-2.5.10";
-            case "6.5":
-                return "2.5.11"; //"org.gradle.groovy:groovy-all:1.3-2.5.11";
-            default:
-                throw new IllegalArgumentException("Version not known at the time, please check groovy-all version");
-        }
     }
 }

@@ -33,7 +33,7 @@ abstract class AbstractGradlePluginDevelopmentFunctionalTestingPluginTest extend
     def "creates a single test task when only one testing strategy"() {
         given:
         project.apply plugin: pluginIdUnderTest
-        project.gradlePlugin.extra.minimumGradleVersion = '6.2.1'
+        project.gradlePlugin.compatibility.minimumGradleVersion = '6.2.1'
         project.components.functionalTest {
             testingStrategies = [strategies.coverageForMinimumVersion]
         }
@@ -49,7 +49,7 @@ abstract class AbstractGradlePluginDevelopmentFunctionalTestingPluginTest extend
     def "creates multiple test task when multiple testing strategy"() {
         given:
         project.apply plugin: pluginIdUnderTest
-        project.gradlePlugin.extra.minimumGradleVersion = '6.2.1'
+        project.gradlePlugin.compatibility.minimumGradleVersion = '6.2.1'
         project.components.functionalTest {
             testingStrategies = [strategies.coverageForMinimumVersion, strategies.coverageForLatestNightlyVersion]
         }
@@ -66,7 +66,7 @@ abstract class AbstractGradlePluginDevelopmentFunctionalTestingPluginTest extend
     def "configures the default Gradle version settings according to the coverage"(coverage, expectedVersion) {
         given:
         project.apply plugin: pluginIdUnderTest
-        project.gradlePlugin.extra.minimumGradleVersion = '6.2.1'
+        project.gradlePlugin.compatibility.minimumGradleVersion = '6.2.1'
         project.components.functionalTest {
             testingStrategies = Optional.ofNullable(coverage).map { [strategies."$it"] }.orElse([])
         }
