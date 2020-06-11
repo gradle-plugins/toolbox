@@ -26,7 +26,7 @@ gradlePlugin {
         }
     }
     compatibility {
-        minimumGradleVersion = '6.2.1'
+        minimumGradleVersion = project.minimumGradleVersion
     }
     java {
         withSourcesJar()
@@ -61,7 +61,7 @@ dependencies {
         }
     }
 
-    testImplementation gradleApi('6.2.1')
+    testImplementation gradleApi(minimumGradleVersion)
     testImplementation platform('org.spockframework:spock-bom:1.2-groovy-2.5')
     testImplementation 'org.spockframework:spock-core'
 }
