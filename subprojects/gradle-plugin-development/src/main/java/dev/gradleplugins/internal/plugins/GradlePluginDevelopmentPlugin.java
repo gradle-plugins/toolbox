@@ -71,22 +71,64 @@ public abstract class GradlePluginDevelopmentPlugin implements Plugin<Object> {
     }
 
     private void warnWhenUsingCoreGradlePluginDevelopment(Project project) {
-        if (project.getPluginManager().hasPlugin("org.gradle.kotlin.kotlin-dsl")) {
+        if (hasKotlinDslPlugin(project) || hasJavaGradlePluginDevelopment(project) || hasGroovyGradlePluginDevelopment(project)) {
             // Ignores anything to do with kotlin-dsl plugin
-        } else if (!project.getPluginManager().hasPlugin("dev.gradleplugins.groovy-gradle-plugin") && project.getPluginManager().hasPlugin("java-gradle-plugin") && project.getPluginManager().hasPlugin("groovy-base") && hasGroovySources(project)) {
-            LOGGER.warn(String.format("The Gradle Plugin Development team recommends using 'dev.gradleplugins.groovy-gradle-plugin' instead of 'java-gradle-plugin' and 'groovy'/'groovy-base' in project '%s'.", project.getPath()));
-        } else if (project.getPluginManager().hasPlugin("java-gradle-plugin") && !project.getPluginManager().hasPlugin("dev.gradleplugins.java-gradle-plugin")) {
-            LOGGER.warn(String.format("The Gradle Plugin Development team recommends using 'dev.gradleplugins.java-gradle-plugin' instead of 'java-gradle-plugin' in project '%s'.", project.getPath()));
+            return;
+        }
+
+        if (hasLegacyGradlePluginDevelopment(project) && !hasGroovyLanguageCapability(project)) {
+            warnAboutUsingJavaGradlePlugin(project);
+        } else if (hasLegacyGradlePluginDevelopment(project) && hasGroovyLanguageCapability(project)) {
+            if (hasGroovySources(project)) {
+                warnAboutUsingGroovyGradlePlugin(project);
+            } else if (hasJavaSources(project)) {
+                warnAboutUsingJavaGradlePlugin(project);
+            } else {
+                warnAboutUsingGroovyGradlePlugin(project);
+            }
         }
     }
 
-    private boolean hasGroovySources(Project project) {
+    private static void warnAboutUsingJavaGradlePlugin(Project project) {
+        LOGGER.warn(String.format("The Gradle Plugin Development team recommends using 'dev.gradleplugins.java-gradle-plugin' instead of 'java-gradle-plugin' in project '%s'.", project.getPath()));
+    }
+
+    private static void warnAboutUsingGroovyGradlePlugin(Project project) {
+        LOGGER.warn(String.format("The Gradle Plugin Development team recommends using 'dev.gradleplugins.groovy-gradle-plugin' instead of 'java-gradle-plugin' and 'groovy'/'groovy-base' in project '%s'.", project.getPath()));
+    }
+
+    private static boolean hasKotlinDslPlugin(Project project) {
+        return project.getPluginManager().hasPlugin("org.gradle.kotlin.kotlin-dsl");
+    }
+
+    private static boolean hasJavaGradlePluginDevelopment(Project project) {
+        return project.getPluginManager().hasPlugin("dev.gradleplugins.java-gradle-plugin");
+    }
+
+    private static boolean hasGroovyGradlePluginDevelopment(Project project) {
+        return project.getPluginManager().hasPlugin("dev.gradleplugins.groovy-gradle-plugin");
+    }
+
+    private static boolean hasLegacyGradlePluginDevelopment(Project project) {
+        return project.getPluginManager().hasPlugin("java-gradle-plugin");
+    }
+
+    private static boolean hasGroovyLanguageCapability(Project project) {
+        return project.getPluginManager().hasPlugin("groovy-base");
+    }
+
+    private static boolean hasGroovySources(Project project) {
         SourceSet sourceSet = project.getExtensions().getByType(SourceSetContainer.class).getByName("main");
         GroovySourceSet groovySourceSet = new DslObject(sourceSet).getConvention().findPlugin(GroovySourceSet.class);
         if (groovySourceSet == null) {
             return false;
         }
         return groovySourceSet.getAllGroovy().getSrcDirs().stream().anyMatch(File::exists);
+    }
+
+    private static boolean hasJavaSources(Project project) {
+        SourceSet sourceSet = project.getExtensions().getByType(SourceSetContainer.class).getByName("main");
+        return sourceSet.getAllJava().getSrcDirs().stream().anyMatch(File::exists);
     }
 
     private interface GradleFailureVisitor {

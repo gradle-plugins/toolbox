@@ -202,7 +202,8 @@ class GradlePluginDevelopmentFunctionalTest extends AbstractGradleSpecification 
         failure.assertOutputContains('Please declare a repository using repositories.gradlePluginDevelopment().')
     }
 
-    def "warn when using java-gradle-plugin without dev.gradleplugins.java-gradle-plugin"() {
+    @Unroll
+    def "shows migration message"() {
         given:
         settingsFile << """
             plugins {
@@ -211,7 +212,76 @@ class GradlePluginDevelopmentFunctionalTest extends AbstractGradleSpecification 
         """
         buildFile << """
             plugins {
-                id 'java-gradle-plugin'
+                ${maybeApplyPlugin(useLegacyGradlePluginDevelopment, 'java-gradle-plugin')}
+                ${maybeApplyPlugin(hasGroovyLanguageCapability, 'groovy')}
+            }
+        """
+        if (hasGroovySource) {
+            file('src/main/groovy/com/example/Foo.groovy') << '''package com.example
+class Foo {}
+'''
+        }
+        if (hasJavaSource) {
+            file('src/main/java/com/example/Bar.java') << '''package com.example;
+public class Bar {}
+'''
+        }
+
+        when:
+        def result = succeeds('tasks')
+
+        then:
+        if (messageToExpect == MigrationMessage.NONE) {
+            result.assertNotOutput("The Gradle Plugin Development team recommends")
+        } else if (messageToExpect == MigrationMessage.USE_GROOVY_GRADLE_PLUGIN) {
+            result.assertOutputContains("The Gradle Plugin Development team recommends using 'dev.gradleplugins.groovy-gradle-plugin' instead of 'java-gradle-plugin' and 'groovy'/'groovy-base' in project ':'.")
+        } else if (messageToExpect == MigrationMessage.USE_JAVA_GRADLE_PLUGIN) {
+            result.assertOutputContains("The Gradle Plugin Development team recommends using 'dev.gradleplugins.java-gradle-plugin' instead of 'java-gradle-plugin' in project ':'.")
+        } else {
+            false
+        }
+
+        where:
+        useLegacyGradlePluginDevelopment | hasGroovyLanguageCapability | hasGroovySource | hasJavaSource || messageToExpect
+        false                            | false                       | false           | false         || MigrationMessage.NONE
+        false                            | false                       | false           | true          || MigrationMessage.NONE
+        false                            | false                       | true            | false         || MigrationMessage.NONE
+        false                            | false                       | true            | true          || MigrationMessage.NONE
+        false                            | true                        | false           | false         || MigrationMessage.NONE
+        false                            | true                        | false           | true          || MigrationMessage.NONE
+        false                            | true                        | true            | false         || MigrationMessage.NONE
+        false                            | true                        | true            | true          || MigrationMessage.NONE
+        true                             | false                       | false           | false         || MigrationMessage.USE_JAVA_GRADLE_PLUGIN
+        true                             | false                       | false           | true          || MigrationMessage.USE_JAVA_GRADLE_PLUGIN
+        true                             | false                       | true            | false         || MigrationMessage.USE_JAVA_GRADLE_PLUGIN
+        true                             | false                       | true            | true          || MigrationMessage.USE_JAVA_GRADLE_PLUGIN
+        true                             | true                        | false           | false         || MigrationMessage.USE_GROOVY_GRADLE_PLUGIN
+        true                             | true                        | false           | true          || MigrationMessage.USE_JAVA_GRADLE_PLUGIN
+        true                             | true                        | true            | false         || MigrationMessage.USE_GROOVY_GRADLE_PLUGIN
+        true                             | true                        | true            | true          || MigrationMessage.USE_GROOVY_GRADLE_PLUGIN
+    }
+
+    private enum MigrationMessage {
+        NONE, USE_JAVA_GRADLE_PLUGIN, USE_GROOVY_GRADLE_PLUGIN
+    }
+
+    private static String maybeApplyPlugin(boolean condition, String pluginId) {
+        if (condition) {
+            return "id '$pluginId'"
+        }
+        return ""
+    }
+
+    def "does not warn when using dev.gradleplugins.java-gradle-plugin"() {
+        given:
+        settingsFile << """
+            plugins {
+                id 'dev.gradleplugins.gradle-plugin-development'
+            }
+        """
+        buildFile << """
+            plugins {
+                id 'dev.gradleplugins.java-gradle-plugin'
             }
         """
         new JavaBasicGradlePlugin().writeToProject(testDirectory)
@@ -220,10 +290,10 @@ class GradlePluginDevelopmentFunctionalTest extends AbstractGradleSpecification 
         def result = succeeds('assemble')
 
         then:
-        result.assertOutputContains("The Gradle Plugin Development team recommends using 'dev.gradleplugins.java-gradle-plugin' instead of 'java-gradle-plugin' in project ':'.")
+        result.assertNotOutput('The Gradle Plugin Development team recommends')
     }
 
-    def "warn when using java-gradle-plugin with groovy main sources without dev.gradleplugins.groovy-gradle-plugin"() {
+    def "does not warn when using dev.gradleplugins.groovy-gradle-plugin"() {
         given:
         settingsFile << """
             plugins {
@@ -232,8 +302,7 @@ class GradlePluginDevelopmentFunctionalTest extends AbstractGradleSpecification 
         """
         buildFile << """
             plugins {
-                id 'java-gradle-plugin'
-                id 'groovy'
+                id 'dev.gradleplugins.groovy-gradle-plugin'
             }
         """
         new GroovyBasicGradlePlugin().writeToProject(testDirectory)
@@ -242,29 +311,7 @@ class GradlePluginDevelopmentFunctionalTest extends AbstractGradleSpecification 
         def result = succeeds('assemble')
 
         then:
-        result.assertOutputContains("The Gradle Plugin Development team recommends using 'dev.gradleplugins.groovy-gradle-plugin' instead of 'java-gradle-plugin' and 'groovy'/'groovy-base' in project ':'.")
-    }
-
-    def "warn when using java-gradle-plugin with groovy plugin and no Groovy source without dev.gradleplugins.groovy-gradle-plugin"() {
-        given:
-        settingsFile << """
-            plugins {
-                id 'dev.gradleplugins.gradle-plugin-development'
-            }
-        """
-        buildFile << """
-            plugins {
-                id 'java-gradle-plugin'
-                id 'groovy'
-            }
-        """
-        new JavaBasicGradlePlugin().writeToProject(testDirectory)
-
-        when:
-        def result = succeeds('assemble')
-
-        then:
-        result.assertOutputContains("The Gradle Plugin Development team recommends using 'dev.gradleplugins.java-gradle-plugin' instead of 'java-gradle-plugin' in project ':'.")
+        result.assertNotOutput('The Gradle Plugin Development team recommends')
     }
 
     def "does not warn when using kotlin-dsl plugin"() {
