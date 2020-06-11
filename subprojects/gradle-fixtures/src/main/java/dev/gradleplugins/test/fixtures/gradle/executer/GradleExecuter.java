@@ -163,4 +163,11 @@ public interface GradleExecuter {
      */
     GradleExecuter requireOwnGradleUserHomeDirectory();
 
+    /**
+     * Disable deprecation warning checks.
+     *
+     * @return a {@link GradleExecuter} with the new configuration.
+     */
+    GradleExecuter withoutDeprecationChecks();
+
 }

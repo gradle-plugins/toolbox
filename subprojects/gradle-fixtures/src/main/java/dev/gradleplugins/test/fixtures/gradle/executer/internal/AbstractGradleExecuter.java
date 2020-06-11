@@ -208,6 +208,13 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
     }
     //endregion
 
+    //region Deprecation warning checks configuration
+    @Override
+    public GradleExecuter withoutDeprecationChecks() {
+        return newInstance(configuration.withAllowDeprecations(false));
+    }
+    //endregion
+
     @Override
     public ExecutionResult run() {
         fireBeforeExecute();
@@ -265,6 +272,8 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
         allArguments.addAll(ofNullable(configuration.getGradleUserHomeDirectory()).map(it -> asList("--gradle-user-home", it.getAbsolutePath())).orElse(emptyList()));
 
         allArguments.addAll(ofNullable(configuration.getConsoleType()).map(it -> asList("--console", it.toString().toLowerCase())).orElse(emptyList()));
+
+        allArguments.addAll(configuration.isAllowDeprecations() ? emptyList() : asList("--warning-mode", "fail"));
 
         allArguments.addAll(configuration.getArguments());
         allArguments.addAll(configuration.getTasks());
