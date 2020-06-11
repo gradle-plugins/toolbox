@@ -1,16 +1,3 @@
-// WORKAROUND: There seems to be a bug where Gradle is too eager to perform dependency substitution.
-// It replace the binary dependency for the project within the current multi-project.
-// The result is a dependency cycle with an error message wrongly pointing to miss built plugin project.
-buildscript {
-    repositories {
-        gradlePluginPortal()
-        maven { url = 'https://dl.bintray.com/gradle-plugins/distributions' }
-    }
-    dependencies {
-        classpath 'dev.gradleplugins:gradle-plugin-development:0.0.69'
-    }
-}
-
 allprojects {
     version = rootProject.file('version.txt').text.trim()
     group = 'dev.gradleplugins'

@@ -1,5 +1,6 @@
 import com.jfrog.bintray.gradle.tasks.BintrayUploadTask
 import org.gradle.api.publish.maven.internal.artifact.FileBasedMavenArtifact
+import dev.gradleplugins.GradleRuntimeCompatibility
 
 import java.text.SimpleDateFormat
 
@@ -21,8 +22,8 @@ sourceSets {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = GradleRuntimeCompatibility.minimumJavaVersionFor('6.2.1')
+    targetCompatibility = GradleRuntimeCompatibility.minimumJavaVersionFor('6.2.1')
     withSourcesJar()
     withJavadocJar()
     registerFeature('spockSupport') {
@@ -36,7 +37,7 @@ repositories {
     jcenter()
     mavenCentral()
     gradlePluginPortal()
-    maven { url = 'https://dl.bintray.com/gradle-plugins/distributions' }
+    gradlePluginDevelopment()
 }
 
 dependencies {
@@ -66,10 +67,10 @@ dependencies {
 
     // SPOCK SUPPORT
     spockSupportApi project(':gradle-fixtures')
-    spockSupportApi 'org.codehaus.groovy:groovy-all:2.5.8'
+    spockSupportApi "org.codehaus.groovy:groovy-all:${GradleRuntimeCompatibility.groovyVersionOf('6.2.1')}"
     spockSupportApi platform('org.spockframework:spock-bom:1.2-groovy-2.5')
     spockSupportApi 'org.spockframework:spock-core'
-    spockSupportCompileOnly 'dev.gradleplugins:gradle-api:6.2.1' // Required because of the AbstractInstalledToolChainIntegrationSpec which is extremely tied to the internal of Gradle
+    spockSupportCompileOnly gradleApi('6.2.1') // Required because of the AbstractInstalledToolChainIntegrationSpec which is extremely tied to the internal of Gradle
     spockSupportCompileOnly gradleTestKit()
     spockSupportApi 'org.apache.commons:commons-lang3:3.10'
     spockSupportImplementation 'commons-io:commons-io:2.6'
