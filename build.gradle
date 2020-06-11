@@ -1,4 +1,4 @@
 allprojects {
-    version = rootProject.file('version.txt').text.trim()
+    version = '0.0.71'
     group = 'dev.gradleplugins'
 }
