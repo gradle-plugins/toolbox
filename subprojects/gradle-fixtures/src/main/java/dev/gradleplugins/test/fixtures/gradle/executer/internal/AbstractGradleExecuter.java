@@ -211,7 +211,7 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
     //region Deprecation warning checks configuration
     @Override
     public GradleExecuter withoutDeprecationChecks() {
-        return newInstance(configuration.withAllowDeprecations(false));
+        return newInstance(configuration.withAllowDeprecations(true));
     }
     //endregion
 
