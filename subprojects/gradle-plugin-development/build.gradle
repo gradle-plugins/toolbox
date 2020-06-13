@@ -6,7 +6,8 @@ import java.text.SimpleDateFormat
 plugins {
     id 'com.jfrog.bintray'
     id 'maven-publish'
-    id "org.jetbrains.kotlin.jvm" version "1.3.72"
+    id 'org.jetbrains.kotlin.jvm' version "1.3.72"
+    id 'java-test-fixtures'
 }
 apply plugin: 'dev.gradleplugins.java-gradle-plugin'
 
@@ -60,6 +61,7 @@ dependencies {
             requireCapability('dev.gradleplugins:gradle-fixtures-spock-support')
         }
     }
+    functionalTestImplementation(testFixtures(project(':gradle-plugin-development')))
 
     testImplementation gradleApi(minimumGradleVersion)
     testImplementation platform('org.spockframework:spock-bom:1.2-groovy-2.5')

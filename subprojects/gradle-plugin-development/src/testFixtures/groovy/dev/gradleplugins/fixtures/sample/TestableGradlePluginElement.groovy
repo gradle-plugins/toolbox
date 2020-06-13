@@ -30,7 +30,7 @@ class TestableGradlePluginElement extends GradlePluginElement {
 
     @Override
     void writeToProject(TestFile projectDir) {
-        ofElements(main, functionalTest).writeToProject(projectDir)
+        dev.gradleplugins.test.fixtures.sources.SourceElement.ofElements(main, functionalTest).writeToProject(projectDir)
     }
 
     GradlePluginElement withTestingStrategySupport() {
