@@ -17,23 +17,21 @@
 package dev.gradleplugins.api
 
 import groovy.transform.CompileStatic
-import org.gradle.api.Action;
-import org.gradle.api.DefaultTask;
-import org.gradle.api.file.RegularFileProperty;
-import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.OutputFile;
-import org.gradle.api.tasks.TaskAction;
-import org.gradle.tooling.GradleConnector;
-import org.gradle.tooling.ProjectConnection;
-import org.gradle.workers.WorkAction;
-import org.gradle.workers.WorkParameters;
-import org.gradle.workers.WorkerExecutor;
+import org.gradle.api.DefaultTask
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.TaskAction
+import org.gradle.tooling.GradleConnector
+import org.gradle.tooling.ProjectConnection
+import org.gradle.workers.WorkAction
+import org.gradle.workers.WorkParameters
+import org.gradle.workers.WorkerExecutor
 
-import javax.inject.Inject;
-import java.io.*;
+import javax.inject.Inject
 import java.nio.file.Files
-import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardCopyOption
 
 @CompileStatic
 public abstract class GenerateGradleApiJar extends DefaultTask {
