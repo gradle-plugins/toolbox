@@ -24,13 +24,17 @@ public class GradlePluginDevelopmentDependencyExtensionInternal implements Gradl
         return getDependencies().create("dev.gradleplugins:gradle-api:" + version);
     }
 
+    public static String gradleApiNotation(String version) {
+        return "dev.gradleplugins:gradle-api:" + version;
+    }
+
     @Override
     public Dependency gradleFixtures() {
         return getDependencies().create("dev.gradleplugins:gradle-fixtures:" + DefaultDependencyVersions.GRADLE_FIXTURES_VERSION);
     }
 
     public void applyTo(DependencyHandler dependencies) {
-        ExtensionAware.class.cast(dependencies).getExtensions().add("gradlePluginDevelopment", this);
+        ExtensionAware.class.cast(dependencies).getExtensions().add(GradlePluginDevelopmentDependencyExtension.class, "gradlePluginDevelopment", this);
         try {
             Method target = Class.forName("dev.gradleplugins.internal.dsl.groovy.GroovyDslRuntimeExtensions").getMethod("extendWithMethod", Object.class, String.class, Closure.class);
             target.invoke(null, dependencies, "gradleApi", new GradleApiClosure(dependencies));

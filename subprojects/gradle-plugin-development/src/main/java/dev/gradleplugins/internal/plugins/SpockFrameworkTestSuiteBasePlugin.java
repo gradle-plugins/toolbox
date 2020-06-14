@@ -55,14 +55,8 @@ public class SpockFrameworkTestSuiteBasePlugin implements Plugin<Project> {
     }
 
     public static void configureSpockFrameworkProjectDependency(Provider<String> spockVersion, SourceSet sourceSet, Project project) {
-        // TODO: Once lazy dependency is supported, see https://github.com/gradle/gradle/pull/11767
-        // project.getDependencies().add(testSuite.getSourceSet().getImplementationConfigurationName(), "org.codehaus.groovy:groovy-all:" + GROOVY_ALL_VERSION);
-        // project.getDependencies().add(testSuite.getSourceSet().getImplementationConfigurationName(), testSuite.getSpockVersion().map(version -> "org.spockframework:spock-bom:" + version));
-        // project.getDependencies().add(testSuite.getSourceSet().getImplementationConfigurationName(), "org.spockframework:spock-core");
-        project.afterEvaluate(proj -> {
-            project.getDependencies().add(sourceSet.getImplementationConfigurationName(), "org.codehaus.groovy:groovy-all:" + GROOVY_ALL_VERSION);
-            project.getDependencies().add(sourceSet.getImplementationConfigurationName(), project.getDependencies().platform("org.spockframework:spock-bom:" + spockVersion.get()));
-            project.getDependencies().add(sourceSet.getImplementationConfigurationName(), "org.spockframework:spock-core");
-        });
+         project.getDependencies().add(sourceSet.getImplementationConfigurationName(), "org.codehaus.groovy:groovy-all:" + GROOVY_ALL_VERSION);
+         project.getDependencies().add(sourceSet.getImplementationConfigurationName(), spockVersion.map(version -> "org.spockframework:spock-bom:" + version));
+         project.getDependencies().add(sourceSet.getImplementationConfigurationName(), "org.spockframework:spock-core");
     }
 }

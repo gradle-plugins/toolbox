@@ -20,12 +20,9 @@ import dev.gradleplugins.GradleRuntimeCompatibility;
 import dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension;
 import dev.gradleplugins.GroovyGradlePluginDevelopmentExtension;
 import dev.gradleplugins.internal.DeferredRepositoryFactory;
-import dev.gradleplugins.internal.GradlePluginDevelopmentExtensionInternal;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.plugins.ExtensionAware;
-import org.gradle.api.plugins.JavaPluginExtension;
-import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
+import org.gradle.util.VersionNumber;
 
 import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.*;
 
@@ -45,16 +42,11 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
 
         registerLanguageExtension(project, "groovy", GroovyGradlePluginDevelopmentExtension.class);
         GradlePluginDevelopmentCompatibilityExtension extension = registerCompatibilityExtension(project);
-        configureExtension(extension, project, repositoryFactory);
+        configureExtension(extension, project);
 
         project.getPluginManager().apply(GradlePluginDevelopmentFunctionalTestingPlugin.class);
 
-        // TODO: Once lazy dependency is supported, see https://github.com/gradle/gradle/pull/11767
-        // project.getDependencies().add("compileOnly", extension.getMinimumGradleVersion().map(VersionNumber::parse).map(GroovyGradlePluginDevelopmentPlugin::toGroovyVersion).map(version -> "org.codehaus.groovy:groovy:" + version));
-        project.afterEvaluate(proj -> {
-            project.getDependencies().add("compileOnly", "org.codehaus.groovy:groovy-all:" + extension.getMinimumGradleVersion().map(GradleRuntimeCompatibility::groovyVersionOf).get());
-        });
-
+         project.getDependencies().add("compileOnly", extension.getMinimumGradleVersion().map(GradleRuntimeCompatibility::groovyVersionOf).map(version -> "org.codehaus.groovy:groovy-all:" + version));
         repositoryFactory.groovy();
 
         // TODO: warn if the plugin only have has Java source and no Groovy.

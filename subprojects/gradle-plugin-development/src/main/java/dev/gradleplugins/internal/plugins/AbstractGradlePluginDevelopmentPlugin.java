@@ -18,7 +18,9 @@ package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension;
 import dev.gradleplugins.internal.DeferredRepositoryFactory;
+import dev.gradleplugins.internal.GradlePluginDevelopmentDependencyExtensionInternal;
 import dev.gradleplugins.internal.GradlePluginDevelopmentExtensionInternal;
+import dev.gradleplugins.internal.GradlePluginDevelopmentRepositoryExtensionInternal;
 import org.gradle.api.GradleException;
 import org.gradle.api.JavaVersion;
 import org.gradle.api.Plugin;
@@ -107,18 +109,7 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
         });
     }
 
-    public static void configureGradleApiDependencies(Project project, Provider<String> minimumGradleVersion) {
-        // TODO: Once lazy dependency is supported, see https://github.com/gradle/gradle/pull/11767
-        // project.getDependencies().add("compileOnly", minimumGradleVersion.map(version -> "dev.gradleplugins:gradle-api:" + version));
-        project.afterEvaluate(proj -> {
-            project.getDependencies().constraints(constraints -> {
-                constraints.create("org.codehaus.groovy:groovy-all:" + groovyVersionOf(minimumGradleVersion.get()));
-            });
-            project.getDependencies().add("compileOnly", "dev.gradleplugins:gradle-api:" + minimumGradleVersion.get());
-        });
-    }
-
-    public static void configureExtension(GradlePluginDevelopmentCompatibilityExtension extension, Project project, DeferredRepositoryFactory repositoryFactory) {
+    public static void configureExtension(GradlePluginDevelopmentCompatibilityExtension extension, Project project) {
         project.afterEvaluate(proj -> {
             if (extension.getMinimumGradleVersion().isPresent()) {
                 configureDefaultJavaCompatibility(project.getExtensions().getByType(JavaPluginExtension.class), VersionNumber.parse(extension.getMinimumGradleVersion().get()));
@@ -127,7 +118,7 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
             }
             extension.getMinimumGradleVersion().disallowChanges();
         });
-        configureGradleApiDependencies(project, extension.getMinimumGradleVersion());
-        repositoryFactory.gradleApi();
+        project.getDependencies().add("compileOnly", extension.getMinimumGradleVersion().map(GradlePluginDevelopmentDependencyExtensionInternal::gradleApiNotation));
+        GradlePluginDevelopmentRepositoryExtensionInternal.gradlePluginDevelopment(project.getRepositories());
     }
 }

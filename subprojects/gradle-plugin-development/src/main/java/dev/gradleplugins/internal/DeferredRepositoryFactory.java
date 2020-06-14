@@ -32,28 +32,6 @@ public abstract class DeferredRepositoryFactory {
         project.afterEvaluate(DeferredRepositoryFactory::createGradleFixturesRepository);
     }
 
-    public void gradleApi() {
-        project.afterEvaluate(DeferredRepositoryFactory::createGradleApiRepository);
-        project.afterEvaluate(DeferredRepositoryFactory::createGroovyForGradleApiRepository);
-    }
-
-    public static void createGradleApiRepository(Project project) {
-        project.getRepositories().maven(repository -> {
-            repository.setName("Gradle Plugin Development - Gradle APIs");
-            repository.setUrl(project.uri("https://dl.bintray.com/gradle-plugins/distributions"));
-            repository.mavenContent(content -> {
-                content.includeModule("dev.gradleplugins", "gradle-api");
-            });
-        });
-    }
-
-    private static void createGroovyForGradleApiRepository(Project project) {
-        project.getRepositories().mavenCentral(repo -> {
-            repo.setName("Gradle Plugin Development - Gradle APIs (Groovy)");
-            repo.mavenContent(content -> content.includeModule("org.codehaus.groovy", "groovy"));
-        });
-    }
-
     public static void createGradleFixturesRepository(Project project) {
         project.getRepositories().maven(repository -> {
             repository.setName("Gradle Plugins Development - Gradle Fixtures");

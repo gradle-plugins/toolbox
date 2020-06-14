@@ -22,11 +22,15 @@ public class GradlePluginDevelopmentRepositoryExtensionInternal implements Gradl
 
     @Override
     public MavenArtifactRepository gradlePluginDevelopment() {
-        getRepositories().mavenCentral(repo -> {
+        return gradlePluginDevelopment(getRepositories());
+    }
+
+    public static MavenArtifactRepository gradlePluginDevelopment(RepositoryHandler repositories) {
+        repositories.mavenCentral(repo -> {
             repo.setName("Gradle Plugin Development - Groovy");
             repo.mavenContent(content -> content.includeModule("org.codehaus.groovy", "groovy"));
         });
-        return getRepositories().maven(repository -> {
+        return repositories.maven(repository -> {
             repository.setName("Gradle Plugin Development");
             repository.setUrl("https://dl.bintray.com/gradle-plugins/distributions");
             repository.mavenContent(content -> {
@@ -36,7 +40,7 @@ public class GradlePluginDevelopmentRepositoryExtensionInternal implements Gradl
     }
 
     public void applyTo(RepositoryHandler repositories) {
-        ExtensionAware.class.cast(repositories).getExtensions().add("gradlePluginDevelopment", this);
+        ExtensionAware.class.cast(repositories).getExtensions().add(GradlePluginDevelopmentRepositoryExtension.class, "gradlePluginDevelopment", this);
         try {
             Method target = Class.forName("dev.gradleplugins.internal.dsl.groovy.GroovyDslRuntimeExtensions").getMethod("extendWithMethod", Object.class, String.class, Closure.class);
             target.invoke(null, repositories, "gradlePluginDevelopment", new GradlePluginDevelopmentClosure(repositories));
