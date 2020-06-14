@@ -1,14 +1,10 @@
 package dev.gradleplugins.internal.plugins;
 
-import dev.gradleplugins.internal.GradlePluginDevelopmentDependencyExtensionInternal;
-import dev.gradleplugins.internal.GradlePluginDevelopmentRepositoryExtensionInternal;
 import lombok.RequiredArgsConstructor;
 import org.gradle.BuildAdapter;
 import org.gradle.BuildResult;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.artifacts.dsl.DependencyHandler;
-import org.gradle.api.artifacts.dsl.RepositoryHandler;
 import org.gradle.api.initialization.Settings;
 import org.gradle.api.internal.plugins.DslObject;
 import org.gradle.api.logging.Logger;
@@ -55,19 +51,8 @@ public abstract class GradlePluginDevelopmentPlugin implements Plugin<Object> {
     }
 
     private void applyToProject(Project project) {
-        applyToRepositories(project.getRepositories());
-        applyToDependencies(project.getDependencies());
+        project.getPluginManager().apply(GradlePluginDevelopmentExtensionPlugin.class);
         project.afterEvaluate(this::warnWhenUsingCoreGradlePluginDevelopment);
-    }
-
-    private void applyToRepositories(RepositoryHandler repositories) {
-        GradlePluginDevelopmentRepositoryExtensionInternal extension = new GradlePluginDevelopmentRepositoryExtensionInternal(repositories);
-        extension.applyTo(repositories);
-    }
-
-    private void applyToDependencies(DependencyHandler dependencies) {
-        GradlePluginDevelopmentDependencyExtensionInternal extension = new GradlePluginDevelopmentDependencyExtensionInternal(dependencies);
-        extension.applyTo(dependencies);
     }
 
     private void warnWhenUsingCoreGradlePluginDevelopment(Project project) {

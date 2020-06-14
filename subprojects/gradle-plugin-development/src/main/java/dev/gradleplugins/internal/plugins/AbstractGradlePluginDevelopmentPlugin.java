@@ -17,10 +17,10 @@
 package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension;
-import dev.gradleplugins.internal.DeferredRepositoryFactory;
 import dev.gradleplugins.internal.GradlePluginDevelopmentDependencyExtensionInternal;
 import dev.gradleplugins.internal.GradlePluginDevelopmentExtensionInternal;
 import dev.gradleplugins.internal.GradlePluginDevelopmentRepositoryExtensionInternal;
+import lombok.val;
 import org.gradle.api.GradleException;
 import org.gradle.api.JavaVersion;
 import org.gradle.api.Plugin;
@@ -29,8 +29,6 @@ import org.gradle.api.internal.artifacts.dependencies.SelfResolvingDependencyInt
 import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.plugins.PluginManager;
-import org.gradle.api.provider.Provider;
-import org.gradle.internal.Cast;
 import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 import org.gradle.util.VersionNumber;
 
@@ -38,7 +36,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static dev.gradleplugins.GradleRuntimeCompatibility.groovyVersionOf;
 import static dev.gradleplugins.GradleRuntimeCompatibility.minimumJavaVersionFor;
 
 public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Project> {
@@ -118,7 +115,8 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
             }
             extension.getMinimumGradleVersion().disallowChanges();
         });
-        project.getDependencies().add("compileOnly", extension.getMinimumGradleVersion().map(GradlePluginDevelopmentDependencyExtensionInternal::gradleApiNotation));
-        GradlePluginDevelopmentRepositoryExtensionInternal.gradlePluginDevelopment(project.getRepositories());
+        val dependencies = GradlePluginDevelopmentDependencyExtensionInternal.of(project.getDependencies());
+        dependencies.add(project, "compileOnly", extension.getMinimumGradleVersion().map(dependencies::gradleApi));
+        GradlePluginDevelopmentRepositoryExtensionInternal.of(project.getRepositories()).gradlePluginDevelopment();
     }
 }

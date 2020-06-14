@@ -18,7 +18,6 @@ package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension;
 import dev.gradleplugins.JavaGradlePluginDevelopmentExtension;
-import dev.gradleplugins.internal.DeferredRepositoryFactory;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 
@@ -32,8 +31,7 @@ public class JavaGradlePluginDevelopmentPlugin implements Plugin<Project> { //ex
         assertJavaGradlePluginIsNotPreviouslyApplied(project.getPluginManager(), PLUGIN_ID);
         assertKotlinDslPluginIsNeverApplied(project.getPluginManager(), PLUGIN_ID);
 
-        DeferredRepositoryFactory repositoryFactory = project.getObjects().newInstance(DeferredRepositoryFactory.class, project);
-
+        project.getPluginManager().apply(GradlePluginDevelopmentExtensionPlugin.class);
         project.getPluginManager().apply("java-gradle-plugin"); // For plugin development
         removeGradleApiProjectDependency(project);
 

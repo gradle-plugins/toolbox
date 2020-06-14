@@ -22,21 +22,21 @@ public class GradlePluginDevelopmentRepositoryExtensionInternal implements Gradl
 
     @Override
     public MavenArtifactRepository gradlePluginDevelopment() {
-        return gradlePluginDevelopment(getRepositories());
-    }
-
-    public static MavenArtifactRepository gradlePluginDevelopment(RepositoryHandler repositories) {
-        repositories.mavenCentral(repo -> {
+        getRepositories().mavenCentral(repo -> {
             repo.setName("Gradle Plugin Development - Groovy");
             repo.mavenContent(content -> content.includeModule("org.codehaus.groovy", "groovy"));
         });
-        return repositories.maven(repository -> {
+        return getRepositories().maven(repository -> {
             repository.setName("Gradle Plugin Development");
             repository.setUrl("https://dl.bintray.com/gradle-plugins/distributions");
             repository.mavenContent(content -> {
                 content.includeGroup("dev.gradleplugins");
             });
         });
+    }
+
+    public static GradlePluginDevelopmentRepositoryExtensionInternal of(RepositoryHandler repositories) {
+        return (GradlePluginDevelopmentRepositoryExtensionInternal) ExtensionAware.class.cast(repositories).getExtensions().getByType(GradlePluginDevelopmentRepositoryExtension.class);
     }
 
     public void applyTo(RepositoryHandler repositories) {

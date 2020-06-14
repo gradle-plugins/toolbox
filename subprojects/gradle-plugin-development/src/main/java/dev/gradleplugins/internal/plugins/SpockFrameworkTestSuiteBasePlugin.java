@@ -17,6 +17,7 @@
 package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.internal.DeferredRepositoryFactory;
+import dev.gradleplugins.internal.GradlePluginDevelopmentDependencyExtensionInternal;
 import dev.gradleplugins.internal.GroovySpockFrameworkTestSuite;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -56,7 +57,7 @@ public class SpockFrameworkTestSuiteBasePlugin implements Plugin<Project> {
 
     public static void configureSpockFrameworkProjectDependency(Provider<String> spockVersion, SourceSet sourceSet, Project project) {
          project.getDependencies().add(sourceSet.getImplementationConfigurationName(), "org.codehaus.groovy:groovy-all:" + GROOVY_ALL_VERSION);
-         project.getDependencies().add(sourceSet.getImplementationConfigurationName(), spockVersion.map(version -> "org.spockframework:spock-bom:" + version));
+        GradlePluginDevelopmentDependencyExtensionInternal.of(project.getDependencies()).add(project, sourceSet.getImplementationConfigurationName(), spockVersion.map(version -> project.getDependencies().platform("org.spockframework:spock-bom:" + version)));
          project.getDependencies().add(sourceSet.getImplementationConfigurationName(), "org.spockframework:spock-core");
     }
 }

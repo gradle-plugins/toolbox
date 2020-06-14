@@ -5,11 +5,14 @@ import groovy.lang.Closure;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.gradle.api.Project;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.plugins.ExtensionAware;
+import org.gradle.api.provider.Provider;
+import org.gradle.util.GradleVersion;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -24,13 +27,26 @@ public class GradlePluginDevelopmentDependencyExtensionInternal implements Gradl
         return getDependencies().create("dev.gradleplugins:gradle-api:" + version);
     }
 
-    public static String gradleApiNotation(String version) {
-        return "dev.gradleplugins:gradle-api:" + version;
-    }
-
     @Override
     public Dependency gradleFixtures() {
         return getDependencies().create("dev.gradleplugins:gradle-fixtures:" + DefaultDependencyVersions.GRADLE_FIXTURES_VERSION);
+    }
+
+    // Shim for supporting older Gradle versions
+    public void add(Project project, String configuration, Provider<Object> notation) {
+        if (isGradleVersionGreaterOrEqualsTo6Dot5()) {
+            getDependencies().add(configuration, notation);
+        } else {
+            project.afterEvaluate(proj -> getDependencies().add(configuration, notation.get()));
+        }
+    }
+
+    private static boolean isGradleVersionGreaterOrEqualsTo6Dot5() {
+        return GradleVersion.current().compareTo(GradleVersion.version("6.5")) >= 0;
+    }
+
+    public static GradlePluginDevelopmentDependencyExtensionInternal of(DependencyHandler dependencies) {
+        return (GradlePluginDevelopmentDependencyExtensionInternal) ExtensionAware.class.cast(dependencies).getExtensions().getByType(GradlePluginDevelopmentDependencyExtension.class);
     }
 
     public void applyTo(DependencyHandler dependencies) {

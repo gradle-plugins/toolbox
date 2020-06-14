@@ -16,13 +16,13 @@
 
 package dev.gradleplugins.internal.plugins;
 
-import dev.gradleplugins.GradleRuntimeCompatibility;
 import dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension;
+import dev.gradleplugins.GradleRuntimeCompatibility;
 import dev.gradleplugins.GroovyGradlePluginDevelopmentExtension;
 import dev.gradleplugins.internal.DeferredRepositoryFactory;
+import dev.gradleplugins.internal.GradlePluginDevelopmentDependencyExtensionInternal;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.util.VersionNumber;
 
 import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.*;
 
@@ -36,6 +36,7 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
 
         DeferredRepositoryFactory repositoryFactory = project.getObjects().newInstance(DeferredRepositoryFactory.class, project);
 
+        project.getPluginManager().apply(GradlePluginDevelopmentExtensionPlugin.class);
         project.getPluginManager().apply("java-gradle-plugin"); // For plugin development
         removeGradleApiProjectDependency(project);
         project.getPluginManager().apply("groovy");
@@ -46,7 +47,7 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
 
         project.getPluginManager().apply(GradlePluginDevelopmentFunctionalTestingPlugin.class);
 
-         project.getDependencies().add("compileOnly", extension.getMinimumGradleVersion().map(GradleRuntimeCompatibility::groovyVersionOf).map(version -> "org.codehaus.groovy:groovy-all:" + version));
+        GradlePluginDevelopmentDependencyExtensionInternal.of(project.getDependencies()).add(project, "compileOnly", extension.getMinimumGradleVersion().map(GradleRuntimeCompatibility::groovyVersionOf).map(version -> "org.codehaus.groovy:groovy-all:" + version));
         repositoryFactory.groovy();
 
         // TODO: warn if the plugin only have has Java source and no Groovy.
