@@ -66,6 +66,15 @@ dependencies {
     testImplementation gradleApi(minimumGradleVersion)
     testImplementation platform('org.spockframework:spock-bom:1.2-groovy-2.5')
     testImplementation 'org.spockframework:spock-core'
+
+    testFixturesCompileOnly gradleApi(minimumGradleVersion)
+    testFixturesImplementation project(':gradle-fixtures')
+    testFixturesImplementation(project(':gradle-fixtures')) {
+        capabilities {
+            requireCapability('dev.gradleplugins:gradle-fixtures-spock-support')
+        }
+    }
+    testFixturesImplementation "org.codehaus.groovy:groovy-all:2.5.11"
 }
 
 // Temporary workaround for https://github.com/bintray/gradle-bintray-plugin/issues/229
