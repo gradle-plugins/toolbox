@@ -18,9 +18,9 @@ package dev.gradleplugins.fixtures.sample
 
 import dev.gradleplugins.test.fixtures.sources.SourceElement
 import dev.gradleplugins.test.fixtures.sources.SourceFile
-import org.apache.tools.ant.taskdefs.optional.extension.Specification
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import spock.lang.Specification
 
 class BasicGradlePluginTestKitTest extends SourceElement {
     @Override

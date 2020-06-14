@@ -2,8 +2,8 @@ package dev.gradleplugins.fixtures.sample
 
 import dev.gradleplugins.test.fixtures.sources.SourceElement
 import dev.gradleplugins.test.fixtures.sources.SourceFile
-import org.apache.tools.ant.taskdefs.optional.extension.Specification
 import org.gradle.testfixtures.ProjectBuilder
+import spock.lang.Specification
 
 class BasicGradlePluginProjectBuilderTest extends SourceElement {
     @Override
