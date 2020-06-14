@@ -1,5 +1,6 @@
 import com.jfrog.bintray.gradle.tasks.BintrayUploadTask
 import org.gradle.api.publish.maven.internal.artifact.FileBasedMavenArtifact
+import static dev.gradleplugins.GradleRuntimeCompatibility.*
 
 import java.text.SimpleDateFormat
 
@@ -74,7 +75,7 @@ dependencies {
             requireCapability('dev.gradleplugins:gradle-fixtures-spock-support')
         }
     }
-    testFixturesImplementation "org.codehaus.groovy:groovy-all:2.5.11"
+    testFixturesImplementation "org.codehaus.groovy:groovy-all:${groovyVersionOf(minimumGradleVersion)}"
 }
 
 // Temporary workaround for https://github.com/bintray/gradle-bintray-plugin/issues/229
