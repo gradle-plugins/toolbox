@@ -54,6 +54,7 @@ class BasicPluginFunctionalTest extends ${Specification.simpleName} {
 
         when:
         def result = GradleRunner.create()
+            .withPluginClasspath()
             .withProjectDir(testProjectDir.root)
             .withArguments('help')
             .build()
