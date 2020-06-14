@@ -32,16 +32,48 @@ public class GradleRuntimeCompatibility {
         switch (String.format("%d.%d", gradleVersion.getMajor(), gradleVersion.getMinor())) {
             case "1.12":
                 return "1.8.6";
+            case "2.0":
+                return "2.3.3";
+            case "2.1":
+            case "2.2":
+                return "2.3.6";
+            case "2.3":
+                return "2.3.9";
+            case "2.4":
+            case "2.5":
+            case "2.6":
+            case "2.7":
+                return "2.3.10";
+            case "2.8":
+            case "2.9":
+            case "2.10":
+            case "2.11":
+            case "2.12":
+            case "2.13":
             case "2.14":
                 return "2.4.4";
             case "3.0":
+            case "3.1":
+            case "3.2":
+            case "3.3":
+            case "3.4":
                 return "2.4.7";
             case "3.5":
                 return "2.4.10";
             case "4.0":
+            case "4.1":
                 return "2.4.11";
+            case "4.2":
             case "4.3":
+            case "4.4":
+            case "4.5":
+            case "4.6":
+            case "4.7":
+            case "4.8":
+            case "4.9":
                 return "2.4.12";
+            case "4.10":
+                return "2.4.15";
             case "5.0":
             case "5.1":
             case "5.2":
@@ -121,12 +153,49 @@ public class GradleRuntimeCompatibility {
     public static Optional<String> kotlinVersionOf(VersionNumber gradleVersion) {
         // Use `find ~/.gradle/wrapper -name "kotlin-stdlib-*"` once the distribution was downloaded locally
         switch (String.format("%d.%d", gradleVersion.getMajor(), gradleVersion.getMinor())) {
+            case "2.0":
+            case "2.1":
+            case "2.2":
+            case "2.3":
+            case "2.4":
+            case "2.5":
+            case "2.6":
+            case "2.7":
+            case "2.8":
+            case "2.9":
+            case "2.10":
+            case "2.11":
+            case "2.12":
+            case "2.13":
             case "2.14":
                 return Optional.empty();
+            case "3.0":
+                return Optional.of("1.1-M01"); // Does not exists
+            case "3.1":
+            case "3.2":
+                return Optional.of("1.1.0-dev-2053"); // Found in https://dl.bintray.com/kotlin/kotlin-dev/
+            case "3.3":
+            case "3.4":
+                return Optional.of("1.1-M02-8"); // Technically, the version in Gradle distribution is 1.1-M02, but only 1.1.-M02-8 in https://dl.bintray.com/kotlin/kotlin-dev/ can be found.
             case "3.5":
+            case "4.0":
                 return Optional.of("1.1.0");
+            case "4.1":
+                return Optional.of("1.1.3-2");
+            case "4.2":
+                return Optional.of("1.1.4-3");
+            case "4.3":
+            case "4.4":
+                return Optional.of("1.1.51");
             case "4.5":
                 return Optional.of("1.2.0");
+            case "4.6":
+                return Optional.of("1.2.21");
+            case "4.7":
+                return Optional.of("1.2.31");
+            case "4.8":
+            case "4.9":
+                return Optional.of("1.2.41");
             case "4.10":
                 return Optional.of("1.2.61");
             case "5.0":
