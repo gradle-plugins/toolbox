@@ -1,4 +1,4 @@
 allprojects {
-    version = '0.0.72'
+    version = '0.0.74'
     group = 'dev.gradleplugins'
 }
