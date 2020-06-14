@@ -45,9 +45,7 @@ class VersionDownloadInfo {
 }
 private Set<String> allGeneralAvailableVersion() {
     def versionInfo = new JsonSlurper().parseText('https://services.gradle.org/versions/all'.toURL().text).collect { new VersionDownloadInfo(it) }
-    def result = versionInfo.findAll { it.notSnapshot && it.notReleaseCandidate && it.notMilestone && it.greaterOrEqualTo("5.5") }.collect { it.version }
-    result.add('3.5.1')
-    result.add('2.14.1')
+    def result = versionInfo.findAll { it.notSnapshot && it.notReleaseCandidate && it.notMilestone && it.greaterOrEqualTo("2.14") }.collect { it.version }
     return result
 }
 include('gradle-api')
