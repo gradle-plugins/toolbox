@@ -7,7 +7,7 @@ buildscript {
         maven { url = 'https://dl.bintray.com/gradle-plugins/distributions' }
     }
     dependencies {
-        classpath 'dev.gradleplugins:gradle-plugin-development:0.0.76'
+        classpath 'dev.gradleplugins:gradle-plugin-development:0.0.77'
     }
 }
 apply plugin: 'dev.gradleplugins.gradle-plugin-development'
