@@ -1,6 +1,6 @@
 package dev.gradleplugins.internal.plugins
 
-import dev.gradleplugins.GradlePluginSpockFrameworkTestSuite
+import dev.gradleplugins.GradlePluginDevelopmentTestSuite
 import groovy.json.JsonSlurper
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.Specification
@@ -15,7 +15,7 @@ abstract class AbstractGradlePluginDevelopmentFunctionalTestingPluginTest extend
 
         then:
         project.components.findByName('functionalTest') != null
-        project.components.functionalTest instanceof GradlePluginSpockFrameworkTestSuite
+        project.components.functionalTest instanceof GradlePluginDevelopmentTestSuite
     }
 
     def "creates a single test task when no testing strategy"() {

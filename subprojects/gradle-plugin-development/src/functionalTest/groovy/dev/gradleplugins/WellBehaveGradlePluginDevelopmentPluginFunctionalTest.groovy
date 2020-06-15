@@ -108,35 +108,18 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
         succeeds('build')
 
         then:
-        result.assertTaskNotSkipped(':build')
+        result.assertTasksExecuted(allTasksToBuild)
+        testTasks.each { result.assertTaskSkipped(it) }
         jar("build/libs/${projectName}.jar").hasDescendants('com/example/BasicPlugin.class',"META-INF/gradle-plugins/${componentUnderTest.pluginId}.properties")
         jar("build/libs/${projectName}.jar").assertFileContent("META-INF/gradle-plugins/${componentUnderTest.pluginId}.properties", CoreMatchers.startsWith('implementation-class=com.example.BasicPlugin'))
     }
 
+    protected List<String> getAllTasksToBuild() {
+        return [':compileJava', ':pluginDescriptors', ':processResources', ':classes', ':jar', ':assemble', ':pluginUnderTestMetadata', ':validatePlugins', ':check', ':build'] + testTasks
+    }
 
-    // TODO: Assert the right version of the fixture is pulled
-    def "can functional test a Gradle plugin"() {
-        given:
-        buildFile << """
-            plugins {
-                ${configureApplyPluginUnderTest()}
-            }
-
-            repositories {
-                jcenter()
-            }
-            
-            ${configureGradlePluginExtension()}
-        """
-        componentUnderTest.withFunctionalTest().writeToProject(testDirectory)
-
-        when:
-        succeeds('build')
-
-        then:
-        result.assertTaskNotSkipped(':build')
-        jar("build/libs/${projectName}.jar").hasDescendants('com/example/BasicPlugin.class',"META-INF/gradle-plugins/${componentUnderTest.pluginId}.properties")
-        jar("build/libs/${projectName}.jar").assertFileContent("META-INF/gradle-plugins/${componentUnderTest.pluginId}.properties", CoreMatchers.startsWith('implementation-class=com.example.BasicPlugin'))
+    protected List<String> getTestTasks() {
+        return [':compileTestJava', ':processTestResources', ':testClasses', ':test']
     }
 
     def "fails if `kotlin-dsl` plugin is applied"() {
@@ -378,5 +361,15 @@ class GroovyGradlePluginDevelopmentWellBehaveFunctionalTest extends WellBehaveGr
     @Override
     protected GradlePluginElement getComponentUnderTest() {
         return new GroovyBasicGradlePlugin()
+    }
+
+    @Override
+    protected List<String> getAllTasksToBuild() {
+        return super.getAllTasksToBuild() + [':compileGroovy']
+    }
+
+    @Override
+    protected List<String> getTestTasks() {
+        return super.getTestTasks() + [':compileTestGroovy']
     }
 }

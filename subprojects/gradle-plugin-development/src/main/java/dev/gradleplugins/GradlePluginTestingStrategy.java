@@ -3,7 +3,7 @@ package dev.gradleplugins;
 /**
  * A testing strategy for a Gradle plugin project test suite.
  *
- * @see GradlePluginSpockFrameworkTestSuite
+ * @see GradlePluginDevelopmentTestSuite
  */
 public interface GradlePluginTestingStrategy {
 }

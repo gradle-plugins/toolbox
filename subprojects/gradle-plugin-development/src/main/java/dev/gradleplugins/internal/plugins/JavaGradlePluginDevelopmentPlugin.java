@@ -16,7 +16,6 @@
 
 package dev.gradleplugins.internal.plugins;
 
-import dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension;
 import dev.gradleplugins.JavaGradlePluginDevelopmentExtension;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -37,7 +36,5 @@ public class JavaGradlePluginDevelopmentPlugin implements Plugin<Project> {
 
         registerLanguageExtension(project, "java", JavaGradlePluginDevelopmentExtension.class);
         registerCompatibilityExtension(project);
-
-        project.getPluginManager().apply(GradlePluginDevelopmentFunctionalTestingPlugin.class);
     }
 }

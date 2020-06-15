@@ -19,7 +19,7 @@ abstract class AbstractGradlePluginDevelopmentTestingStrategyFunctionalTest exte
                     minimumGradleVersion = '6.2'
                 }
             }
-            
+
             components.functionalTest {
                 testingStrategies = [strategies.coverageForMinimumVersion, strategies.coverageForLatestGlobalAvailableVersion]
             }
@@ -74,7 +74,7 @@ abstract class AbstractGradlePluginDevelopmentTestingStrategyFunctionalTest exte
                     minimumGradleVersion = '6.2'
                 }
             }
-            
+
             components.functionalTest {
                 testingStrategies = [strategies.${coverage}]
             }
@@ -121,6 +121,7 @@ abstract class AbstractGradlePluginDevelopmentTestingStrategyFunctionalTest exte
         buildFile << """
             plugins {
                 id '${pluginIdUnderTest}'
+                id 'dev.gradleplugins.gradle-plugin-functional-test'
             }
 
             gradlePlugin {
@@ -129,6 +130,18 @@ abstract class AbstractGradlePluginDevelopmentTestingStrategyFunctionalTest exte
                         id = '${componentUnderTest.pluginId}'
                         implementationClass = 'com.example.BasicPlugin'
                     }
+                }
+            }
+
+            repositories {
+                jcenter()
+            }
+
+            functionalTest {
+                dependencies {
+                    implementation spockFramework()
+                    implementation gradleFixtures()
+                    implementation gradleTestKit()
                 }
             }
         """

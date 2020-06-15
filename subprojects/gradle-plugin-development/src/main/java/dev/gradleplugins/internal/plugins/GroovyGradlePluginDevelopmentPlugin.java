@@ -43,8 +43,6 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
         registerLanguageExtension(project, "groovy", GroovyGradlePluginDevelopmentExtension.class);
         GradlePluginDevelopmentCompatibilityExtension extension = registerCompatibilityExtension(project);
 
-        project.getPluginManager().apply(GradlePluginDevelopmentFunctionalTestingPlugin.class);
-
         val dependencies = GradlePluginDevelopmentDependencyExtensionInternal.of(project.getDependencies());
         dependencies.add("compileOnly", extension.getMinimumGradleVersion().map(GradleRuntimeCompatibility::groovyVersionOf).map(dependencies::groovy));
 

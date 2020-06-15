@@ -6,7 +6,7 @@ import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.testing.Test;
 
-public interface GradlePluginSpockFrameworkTestSuite {
+public interface GradlePluginDevelopmentTestSuite {
     /**
      * Configure the testing strategies for this test suite.
      *
@@ -22,13 +22,6 @@ public interface GradlePluginSpockFrameworkTestSuite {
     Property<SourceSet> getTestedSourceSet();
 
     /**
-     * Configure the Spock framework version to use by this test suite.
-     *
-     * @return a property for configuring the Spock framework version
-     */
-    Property<String> getSpockVersion();
-
-    /**
      * Returns a factory for creating the various testing strategies.
      *
      * @return a {@link GradlePluginTestingStrategyFactory} instance, never null.
@@ -37,7 +30,7 @@ public interface GradlePluginSpockFrameworkTestSuite {
 
     TaskView<Test> getTestTasks();
 
-    GradlePluginSpockFrameworkTestSuiteDependencies getDependencies();
+    GradlePluginDevelopmentTestSuiteDependencies getDependencies();
 
-    void dependencies(Action<? super GradlePluginSpockFrameworkTestSuiteDependencies> action);
+    void dependencies(Action<? super GradlePluginDevelopmentTestSuiteDependencies> action);
 }

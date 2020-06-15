@@ -5,12 +5,11 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.Action;
-import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.artifacts.ConfigurationContainer;
-import org.gradle.api.artifacts.ExternalModuleDependency;
+import org.gradle.api.artifacts.*;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
 import org.gradle.api.component.SoftwareComponent;
 import org.gradle.api.model.ObjectFactory;
+import org.gradle.api.plugins.PluginManager;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskContainer;
@@ -21,7 +20,9 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class GradlePluginSpockFrameworkTestSuiteInternal implements GradlePluginSpockFrameworkTestSuite, SoftwareComponent {
+import static dev.gradleplugins.internal.DefaultDependencyVersions.SPOCK_FRAMEWORK_VERSION;
+
+public abstract class GradlePluginDevelopmentTestSuiteInternal implements GradlePluginDevelopmentTestSuite, SoftwareComponent {
     private final GradlePluginTestingStrategyFactory strategyFactory = getObjects().newInstance(GradlePluginTestingStrategyFactoryInternal.class);
     @Getter private final Dependencies dependencies;
     @Getter private final String name;
@@ -35,10 +36,10 @@ public abstract class GradlePluginSpockFrameworkTestSuiteInternal implements Gra
     protected abstract TaskContainer getTasks();
 
     @Inject
-    public GradlePluginSpockFrameworkTestSuiteInternal(String name, SourceSet sourceSet) {
+    public GradlePluginDevelopmentTestSuiteInternal(String name, SourceSet sourceSet, PluginManager pluginManager) {
         this.name = name;
         this.sourceSet = sourceSet;
-        this.dependencies = getObjects().newInstance(Dependencies.class, sourceSet);
+        this.dependencies = getObjects().newInstance(Dependencies.class, sourceSet, pluginManager);
         getTasks().named("pluginUnderTestMetadata", PluginUnderTestMetadata.class, task -> {
             task.getPluginClasspath().from(dependencies.pluginUnderTestMetadata);
         });
@@ -67,12 +68,13 @@ public abstract class GradlePluginSpockFrameworkTestSuiteInternal implements Gra
     }
 
     @Override
-    public void dependencies(Action<? super GradlePluginSpockFrameworkTestSuiteDependencies> action) {
+    public void dependencies(Action<? super GradlePluginDevelopmentTestSuiteDependencies> action) {
         action.execute(dependencies);
     }
 
-    protected abstract static class Dependencies implements GradlePluginSpockFrameworkTestSuiteDependencies {
+    protected abstract static class Dependencies implements GradlePluginDevelopmentTestSuiteDependencies {
         private final SourceSet sourceSet;
+        private final PluginManager pluginManager;
         private final Configuration pluginUnderTestMetadata;
 
         @Inject
@@ -82,8 +84,9 @@ public abstract class GradlePluginSpockFrameworkTestSuiteInternal implements Gra
         protected abstract DependencyHandler getDependencies();
 
         @Inject
-        public Dependencies(SourceSet sourceSet) {
+        public Dependencies(SourceSet sourceSet, PluginManager pluginManager) {
             this.sourceSet = sourceSet;
+            this.pluginManager = pluginManager;
             this.pluginUnderTestMetadata = getConfigurations().create(sourceSet.getName() + StringUtils.capitalize("pluginUnderTestMetadata"));
         }
 
@@ -93,8 +96,8 @@ public abstract class GradlePluginSpockFrameworkTestSuiteInternal implements Gra
         }
 
         @Override
-        public void implementation(Object notation, Action<? super ExternalModuleDependency> action) {
-            ExternalModuleDependency dependency = (ExternalModuleDependency) getDependencies().create(notation);
+        public void implementation(Object notation, Action<? super ModuleDependency> action) {
+            ModuleDependency dependency = (ModuleDependency) getDependencies().create(notation);
             action.execute(dependency);
             getDependencies().add(sourceSet.getImplementationConfigurationName(), dependency);
         }
@@ -112,6 +115,32 @@ public abstract class GradlePluginSpockFrameworkTestSuiteInternal implements Gra
         @Override
         public void pluginUnderTestMetadata(Object notation) {
             getDependencies().add(pluginUnderTestMetadata.getName(), notation);
+        }
+
+        @Override
+        public Dependency testFixtures(Object notation) {
+            return getDependencies().testFixtures(notation);
+        }
+
+        @Override
+        public Dependency spockFramework() {
+            return spockFramework(SPOCK_FRAMEWORK_VERSION);
+        }
+
+        @Override
+        public Dependency spockFramework(String version) {
+            pluginManager.apply("groovy-base"); // Spock framework imply Groovy implementation language
+            return GradlePluginDevelopmentDependencyExtensionInternal.of(getDependencies()).spockFramework(version);
+        }
+
+        @Override
+        public Dependency gradleFixtures() {
+            return GradlePluginDevelopmentDependencyExtensionInternal.of(getDependencies()).gradleFixtures();
+        }
+
+        @Override
+        public Dependency gradleTestKit() {
+            return getDependencies().gradleTestKit();
         }
     }
 }

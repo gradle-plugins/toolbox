@@ -26,6 +26,10 @@ gradlePlugin {
             id = 'dev.gradleplugins.gradle-plugin-development'
             implementationClass = 'dev.gradleplugins.internal.plugins.GradlePluginDevelopmentPlugin'
         }
+        functionalTest {
+            id = 'dev.gradleplugins.gradle-plugin-functional-test'
+            implementationClass = 'dev.gradleplugins.internal.plugins.GradlePluginDevelopmentFunctionalTestingPlugin'
+        }
     }
     compatibility {
         minimumGradleVersion = project.minimumGradleVersion

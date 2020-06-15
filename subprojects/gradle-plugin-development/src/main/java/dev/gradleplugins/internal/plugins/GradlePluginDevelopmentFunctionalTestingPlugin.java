@@ -1,13 +1,16 @@
 package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension;
+import dev.gradleplugins.GradlePluginDevelopmentTestSuite;
 import dev.gradleplugins.GradlePluginTestingStrategy;
-import dev.gradleplugins.internal.*;
+import dev.gradleplugins.internal.DeferredRepositoryFactory;
+import dev.gradleplugins.internal.GradlePluginDevelopmentTestSuiteInternal;
+import dev.gradleplugins.internal.GradlePluginTestingStrategyInternal;
+import dev.gradleplugins.internal.ReleasedVersionDistributions;
 import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.artifacts.ModuleDependency;
 import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
@@ -20,10 +23,7 @@ import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 import javax.inject.Inject;
 import java.util.Set;
 
-import static dev.gradleplugins.internal.DefaultDependencyVersions.GRADLE_FIXTURES_VERSION;
-import static dev.gradleplugins.internal.DefaultDependencyVersions.SPOCK_FRAMEWORK_VERSION;
 import static dev.gradleplugins.internal.GradlePluginTestingStrategyInternal.*;
-import static dev.gradleplugins.internal.plugins.SpockFrameworkTestSuiteBasePlugin.configureSpockFrameworkProjectDependency;
 
 public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements Plugin<Project> {
     private static final String FUNCTIONAL_TEST_NAME = "functionalTest";
@@ -33,11 +33,7 @@ public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements 
 
     @Override
     public void apply(Project project) {
-        DeferredRepositoryFactory repositoryFactory = project.getObjects().newInstance(DeferredRepositoryFactory.class, project);
-
-        project.getPluginManager().apply("groovy-base");
-
-        project.getComponents().withType(GradlePluginSpockFrameworkTestSuiteInternal.class).configureEach(testSuite -> {
+        project.getComponents().withType(GradlePluginDevelopmentTestSuiteInternal.class).configureEach(testSuite -> {
             project.afterEvaluate(proj -> {
                 testSuite.getTestedSourceSet().disallowChanges();
                 if (testSuite.getTestedSourceSet().isPresent()) {
@@ -48,18 +44,11 @@ public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements 
                 }
             });
 
-            testSuite.getSpockVersion().convention(SPOCK_FRAMEWORK_VERSION).finalizeValueOnRead();
-            configureSpockFrameworkProjectDependency(testSuite.getSpockVersion(), testSuite.getSourceSet(), project);
-            repositoryFactory.spock();
-
             SourceSet sourceSet = testSuite.getSourceSet();
 
             // Configure functionalTest for GradlePluginDevelopmentExtension
             GradlePluginDevelopmentExtension gradlePlugin = project.getExtensions().getByType(GradlePluginDevelopmentExtension.class);
             gradlePlugin.testSourceSets(sourceSet);
-
-            configureTestKitProjectDependency(testSuite, project);
-            configureGradleFixturesProjectDependency(testSuite, project, repositoryFactory);
 
             project.afterEvaluate(proj -> {
                 testSuite.getTestingStrategies().disallowChanges();
@@ -84,15 +73,22 @@ public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements 
             });
         });
 
+        project.getPluginManager().withPlugin("dev.gradleplugins.java-gradle-plugin", appliedPlugin -> createFunctionalTestSuite(project));
+        project.getPluginManager().withPlugin("dev.gradleplugins.groovy-gradle-plugin", appliedPlugin -> createFunctionalTestSuite(project));
+    }
+
+    private void createFunctionalTestSuite(Project project) {
         SourceSetContainer sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
-        GradlePluginSpockFrameworkTestSuiteInternal functionalTestSuite = project.getObjects().newInstance(GradlePluginSpockFrameworkTestSuiteInternal.class, FUNCTIONAL_TEST_NAME, sourceSets.maybeCreate(FUNCTIONAL_TEST_NAME));
+        GradlePluginDevelopmentTestSuiteInternal functionalTestSuite = project.getObjects().newInstance(GradlePluginDevelopmentTestSuiteInternal.class, FUNCTIONAL_TEST_NAME, sourceSets.maybeCreate(FUNCTIONAL_TEST_NAME));
         functionalTestSuite.getTestedSourceSet().convention(project.provider(() -> sourceSets.getByName("main")));
         functionalTestSuite.getTestedGradlePlugin().set((GradlePluginDevelopmentCompatibilityExtension) ((ExtensionAware)project.getExtensions().getByType(GradlePluginDevelopmentExtension.class)).getExtensions().getByName("compatibility"));
         functionalTestSuite.getTestedGradlePlugin().disallowChanges();
+
         project.getComponents().add(functionalTestSuite);
+        project.getExtensions().add(GradlePluginDevelopmentTestSuite.class, "functionalTest", functionalTestSuite);
     }
 
-    private Action<Test> applyTestActions(GradlePluginSpockFrameworkTestSuiteInternal testSuite) {
+    private Action<Test> applyTestActions(GradlePluginDevelopmentTestSuiteInternal testSuite) {
         return task -> {
             for (Action<? super Test> action : testSuite.getTestTaskActions()) {
                 action.execute(task);
@@ -100,7 +96,7 @@ public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements 
         };
     }
 
-    private Action<Test> testingStrategy(GradlePluginSpockFrameworkTestSuiteInternal testSuite, GradlePluginTestingStrategyInternal strategy) {
+    private Action<Test> testingStrategy(GradlePluginDevelopmentTestSuiteInternal testSuite, GradlePluginTestingStrategyInternal strategy) {
         return task -> {
             String version;
             switch (strategy.getName()) {
@@ -120,11 +116,11 @@ public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements 
         };
     }
 
-    private TaskProvider<Test> createTestTask(GradlePluginSpockFrameworkTestSuiteInternal testSuite) {
+    private TaskProvider<Test> createTestTask(GradlePluginDevelopmentTestSuiteInternal testSuite) {
         return createTestTask(testSuite, "");
     }
 
-    private TaskProvider<Test> createTestTask(GradlePluginSpockFrameworkTestSuiteInternal testSuite, String variant) {
+    private TaskProvider<Test> createTestTask(GradlePluginDevelopmentTestSuiteInternal testSuite, String variant) {
         SourceSet sourceSet = testSuite.getSourceSet();
         return getTasks().register(sourceSet.getName() + StringUtils.capitalize(variant), Test.class, it -> {
             it.setDescription("Runs the functional tests");
@@ -133,16 +129,5 @@ public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements 
             it.setTestClassesDirs(sourceSet.getOutput().getClassesDirs());
             it.setClasspath(sourceSet.getRuntimeClasspath());
         });
-    }
-
-    private static void configureTestKitProjectDependency(GradlePluginSpockFrameworkTestSuiteInternal testSuite, Project project) {
-        project.getDependencies().add(testSuite.getSourceSet().getCompileOnlyConfigurationName(), project.getDependencies().gradleTestKit());
-    }
-
-    private static void configureGradleFixturesProjectDependency(GradlePluginSpockFrameworkTestSuiteInternal testSuite, Project project, DeferredRepositoryFactory repositoryFactory) {
-        ModuleDependency dep = (ModuleDependency)project.getDependencies().add(testSuite.getSourceSet().getImplementationConfigurationName(), "dev.gradleplugins:gradle-fixtures:" + GRADLE_FIXTURES_VERSION);
-        dep.capabilities(h -> h.requireCapability("dev.gradleplugins:gradle-fixtures-spock-support"));
-
-        repositoryFactory.gradleFixtures();
     }
 }

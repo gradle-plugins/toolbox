@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Dependency;
+import org.gradle.api.artifacts.ModuleDependency;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
@@ -30,7 +31,11 @@ public class GradlePluginDevelopmentDependencyExtensionInternal implements Gradl
 
     @Override
     public Dependency gradleFixtures() {
-        return getDependencies().create("dev.gradleplugins:gradle-fixtures:" + DefaultDependencyVersions.GRADLE_FIXTURES_VERSION);
+        ModuleDependency dependency = (ModuleDependency)getDependencies().create("dev.gradleplugins:gradle-fixtures:" + DefaultDependencyVersions.GRADLE_FIXTURES_VERSION);
+        dependency.capabilities(it -> {
+            it.requireCapability("dev.gradleplugins:gradle-fixtures-spock-support");
+        });
+        return dependency;
     }
 
     public Dependency groovy(String version) {
