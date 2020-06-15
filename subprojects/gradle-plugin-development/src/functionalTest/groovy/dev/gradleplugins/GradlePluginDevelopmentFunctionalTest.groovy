@@ -369,4 +369,25 @@ public class Bar {}
         where:
         dsl << GradleScriptDsl.values()
     }
+
+    def "can handle exception with null message"() {
+        given:
+        settingsFile << """
+            plugins {
+                id 'dev.gradleplugins.gradle-plugin-development'
+            }
+            rootProject.name = 'root'
+        """
+        buildFile << """
+            throw new GradleException("Some exception", new Throwable())
+        """
+
+        when:
+        def failure = fails('tasks')
+
+        then:
+        failure.assertHasDescription("A problem occurred evaluating root project 'root'.")
+        failure.assertHasCause("Some exception")
+        failure.assertNotOutput("java.lang.NullPointerException (no error message)")
+    }
 }

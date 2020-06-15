@@ -160,6 +160,10 @@ public abstract class GradlePluginDevelopmentPlugin implements Plugin<Object> {
 
         @Override
         public void visitCause(Throwable cause) {
+            if (cause.getMessage() == null) {
+                return; // skip
+            }
+
             if (cause.getMessage().startsWith("Could not find org.codehaus.groovy:groovy-all") && cause.getMessage().contains("dev.gradleplugins:gradle-api:")) {
                 missingGroovyAll = true;
             } else if (cause.getMessage().startsWith("Could not find org.jetbrains.kotlin:kotlin-stdlib") && cause.getMessage().contains("dev.gradleplugins:gradle-api:")) {
@@ -186,6 +190,10 @@ public abstract class GradlePluginDevelopmentPlugin implements Plugin<Object> {
         private boolean shouldReport = false;
         @Override
         public void visitCause(Throwable cause) {
+            if (cause.getMessage() == null) {
+                return; // skip
+            }
+
             if (cause.getMessage().startsWith("Cannot resolve external dependency dev.gradleplugins:") || cause.getMessage().startsWith("Could not find dev.gradleplugins:")) {
                 shouldReport = true;
             }
