@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 public class GradlePluginDevelopmentDependencyExtensionInternal implements GradlePluginDevelopmentDependencyExtension {
     private static final Logger LOGGER = Logging.getLogger(GradlePluginDevelopmentDependencyExtensionInternal.class);
     @Getter(AccessLevel.PROTECTED) private final DependencyHandler dependencies;
+    private final Project project; // for the provider as notation shim
 
     @Override
     public Dependency gradleApi(String version) {
@@ -32,6 +33,22 @@ public class GradlePluginDevelopmentDependencyExtensionInternal implements Gradl
         return getDependencies().create("dev.gradleplugins:gradle-fixtures:" + DefaultDependencyVersions.GRADLE_FIXTURES_VERSION);
     }
 
+    public Dependency groovy(String version) {
+        return getDependencies().create("org.codehaus.groovy:groovy-all:" + version);
+    }
+
+    public Dependency spockFramework(String version) {
+        return getDependencies().create("org.spockframework:spock-core:" + version);
+    }
+
+    public Dependency spockFramework() {
+        return getDependencies().create("org.spockframework:spock-core");
+    }
+
+    public Dependency spockFrameworkPlatform(String version) {
+        return getDependencies().platform(getDependencies().create("org.spockframework:spock-bom:" + version));
+    }
+
     // Shim for supporting older Gradle versions
     public void add(Project project, String configuration, Provider<Object> notation) {
         if (isGradleVersionGreaterOrEqualsTo6Dot5()) {
@@ -39,6 +56,18 @@ public class GradlePluginDevelopmentDependencyExtensionInternal implements Gradl
         } else {
             project.afterEvaluate(proj -> getDependencies().add(configuration, notation.get()));
         }
+    }
+
+    public void add(String configuration, Provider<Object> notation) {
+        if (isGradleVersionGreaterOrEqualsTo6Dot5()) {
+            getDependencies().add(configuration, notation);
+        } else {
+            project.afterEvaluate(proj -> getDependencies().add(configuration, notation.get()));
+        }
+    }
+
+    public void add(String configuration, Object notation) {
+        getDependencies().add(configuration, notation);
     }
 
     private static boolean isGradleVersionGreaterOrEqualsTo6Dot5() {

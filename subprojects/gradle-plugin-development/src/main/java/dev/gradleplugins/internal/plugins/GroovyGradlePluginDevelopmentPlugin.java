@@ -21,6 +21,7 @@ import dev.gradleplugins.GradleRuntimeCompatibility;
 import dev.gradleplugins.GroovyGradlePluginDevelopmentExtension;
 import dev.gradleplugins.internal.DeferredRepositoryFactory;
 import dev.gradleplugins.internal.GradlePluginDevelopmentDependencyExtensionInternal;
+import lombok.val;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 
@@ -47,7 +48,8 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
 
         project.getPluginManager().apply(GradlePluginDevelopmentFunctionalTestingPlugin.class);
 
-        GradlePluginDevelopmentDependencyExtensionInternal.of(project.getDependencies()).add(project, "compileOnly", extension.getMinimumGradleVersion().map(GradleRuntimeCompatibility::groovyVersionOf).map(version -> "org.codehaus.groovy:groovy-all:" + version));
+        val dependencies = GradlePluginDevelopmentDependencyExtensionInternal.of(project.getDependencies());
+        dependencies.add("compileOnly", extension.getMinimumGradleVersion().map(GradleRuntimeCompatibility::groovyVersionOf).map(dependencies::groovy));
         repositoryFactory.groovy();
 
         // TODO: warn if the plugin only have has Java source and no Groovy.

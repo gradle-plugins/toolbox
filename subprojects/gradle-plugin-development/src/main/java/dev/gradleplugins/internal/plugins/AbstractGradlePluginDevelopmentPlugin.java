@@ -116,7 +116,7 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
             extension.getMinimumGradleVersion().disallowChanges();
         });
         val dependencies = GradlePluginDevelopmentDependencyExtensionInternal.of(project.getDependencies());
-        dependencies.add(project, "compileOnly", extension.getMinimumGradleVersion().map(dependencies::gradleApi));
+        dependencies.add("compileOnly", extension.getMinimumGradleVersion().map(dependencies::gradleApi));
         GradlePluginDevelopmentRepositoryExtensionInternal.of(project.getRepositories()).gradlePluginDevelopment();
     }
 }
