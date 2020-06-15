@@ -24,6 +24,7 @@ import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopment
 
 public class JavaGradlePluginDevelopmentPlugin implements Plugin<Project> {
     private static final String PLUGIN_ID = "dev.gradleplugins.java-gradle-plugin";
+
     @Override
     public void apply(Project project) {
         assertOtherGradlePluginDevelopmentPluginsAreNeverApplied(project.getPluginManager(), PLUGIN_ID);

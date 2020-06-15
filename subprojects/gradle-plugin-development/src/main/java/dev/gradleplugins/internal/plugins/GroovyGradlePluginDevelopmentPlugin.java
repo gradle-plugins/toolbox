@@ -29,6 +29,7 @@ import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopment
 
 public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
     private static final String PLUGIN_ID = "dev.gradleplugins.groovy-gradle-plugin";
+
     @Override
     public void apply(Project project) {
         assertOtherGradlePluginDevelopmentPluginsAreNeverApplied(project.getPluginManager(), PLUGIN_ID);
@@ -40,12 +41,15 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
         removeGradleApiProjectDependency(project);
         project.getPluginManager().apply("groovy");
 
-        registerLanguageExtension(project, "groovy", GroovyGradlePluginDevelopmentExtension.class);
-        GradlePluginDevelopmentCompatibilityExtension extension = registerCompatibilityExtension(project);
+        val groovy = registerLanguageExtension(project, "groovy", GroovyGradlePluginDevelopmentExtension.class);
+        val extension = registerCompatibilityExtension(project);
 
+        // Configure the Groovy version and dependency
+        groovy.getGroovyVersion().convention(extension.getMinimumGradleVersion().map(GradleRuntimeCompatibility::groovyVersionOf));
         val dependencies = GradlePluginDevelopmentDependencyExtensionInternal.of(project.getDependencies());
-        dependencies.add("compileOnly", extension.getMinimumGradleVersion().map(GradleRuntimeCompatibility::groovyVersionOf).map(dependencies::groovy));
+        dependencies.add("compileOnly", groovy.getGroovyVersion().map(dependencies::groovy));
 
+        // TODO: We should warn that a repository is required instead of trying to add a groovy only repository
         DeferredRepositoryFactory repositoryFactory = project.getObjects().newInstance(DeferredRepositoryFactory.class, project);
         repositoryFactory.groovy();
 
