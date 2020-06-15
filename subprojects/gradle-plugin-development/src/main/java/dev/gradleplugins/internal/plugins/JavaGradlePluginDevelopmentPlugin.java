@@ -36,8 +36,7 @@ public class JavaGradlePluginDevelopmentPlugin implements Plugin<Project> {
         removeGradleApiProjectDependency(project);
 
         registerLanguageExtension(project, "java", JavaGradlePluginDevelopmentExtension.class);
-        GradlePluginDevelopmentCompatibilityExtension extension = registerCompatibilityExtension(project);
-        configureExtension(extension, project);
+        registerCompatibilityExtension(project);
 
         project.getPluginManager().apply(GradlePluginDevelopmentFunctionalTestingPlugin.class);
     }

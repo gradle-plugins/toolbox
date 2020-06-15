@@ -44,7 +44,6 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
 
         registerLanguageExtension(project, "groovy", GroovyGradlePluginDevelopmentExtension.class);
         GradlePluginDevelopmentCompatibilityExtension extension = registerCompatibilityExtension(project);
-        configureExtension(extension, project);
 
         project.getPluginManager().apply(GradlePluginDevelopmentFunctionalTestingPlugin.class);
 

@@ -83,6 +83,9 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
     public static GradlePluginDevelopmentCompatibilityExtension registerCompatibilityExtension(Project project) {
         GradlePluginDevelopmentExtension gradlePlugin = project.getExtensions().getByType(GradlePluginDevelopmentExtension.class);
         GradlePluginDevelopmentCompatibilityExtension extension = project.getObjects().newInstance(GradlePluginDevelopmentCompatibilityExtension.class);
+
+        configureExtension(extension, project);
+
         ((ExtensionAware)gradlePlugin).getExtensions().add("compatibility", extension);
 
         return extension;
