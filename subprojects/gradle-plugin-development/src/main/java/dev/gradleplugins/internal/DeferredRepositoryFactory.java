@@ -28,49 +28,6 @@ public abstract class DeferredRepositoryFactory {
         project.afterEvaluate(DeferredRepositoryFactory::createSpockRepository);
     }
 
-    public void gradleFixtures() {
-        project.afterEvaluate(DeferredRepositoryFactory::createGradleFixturesRepository);
-    }
-
-    public static void createGradleFixturesRepository(Project project) {
-        project.getRepositories().maven(repository -> {
-            repository.setName("Gradle Plugins Development - Gradle Fixtures");
-            repository.setUrl(project.uri("https://dl.bintray.com/gradle-plugins/distributions"));
-            repository.mavenContent(content -> content.includeModule("dev.gradleplugins", "gradle-fixtures"));
-        });
-        project.getRepositories().jcenter(repository -> {
-            repository.setName("Gradle Plugins Development - Gradle Fixtures Dependencies");
-            repository.mavenContent(content -> allowGradleFixturesDependencies().accept(content));
-        });
-    }
-
-    private static Consumer<MavenRepositoryContentDescriptor> allowGradleFixturesDependencies() {
-        return content -> {
-            content.includeModule("net.rubygrapefruit", "ansi-control-sequence-util");
-            content.includeModule("org.apache.commons", "commons-lang3");
-            content.includeModule("org.hamcrest", "hamcrest");
-            content.includeModule("com.google.guava", "guava");
-            content.includeModule("com.google.guava", "guava-parent");
-            content.includeModule("com.google.j2objc", "j2objc-annotations");
-            content.includeModule("com.google.errorprone", "error_prone_annotations");
-            content.includeModule("com.google.errorprone", "error_prone_parent");
-            content.includeModule("org.checkerframework", "checker-qual");
-            content.includeModule("com.google.code.findbugs", "jsr305");
-            content.includeModule("com.google.guava", "listenablefuture");
-            content.includeModule("com.google.guava", "failureaccess");
-
-            content.includeModule("org.ow2.asm", "asm");
-            content.includeModule("org.ow2.asm", "asm-parent");
-            content.includeModule("org.ow2", "ow2");
-            content.includeModule("org.jsoup", "jsoup");
-            content.includeModule("commons-io", "commons-io");
-            content.includeModule("org.apache.commons", "commons-exec");
-            content.includeModule("com.google.code.gson", "gson");
-            content.includeModule("com.google.code.gson", "gson-parent");
-//            content.includeModule("org.junit.jupiter", "junit-jupiter-engine");
-        };
-    }
-
     private static void createGroovyRepository(Project project) {
         project.getRepositories().mavenCentral(repo -> {
             repo.setName("Gradle Plugin Development - Groovy");
