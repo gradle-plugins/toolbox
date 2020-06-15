@@ -22,4 +22,12 @@ public abstract class GradlePluginElement extends SourceElement {
     public abstract String getPluginId();
 
     public abstract TestableGradlePluginElement withFunctionalTest();
+
+    public TestableGradlePluginElement withTestKitTest() {
+        return new TestableGradlePluginElement(this, new BasicGradlePluginTestKitTest());
+    }
+
+    public TestableGradlePluginElement withProjectBuilderTest() {
+        return new TestableGradlePluginElement(this, new BasicGradlePluginProjectBuilderTest());
+    }
 }

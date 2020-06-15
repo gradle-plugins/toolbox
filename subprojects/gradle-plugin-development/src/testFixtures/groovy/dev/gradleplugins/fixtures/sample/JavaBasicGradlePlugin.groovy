@@ -37,12 +37,4 @@ public class BasicPlugin implements Plugin<Project> {
     TestableGradlePluginElement withFunctionalTest() {
         return new TestableGradlePluginElement(this, new BasicGradlePluginTestKitFunctionalTest())
     }
-
-    TestableGradlePluginElement withTestKitTest() {
-        return new TestableGradlePluginElement(this, new BasicGradlePluginTestKitTest());
-    }
-
-    TestableGradlePluginElement withProjectBuilderTest() {
-        return new TestableGradlePluginElement(this, new BasicGradlePluginProjectBuilderTest());
-    }
 }
