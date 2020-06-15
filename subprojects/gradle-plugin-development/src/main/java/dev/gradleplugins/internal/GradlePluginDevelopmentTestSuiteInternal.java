@@ -113,6 +113,11 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         }
 
         @Override
+        public void runtimeOnly(Object notation) {
+            GradlePluginDevelopmentDependencyExtensionInternal.of(getDependencies()).add(sourceSet.getRuntimeOnlyConfigurationName(), notation);
+        }
+
+        @Override
         public void annotationProcessor(Object notation) {
             getDependencies().add(sourceSet.getAnnotationProcessorConfigurationName(), notation);
         }
