@@ -11,6 +11,8 @@ plugins {
     id 'java-test-fixtures'
 }
 apply plugin: 'dev.gradleplugins.java-gradle-plugin'
+apply plugin: 'dev.gradleplugins.gradle-plugin-unit-test'
+apply plugin: 'dev.gradleplugins.gradle-plugin-functional-test'
 
 gradlePlugin {
     plugins {
@@ -48,12 +50,25 @@ repositories {
     jcenter()
 }
 
-components.functionalTest {
+test {
+    dependencies {
+        implementation spockFramework()
+        implementation groovy()
+    }
+}
+
+functionalTest {
     testTasks.configureEach {
         dependsOn(':gradle-fixtures:publishAllPublicationsToLocalRepositoryRepository')
         it.systemProperty('localRepository', layout.buildDirectory.dir('repository').get().asFile)
     }
     testingStrategies = [strategies.coverageForMinimumVersion, strategies.coverageForLatestGlobalAvailableVersion]
+    dependencies {
+        implementation spockFramework()
+        implementation gradleTestKit()
+        implementation groovy()
+        implementation testFixtures(project(':gradle-plugin-development'))
+    }
 }
 
 dependencies {
@@ -70,11 +85,6 @@ dependencies {
             requireCapability('dev.gradleplugins:gradle-fixtures-spock-support')
         }
     }
-    functionalTestImplementation(testFixtures(project(':gradle-plugin-development')))
-
-    testImplementation gradleApi(minimumGradleVersion)
-    testImplementation platform('org.spockframework:spock-bom:1.2-groovy-2.5')
-    testImplementation 'org.spockframework:spock-core'
 
     testFixturesCompileOnly gradleApi(minimumGradleVersion)
     testFixturesImplementation project(':gradle-fixtures')
