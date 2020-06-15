@@ -5,12 +5,15 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.Action;
-import org.gradle.api.artifacts.*;
+import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.ConfigurationContainer;
+import org.gradle.api.artifacts.ModuleDependency;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
 import org.gradle.api.component.SoftwareComponent;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.plugins.PluginManager;
 import org.gradle.api.provider.Property;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.testing.Test;
@@ -39,7 +42,7 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
     public GradlePluginDevelopmentTestSuiteInternal(String name, SourceSet sourceSet, PluginManager pluginManager) {
         this.name = name;
         this.sourceSet = sourceSet;
-        this.dependencies = getObjects().newInstance(Dependencies.class, sourceSet, pluginManager);
+        this.dependencies = getObjects().newInstance(Dependencies.class, sourceSet, pluginManager, getTestedGradlePlugin().flatMap(GradlePluginDevelopmentCompatibilityExtension::getMinimumGradleVersion).map(GradleRuntimeCompatibility::groovyVersionOf));
         getTasks().named("pluginUnderTestMetadata", PluginUnderTestMetadata.class, task -> {
             task.getPluginClasspath().from(dependencies.pluginUnderTestMetadata);
         });
@@ -75,6 +78,7 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
     protected abstract static class Dependencies implements GradlePluginDevelopmentTestSuiteDependencies {
         private final SourceSet sourceSet;
         private final PluginManager pluginManager;
+        private final Provider<String> defaultGroovyVersion;
         private final Configuration pluginUnderTestMetadata;
 
         @Inject
@@ -84,15 +88,16 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         protected abstract DependencyHandler getDependencies();
 
         @Inject
-        public Dependencies(SourceSet sourceSet, PluginManager pluginManager) {
+        public Dependencies(SourceSet sourceSet, PluginManager pluginManager, Provider<String> defaultGroovyVersion) {
             this.sourceSet = sourceSet;
             this.pluginManager = pluginManager;
+            this.defaultGroovyVersion = defaultGroovyVersion;
             this.pluginUnderTestMetadata = getConfigurations().create(sourceSet.getName() + StringUtils.capitalize("pluginUnderTestMetadata"));
         }
 
         @Override
         public void implementation(Object notation) {
-            getDependencies().add(sourceSet.getImplementationConfigurationName(), notation);
+            GradlePluginDevelopmentDependencyExtensionInternal.of(getDependencies()).add(sourceSet.getImplementationConfigurationName(), notation);
         }
 
         @Override
@@ -104,7 +109,7 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
 
         @Override
         public void compileOnly(Object notation) {
-            getDependencies().add(sourceSet.getCompileOnlyConfigurationName(), notation);
+            GradlePluginDevelopmentDependencyExtensionInternal.of(getDependencies()).add(sourceSet.getCompileOnlyConfigurationName(), notation);
         }
 
         @Override
@@ -118,29 +123,44 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         }
 
         @Override
-        public Dependency testFixtures(Object notation) {
+        public Object testFixtures(Object notation) {
             return getDependencies().testFixtures(notation);
         }
 
         @Override
-        public Dependency spockFramework() {
+        public Object platform(Object notation) {
+            return getDependencies().platform(notation);
+        }
+
+        @Override
+        public Object spockFramework() {
             return spockFramework(SPOCK_FRAMEWORK_VERSION);
         }
 
         @Override
-        public Dependency spockFramework(String version) {
+        public Object spockFramework(String version) {
             pluginManager.apply("groovy-base"); // Spock framework imply Groovy implementation language
             return GradlePluginDevelopmentDependencyExtensionInternal.of(getDependencies()).spockFramework(version);
         }
 
         @Override
-        public Dependency gradleFixtures() {
+        public Object gradleFixtures() {
             return GradlePluginDevelopmentDependencyExtensionInternal.of(getDependencies()).gradleFixtures();
         }
 
         @Override
-        public Dependency gradleTestKit() {
+        public Object gradleTestKit() {
             return getDependencies().gradleTestKit();
+        }
+
+        @Override
+        public Object groovy() {
+            return defaultGroovyVersion.map(GradlePluginDevelopmentDependencyExtensionInternal.of(getDependencies())::groovy);
+        }
+
+        @Override
+        public Object groovy(String version) {
+            return GradlePluginDevelopmentDependencyExtensionInternal.of(getDependencies()).groovy(version);
         }
     }
 }

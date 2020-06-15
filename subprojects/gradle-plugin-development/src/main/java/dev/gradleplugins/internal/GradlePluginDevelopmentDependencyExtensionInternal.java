@@ -46,10 +46,12 @@ public class GradlePluginDevelopmentDependencyExtensionInternal implements Gradl
         return getDependencies().create("org.spockframework:spock-core:" + version);
     }
 
+    // Used by SpockFrameworkTestSuiteBasePlugin
     public Dependency spockFramework() {
         return getDependencies().create("org.spockframework:spock-core");
     }
 
+    // Used by SpockFrameworkTestSuiteBasePlugin
     public Dependency spockFrameworkPlatform(String version) {
         return getDependencies().platform(getDependencies().create("org.spockframework:spock-bom:" + version));
     }
@@ -72,7 +74,11 @@ public class GradlePluginDevelopmentDependencyExtensionInternal implements Gradl
     }
 
     public void add(String configuration, Object notation) {
-        getDependencies().add(configuration, notation);
+        if (isGradleVersionGreaterOrEqualsTo6Dot5() || !(notation instanceof Provider)) {
+            getDependencies().add(configuration, notation);
+        } else {
+            project.afterEvaluate(proj -> getDependencies().add(configuration, ((Provider<Object>)notation).get()));
+        }
     }
 
     private static boolean isGradleVersionGreaterOrEqualsTo6Dot5() {

@@ -3,6 +3,7 @@ package dev.gradleplugins;
 import org.gradle.api.Action;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.ModuleDependency;
+import org.gradle.api.provider.Provider;
 
 public interface GradlePluginDevelopmentTestSuiteDependencies {
     void implementation(Object notation);
@@ -15,13 +16,19 @@ public interface GradlePluginDevelopmentTestSuiteDependencies {
 
     void pluginUnderTestMetadata(Object notation);
 
-    Dependency testFixtures(Object notation);
+    Object testFixtures(Object notation);
 
-    Dependency spockFramework();
+    Object platform(Object notation);
 
-    Dependency spockFramework(String version);
+    Object spockFramework();
 
-    Dependency gradleFixtures();
+    Object spockFramework(String version);
 
-    Dependency gradleTestKit();
+    Object gradleFixtures();
+
+    Object gradleTestKit();
+
+    Object groovy();
+
+    Object groovy(String version);
 }

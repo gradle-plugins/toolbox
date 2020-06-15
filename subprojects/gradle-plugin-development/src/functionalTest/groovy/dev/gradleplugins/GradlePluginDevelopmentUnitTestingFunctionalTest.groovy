@@ -4,28 +4,28 @@ import dev.gradleplugins.fixtures.sample.GroovyBasicGradlePlugin
 import dev.gradleplugins.fixtures.sample.JavaBasicGradlePlugin
 import dev.gradleplugins.fixtures.test.DefaultTestExecutionResult
 import dev.gradleplugins.integtests.fixtures.ArchiveTestFixture
+import dev.gradleplugins.test.fixtures.scan.GradleEnterpriseBuildScan
 import dev.gradleplugins.test.fixtures.sources.SourceElement
 import org.hamcrest.CoreMatchers
 
-abstract class AbstractGradlePluginDevelopmentFunctionalTestingFunctionalTest extends AbstractGradlePluginDevelopmentFunctionalSpec implements ArchiveTestFixture {
-    // TODO: Assert the right version of the fixture is pulled
-    def "can functional test a Gradle plugin"() {
+abstract class AbstractGradlePluginDevelopmentUnitTestingFunctionalTest extends AbstractGradlePluginDevelopmentFunctionalSpec implements ArchiveTestFixture {
+    def "can unit test a Gradle plugin"() {
         given:
         makeSingleProject()
         componentUnderTest.writeToProject(testDirectory)
 
         when:
+        executer = new GradleEnterpriseBuildScan().apply(executer)
         succeeds('build')
 
         then:
         result.assertTasksExecuted(allTasksToBuild)
-        result.assertTaskSkipped(':test')
-        result.assertTaskNotSkipped(':functionalTest')
+        result.assertTaskNotSkipped(':test')
 
         and:
-        testResult.assertTestClassesExecuted('com.example.BasicPluginFunctionalTest')
-        testResult.testClass('com.example.BasicPluginFunctionalTest').assertTestPassed('can do basic test')
-        testResult.testClass('com.example.BasicPluginFunctionalTest').assertTestCount(1, 0, 0)
+        testResult.assertTestClassesExecuted('com.example.BasicPluginTest')
+        testResult.testClass('com.example.BasicPluginTest').assertTestPassed('can do basic test')
+        testResult.testClass('com.example.BasicPluginTest').assertTestCount(1, 0, 0)
 
         and:
         jar("build/libs/gradle-plugin.jar").hasDescendants('com/example/BasicPlugin.class',"META-INF/gradle-plugins/${componentUnderTest.pluginId}.properties")
@@ -33,15 +33,11 @@ abstract class AbstractGradlePluginDevelopmentFunctionalTestingFunctionalTest ex
     }
 
     protected DefaultTestExecutionResult getTestResult() {
-        new DefaultTestExecutionResult(testDirectory, 'build', '', '', 'functionalTest')
+        new DefaultTestExecutionResult(testDirectory, 'build', '', '', 'test')
     }
 
     protected List<String> getAllTasksToBuild() {
-        return [':compileJava', ':compileGroovy', ':pluginDescriptors', ':processResources', ':classes', ':jar', ':assemble', ':pluginUnderTestMetadata', ':validatePlugins', ':check', ':build'] + functionalTestTasks + testTasks
-    }
-
-    protected List<String> getFunctionalTestTasks() {
-        return [':compileFunctionalTestJava', ':compileFunctionalTestGroovy', ':processFunctionalTestResources', ':functionalTestClasses', ':functionalTest']
+        return [':compileJava', ':compileGroovy', ':pluginDescriptors', ':processResources', ':classes', ':jar', ':assemble', ':pluginUnderTestMetadata', ':validatePlugins', ':check', ':build'] + testTasks
     }
 
     protected List<String> getTestTasks() {
@@ -56,7 +52,7 @@ abstract class AbstractGradlePluginDevelopmentFunctionalTestingFunctionalTest ex
         settingsFile << 'rootProject.name = "gradle-plugin"'
         buildFile << """
             plugins {
-                id 'dev.gradleplugins.gradle-plugin-functional-test'
+                id 'dev.gradleplugins.gradle-plugin-unit-test'
                 id '${pluginIdUnderTest}'
             }
 
@@ -73,27 +69,28 @@ abstract class AbstractGradlePluginDevelopmentFunctionalTestingFunctionalTest ex
                 jcenter()
             }
             
-            functionalTest {
+            import static ${GradleRuntimeCompatibility.canonicalName}.groovyVersionOf
+            
+            test {
                 dependencies {
                     implementation spockFramework()
-                    implementation gradleFixtures()
-                    implementation gradleTestKit()
+                    implementation groovy()
                 }
             }
         """
     }
 }
 
-class GroovyGradlePluginDevelopmentFunctionalTestingFunctionalTest extends AbstractGradlePluginDevelopmentFunctionalTestingFunctionalTest implements GroovyGradlePluginDevelopmentPlugin {
+class GroovyGradlePluginDevelopmentUnitTestingFunctionalTest extends AbstractGradlePluginDevelopmentUnitTestingFunctionalTest implements GroovyGradlePluginDevelopmentPlugin {
     @Override
     protected SourceElement getComponentUnderTest() {
-        return new GroovyBasicGradlePlugin().withFunctionalTest()
+        return new GroovyBasicGradlePlugin().withProjectBuilderTest()
     }
 }
 
-class JavaGradlePluginDevelopmentFunctionalTestingFunctionalTest extends AbstractGradlePluginDevelopmentFunctionalTestingFunctionalTest implements JavaGradlePluginDevelopmentPlugin {
+class JavaGradlePluginDevelopmentUnitTestingFunctionalTest extends AbstractGradlePluginDevelopmentUnitTestingFunctionalTest implements JavaGradlePluginDevelopmentPlugin {
     @Override
     protected SourceElement getComponentUnderTest() {
-        return new JavaBasicGradlePlugin().withFunctionalTest()
+        return new JavaBasicGradlePlugin().withProjectBuilderTest()
     }
 }

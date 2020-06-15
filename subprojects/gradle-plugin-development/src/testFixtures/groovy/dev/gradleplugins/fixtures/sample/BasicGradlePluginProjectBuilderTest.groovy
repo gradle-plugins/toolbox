@@ -13,7 +13,7 @@ class BasicGradlePluginProjectBuilderTest extends SourceElement {
 import ${ProjectBuilder.canonicalName}
 import ${Specification.canonicalName}
 
-class BasicPluginFunctionalTest extends ${Specification.simpleName} {
+class BasicPluginTest extends ${Specification.simpleName} {
     def "can do basic test"() {
         given:
         def project = ProjectBuilder.builder().build()
