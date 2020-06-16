@@ -77,7 +77,6 @@ abstract class AbstractGradlePluginDevelopmentFunctionalTestingFunctionalTest ex
                 dependencies {
                     implementation spockFramework()
                     implementation gradleFixtures()
-                    implementation gradleTestKit()
                 }
             }
         """
