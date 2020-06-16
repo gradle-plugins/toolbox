@@ -31,4 +31,6 @@ public interface GradlePluginDevelopmentTestSuiteDependencies {
     Object groovy();
 
     Object groovy(String version);
+
+    Object gradleApi(String version);
 }

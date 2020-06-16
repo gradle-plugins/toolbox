@@ -167,5 +167,10 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         public Object groovy(String version) {
             return GradlePluginDevelopmentDependencyExtensionInternal.of(getDependencies()).groovy(version);
         }
+
+        @Override
+        public Object gradleApi(String version) {
+            return GradlePluginDevelopmentDependencyExtensionInternal.of(getDependencies()).gradleApi(version);
+        }
     }
 }
