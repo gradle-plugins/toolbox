@@ -13,7 +13,6 @@ import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.testing.Test;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
-import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 import org.gradle.util.GUtil;
 
 import javax.inject.Inject;
@@ -37,12 +36,6 @@ public abstract class GradlePluginDevelopmentTestingBasePlugin implements Plugin
                     sourceSet.setRuntimeClasspath(sourceSet.getRuntimeClasspath().plus(sourceSet.getOutput()).plus(sourceSet.getCompileClasspath()));
                 }
             });
-
-            SourceSet sourceSet = testSuite.getSourceSet();
-
-            // Configure functionalTest for GradlePluginDevelopmentExtension
-            GradlePluginDevelopmentExtension gradlePlugin = project.getExtensions().getByType(GradlePluginDevelopmentExtension.class);
-            gradlePlugin.testSourceSets(sourceSet);
 
             project.afterEvaluate(proj -> {
                 testSuite.getTestingStrategies().disallowChanges();
