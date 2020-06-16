@@ -24,7 +24,11 @@ public abstract class GradlePluginElement extends SourceElement {
     public abstract TestableGradlePluginElement withFunctionalTest();
 
     public TestableGradlePluginElement withTestKitTest() {
-        return new TestableGradlePluginElement(this, new BasicGradlePluginTestKitTest());
+        return new TestableGradlePluginElement(this, new BasicGradlePluginTestKitTest("test"));
+    }
+
+    public TestableGradlePluginElement withTestKitFunctionalTest() {
+        return new TestableGradlePluginElement(this, new BasicGradlePluginTestKitTest("functionalTest"));
     }
 
     public TestableGradlePluginElement withProjectBuilderTest() {

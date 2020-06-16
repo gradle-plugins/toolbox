@@ -23,6 +23,12 @@ import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
 class BasicGradlePluginTestKitTest extends SourceElement {
+    private final String sourceSetName
+
+    BasicGradlePluginTestKitTest(String sourceSetName = 'test') {
+        this.sourceSetName = sourceSetName
+    }
+
     @Override
     List<SourceFile> getFiles() {
         return Collections.singletonList(sourceFile('groovy', 'com/example/BasicPluginTest.groovy', """package com.example
@@ -68,6 +74,6 @@ class BasicPluginFunctionalTest extends ${Specification.simpleName} {
 
     @Override
     String getSourceSetName() {
-        return "test"
+        return sourceSetName
     }
 }
