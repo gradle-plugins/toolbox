@@ -1,4 +1,5 @@
 import com.jfrog.bintray.gradle.tasks.BintrayUploadTask
+import groovy.json.JsonOutput
 import org.gradle.api.publish.maven.internal.artifact.FileBasedMavenArtifact
 import static dev.gradleplugins.GradleRuntimeCompatibility.*
 
@@ -13,6 +14,8 @@ plugins {
 apply plugin: 'dev.gradleplugins.java-gradle-plugin'
 apply plugin: 'dev.gradleplugins.gradle-plugin-unit-test'
 apply plugin: 'dev.gradleplugins.gradle-plugin-functional-test'
+
+version = '1.0'
 
 gradlePlugin {
     plugins {
@@ -163,6 +166,36 @@ afterEvaluate {
             }
         }
     }
+}
+
+def updateBintrayMetadata = tasks.register('updateBintrayMetadata') {
+    doLast {
+        // Set attributes
+        if (project.version.toString().split('\\.').length == 2) {
+            // Credentials
+            def user = resolveProperty(project, "BINTRAY_USER", "dev.gradleplugins.bintray.user")
+            def key = resolveProperty(project, "BINTRAY_KEY", "dev.gradleplugins.bintray.key")
+            def repository = 'distributions'
+            def packageName = 'dev.gradleplugins:gradle-development-plugins'
+
+            def data = ['gradle-plugin': [
+                    "dev.gradleplugins.java-gradle-plugin:${project.group}:${project.name}",
+                    "dev.gradleplugins.groovy-gradle-plugin:${project.group}:${project.name}",
+                    "dev.gradleplugins.gradle-plugin-development:${project.group}:${project.name}",
+                    "dev.gradleplugins.gradle-plugin-unit-test:${project.group}:${project.name}",
+                    "dev.gradleplugins.gradle-plugin-functional-test:${project.group}:${project.name}"
+            ]]
+            data = data.collect { k, v ->
+                return [name: k, values: v, type: 'string']
+            }
+
+            ['curl', '-X', 'POST', '-H', 'Content-Type: application/json', '--data', JsonOutput.toJson(data), "-u${user}:${key}", "https://api.bintray.com/packages/gradle-plugins/${repository}/${packageName}/versions/${project.version}/attributes"].execute().waitFor()
+        }
+    }
+}
+
+rootProject.tasks.named('bintrayPublish') {
+    finalizedBy(updateBintrayMetadata)
 }
 
 tasks.register('release') {
