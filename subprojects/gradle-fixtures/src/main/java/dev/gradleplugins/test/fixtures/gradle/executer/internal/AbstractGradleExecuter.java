@@ -9,6 +9,7 @@ import dev.gradleplugins.test.fixtures.gradle.executer.GradleDistribution;
 import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter;
 import dev.gradleplugins.test.fixtures.gradle.logging.ConsoleOutput;
 import lombok.NonNull;
+import lombok.val;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
@@ -172,12 +174,16 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
 
     //region Before execute actions
     @Override
-    public GradleExecuter beforeExecute(Consumer<? super GradleExecuter> action) {
-        return newInstance(configuration.withBeforeExecute(ImmutableList.<Consumer<? super GradleExecuter>>builder().addAll(configuration.getBeforeExecute()).add(action).build()));
+    public GradleExecuter beforeExecute(Function<? super GradleExecuter, GradleExecuter> action) {
+        return newInstance(configuration.withBeforeExecute(ImmutableList.<Function<? super GradleExecuter, GradleExecuter>>builder().addAll(configuration.getBeforeExecute()).add(action).build()));
     }
 
-    private void fireBeforeExecute() {
-        configuration.getBeforeExecute().forEach(it -> it.accept(this));
+    private GradleExecuter fireBeforeExecute() {
+        GradleExecuter executer = newInstance(configuration.withBeforeExecute(ImmutableList.of()));
+        for (val it : configuration.getBeforeExecute()) {
+            executer = it.apply(executer);
+        }
+        return executer;
     }
     //endregion
 
@@ -217,13 +223,16 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
 
     @Override
     public ExecutionResult run() {
-        fireBeforeExecute();
-        try {
-            ExecutionResult result = doRun();
-            fireAfterExecute();
-            return result;
-        } finally {
-            finished();
+        if (configuration.getBeforeExecute().isEmpty()) {
+            try {
+                ExecutionResult result = doRun();
+                fireAfterExecute();
+                return result;
+            } finally {
+                finished();
+            }
+        } else {
+            return fireBeforeExecute().run();
         }
     }
 

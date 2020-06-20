@@ -70,6 +70,7 @@ public class GradleEnterpriseBuildScan implements Function<GradleExecuter, Gradl
             } catch (FileNotFoundException e) {
                 throw new UncheckedIOException(e);
             }
+            return it;
         }).withArgument("--init-script")
                 .withArgument(executer.getTestDirectory().file("build-scan.init.gradle").getAbsolutePath())
                 .withArgument("--scan");

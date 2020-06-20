@@ -8,6 +8,7 @@ import lombok.*;
 import java.io.File;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
@@ -33,7 +34,7 @@ public class GradleExecuterConfiguration {
     @With private boolean debuggerAttached = false;
     @With private boolean pluginClasspath = false;
     @With private String gradleVersion = null;
-    @With @NonNull private List<Consumer<? super GradleExecuter>> beforeExecute = emptyList();
+    @With @NonNull private List<Function<? super GradleExecuter, GradleExecuter>> beforeExecute = emptyList();
     @With @NonNull private List<Consumer<? super GradleExecuter>> afterExecute = emptyList();
     @With private boolean allowDeprecations = false;
 }

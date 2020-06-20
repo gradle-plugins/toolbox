@@ -19,19 +19,14 @@ package dev.gradleplugins.integtests.fixtures
 import dev.gradleplugins.spock.lang.CleanupTestDirectory
 import dev.gradleplugins.spock.lang.TestNameTestDirectoryProvider
 import dev.gradleplugins.test.fixtures.file.TestFile
-import dev.gradleplugins.test.fixtures.gradle.executer.ExecutionFailure
-import dev.gradleplugins.test.fixtures.gradle.executer.ExecutionResult
-import dev.gradleplugins.test.fixtures.gradle.executer.GradleDistribution
-import dev.gradleplugins.test.fixtures.gradle.executer.GradleDistributionFactory
-import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter
-import dev.gradleplugins.test.fixtures.gradle.executer.internal.DefaultGradleDistribution
+import dev.gradleplugins.test.fixtures.gradle.executer.*
 import dev.gradleplugins.test.fixtures.gradle.executer.internal.GradleRunnerExecuter
 import dev.gradleplugins.test.fixtures.maven.M2Installation
 import groovy.transform.PackageScope
 import org.junit.Rule
 import spock.lang.Specification
 
-import java.util.function.Consumer
+import java.util.function.Function
 
 // TODO: This should be rename to something else... Given it's a Spock specification we could call it GradleSpecification (the fact that it's Functional is putting the wrong spin to this class).
 //    This class should only ties things together for fast starting with gradle, however, each pieces should be usable on it's own and compose into something else if the user wants.
@@ -49,7 +44,7 @@ class AbstractGradleSpecification extends Specification {
     ExecutionFailure failure
 
     def setup() {
-         m2.isolateMavenLocalRepo(executer)
+         executer = m2.isolateMavenLocalRepo(executer)
     }
 
     protected void useKotlinDsl() {
@@ -163,8 +158,8 @@ class AbstractGradleSpecification extends Specification {
         return prop.get("implementation-classpath").toString().split(File.pathSeparator).collect { new File(it) }
     }
 
-    protected GradleExecuter using(Consumer<GradleExecuter> action) {
-        action.accept(executer)
+    protected GradleExecuter using(Function<? super GradleExecuter, GradleExecuter> action) {
+        executer = action.apply(executer)
         return executer
     }
 

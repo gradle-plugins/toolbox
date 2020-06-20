@@ -13,6 +13,7 @@ class AbstractGradlePluginDevelopmentFunctionalSpec extends AbstractGradleSpecif
                     }
                 }
             """
+            it
         }
     }
 }

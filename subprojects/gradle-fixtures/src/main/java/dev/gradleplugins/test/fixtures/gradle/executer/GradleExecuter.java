@@ -23,6 +23,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public interface GradleExecuter {
     /**
@@ -142,7 +143,7 @@ public interface GradleExecuter {
     /**
      * Adds an action to be called immediately before execution, to allow extra configuration to be injected.
      */
-    GradleExecuter beforeExecute(Consumer<? super GradleExecuter> action);
+    GradleExecuter beforeExecute(Function<? super GradleExecuter, GradleExecuter> action);
 
     /**
      * Adds an action to be called immediately after execution.

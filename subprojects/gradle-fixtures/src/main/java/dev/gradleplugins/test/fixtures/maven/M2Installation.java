@@ -16,14 +16,15 @@
 
 package dev.gradleplugins.test.fixtures.maven;
 
-import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter;
 import dev.gradleplugins.test.fixtures.file.TestFile;
+import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter;
+import lombok.var;
 
 import java.io.File;
 import java.util.Collections;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
-public class M2Installation implements Consumer<GradleExecuter> {
+public class M2Installation implements Function<GradleExecuter, GradleExecuter> {
     private final TestFile testDirectory;
     private boolean initialized = false;
     private TestFile userHomeDirectory;
@@ -102,32 +103,36 @@ public class M2Installation implements Consumer<GradleExecuter> {
     }
 
     @Override
-    public void accept(GradleExecuter gradleExecuter) {
+    public GradleExecuter apply(GradleExecuter gradleExecuter) {
         init();
-        gradleExecuter.withUserHomeDirectory(userHomeDirectory);
+        var result = gradleExecuter.withUserHomeDirectory(userHomeDirectory);
         // if call `using m2`, then we disable the automatic isolation of m2
         isolateMavenLocal = false;
         if (globalMavenDirectory.exists()) {
-            gradleExecuter.withEnvironmentVars(Collections.singletonMap("M2_HOME", globalMavenDirectory.getAbsolutePath()));
+            result = result.withEnvironmentVars(Collections.singletonMap("M2_HOME", globalMavenDirectory.getAbsolutePath()));
         }
+        return result;
     }
 
-    public void isolateMavenLocalRepo(GradleExecuter gradleExecuter) {
-        gradleExecuter.beforeExecute(executer -> {
+    public GradleExecuter isolateMavenLocalRepo(GradleExecuter gradleExecuter) {
+        var result = gradleExecuter.beforeExecute(executer -> {
             if (isolateMavenLocal) {
                 isolatedMavenRepoForLeakageChecks = executer.getTestDirectory().createDirectory("m2-home-should-not-be-filled");
-                setMavenLocalLocation(gradleExecuter, isolatedMavenRepoForLeakageChecks);
+                return setMavenLocalLocation(gradleExecuter, isolatedMavenRepoForLeakageChecks);
             }
+            return executer;
         });
-        gradleExecuter.afterExecute(executer -> {
+        result = result.afterExecute(executer -> {
             if (isolateMavenLocal) {
                 isolatedMavenRepoForLeakageChecks.assertIsEmptyDirectory();
             }
         });
+
+        return result;
     }
 
-    private static void setMavenLocalLocation(GradleExecuter gradleExecuter, File destination) {
-        gradleExecuter.withArgument("-Dmaven.repo.local=" + destination.getAbsolutePath());
+    private static GradleExecuter setMavenLocalLocation(GradleExecuter gradleExecuter, File destination) {
+        return gradleExecuter.withArgument("-Dmaven.repo.local=" + destination.getAbsolutePath());
     }
 }
 
