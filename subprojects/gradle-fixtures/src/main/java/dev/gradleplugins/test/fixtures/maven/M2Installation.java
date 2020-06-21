@@ -115,20 +115,20 @@ public class M2Installation implements Function<GradleExecuter, GradleExecuter> 
     }
 
     public GradleExecuter isolateMavenLocalRepo(GradleExecuter gradleExecuter) {
-        var result = gradleExecuter.beforeExecute(executer -> {
+        gradleExecuter = gradleExecuter.beforeExecute(executer -> {
             if (isolateMavenLocal) {
                 isolatedMavenRepoForLeakageChecks = executer.getTestDirectory().createDirectory("m2-home-should-not-be-filled");
-                return setMavenLocalLocation(gradleExecuter, isolatedMavenRepoForLeakageChecks);
+                return setMavenLocalLocation(executer, isolatedMavenRepoForLeakageChecks);
             }
             return executer;
         });
-        result = result.afterExecute(executer -> {
+        gradleExecuter = gradleExecuter.afterExecute(executer -> {
             if (isolateMavenLocal) {
                 isolatedMavenRepoForLeakageChecks.assertIsEmptyDirectory();
             }
         });
 
-        return result;
+        return gradleExecuter;
     }
 
     private static GradleExecuter setMavenLocalLocation(GradleExecuter gradleExecuter, File destination) {
