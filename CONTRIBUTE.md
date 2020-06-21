@@ -27,7 +27,7 @@ In order for your contributions to be accepted, you must [sign off](https://git-
 
 ## Follow the Code of Conduct
 
-This project and everyone participating in it is governed by the [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to daniel@lacasse.io.
+This project and everyone participating in it is governed by the [Code of Conduct](CODE_OF_CONDUCT.adoc). By participating, you are expected to uphold this code. Please report unacceptable behavior to daniel@lacasse.io.
 
 ## Making Changes
 
@@ -55,8 +55,6 @@ You require IntelliJ 2018.3.1 or newer.
 - In the "Open Project" dialogue, choose "Delete Existing Project and Import"
 - Revert the Git changes to files in the `.idea` folder
 
-NOTE: Due to the project size, the initial import can take a while and IntelliJ might become unresponsive for several seconds during this period.
-
 ### Code Change Guidelines
 
 All code contributions should contain the following:
@@ -70,10 +68,6 @@ After making changes, you can test them in 2 ways:
 
 To run tests, execute `./gradlew :<subproject>:check` where `<subproject>` is the name of the sub-project that has changed.
 For example: `./gradlew :gradle-plugin-development:check`.
-
-To try out a change in behavior manually, install the libraries and plugins locally and use it.
-Install: `./gradlew install`.
-Use: `./gradlew taskName -Ddev.gradleplugins.useLocal` to use the installed version in this repository.
 
 ### Creating Commits And Writing Commit Messages
 
