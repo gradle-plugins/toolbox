@@ -240,13 +240,16 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
 
     @Override
     public ExecutionFailure runWithFailure() {
-        fireBeforeExecute();
-        try {
-            ExecutionFailure result = doRunWithFailure();
-            fireAfterExecute();
-            return result;
-        } finally {
-            finished();
+        if (configuration.getBeforeExecute().isEmpty()) {
+            try {
+                ExecutionFailure result = doRunWithFailure();
+                fireAfterExecute();
+                return result;
+            } finally {
+                finished();
+            }
+        } else {
+            return fireBeforeExecute().runWithFailure();
         }
     }
 
