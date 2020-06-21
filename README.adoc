@@ -11,7 +11,7 @@ The Nokee team developed the toolbox plugins and offer them for free to everyone
 
 == Usage
 
-Apply link:https://nokee.dev/docs/nightly/plugin-references.html[any of the toolbox plugins] to your build just like any other Gradle plugin:
+Apply link:https://nokee.dev/docs/nightly/manual/plugin-references.html[any of the toolbox plugins] to your build just like any other Gradle plugin:
 
 [source,groovy,subs=attributes+]
 ----
