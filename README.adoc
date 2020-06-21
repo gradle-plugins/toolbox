@@ -1,47 +1,38 @@
+:jbake-version: 1.0
+// TODO: Add test for the version above
 = Gradle Plugin Development Toolbox
 
-The Gradle plugins in this repository help speed up as much as possible the Gradle plugin development.
-The goal is to have sensible defaults for the majority of all plugin development cases.
-The plugins are highly opinionated and hope to become less opinionated overtime.
-It doesn't mean the plugins will become complicated to configure, it simply means more knobs will be provided to configure more information.
+Painless Gradle plugins development.
+The Gradle toolbox is a suite of high-quality Gradle plugins improving the developer experience of writing Gradle plugins.
+It bridges the gaps in the development process offered by the Gradle team.
+The Nokee team developed the toolbox plugins and offer them for free to everyone.
 
-Three plugins are provided:
+*For more information, visit the link:https://nokee.dev/docs/nightly/manual/gradle-plugin-development.html[official project documentation]*
 
-- `dev.gradleplugins.java-gradle-plugin`: Everything the `java-gradle-plugin` is not.
-- `dev.gradleplugins.groovy-gradle-plugin`: Gradle plugin written in Groovy
+== Usage
 
-NOTE: There used to be a `dev.gradleplugins.kotlin-gradle-plugin` plugin but it was removed.
-I couldn't assert it's quality and I always had issues with Gradle Kotlin plugins so I'm sticking to Groovy and Java plugin for the time being.
-Once I have more time to investigate the issues I was having I will add it back.
+Apply link:https://nokee.dev/docs/nightly/plugin-references.html[any of the toolbox plugins] to your build just like any other Gradle plugin:
+
+[source,groovy,subs=attributes+]
+----
+plugins {
+    id("dev.gradleplugins.java-gradle-plugin") version("{jbake-version}")
+}
+----
+
+== Examples
+
+Look at link:https://nokee.dev/docs/nightly/samples/#sec:samples-gradle-dev[all the samples demonstrating various use cases solved by Gradle toolbox plugins].
+
+== Need Help?
+
+* Get familiar with the link:https://nokee.dev/docs/nightly/manual/gradle-plugin-development.html[Toolbox Manual]
+* Have a look at the link:https://nokee.dev/docs/nightly/samples/#sec:samples-gradle-dev[Samples]
+* Join the link:https://gradle.com/slack-invite[Gradle Slack Channel]
 
 == Contributing
 
-Tell us which features would make your plugin development easier?
-You can also contribute anything that will accelerate your Gradle plugin development.
+If you're looking to contribute to Gradle toolbox or provide a patch/pull request, you can find more info link:https://github.com/gradle-plugins/toolbox/blob/master/CONTRIBUTING.md[here].
 
-Some ideas on modeling that will need to take place at some point are licensing, source control manager, developers/contacts, continuous integration, continuous delivery and repository setup (e.g. generating files like LICENSE, issue templates, code of conduct, editorconfig, gitignore, CI configuration generation such as Travis CI and GitLab CI, etc.).
-
-The other aspect to contribute is improving the TestKit fixtures.
-We are done rewriting the same piece of boilerplate code for testing plugins and tasks.
-Let's go wild and move all the goodies in the same place.
-
-== Roadmap
-
-=== Stable
-
-At the moment, the project is mostly aiming toward a stable version for developing plugins with 5.6.2 and up.
-Because of the opinion of the plugins, all built plugins will only work for Java 8+ and 5.6.2+.
-Those will be changed once we reach a stable version.
-
-There are still issues with the `dev.gradleplugins.kotlin-gradle-plugin` that prevent it from being useful.
-This needs to be addressed before moving forward.
-The plugins for Java and Groovy are mostly stable.
-
-There is a lot of test coverage missing in the `gradle-plugin-development` project and `gradle-testkit-fixture`.
-
-Finally, the basic documentation is missing.
-
-=== 1.0
-
-For 1.0 to arrive, we need full documentation and some configurability for at the very least the minimum Gradle version.
-
+This project adheres to this link:https://github.com/gradle-plugins/toolbox/blob/master/CODE_OF_CONDUCT.adoc[Code of Conduct].
+By participating, you are expected to uphold this code.

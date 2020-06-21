@@ -1,27 +1,38 @@
-= Gradle TestKit Fixtures
+:jbake-version: 1.0
+= Gradle Testing Fixtures
 
-These are fixtures for accelerating your Gradle plugin development.
-These fixtures are mostly extracted from https://github.com/gradle/gradle[Gradle code base].
-The main goal is to extract what is required for the all plugin authors.
+The Gradle testing fixtures are a set of classes accelerating Gradle plugin development by providing assertion for common scenarios.
+We extracted the fixtures from the link:https://github.com/gradle/gradle[Gradle codebase] for every plugin developer to benefit.
+Head over to link:https://nokee.dev/docs/nightly/samples/gradle-plugin-development-with-testing-strategies/[the testing strategy sample] to see them in action.
 
-== How to use?
+== Usage
 
-Add the repository to your build script:
+Apply the following plugin in your `settings.gradle[.kts]`:
 
-```
+[source,groovy,subs=attributes+]
+----
+plugins {
+    id("dev.gradleplugins.gradle-plugin-development") version("{jbake-version}")
+}
+----
+
+NOTE: Head over to link:https://nokee.dev/docs/nightly/manual/gradle-plugin-development-plugin.html[the reference chapter] to learn more about the `dev.gradleplugins.gradle-plugin-development` plugin.
+
+Then add the project repository in your build script, e.g. `build.gradle[.kts]`:
+
+[source,groovy]
+----
 repositories {
-    maven {
-        url = uri("https://dl.bintray.com/gradle-plugins/maven")
-    }
+    gradlePluginDevelopment()
 }
-```
+----
 
-Add the dependency to your functional tests:
+Finally, add a dependency on the Gradle testing fixtures:
 
-```
+[source,groovy]
+----
 dependencies {
-    // See https://bintray.com/gradle-plugins/maven/testkit-fixtures for the latest version
-    functionalTestImplementation("dev.gradleplugins:gradle-testkit-fixtures:0.0.21")
+    testImplementation(gradleFixtures())
 }
-```
+----
 

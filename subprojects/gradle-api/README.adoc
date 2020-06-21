@@ -1,27 +1,37 @@
-= Gradle API Jars
+:jbake-version: 1.0
+= Gradle API Redistribution
 
-== Usages
+As part of the Gradle toolbox project, the Nokee team is redistribution the Gradle API JARs with its source for Gradle 2.14 and newer.
+Plugin authors can target specific Gradle API versions while building with any Gradle versions.
+Head over to link:https://nokee.dev/docs/nightly/samples/gradle-plugin-development-runtime-compatibilities/[the Gradle runtime compatibilities sample] to see them in action.
 
-=== As included build
+== Usage
 
-```
-dependencies {
-    compileOnly(project(':gradle-api')) {
-        attributes {
-            attribute(Attribute.of('dev.gradleplugins.gradleAbi', String), '2.14.1')
-        }
-    }
+Apply the following plugin in your `settings.gradle[.kts]`:
+
+[source,groovy,subs=attributes+]
+----
+plugins {
+    id("dev.gradleplugins.gradle-plugin-development") version("{jbake-version}")
 }
-```
+----
 
-=== As external binary
+NOTE: Head over to link:https://nokee.dev/docs/nightly/manual/gradle-plugin-development-plugin.html[the reference chapter] to learn more about the `dev.gradleplugins.gradle-plugin-development` plugin.
 
-```
+Then add the project repository in your build script, e.g. `build.gradle[.kts]`:
+
+[source,groovy]
+----
 repositories {
-    maven { url = uri("https://dl.bintray.com/gradle-plugins/distributions") }
+    gradlePluginDevelopment()
 }
+----
 
+Finally, add a dependency on the Gradle API of your choice, i.e. Gradle API 4.9:
+
+[source,groovy]
+----
 dependencies {
-    compileOnly("dev.gradleplugins:gradle-api:2.14.1")
+    compileOnly(gradleApi("4.9"))
 }
-```
+----
