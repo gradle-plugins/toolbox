@@ -1,4 +1,4 @@
-:jbake-version: 1.0
+:jbake-version: 1.1
 = Gradle Testing Fixtures
 
 The Gradle testing fixtures are a set of classes accelerating Gradle plugin development by providing assertion for common scenarios.

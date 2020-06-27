@@ -1,4 +1,4 @@
-:jbake-version: 1.0
+:jbake-version: 1.1
 = Gradle API Redistribution
 
 As part of the Gradle toolbox project, the Nokee team is redistribution the Gradle API JARs with its source for Gradle 2.14 and newer.
