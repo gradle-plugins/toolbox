@@ -172,6 +172,7 @@ def updateBintrayMetadata = tasks.register('updateBintrayMetadata') {
     doLast {
         // Set attributes
         if (project.version.toString().split('\\.').length == 2) {
+            println 'Publishing plugin metadata for plugins.gradle.org update...'
             // Credentials
             def user = resolveProperty(project, "BINTRAY_USER", "dev.gradleplugins.bintray.user")
             def key = resolveProperty(project, "BINTRAY_KEY", "dev.gradleplugins.bintray.key")
@@ -190,6 +191,8 @@ def updateBintrayMetadata = tasks.register('updateBintrayMetadata') {
             }
 
             ['curl', '-X', 'POST', '-H', 'Content-Type: application/json', '--data', JsonOutput.toJson(data), "-u${user}:${key}", "https://api.bintray.com/packages/gradle-plugins/${repository}/${packageName}/versions/${project.version}/attributes"].execute().waitFor()
+        } else {
+            println 'No plugin metadata publishing for plugins.gradle.org'
         }
     }
 }
