@@ -15,7 +15,7 @@ apply plugin: 'dev.gradleplugins.java-gradle-plugin'
 apply plugin: 'dev.gradleplugins.gradle-plugin-unit-test'
 apply plugin: 'dev.gradleplugins.gradle-plugin-functional-test'
 
-version = '1.0'
+version = '1.0.1'
 
 gradlePlugin {
     plugins {
@@ -85,7 +85,7 @@ dependencies {
     // TODO: Maybe look into dependency substitution
     functionalTestImplementation(project(':gradle-fixtures')) {
         capabilities {
-            requireCapability('dev.gradleplugins:gradle-fixtures-spock-support')
+            requireCapability("dev.gradleplugins:gradle-fixtures-spock-support:${project(':gradle-fixtures').version}")
         }
     }
 
@@ -93,7 +93,7 @@ dependencies {
     testFixturesImplementation project(':gradle-fixtures')
     testFixturesImplementation(project(':gradle-fixtures')) {
         capabilities {
-            requireCapability('dev.gradleplugins:gradle-fixtures-spock-support')
+            requireCapability("dev.gradleplugins:gradle-fixtures-spock-support:${project(':gradle-fixtures').version}")
         }
     }
     testFixturesImplementation "org.codehaus.groovy:groovy-all:${groovyVersionOf(minimumGradleVersion)}"
