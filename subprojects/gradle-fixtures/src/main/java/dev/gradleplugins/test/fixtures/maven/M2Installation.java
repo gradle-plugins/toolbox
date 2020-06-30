@@ -18,7 +18,6 @@ package dev.gradleplugins.test.fixtures.maven;
 
 import dev.gradleplugins.test.fixtures.file.TestFile;
 import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter;
-import lombok.var;
 
 import java.io.File;
 import java.util.Collections;
@@ -105,7 +104,7 @@ public class M2Installation implements Function<GradleExecuter, GradleExecuter> 
     @Override
     public GradleExecuter apply(GradleExecuter gradleExecuter) {
         init();
-        var result = gradleExecuter.withUserHomeDirectory(userHomeDirectory);
+        GradleExecuter result = gradleExecuter.withUserHomeDirectory(userHomeDirectory);
         // if call `using m2`, then we disable the automatic isolation of m2
         isolateMavenLocal = false;
         if (globalMavenDirectory.exists()) {
