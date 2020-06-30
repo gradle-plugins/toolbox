@@ -76,8 +76,14 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
 
     public static void configureDefaultJavaCompatibility(JavaPluginExtension java, VersionNumber minimumGradleVersion) {
         JavaVersion minimumJavaVersion = minimumJavaVersionFor(minimumGradleVersion);
-        java.setSourceCompatibility(minimumJavaVersion);
-        java.setTargetCompatibility(minimumJavaVersion);
+
+        if (java.getSourceCompatibility().equals(JavaVersion.VERSION_1_1)) {
+            java.setSourceCompatibility(minimumJavaVersion);
+        }
+
+        if (java.getTargetCompatibility().equals(JavaVersion.VERSION_1_1)) {
+            java.setTargetCompatibility(minimumJavaVersion);
+        }
     }
 
     public static GradlePluginDevelopmentCompatibilityExtension registerCompatibilityExtension(Project project) {
@@ -110,11 +116,27 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
     }
 
     public static void configureExtension(GradlePluginDevelopmentCompatibilityExtension extension, Project project) {
+        val java = project.getExtensions().getByType(JavaPluginExtension.class);
+        val defaultSourceCompatibility = java.getSourceCompatibility();
+        val defaultTargetCompatibility = java.getTargetCompatibility();
+
+        // The plugins assume no one will ever use this value
+        java.setSourceCompatibility(JavaVersion.VERSION_1_1);
+        java.setTargetCompatibility(JavaVersion.VERSION_1_1);
+
         project.afterEvaluate(proj -> {
             if (extension.getMinimumGradleVersion().isPresent()) {
-                configureDefaultJavaCompatibility(project.getExtensions().getByType(JavaPluginExtension.class), VersionNumber.parse(extension.getMinimumGradleVersion().get()));
+                configureDefaultJavaCompatibility(java, VersionNumber.parse(extension.getMinimumGradleVersion().get()));
             } else {
                 extension.getMinimumGradleVersion().set(project.getGradle().getGradleVersion());
+
+                // Restore default values if needed
+                if (java.getSourceCompatibility().equals(JavaVersion.VERSION_1_1)) {
+                    java.setSourceCompatibility(defaultSourceCompatibility);
+                }
+                if (java.getTargetCompatibility().equals(JavaVersion.VERSION_1_1)) {
+                    java.setTargetCompatibility(defaultTargetCompatibility);
+                }
             }
             extension.getMinimumGradleVersion().disallowChanges();
         });

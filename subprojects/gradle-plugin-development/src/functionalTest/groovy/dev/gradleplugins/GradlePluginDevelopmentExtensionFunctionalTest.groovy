@@ -3,8 +3,11 @@ package dev.gradleplugins
 import dev.gradleplugins.fixtures.sample.GradlePluginElement
 import dev.gradleplugins.fixtures.sample.GroovyBasicGradlePlugin
 import dev.gradleplugins.fixtures.sample.JavaBasicGradlePlugin
+import org.apache.commons.lang3.JavaVersion
 import spock.lang.Unroll
 import spock.util.environment.Jvm
+
+import static org.junit.Assume.assumeFalse
 
 abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends AbstractGradlePluginDevelopmentFunctionalSpec {
     def "register an compatibility extension on gradlePlugin extension"() {
@@ -29,6 +32,56 @@ abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends Ab
             tasks.register('verify') {
                 doLast {
                     assert gradlePlugin.compatibility.minimumGradleVersion.get() == project.gradle.gradleVersion
+                }
+            }
+        """
+
+        expect:
+        succeeds('verify')
+    }
+
+    def "does not change source/target compatibility if already configured when a minimum Gradle version is configured"() {
+        assumeFalse(Jvm.current.java11)
+
+        given:
+        makeSingleProject()
+        buildFile << """
+            gradlePlugin {
+                compatibility.minimumGradleVersion = '6.2.1'
+            }
+
+            java {
+                sourceCompatibility = JavaVersion.VERSION_11
+                targetCompatibility = JavaVersion.VERSION_11
+            }
+
+            tasks.register('verify') {
+                doLast {
+                    assert java.sourceCompatibility.toString() == '${JavaVersion.JAVA_11}'
+                    assert java.targetCompatibility.toString() == '${JavaVersion.JAVA_11}'
+                }
+            }
+        """
+
+        expect:
+        succeeds('verify')
+    }
+
+    def "does not change source/target compatibility if already configured when a no minimum Gradle version is configured"() {
+        assumeFalse(Jvm.current.java11)
+
+        given:
+        makeSingleProject()
+        buildFile << """
+            java {
+                sourceCompatibility = JavaVersion.VERSION_11
+                targetCompatibility = JavaVersion.VERSION_11
+            }
+
+            tasks.register('verify') {
+                doLast {
+                    assert java.sourceCompatibility.toString() == '${JavaVersion.JAVA_11}'
+                    assert java.targetCompatibility.toString() == '${JavaVersion.JAVA_11}'
                 }
             }
         """
