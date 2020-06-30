@@ -1,0 +1,13 @@
+name: CI
+
+on: push
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run all tests
+      run: ./gradlew check --stacktrace --scan
+
