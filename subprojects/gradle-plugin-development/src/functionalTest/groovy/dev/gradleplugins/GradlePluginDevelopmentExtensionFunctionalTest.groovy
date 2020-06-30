@@ -261,3 +261,4 @@ class JavaGradlePluginDevelopmentExtensionFunctionalTest extends AbstractGradleP
         return 'java'
     }
 }
+
