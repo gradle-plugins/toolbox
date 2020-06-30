@@ -9,7 +9,7 @@ class AbstractGradlePluginDevelopmentFunctionalSpec extends AbstractGradleSpecif
             buildFile << """
                 allprojects {
                     repositories {
-                        maven { url = uri("${System.getProperty('localRepository')}") }
+                        maven { url = uri("${System.getProperty('localRepository').replace('\\', '/')}") }
                     }
                 }
             """
