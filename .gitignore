@@ -6,3 +6,10 @@ build
 
 .idea/
 .DS_Store
+
+# Ignore buildship created directories
+bin/
+*.project
+*.classpath
+.settings/
+
