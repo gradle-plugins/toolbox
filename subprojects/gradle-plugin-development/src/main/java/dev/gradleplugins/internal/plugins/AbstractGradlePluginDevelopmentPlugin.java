@@ -112,7 +112,9 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
     public static void configureExtension(GradlePluginDevelopmentCompatibilityExtension extension, Project project) {
         project.afterEvaluate(proj -> {
             if (extension.getMinimumGradleVersion().isPresent()) {
-                configureDefaultJavaCompatibility(project.getExtensions().getByType(JavaPluginExtension.class), VersionNumber.parse(extension.getMinimumGradleVersion().get()));
+                if (extension.getSkipMinimumJavaVersion().getOrElse(false)) {
+                    configureDefaultJavaCompatibility(project.getExtensions().getByType(JavaPluginExtension.class), VersionNumber.parse(extension.getMinimumGradleVersion().get()));
+                }
             } else {
                 extension.getMinimumGradleVersion().set(project.getGradle().getGradleVersion());
             }

@@ -95,6 +95,51 @@ abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends Ab
         failure.assertHasCause("The value for property 'minimumGradleVersion' cannot be changed any further.")
     }
 
+    @Unroll
+    def "changes source/target compatibility to the minimum Gradle version skipped with skip variable set"() {
+        given:
+        makeSingleProject()
+        buildFile << """
+            gradlePlugin.compatibility.minimumGradleVersion = '${gradleVersion}'
+            gradlePlugin.compatibility.skipMinimumJavaVersion
+            def existingJavaSourceVersion = java.sourceCompatibility
+            def existingJavaTargetVersion = java.targetCompatibility
+            tasks.register('verify') {
+                doLast {
+                    assert java.sourceCompatibility == existingJavaSourceVersion
+                    assert java.targetCompatibility == existingJavaTargetVersion
+                }
+            }
+        """
+
+        expect:
+        succeeds('verify')
+
+        where:
+        gradleVersion   | javaVersion
+        '6.2'
+        '5.1'
+        '4.3'
+        '3.0'
+        '2.14'
+        '1.12'
+    }
+
+    def "cannot change skip java configuration after configured"() {
+        given:
+        makeSingleProject()
+        buildFile << """
+            afterEvaluate {
+                gradlePlugin.compatibility.skipMinimumJavaVersion = true
+            }
+        """
+
+        expect:
+        fails('help')
+        failure.assertHasDescription("A problem occurred configuring root project 'gradle-plugin'.")
+        failure.assertHasCause("The value for property 'minimumGradleVersion' cannot be changed any further.")
+    }
+
     def "can generate Javadoc Jar"() {
         given:
         makeSingleProject()
