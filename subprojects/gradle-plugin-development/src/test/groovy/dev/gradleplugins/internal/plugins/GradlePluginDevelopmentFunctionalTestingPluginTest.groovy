@@ -12,6 +12,7 @@ abstract class AbstractGradlePluginDevelopmentFunctionalTestingPluginTest extend
     def "creates functionalTest component"() {
         when:
         project.apply plugin: pluginIdUnderTest
+        project.apply plugin: 'dev.gradleplugins.gradle-plugin-functional-test'
 
         then:
         project.components.findByName('functionalTest') != null
@@ -21,6 +22,7 @@ abstract class AbstractGradlePluginDevelopmentFunctionalTestingPluginTest extend
     def "creates a single test task when no testing strategy"() {
         given:
         project.apply plugin: pluginIdUnderTest
+        project.apply plugin: 'dev.gradleplugins.gradle-plugin-functional-test'
 
         when:
         project.evaluate()
@@ -33,6 +35,7 @@ abstract class AbstractGradlePluginDevelopmentFunctionalTestingPluginTest extend
     def "creates a single test task when only one testing strategy"() {
         given:
         project.apply plugin: pluginIdUnderTest
+        project.apply plugin: 'dev.gradleplugins.gradle-plugin-functional-test'
         project.gradlePlugin.compatibility.minimumGradleVersion = '6.2.1'
         project.components.functionalTest {
             testingStrategies = [strategies.coverageForMinimumVersion]
@@ -49,6 +52,7 @@ abstract class AbstractGradlePluginDevelopmentFunctionalTestingPluginTest extend
     def "creates multiple test task when multiple testing strategy"() {
         given:
         project.apply plugin: pluginIdUnderTest
+        project.apply plugin: 'dev.gradleplugins.gradle-plugin-functional-test'
         project.gradlePlugin.compatibility.minimumGradleVersion = '6.2.1'
         project.components.functionalTest {
             testingStrategies = [strategies.coverageForMinimumVersion, strategies.coverageForLatestNightlyVersion]
@@ -66,6 +70,7 @@ abstract class AbstractGradlePluginDevelopmentFunctionalTestingPluginTest extend
     def "configures the default Gradle version settings according to the coverage"(coverage, expectedVersion) {
         given:
         project.apply plugin: pluginIdUnderTest
+        project.apply plugin: 'dev.gradleplugins.gradle-plugin-functional-test'
         project.gradlePlugin.compatibility.minimumGradleVersion = '6.2.1'
         project.components.functionalTest {
             testingStrategies = Optional.ofNullable(coverage).map { [strategies."$it"] }.orElse([])
@@ -88,6 +93,7 @@ abstract class AbstractGradlePluginDevelopmentFunctionalTestingPluginTest extend
     def "can configure the test tasks before the project is evaluated"() {
         given:
         project.apply plugin: pluginIdUnderTest
+        project.apply plugin: 'dev.gradleplugins.gradle-plugin-functional-test'
 
         when:
         project.components.functionalTest {
