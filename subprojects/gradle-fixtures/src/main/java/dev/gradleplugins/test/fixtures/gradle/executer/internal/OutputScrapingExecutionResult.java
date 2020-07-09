@@ -23,6 +23,8 @@ import org.gradle.internal.featurelifecycle.LoggingDeprecatedFeatureHandler;
 import org.gradle.launcher.daemon.client.DaemonStartupMessage;
 import org.gradle.launcher.daemon.server.DaemonStateCoordinator;
 import org.gradle.launcher.daemon.server.health.LowHeapSpaceDaemonExpirationStrategy;
+import org.hamcrest.Matcher;
+import org.junit.Assert;
 import org.junit.ComparisonFailure;
 
 import java.util.*;
@@ -195,6 +197,11 @@ public class OutputScrapingExecutionResult implements ExecutionResult {
         if (!actualText.contains(expectedText)) {
             failOnMissingOutput("Did not find expected text in " + label.toLowerCase() + ".", label, expectedOutput, actualText);
         }
+        return this;
+    }
+
+    public ExecutionResult assertThatOutput(Matcher<? super String> matcher) {
+        Assert.assertThat("Output did not match!", getMainContent().withNormalizedEol(), matcher);
         return this;
     }
 

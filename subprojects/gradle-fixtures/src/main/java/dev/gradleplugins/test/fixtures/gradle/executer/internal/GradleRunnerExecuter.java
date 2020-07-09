@@ -259,6 +259,11 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
             Assert.assertThat(getSkippedTasks(), hasItem(taskPath));
             return this;
         }
+
+        @Override
+        public ExecutionResult assertThatOutput(Matcher<? super String> matcher) {
+            return delegate.assertThatOutput(matcher);
+        }
     }
 
     private static class GradleRunnerExecutionFailure extends GradleRunnerExecutionResult implements ExecutionFailure {

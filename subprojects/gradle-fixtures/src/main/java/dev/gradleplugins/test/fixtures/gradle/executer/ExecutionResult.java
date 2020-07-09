@@ -1,6 +1,7 @@
 package dev.gradleplugins.test.fixtures.gradle.executer;
 
 import dev.gradleplugins.test.fixtures.gradle.logging.GroupedOutputFixture;
+import org.hamcrest.Matcher;
 
 public interface ExecutionResult {
     /**
@@ -61,6 +62,15 @@ public interface ExecutionResult {
      * @param expectedOutput The expected log message, with line endings normalized to a newline character.
      */
     ExecutionResult assertOutputContains(String expectedOutput);
+
+    /**
+     * Asserts that the non-error log message matches.
+     *
+     * <p>Log messages are normalized to use new-line char as line separator.
+     *
+     * @param matcher the matcher to use
+     */
+    ExecutionResult assertThatOutput(Matcher<? super String> matcher);
 
     /**
      * Asserts that this result does not include the given log message anywhere in the build output.
