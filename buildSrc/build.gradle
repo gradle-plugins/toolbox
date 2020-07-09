@@ -27,7 +27,7 @@ dependencies {
     // The tooling API need an SLF4J implementation available at runtime, replace this with any other implementation
     runtimeOnly 'org.slf4j:slf4j-simple:1.7.10'
 
-    implementation 'dev.gradleplugins:gradle-plugin-development:1.1'
+    implementation 'dev.gradleplugins:gradle-plugin-development:1.1.2'
     implementation 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
     implementation 'com.github.jengelman.gradle.plugins:shadow:5.1.0'
 }
