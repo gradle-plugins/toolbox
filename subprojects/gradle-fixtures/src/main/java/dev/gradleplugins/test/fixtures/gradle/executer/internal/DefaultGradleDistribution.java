@@ -44,12 +44,12 @@ public class DefaultGradleDistribution implements GradleDistribution {
     }
 
     @Override
-    public TestFile getGradleHomeDir() {
+    public TestFile getGradleHomeDirectory() {
         return gradleHomeDir;
     }
 
     @Override
-    public TestFile getBinDistribution() {
+    public TestFile getBinaryDirectory() {
         return binDistribution;
     }
 

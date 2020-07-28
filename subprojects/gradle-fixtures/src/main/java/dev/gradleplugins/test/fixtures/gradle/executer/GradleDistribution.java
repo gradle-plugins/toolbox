@@ -26,12 +26,22 @@ public interface GradleDistribution {
     /**
      * Returns the root directory of the installed distribution
      */
-    TestFile getGradleHomeDir();
+    TestFile getGradleHomeDirectory();
+
+    @Deprecated
+    default TestFile getGradleHomeDir() {
+        return getGradleHomeDirectory();
+    }
 
     /**
      * Returns the binary distribution.
      */
-    TestFile getBinDistribution();
+    TestFile getBinaryDirectory();
+
+    @Deprecated
+    default TestFile getBinDistribution() {
+        return getBinaryDirectory();
+    }
 
     /**
      * Returns the version of this distribution.

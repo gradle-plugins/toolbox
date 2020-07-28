@@ -65,14 +65,14 @@ public abstract class DownloadableGradleDistribution extends DefaultGradleDistri
         this.versionDir = versionDir;
     }
 
-    public TestFile getBinDistribution() {
+    public TestFile getBinaryDirectory() {
         download();
-        return super.getBinDistribution();
+        return super.getBinaryDirectory();
     }
 
-    public TestFile getGradleHomeDir() {
+    public TestFile getGradleHomeDirectory() {
         download();
-        return super.getGradleHomeDir();
+        return super.getGradleHomeDirectory();
     }
 
     private void download() {
@@ -86,10 +86,10 @@ public abstract class DownloadableGradleDistribution extends DefaultGradleDistri
 //            //noinspection GrDeprecatedAPIUsage
 ////            cache = CACHE_FACTORY.open(versionDir, getVersion(), [:], CacheBuilder.LockTarget.DefaultTarget, LockOptionsBuilder.mode(FileLockManager.LockMode.Shared).useCrossVersionImplementation(), downloadAction as Action, null)
 //        }
-        CACHE.getUnchecked(new Key(getDownloadURL(), getBinDistribution(), versionDir));
+        CACHE.getUnchecked(new Key(getDownloadURL(), getBinaryDirectory(), versionDir));
 
-        super.getBinDistribution().assertIsFile();
-        super.getGradleHomeDir().assertIsDirectory();
+        super.getBinaryDirectory().assertIsFile();
+        super.getGradleHomeDirectory().assertIsDirectory();
     }
 
     protected abstract URL getDownloadURL();
