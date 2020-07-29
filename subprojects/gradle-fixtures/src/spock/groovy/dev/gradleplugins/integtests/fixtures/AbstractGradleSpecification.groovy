@@ -59,13 +59,13 @@ class AbstractGradleSpecification extends Specification {
         }
         String defaultGradleVersionUnderTest = System.getProperty(DEFAULT_GRADLE_VERSION_SYSPROP_NAME, null)
         if (defaultGradleVersionUnderTest == null) {
-            return null
+            return GradleDistributionFactory.current();
         }
         return GradleDistributionFactory.distribution(defaultGradleVersionUnderTest)
     }
 
     private GradleExecuter createExecuter() {
-        return new GradleRunnerExecuter(gradleDistributionUnderTest, TestFile.of(temporaryFolder.testDirectory)).withPluginClasspath()
+        return new GradleRunnerExecuter(gradleDistributionUnderTest, TestFile.of(temporaryFolder.testDirectory)).withPluginClasspath().requireDaemon()
     }
 
     protected TestFile getProjectDir() {

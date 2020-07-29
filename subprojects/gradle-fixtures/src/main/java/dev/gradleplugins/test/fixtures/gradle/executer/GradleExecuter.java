@@ -20,8 +20,12 @@ import dev.gradleplugins.test.fixtures.file.TestFile;
 import dev.gradleplugins.test.fixtures.gradle.logging.ConsoleOutput;
 
 import java.io.File;
+import java.nio.charset.Charset;
+import java.time.Duration;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -188,10 +192,96 @@ public interface GradleExecuter {
     GradleExecuter withoutDeprecationChecks();
 
     /**
-     * Requires that there is a real gradle distribution for the execution, which in-process execution does not.
+     * Requires that there is a real gradle distribution for the execution, which in-process or tooling API-based execution does not.
      *
      * <p>Note: try to avoid using this method. It has some major drawbacks when it comes to development: 1. It requires a Gradle distribution or installation, and this will need to be rebuilt after
      * each change in order to use the test, and 2. it requires that the build run in a different JVM, which makes it very difficult to debug.</p>
      */
     GradleExecuter requireGradleDistribution();
+
+    /**
+     * Returns true if this executer uses a real Gradle distribution for execution.
+     *
+     * @return {@code true} if this executer uses a real Gradle distribution for execution or {@code false} otherwise.
+     */
+    boolean usesGradleDistribution();
+
+    /**
+     * Configures that any daemons used by the execution are unique to the test.
+     *
+     * This value is persistent across executions by this executer.
+     *
+     * <p>Note: this does not affect the Gradle user home directory.</p>
+     */
+    GradleExecuter requireIsolatedDaemons();
+
+    /**
+     * Requires that the build run in a separate daemon process.
+     *
+     * @return a {@link GradleExecuter} instance configured to run build in a separate daemon process, never null.
+     */
+    GradleExecuter requireDaemon();
+
+    /**
+     * Returns true if this executer uses a daemon.
+     *
+     * @return {@code true} if the executer uses a daemon or {@code false} otherwise.
+     */
+    boolean usesDaemon();
+
+    /**
+     * Returns true if this executer will share daemons with other executers.
+     *
+     * @return {@code true} if the executer share daemons with other executers or {@code false} otherwise.
+     */
+    boolean usesSharedDaemons();
+
+    /**
+     * Set the working space for any daemons used by the builds.
+     *
+     * <p>Note: this does not affect the Gradle user home directory.</p>
+     *
+     * @return a {@link GradleExecuter} instance configured for the specified daemon base directory, never null.
+     */
+    GradleExecuter withDaemonBaseDirectory(File daemonBaseDirectory);
+
+    /**
+     * Set the the idle time a daemon should live for.
+     *
+     * @return a {@link GradleExecuter} instance configured for the specified daemon idle time, never null.
+     */
+    GradleExecuter withDaemonIdleTimeout(Duration daemonIdleTimeout);
+
+    /**
+     * Don't set temporary folder explicitly.
+     *
+     * @return a {@link GradleExecuter} instance configured without explicit temporary directory value, never null.
+     */
+    GradleExecuter withoutExplicitTemporaryDirectory();
+
+    /**
+     * Sets the default character encoding to use.
+     *
+     * @return a {@link GradleExecuter} instance configured with the specified character encoding, never null.
+     * @throws UnsupportedOperationException on non-forking executers
+     */
+    GradleExecuter withDefaultCharacterEncoding(Charset defaultCharacterEncoding);
+
+    /**
+     * Sets the default locale to use.
+     *
+     * Only makes sense for forking executers.
+     *
+     * @return a {@link GradleExecuter} instance configured with the specified locale, never null.
+     * @throws UnsupportedOperationException on non-forking executers
+     */
+    GradleExecuter withDefaultLocale(Locale defaultLocale);
+
+    /**
+     * Renders the welcome message users see upon first invocation of a Gradle distribution with a given Gradle user home directory.
+     * By default the message is never rendered.
+     *
+     * @return a {@link GradleExecuter} instance configured with the welcome message on first invocation, never null.
+     */
+    GradleExecuter withWelcomeMessageEnabled();
 }

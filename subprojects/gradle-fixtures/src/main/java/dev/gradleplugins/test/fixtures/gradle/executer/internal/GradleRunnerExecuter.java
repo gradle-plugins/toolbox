@@ -67,6 +67,11 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
     }
 
     @Override
+    public boolean usesGradleDistribution() {
+        return false;
+    }
+
+    @Override
     public ExecutionResult doRun() {
         return new GradleRunnerExecutionResult(configureExecuter().build());
     }
@@ -85,6 +90,7 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
         }
         runner.withProjectDir(getWorkingDirectory());
 
+        // TODO: This actually creates an in-process executer, we should make a distinction between the TestKit as forking vs TestKit as in-process. Some configuration don't apply to in-process executer such as default character encoding.
         if (configuration.isDebuggerAttached()) {
             System.out.println("WARNING: Gradle TestKit has some class loader issue that may result in runtime failures - such as NoClassDefFoundError for groovy/util/AntBuilder (see https://github.com/gradle/gradle/issues/1687).");
             runner.withDebug(true);

@@ -38,6 +38,11 @@ public class OutOfProcessGradleExecuter extends AbstractGradleExecuter {
         return this;
     }
 
+    @Override
+    public boolean usesGradleDistribution() {
+        return true;
+    }
+
     @RequiredArgsConstructor
     private static class GradleHandle {
         private final Process process;

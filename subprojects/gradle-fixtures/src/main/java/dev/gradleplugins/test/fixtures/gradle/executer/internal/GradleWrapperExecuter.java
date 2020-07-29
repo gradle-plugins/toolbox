@@ -30,6 +30,11 @@ public class GradleWrapperExecuter extends AbstractGradleExecuter {
     }
 
     @Override
+    public boolean usesGradleDistribution() {
+        return true;
+    }
+
+    @Override
     protected ExecutionResult doRun() {
         try {
             List<String> command = new ArrayList<>();

@@ -6,6 +6,8 @@ import dev.gradleplugins.test.fixtures.gradle.logging.ConsoleOutput;
 import lombok.*;
 
 import java.io.File;
+import java.nio.charset.Charset;
+import java.time.Duration;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -37,4 +39,11 @@ public class GradleExecuterConfiguration {
     @With @NonNull private List<Function<? super GradleExecuter, GradleExecuter>> beforeExecute = emptyList();
     @With @NonNull private List<Consumer<? super GradleExecuter>> afterExecute = emptyList();
     @With private boolean allowDeprecations = false;
+    @With private File daemonBaseDirectory = null;
+    @With private Duration daemonIdleTimeout = Duration.ofSeconds(120);
+    @With private boolean explicitTemporaryDirectory = true;
+    @With private Charset defaultCharacterEncoding = Charset.defaultCharset();
+    @With private Locale defaultLocale = null;
+    @With private boolean renderWelcomeMessage = false;
+    @With private boolean requireDaemon = false;
 }
