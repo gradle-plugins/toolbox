@@ -47,6 +47,11 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
     protected abstract GradleExecuter newInstance(TestFile testDirectory, GradleExecuterConfiguration configuration);
 
     @Override
+    public GradleDistribution getDistribution() {
+        return configuration.getDistribution();
+    }
+
+    @Override
     public TestFile getTestDirectory() {
         return testDirectory;
     }

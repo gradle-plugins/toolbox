@@ -27,6 +27,13 @@ import java.util.function.Function;
 
 public interface GradleExecuter {
     /**
+     * Return the Gradle distribution used by this executer.
+     *
+     * @return a {@link GradleDistribution} instance used by this executer, never null.
+     */
+    GradleDistribution getDistribution();
+
+    /**
      * Sets the working directory to use. Defaults to the test's temporary directory.
      */
     GradleExecuter inDirectory(File directory);
