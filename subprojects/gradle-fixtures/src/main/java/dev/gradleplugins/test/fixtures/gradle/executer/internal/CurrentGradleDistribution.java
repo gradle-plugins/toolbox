@@ -18,26 +18,25 @@ package dev.gradleplugins.test.fixtures.gradle.executer.internal;
 
 import dev.gradleplugins.test.fixtures.file.TestFile;
 import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter;
+import lombok.EqualsAndHashCode;
+import org.gradle.internal.installation.CurrentGradleInstallation;
+import org.gradle.util.GradleVersion;
 
-public class CurrentGradleDistribution extends DefaultGradleDistribution {
+@EqualsAndHashCode(callSuper = false)
+public class CurrentGradleDistribution extends AbstractGradleDistribution {
+    @Override
+    public TestFile getGradleHomeDirectory() {
+        return TestFile.of(CurrentGradleInstallation.get().getGradleHome());
+    }
 
-    public CurrentGradleDistribution() {
-//        this(IntegrationTestBuildContext.INSTANCE);
-//    }
-//
-//    public CurrentGradleDistribution(IntegrationTestBuildContext buildContext) {
-//        this(buildContext, buildContext.getGradleHomeDir());
-//    }
-//
-//    public CurrentGradleDistribution(IntegrationTestBuildContext buildContext, TestFile gradleHomeDir) {
-        super(
-//            buildContext.getVersion(),
-                null,
-//            gradleHomeDir,
-                null,
-//            buildContext.getDistributionsDir().file(String.format("gradle-%s-bin.zip", buildContext.getVersion().getBaseVersion().getVersion()))
-                null
-        );
+    @Override
+    public TestFile getBinaryDirectory() {
+        return getGradleHomeDirectory().file("bin");
+    }
+
+    @Override
+    public GradleVersion getVersion() {
+        return GradleVersion.current();
     }
 
     @Override
