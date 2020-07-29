@@ -1,7 +1,9 @@
 package dev.gradleplugins.test.fixtures.gradle.executer;
 
 import dev.gradleplugins.test.fixtures.file.TestFile;
+import dev.gradleplugins.test.fixtures.gradle.executer.internal.CurrentGradleDistribution;
 import dev.gradleplugins.test.fixtures.gradle.executer.internal.ReleasedGradleDistribution;
+import dev.gradleplugins.test.fixtures.gradle.executer.internal.WrapperGradleDistribution;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -23,6 +25,14 @@ public class GradleDistributionFactory {
 //            return new LocallyBuiltGradleDistribution(version);
 //        }
         return new ReleasedGradleDistribution(version, previousVersionDir.file(version));
+    }
+
+    public static GradleDistribution wrapper(File rootProjectDirectory) {
+        return new WrapperGradleDistribution(rootProjectDirectory);
+    }
+
+    public static GradleDistribution current() {
+        return new CurrentGradleDistribution();
     }
 
     private static TestFile getGradleUserHomeDir() {
