@@ -16,52 +16,56 @@
 
 package dev.gradleplugins.test.fixtures.sources;
 
-import dev.gradleplugins.test.fixtures.file.TestFile;
+import lombok.Value;
+import lombok.val;
+import org.apache.commons.io.FileUtils;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 
+@Value
 public class SourceFile {
-    private final String path;
-    private final String name;
-    private final String content;
+    String path;
+    String name;
+    String content;
 
-    public SourceFile(String path, String name, String content) {
-        this.content = content;
-        this.path = path;
-        this.name = name;
+    public File writeToDirectory(File base) {
+        return writeToDirectory(base, name);
     }
 
-    public String getPath() {
-        return path;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public TestFile writeToDir(TestFile base) {
-        return writeToDir(base, name);
-    }
-
-    public TestFile writeToDir(TestFile base, String name) {
-        TestFile file = base.file(path, name);
+    private File writeToDirectory(File base, String name) {
+        val file = new File(base, name);
         writeToFile(file);
         return file;
     }
 
-    public void writeToFile(TestFile file) {
-        if (file.exists()) {
-            file.write("");
+    public void writeToFile(File file) {
+        try {
+            FileUtils.touch(file);
+            FileUtils.write(file, content, Charset.defaultCharset());
+        } catch (IOException ex) {
+            throw new UncheckedIOException(String.format("Unable to create source file at '%s'.", file.getAbsolutePath()), ex);
         }
-        file.write(content);
     }
 
     public String withPath(String basePath) {
-        return Stream.of(basePath, path, name).collect(Collectors.joining("/"));
+        return String.join("/", basePath, path, name);
+    }
+
+    @Override
+    public String toString() {
+        return "SourceFile{" +
+                "path='" + path + '\'' +
+                ", name='" + name + '\'' +
+                ", content='" + firstContentLine(content) + '\'' +
+                '}';
+    }
+
+    private static String firstContentLine(String content) {
+        String[] tokens = content.split("\n", -1);
+        return Arrays.stream(tokens).map(String::trim).filter(line -> !line.isEmpty()).findFirst().map(it -> it + "...").orElse("");
     }
 }

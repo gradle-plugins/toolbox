@@ -46,7 +46,7 @@ public abstract class SourceElement extends Element {
     public void writeToProject(TestFile projectDir) {
         TestFile srcDir = projectDir.file("src/" + getSourceSetName());
         for (SourceFile sourceFile : getFiles()) {
-            sourceFile.writeToDir(srcDir);
+            sourceFile.writeToDirectory(srcDir);
         }
     }
 
