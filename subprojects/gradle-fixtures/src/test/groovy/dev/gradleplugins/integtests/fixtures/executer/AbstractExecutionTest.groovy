@@ -1,20 +1,25 @@
 //package dev.gradleplugins.integtests.fixtures.executer
 //
-//import dev.gradleplugins.spock.lang.TestNameTestDirectoryProvider
+//import dev.gradleplugins.test.fixtures.file.TestFile
+//import dev.gradleplugins.test.fixtures.gradle.executer.ExecutionResult
 //import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter
 //import org.junit.Rule
+//import org.junit.rules.TemporaryFolder
 //import spock.lang.Specification
 //
 //abstract class AbstractExecutionTest extends Specification {
-//    @Rule
-//    protected final TestNameTestDirectoryProvider temporaryFolder = new TestNameTestDirectoryProvider(getClass())
+//    @Rule protected final TemporaryFolder temporaryFolder = new TemporaryFolder(getClass())
 //
 //    protected abstract GradleExecuter getExecuterUnderTest()
 //
 //    protected abstract ExecutionResult run(GradleExecuter executer)
 //
-//    protected File getBuildFile() {
-//        return temporaryFolder.createFile("build.gradle")
+//    protected TestFile getTestDirectory() {
+//        return TestFile.of(temporaryFolder.root)
+//    }
+//
+//    protected TestFile getBuildFile() {
+//        return testDirectory.createFile("build.gradle")
 //    }
 //
 //    protected String getTaskNameUnderTest() {
