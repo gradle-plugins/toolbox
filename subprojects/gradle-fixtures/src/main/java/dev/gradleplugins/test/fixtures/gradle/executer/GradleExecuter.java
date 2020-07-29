@@ -31,15 +31,24 @@ public interface GradleExecuter {
      */
     GradleExecuter inDirectory(File directory);
 
+    /**
+     * Returns the working directory of this executer.
+     *
+     * @return a directory representing the working directory of this executer.
+     */
     File getWorkingDirectory();
 
     /**
      * Allows to trigger on breakpoints inside the Gradle build when the debugger is attached to the caller.
+     *
+     * @return a {@link GradleExecuter} instance that will attach the debugger, never null.
      */
     GradleExecuter withDebuggerAttached();
 
     /**
      * Sets the task names to execute. Defaults to an empty list.
+     *
+     * @return a {@link GradleExecuter} instance with the specified tasks to execute, never null.
      */
     GradleExecuter withTasks(String... tasks);
 
