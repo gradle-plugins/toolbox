@@ -30,8 +30,7 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
     protected GradleExecuterConfiguration configuration;
     private final TestFile testDirectory;
 
-    // TODO: Remove nullability at some point
-    public AbstractGradleExecuter(@Nullable GradleDistribution distribution, @NonNull TestFile testDirectory) {
+    public AbstractGradleExecuter(@NonNull GradleDistribution distribution, @NonNull TestFile testDirectory) {
         this(testDirectory, new GradleExecuterConfiguration(distribution));
     }
 

@@ -11,9 +11,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class GradleWrapperExecuter extends AbstractGradleExecuter {
-    // TODO: The distribution should be model after something that will recognize the wrapper properties file and get the information from there
-    public GradleWrapperExecuter(TestFile testDirectory) {
-        super(null, testDirectory);
+    public GradleWrapperExecuter(GradleDistribution distribution, TestFile testDirectory) {
+        super(distribution, testDirectory);
     }
 
     private GradleWrapperExecuter(TestFile testDirectory, GradleExecuterConfiguration configuration) {
@@ -23,6 +22,11 @@ public class GradleWrapperExecuter extends AbstractGradleExecuter {
     @Override
     protected GradleExecuter newInstance(TestFile testDirectory, GradleExecuterConfiguration configuration) {
         return new GradleWrapperExecuter(testDirectory, configuration);
+    }
+
+    @Override
+    public GradleExecuter requireGradleDistribution() {
+        return this; // already downloading its own distribution via Gradle wrapper
     }
 
     @Override

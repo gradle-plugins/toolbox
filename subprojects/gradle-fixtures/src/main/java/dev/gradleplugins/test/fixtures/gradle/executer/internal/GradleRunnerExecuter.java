@@ -17,7 +17,10 @@
 package dev.gradleplugins.test.fixtures.gradle.executer.internal;
 
 import dev.gradleplugins.test.fixtures.file.TestFile;
-import dev.gradleplugins.test.fixtures.gradle.executer.*;
+import dev.gradleplugins.test.fixtures.gradle.executer.ExecutionFailure;
+import dev.gradleplugins.test.fixtures.gradle.executer.ExecutionResult;
+import dev.gradleplugins.test.fixtures.gradle.executer.GradleDistribution;
+import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter;
 import dev.gradleplugins.test.fixtures.gradle.logging.GroupedOutputFixture;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.BuildTask;
@@ -26,7 +29,6 @@ import org.gradle.testkit.runner.TaskOutcome;
 import org.hamcrest.Matcher;
 import org.junit.Assert;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -36,8 +38,7 @@ import static org.hamcrest.CoreMatchers.hasItem;
 //    We should instead offer a factory to construct the right executer
 //    The contextual executer would also be beneficial here.
 public class GradleRunnerExecuter extends AbstractGradleExecuter {
-    // TODO: Remove nullability at some point
-    public GradleRunnerExecuter(@Nullable GradleDistribution distribution, TestFile testDirectory) {
+    public GradleRunnerExecuter(GradleDistribution distribution, TestFile testDirectory) {
         super(distribution, testDirectory);
     }
 
@@ -58,6 +59,11 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
     @Override
     public GradleExecuter withPluginClasspath() {
         return newInstance(configuration.withPluginClasspath(true));
+    }
+
+    @Override
+    public GradleExecuter requireGradleDistribution() {
+        return new OutOfProcessGradleExecuter(getTestDirectory(), configuration);
     }
 
     @Override
@@ -84,7 +90,7 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
             runner.withDebug(true);
         }
 
-        if (configuration.getDistribution() != null) {
+        if (configuration.getDistribution() != null && !(configuration.getDistribution() instanceof CurrentGradleDistribution)) {
             runner.withGradleVersion(configuration.getDistribution().getVersion().getVersion());
         } else if (configuration.getGradleVersion() != null) {
             runner.withGradleVersion(configuration.getGradleVersion());
