@@ -110,7 +110,7 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
     // TODO: This is not how we want to solve this use case!
     @Deprecated
     public GradleExecuter usingGradleVersion(String gradleVersion) {
-        System.out.println("WARNING: Stop using this method, we are modling the GradleDistribution better to have a cross-executor solution");
+        System.out.println("WARNING: Stop using this method, we are modeling the GradleDistribution better to have a cross-executor solution");
         return newInstance(configuration.withGradleVersion(gradleVersion));
     }
 
