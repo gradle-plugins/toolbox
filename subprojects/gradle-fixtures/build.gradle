@@ -65,6 +65,8 @@ dependencies {
     // TEST
     testImplementation platform('org.spockframework:spock-bom:1.2-groovy-2.5')
     testImplementation 'org.spockframework:spock-core'
+    testImplementation gradleApi(minimumGradleVersion)
+    testImplementation gradleTestKit() // Only for TestKit tests
 
     // SPOCK SUPPORT
     spockSupportApi project(':gradle-fixtures')
