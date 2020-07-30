@@ -38,6 +38,10 @@ import static org.hamcrest.CoreMatchers.hasItem;
 //    We should instead offer a factory to construct the right executer
 //    The contextual executer would also be beneficial here.
 public class GradleRunnerExecuter extends AbstractGradleExecuter {
+    public GradleRunnerExecuter(GradleDistribution distribution, TestFile testDirectory) {
+        this(distribution, testDirectory, TestKitGradleExecuterBuildContext.INSTANCE);
+    }
+
     public GradleRunnerExecuter(GradleDistribution distribution, TestFile testDirectory, GradleExecuterBuildContext buildContext) {
         super(distribution, testDirectory, buildContext);
     }
