@@ -67,6 +67,7 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
 
     @Override
     public GradleExecuter requireGradleDistribution() {
+        // We need to switch to a forking executer
         return new OutOfProcessGradleExecuter(getTestDirectory(), configuration);
     }
 
