@@ -253,6 +253,13 @@ public interface GradleExecuter {
     GradleExecuter withDaemonIdleTimeout(Duration daemonIdleTimeout);
 
     /**
+     * Disable crash daemon checks.
+     *
+     * @return a {@link GradleExecuter} instance configured without checking for daemon crash, never null.
+     */
+    GradleExecuter withoutDaemonCrashChecks();
+
+    /**
      * Don't set temporary folder explicitly.
      *
      * @return a {@link GradleExecuter} instance configured without explicit temporary directory value, never null.

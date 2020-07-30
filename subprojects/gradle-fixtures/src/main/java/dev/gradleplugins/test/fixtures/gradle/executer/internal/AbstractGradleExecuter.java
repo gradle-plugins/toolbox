@@ -292,6 +292,11 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
         return configuration.getDaemonBaseDirectory().equals(configuration.getBuildContext().getDaemonBaseDirectory());
     }
 
+    @Override
+    public GradleExecuter withoutDaemonCrashChecks() {
+        return newInstance(configuration.withDaemonCrashChecks(false));
+    }
+
     /**
      * Performs cleanup at completion of the test.
      */
@@ -310,6 +315,10 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
                 System.out.println("Problem killing isolated daemons of Gradle version " + configuration.getDistribution().getVersion().getVersion() + " in " + directory);
                 e.printStackTrace();
             }
+        }
+
+        if (configuration.isDaemonCrashChecks()) {
+            analyzers.forEach(DaemonLogsAnalyzer::assertNoCrashedDaemon);
         }
     }
     //endregion
