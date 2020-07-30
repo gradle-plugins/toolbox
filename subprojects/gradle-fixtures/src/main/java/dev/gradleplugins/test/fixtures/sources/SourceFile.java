@@ -37,7 +37,7 @@ public class SourceFile {
     }
 
     private File writeToDirectory(File base, String name) {
-        val file = new File(base, name);
+        val file = new File(base, String.join(File.separator, path, name));
         writeToFile(file);
         return file;
     }

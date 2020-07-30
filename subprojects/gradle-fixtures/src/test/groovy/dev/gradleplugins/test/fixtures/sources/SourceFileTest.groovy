@@ -27,8 +27,8 @@ class SourceFileTest extends Specification {
         sourceFileUnderTest.writeToDirectory(temporaryFolder.root)
 
         then:
-        TestFile.of(temporaryFolder.root).assertHasDescendants('main.cpp')
-        TestFile.of(temporaryFolder.root).file('main.cpp').text == sourceFileUnderTest.content
+        TestFile.of(temporaryFolder.root).assertHasDescendants('cpp/main.cpp')
+        TestFile.of(temporaryFolder.root).file('cpp/main.cpp').text == sourceFileUnderTest.content
     }
 
     def "can write to file"() {
