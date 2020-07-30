@@ -15,17 +15,17 @@
  */
 package dev.gradleplugins.test.fixtures.gradle.executer.internal;
 
-import dev.gradleplugins.test.fixtures.file.TestFile;
 import org.gradle.util.DistributionLocator;
 
+import java.io.File;
 import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 public class ReleasedGradleDistribution extends DownloadableGradleDistribution {
 
-    public ReleasedGradleDistribution(String version, TestFile versionDir) {
-        super(version, versionDir);
+    public ReleasedGradleDistribution(String version, File versionDirectory) {
+        super(version, versionDirectory);
     }
 
     @Override

@@ -37,7 +37,7 @@ public abstract class DownloadableGradleDistribution extends DefaultGradleDistri
                             public File load(Key key) {
                                 System.out.println("downloading " + key.url.toString());
                                 key.getBinDistribution().copyFrom(key.url);
-                                key.getBinDistribution().usingNativeTools().unzipTo(key.versionDir);
+                                key.getBinDistribution().usingNativeTools().unzipTo(key.versionDirectory);
                                 return key.getBinDistribution();
                             }
                         });
@@ -47,14 +47,14 @@ public abstract class DownloadableGradleDistribution extends DefaultGradleDistri
     private static class Key {
         URL url;
         TestFile binDistribution;
-        TestFile versionDir;
+        File versionDirectory;
     }
 
-    protected TestFile versionDir;
+    protected File versionDirectory;
 
-    public DownloadableGradleDistribution(String version, TestFile versionDir) {
-        super(GradleVersion.version(version), versionDir.file("gradle-$version"), versionDir.file("gradle-$version-bin.zip"));
-        this.versionDir = versionDir;
+    public DownloadableGradleDistribution(String version, File versionDirectory) {
+        super(GradleVersion.version(version), TestFile.of(new File(versionDirectory, String.format("gradle-%s", version))), TestFile.of(new File(versionDirectory, String.format("gradle-%s-bin.zip", version))));
+        this.versionDirectory = versionDirectory;
     }
 
     public TestFile getBinDistribution() {
