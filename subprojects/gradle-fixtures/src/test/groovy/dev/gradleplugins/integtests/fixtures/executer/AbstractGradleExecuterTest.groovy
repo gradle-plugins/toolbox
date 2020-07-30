@@ -88,6 +88,18 @@ abstract class AbstractGradleExecuterTest extends Specification {
         result.output.contains("The executer is using '${buildFile}' as its build file")
     }
 
+    def "can isolate daemons"() {
+        when:
+        def executer = executerUnderTest
+        then:
+        executer.usesSharedDaemons()
+
+        when:
+        executer = executer.requireIsolatedDaemons()
+        then:
+        !executer.usesSharedDaemons()
+    }
+
 //    def "can assert successful execution"() {
 //        file('build.gradle') << '''
 //            if (System.properties.containsKey('throw')) {
