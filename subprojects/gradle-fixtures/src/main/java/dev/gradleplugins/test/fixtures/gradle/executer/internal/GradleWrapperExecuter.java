@@ -11,8 +11,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class GradleWrapperExecuter extends AbstractGradleExecuter {
-    public GradleWrapperExecuter(GradleDistribution distribution, TestFile testDirectory) {
-        super(distribution, testDirectory);
+    public GradleWrapperExecuter(GradleDistribution distribution, TestFile testDirectory, GradleExecuterBuildContext buildContext) {
+        super(distribution, testDirectory, buildContext);
     }
 
     private GradleWrapperExecuter(TestFile testDirectory, GradleExecuterConfiguration configuration) {

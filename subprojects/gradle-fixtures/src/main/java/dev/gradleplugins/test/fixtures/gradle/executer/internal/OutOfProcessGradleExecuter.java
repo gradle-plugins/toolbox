@@ -20,8 +20,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class OutOfProcessGradleExecuter extends AbstractGradleExecuter {
-    public OutOfProcessGradleExecuter(GradleDistribution distribution, TestFile testDirectory) {
-        super(distribution, testDirectory);
+    public OutOfProcessGradleExecuter(GradleDistribution distribution, TestFile testDirectory, GradleExecuterBuildContext buildContext) {
+        super(distribution, testDirectory, buildContext);
     }
 
     OutOfProcessGradleExecuter(TestFile testDirectory, GradleExecuterConfiguration configuration) {

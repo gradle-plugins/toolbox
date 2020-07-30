@@ -30,12 +30,12 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
     protected GradleExecuterConfiguration configuration;
     private final TestFile testDirectory;
 
-    public AbstractGradleExecuter(@NonNull GradleDistribution distribution, @NonNull TestFile testDirectory) {
-        this(testDirectory, new GradleExecuterConfiguration(distribution));
+    public AbstractGradleExecuter(@NonNull GradleDistribution distribution, @NonNull TestFile testDirectory, @NonNull GradleExecuterBuildContext buildContext) {
+        this(testDirectory, new GradleExecuterConfiguration(distribution, buildContext).withGradleUserHomeDirectory(buildContext.getGradleUserHomeDirectory()).withDaemonBaseDirectory(buildContext.getDaemonBaseDirectory()));
     }
 
     protected AbstractGradleExecuter(TestFile testDirectory, GradleExecuterConfiguration configuration) {
-        this.configuration = configuration.withGradleUserHomeDirectory(GradleExecuterBuildContext.INSTANCE.getGradleUserHomeDirectory()).withDaemonBaseDirectory(GradleExecuterBuildContext.INSTANCE.getDaemonBaseDirectory());
+        this.configuration = configuration;
         this.testDirectory = testDirectory;
     }
 
@@ -288,7 +288,7 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
     }
 
     protected boolean isSharedDaemons() {
-        return configuration.getDaemonBaseDirectory().equals(GradleExecuterBuildContext.INSTANCE.getDaemonBaseDirectory());
+        return configuration.getDaemonBaseDirectory().equals(configuration.getBuildContext().getDaemonBaseDirectory());
     }
     //endregion
 
@@ -413,7 +413,7 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
         properties.put(DaemonBuildOptions.BaseDirOption.GRADLE_PROPERTY, configuration.getDaemonBaseDirectory().getAbsolutePath());
 
         if (configuration.isExplicitTemporaryDirectory()) {
-            val temporaryDirectory = GradleExecuterBuildContext.INSTANCE.getTemporaryDirectory();
+            val temporaryDirectory = configuration.getBuildContext().getTemporaryDirectory();
             temporaryDirectory.mkdirs(); // ignore return code
             String temporaryDirectoryPath = temporaryDirectory.getAbsolutePath();
             if (!temporaryDirectoryPath.contains(" ") || (getDistribution().isSupportsSpacesInGradleAndJavaOpts() && supportsWhiteSpaceInEnvVars())) {

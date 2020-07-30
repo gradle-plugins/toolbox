@@ -20,6 +20,7 @@ import static java.util.Collections.emptyMap;
 @AllArgsConstructor
 public class GradleExecuterConfiguration {
     private final GradleDistribution distribution;
+    private final GradleExecuterBuildContext buildContext;
     @With private File workingDirectory = null;
     @With private File userHomeDirectory = null;
     @With private File gradleUserHomeDirectory = null;
