@@ -86,7 +86,7 @@ public abstract class DownloadableGradleDistribution extends DefaultGradleDistri
 //            //noinspection GrDeprecatedAPIUsage
 ////            cache = CACHE_FACTORY.open(versionDir, getVersion(), [:], CacheBuilder.LockTarget.DefaultTarget, LockOptionsBuilder.mode(FileLockManager.LockMode.Shared).useCrossVersionImplementation(), downloadAction as Action, null)
 //        }
-        CACHE.getUnchecked(new Key(getDownloadURL(), getBinaryDirectory(), versionDir));
+        CACHE.getUnchecked(new Key(getDownloadURL(), super.getBinDistribution(), versionDirectory));
 
         super.getBinaryDirectory().assertIsFile();
         super.getGradleHomeDirectory().assertIsDirectory();
