@@ -42,7 +42,7 @@ public class WrapperGradleDistribution extends AbstractGradleDistribution {
     }
 
     @Override
-    public TestFile getBinaryDirectory() {
+    public TestFile getBinDistribution() {
         throw new UnsupportedOperationException();
     }
 

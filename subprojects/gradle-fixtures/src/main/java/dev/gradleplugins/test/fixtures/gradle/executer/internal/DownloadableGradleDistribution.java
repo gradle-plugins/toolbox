@@ -65,9 +65,9 @@ public abstract class DownloadableGradleDistribution extends DefaultGradleDistri
         this.versionDir = versionDir;
     }
 
-    public TestFile getBinaryDirectory() {
+    public TestFile getBinDistribution() {
         download();
-        return super.getBinaryDirectory();
+        return super.getBinDistribution();
     }
 
     public TestFile getGradleHomeDirectory() {
@@ -88,7 +88,7 @@ public abstract class DownloadableGradleDistribution extends DefaultGradleDistri
 //        }
         CACHE.getUnchecked(new Key(getDownloadURL(), super.getBinDistribution(), versionDirectory));
 
-        super.getBinaryDirectory().assertIsFile();
+        super.getBinDistribution().assertIsFile();
         super.getGradleHomeDirectory().assertIsDirectory();
     }
 

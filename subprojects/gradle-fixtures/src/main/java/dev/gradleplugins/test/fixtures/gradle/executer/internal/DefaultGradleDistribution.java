@@ -42,7 +42,7 @@ public class DefaultGradleDistribution extends AbstractGradleDistribution {
     }
 
     @Override
-    public TestFile getBinaryDirectory() {
+    public TestFile getBinDistribution() {
         return binDistribution;
     }
 

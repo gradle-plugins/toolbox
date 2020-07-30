@@ -30,7 +30,7 @@ public class CurrentGradleDistribution extends AbstractGradleDistribution {
     }
 
     @Override
-    public TestFile getBinaryDirectory() {
+    public TestFile getBinDistribution() {
         return getGradleHomeDirectory().file("bin");
     }
 

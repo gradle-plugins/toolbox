@@ -36,12 +36,7 @@ public interface GradleDistribution {
     /**
      * Returns the binary distribution.
      */
-    TestFile getBinaryDirectory();
-
-    @Deprecated
-    default TestFile getBinDistribution() {
-        return getBinaryDirectory();
-    }
+    TestFile getBinDistribution();
 
     /**
      * Returns the version of this distribution.
