@@ -413,11 +413,7 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
         allArguments.addAll(ofNullable(configuration.getSettingsFile()).map(it -> asList("--settings-file", it.getAbsolutePath())).orElse(emptyList()));
 
         if (noDaemonArgumentGiven()) {
-            if (usesDaemon()) {
-                allArguments.add("--daemon");
-            } else {
-                allArguments.add("--no-daemon");
-            }
+            allArguments.addAll(getDaemonArguments());
         }
 
         allArguments.addAll(configuration.isShowStacktrace() ? singletonList("--stacktrace") : emptyList());
@@ -442,6 +438,13 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
         allArguments.addAll(configuration.getTasks());
 
         return allArguments;
+    }
+
+    protected List<String> getDaemonArguments() {
+        if (usesDaemon()) {
+            return ImmutableList.of("--daemon");
+        }
+        return ImmutableList.of("--no-daemon");
     }
 
     /**

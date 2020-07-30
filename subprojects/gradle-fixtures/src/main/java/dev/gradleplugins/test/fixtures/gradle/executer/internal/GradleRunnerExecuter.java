@@ -76,6 +76,12 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
     }
 
     @Override
+    protected List<String> getDaemonArguments() {
+        // Not technically right...
+        return Collections.emptyList();
+    }
+
+    @Override
     public ExecutionResult doRun() {
         return new GradleRunnerExecutionResult(configureExecuter().build());
     }
