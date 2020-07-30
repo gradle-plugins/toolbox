@@ -83,6 +83,10 @@ dependencies {
     spockSupportAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 }
 
+tasks.named('test', Test) {
+    systemProperty('dev.gradleplugins.cwd', projectDir.absolutePath)
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
