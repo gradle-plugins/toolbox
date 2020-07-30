@@ -85,4 +85,9 @@ public interface ExecutionResult {
      * @param expectedOutput The expected log message, with line endings normalized to a newline character.
      */
     ExecutionResult assertHasPostBuildOutput(String expectedOutput);
+
+    /**
+     * Asserts that the important information from this result has been verified by the test.
+     */
+    void assertResultVisited();
 }

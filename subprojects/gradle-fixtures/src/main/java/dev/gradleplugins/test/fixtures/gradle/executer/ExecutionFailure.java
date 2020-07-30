@@ -23,4 +23,11 @@ public interface ExecutionFailure extends ExecutionResult {
      * <p>Error messages are normalized to use new-line char as line separator.
      */
     ExecutionFailure assertHasDescription(String context);
+
+    interface Failure {
+        /**
+         * Asserts that this failure has the given number of direct causes.
+         */
+        void assertHasCauses(int count);
+    }
 }

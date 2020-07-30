@@ -1,5 +1,6 @@
 package dev.gradleplugins.test.fixtures.gradle.executer.internal;
 
+import dev.gradleplugins.test.fixtures.gradle.executer.ExecutionResult;
 import dev.gradleplugins.test.fixtures.gradle.executer.GradleDistribution;
 import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter;
 import dev.gradleplugins.test.fixtures.gradle.logging.ConsoleOutput;
@@ -49,4 +50,5 @@ public class GradleExecuterConfiguration {
     @With private boolean requireDaemon = false;
     @With private boolean daemonCrashChecks = true;
     @With private List<File> isolatedDaemonBaseDirectories = emptyList();
+    @With private List<ExecutionResult> executionResults = emptyList();
 }

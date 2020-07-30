@@ -286,6 +286,11 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
         public ExecutionResult assertThatOutput(Matcher<? super String> matcher) {
             return delegate.assertThatOutput(matcher);
         }
+
+        @Override
+        public void assertResultVisited() {
+            delegate.assertResultVisited();
+        }
     }
 
     private static class GradleRunnerExecutionFailure extends GradleRunnerExecutionResult implements ExecutionFailure {
@@ -309,6 +314,12 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
         @Override
         public ExecutionFailure assertHasDescription(String context) {
             return delegate.assertHasDescription(context);
+        }
+
+        @Override
+        public void assertResultVisited() {
+            super.assertResultVisited();
+            delegate.assertResultVisited();
         }
     }
 }

@@ -389,4 +389,8 @@ public class OutputScrapingExecutionResult implements ExecutionResult {
 
         return tasks;
     }
+
+    @Override
+    public void assertResultVisited() {
+    }
 }

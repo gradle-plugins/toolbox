@@ -302,6 +302,9 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
      */
     public void cleanup() {
         cleanupIsolatedDaemons();
+        for (ExecutionResult result : configuration.getExecutionResults()) {
+            result.assertResultVisited();
+        }
     }
 
     private void cleanupIsolatedDaemons() {
@@ -357,7 +360,7 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
         if (configuration.getBeforeExecute().isEmpty()) {
             try {
                 ExecutionResult result = doRun();
-                fireAfterExecute();
+                afterBuildCleanup(result);
                 return result;
             } finally {
                 finished();
@@ -365,6 +368,11 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
         } else {
             return fireBeforeExecute().run();
         }
+    }
+
+    private void afterBuildCleanup(ExecutionResult result) {
+        fireAfterExecute();
+        configuration = configuration.withExecutionResults(ImmutableList.<ExecutionResult>builder().addAll(configuration.getExecutionResults()).add(result).build());
     }
 
     protected abstract ExecutionResult doRun();
@@ -375,7 +383,7 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
         if (configuration.getBeforeExecute().isEmpty()) {
             try {
                 ExecutionFailure result = doRunWithFailure();
-                fireAfterExecute();
+                afterBuildCleanup(result);
                 return result;
             } finally {
                 finished();
