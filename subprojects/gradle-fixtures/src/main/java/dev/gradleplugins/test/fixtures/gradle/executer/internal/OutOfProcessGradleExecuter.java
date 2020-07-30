@@ -64,9 +64,9 @@ public class OutOfProcessGradleExecuter extends AbstractGradleExecuter {
         try {
             List<String> command = new ArrayList<>();
             if (SystemUtils.IS_OS_WINDOWS) {
-                command.addAll(Arrays.asList("cmd", "/c", getDistribution().getBinaryDirectory().file("gradle.bat").getAbsolutePath()));
+                command.addAll(Arrays.asList("cmd", "/c", getDistribution().getGradleHomeDirectory().file("bin/gradle.bat").getAbsolutePath()));
             } else {
-                command.add(getDistribution().getBinaryDirectory().file("gradle").getAbsolutePath());
+                command.add(getDistribution().getGradleHomeDirectory().file("bin/gradle").getAbsolutePath());
             }
             command.addAll(getAllArguments());
             ProcessBuilder processBuilder = new ProcessBuilder().command(command).directory(getWorkingDirectory());
