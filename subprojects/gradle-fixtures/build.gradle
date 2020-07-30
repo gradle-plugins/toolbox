@@ -11,7 +11,7 @@ plugins {
     id 'com.jfrog.bintray'
 }
 
-version = '0.0.86'
+version = '0.0.87'
 description = "Gradle TestKit fixtures for fast and efficient Gradle plugin development."
 
 sourceSets {
