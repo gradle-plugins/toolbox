@@ -1,7 +1,6 @@
 package dev.gradleplugins.test.fixtures.gradle
 
 import dev.gradleplugins.test.fixtures.file.TestFile
-import dev.gradleplugins.test.fixtures.gradle.GradleExecuterFactory
 import dev.gradleplugins.test.fixtures.gradle.executer.GradleDistributionFactory
 import dev.gradleplugins.test.fixtures.gradle.executer.internal.*
 import org.junit.Rule
@@ -57,7 +56,7 @@ class GradleExecuterFactoryTest extends Specification {
         def executer = factory.forking()
 
         then:
-        executer instanceof OutOfProcessGradleExecuter
+        executer instanceof ForkingGradleExecuter
         executer.distribution instanceof CurrentGradleDistribution
     }
 
@@ -69,7 +68,7 @@ class GradleExecuterFactoryTest extends Specification {
         def executer = factory.forking(distribution)
 
         then:
-        executer instanceof OutOfProcessGradleExecuter
+        executer instanceof ForkingGradleExecuter
         executer.distribution == distribution
     }
 }

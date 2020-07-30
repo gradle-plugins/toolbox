@@ -19,18 +19,18 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class OutOfProcessGradleExecuter extends AbstractGradleExecuter {
-    public OutOfProcessGradleExecuter(GradleDistribution distribution, TestFile testDirectory, GradleExecuterBuildContext buildContext) {
+public class ForkingGradleExecuter extends AbstractGradleExecuter {
+    public ForkingGradleExecuter(GradleDistribution distribution, TestFile testDirectory, GradleExecuterBuildContext buildContext) {
         super(distribution, testDirectory, buildContext);
     }
 
-    OutOfProcessGradleExecuter(TestFile testDirectory, GradleExecuterConfiguration configuration) {
+    ForkingGradleExecuter(TestFile testDirectory, GradleExecuterConfiguration configuration) {
         super(testDirectory, configuration);
     }
 
     @Override
     protected GradleExecuter newInstance(TestFile testDirectory, GradleExecuterConfiguration configuration) {
-        return new OutOfProcessGradleExecuter(testDirectory, configuration);
+        return new ForkingGradleExecuter(testDirectory, configuration);
     }
 
     @Override

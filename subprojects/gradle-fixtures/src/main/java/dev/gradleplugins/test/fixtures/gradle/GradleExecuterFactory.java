@@ -36,11 +36,11 @@ public class GradleExecuterFactory {
     }
 
     public GradleExecuter forking() {
-        return new OutOfProcessGradleExecuter(GradleDistributionFactory.current(), TestFile.of(testDirectory), DefaultGradleExecuterBuildContext.INSTANCE);
+        return new ForkingGradleExecuter(GradleDistributionFactory.current(), TestFile.of(testDirectory), DefaultGradleExecuterBuildContext.INSTANCE);
     }
 
     public GradleExecuter forking(GradleDistribution distribution) {
-        return new OutOfProcessGradleExecuter(distribution, TestFile.of(testDirectory), DefaultGradleExecuterBuildContext.INSTANCE);
+        return new ForkingGradleExecuter(distribution, TestFile.of(testDirectory), DefaultGradleExecuterBuildContext.INSTANCE);
     }
 
 //    public GradleExecuter toolingApi(TestFile testDirectory) {

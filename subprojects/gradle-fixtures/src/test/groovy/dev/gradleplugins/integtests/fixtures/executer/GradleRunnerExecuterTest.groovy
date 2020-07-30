@@ -3,7 +3,7 @@ package dev.gradleplugins.integtests.fixtures.executer
 import dev.gradleplugins.test.fixtures.gradle.executer.GradleDistributionFactory
 import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter
 import dev.gradleplugins.test.fixtures.gradle.executer.internal.GradleRunnerExecuter
-import dev.gradleplugins.test.fixtures.gradle.executer.internal.OutOfProcessGradleExecuter
+import dev.gradleplugins.test.fixtures.gradle.executer.internal.ForkingGradleExecuter
 import dev.gradleplugins.test.fixtures.gradle.executer.internal.TestKitGradleExecuterBuildContext
 import spock.lang.Subject
 
@@ -19,7 +19,7 @@ class GradleRunnerExecuterTest extends AbstractGradleExecuterTest {
         def executer = executerUnderTest.requireGradleDistribution()
 
         then:
-        executer instanceof OutOfProcessGradleExecuter
+        executer instanceof ForkingGradleExecuter
         executer.testDirectory == testDirectory
         executer.distribution == executerUnderTest.distribution
     }
