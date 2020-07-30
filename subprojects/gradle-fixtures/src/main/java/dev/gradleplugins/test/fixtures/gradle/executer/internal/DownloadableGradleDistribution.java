@@ -32,7 +32,6 @@ public abstract class DownloadableGradleDistribution extends DefaultGradleDistri
     private static LoadingCache<Key, File> createCache() {
         return CacheBuilder.newBuilder()
                 .maximumSize(10000)
-//                .removalListener(MY_LISTENER)
                 .build(
                         new CacheLoader<Key, File>() {
                             public File load(Key key) {
@@ -42,12 +41,6 @@ public abstract class DownloadableGradleDistribution extends DefaultGradleDistri
                                 return key.getBinDistribution();
                             }
                         });
-//        return new DefaultCacheFactory(
-//                new DefaultFileLockManager(
-//                        new DefaultProcessMetaDataProvider(
-//                                NativeServicesTestFixture.getInstance().get(org.gradle.internal.nativeintegration.ProcessEnvironment)),
-//                        20 * 60 * 1000 // allow up to 20 minutes to download a distribution
-//                        , new NoOpFileLockContentionHandler()), new DefaultExecutorFactory(), new NoOpProgressLoggerFactory())
     }
 
     @Value
@@ -58,7 +51,6 @@ public abstract class DownloadableGradleDistribution extends DefaultGradleDistri
     }
 
     protected TestFile versionDir;
-//    private PersistentCache cache;
 
     public DownloadableGradleDistribution(String version, TestFile versionDir) {
         super(GradleVersion.version(version), versionDir.file("gradle-$version"), versionDir.file("gradle-$version-bin.zip"));
@@ -76,16 +68,6 @@ public abstract class DownloadableGradleDistribution extends DefaultGradleDistri
     }
 
     private void download() {
-//        if (cache == null) {
-//            def downloadAction = { cache ->
-//                URL url = getDownloadURL();
-//                System.out.println("downloading $url");
-//                super.getBinDistribution().copyFrom(url);
-//                super.getBinDistribution().usingNativeTools().unzipTo(versionDir);
-//            }
-//            //noinspection GrDeprecatedAPIUsage
-////            cache = CACHE_FACTORY.open(versionDir, getVersion(), [:], CacheBuilder.LockTarget.DefaultTarget, LockOptionsBuilder.mode(FileLockManager.LockMode.Shared).useCrossVersionImplementation(), downloadAction as Action, null)
-//        }
         CACHE.getUnchecked(new Key(getDownloadURL(), super.getBinDistribution(), versionDirectory));
 
         super.getBinDistribution().assertIsFile();
