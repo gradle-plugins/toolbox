@@ -1,7 +1,10 @@
 package dev.gradleplugins.integtests.fixtures.executer
 
+import dev.gradleplugins.test.fixtures.ProcessFixture
 import dev.gradleplugins.test.fixtures.file.TestFile
+import dev.gradleplugins.test.fixtures.gradle.daemon.DaemonLogsAnalyzer
 import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter
+import dev.gradleplugins.test.fixtures.gradle.executer.internal.AbstractGradleExecuter
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Ignore
@@ -98,6 +101,19 @@ abstract class AbstractGradleExecuterTest extends Specification {
         executer = executer.requireIsolatedDaemons()
         then:
         !executer.usesSharedDaemons()
+    }
+
+    def "can cleanup isolated daemons"() {
+        def executer = executerUnderTest.requireIsolatedDaemons().requireDaemon()
+        executer.run()
+        when:
+        (executer as AbstractGradleExecuter).cleanup()
+
+        then:
+        noExceptionThrown()
+
+        and:
+        new DaemonLogsAnalyzer(file('daemon')).allDaemons*.context.every { !new ProcessFixture(it.pid).alive }
     }
 
 //    def "can assert successful execution"() {

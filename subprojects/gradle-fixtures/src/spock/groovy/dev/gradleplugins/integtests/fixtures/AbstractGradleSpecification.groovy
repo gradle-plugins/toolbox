@@ -47,6 +47,10 @@ class AbstractGradleSpecification extends Specification {
          executer = m2.isolateMavenLocalRepo(executer)
     }
 
+    def cleanup() {
+        executer.cleanup()
+    }
+
     protected void useKotlinDsl() {
         // TODO: Detect when configuration already started to happen and either migrate the configuration or crash.
         //   Leaning more toward crashing.

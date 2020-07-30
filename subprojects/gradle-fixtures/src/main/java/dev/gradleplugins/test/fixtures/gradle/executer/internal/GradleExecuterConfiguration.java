@@ -47,4 +47,5 @@ public class GradleExecuterConfiguration {
     @With private Locale defaultLocale = null;
     @With private boolean renderWelcomeMessage = false;
     @With private boolean requireDaemon = false;
+    @With private List<File> isolatedDaemonBaseDirectories = emptyList();
 }

@@ -3,6 +3,7 @@ package dev.gradleplugins.test.fixtures.gradle.executer.internal;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import dev.gradleplugins.test.fixtures.file.TestFile;
+import dev.gradleplugins.test.fixtures.gradle.daemon.DaemonLogsAnalyzer;
 import dev.gradleplugins.test.fixtures.gradle.executer.ExecutionFailure;
 import dev.gradleplugins.test.fixtures.gradle.executer.ExecutionResult;
 import dev.gradleplugins.test.fixtures.gradle.executer.GradleDistribution;
@@ -26,7 +27,7 @@ import static java.util.Collections.*;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
-abstract class AbstractGradleExecuter implements GradleExecuter {
+public abstract class AbstractGradleExecuter implements GradleExecuter {
     protected GradleExecuterConfiguration configuration;
     private final TestFile testDirectory;
 
@@ -290,6 +291,27 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
     protected boolean isSharedDaemons() {
         return configuration.getDaemonBaseDirectory().equals(configuration.getBuildContext().getDaemonBaseDirectory());
     }
+
+    /**
+     * Performs cleanup at completion of the test.
+     */
+    public void cleanup() {
+        cleanupIsolatedDaemons();
+    }
+
+    private void cleanupIsolatedDaemons() {
+        List<DaemonLogsAnalyzer> analyzers = new ArrayList<>();
+        for (File directory : configuration.getIsolatedDaemonBaseDirectories()) {
+            try {
+                DaemonLogsAnalyzer analyzer = new DaemonLogsAnalyzer(directory, configuration.getDistribution().getVersion().getVersion());
+                analyzers.add(analyzer);
+                analyzer.killAll();
+            } catch (Exception e) {
+                System.out.println("Problem killing isolated daemons of Gradle version " + configuration.getDistribution().getVersion().getVersion() + " in " + directory);
+                e.printStackTrace();
+            }
+        }
+    }
     //endregion
 
     //region Temporary directory configuration
@@ -322,6 +344,7 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
 
     @Override
     public ExecutionResult run() {
+        beforeBuildSetup();
         if (configuration.getBeforeExecute().isEmpty()) {
             try {
                 ExecutionResult result = doRun();
@@ -339,6 +362,7 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
 
     @Override
     public ExecutionFailure runWithFailure() {
+        beforeBuildSetup();
         if (configuration.getBeforeExecute().isEmpty()) {
             try {
                 ExecutionFailure result = doRunWithFailure();
@@ -349,6 +373,16 @@ abstract class AbstractGradleExecuter implements GradleExecuter {
             }
         } else {
             return fireBeforeExecute().runWithFailure();
+        }
+    }
+
+    private void beforeBuildSetup() {
+        collectStateBeforeExecution();
+    }
+
+    private void collectStateBeforeExecution() {
+        if (!isSharedDaemons()) {
+            configuration = configuration.withIsolatedDaemonBaseDirectories(ImmutableList.<File>builder().addAll(configuration.getIsolatedDaemonBaseDirectories()).add(configuration.getDaemonBaseDirectory()).build());
         }
     }
 
