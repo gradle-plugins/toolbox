@@ -11,10 +11,13 @@ import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter;
 import dev.gradleplugins.test.fixtures.gradle.logging.ConsoleOutput;
 import lombok.NonNull;
 import lombok.val;
+import org.apache.commons.io.FileUtils;
 import org.gradle.launcher.cli.DefaultCommandLineActionFactory;
 import org.gradle.launcher.daemon.configuration.DaemonBuildOptions;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.*;
@@ -485,6 +488,16 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
         }).orElse(emptyMap()));
 
         properties.put(DefaultCommandLineActionFactory.WELCOME_MESSAGE_ENABLED_SYSTEM_PROPERTY, Boolean.toString(configuration.isRenderWelcomeMessage()));
+        val welcomeMessageFile = new File(configuration.getGradleUserHomeDirectory(), "notifications/" + configuration.getDistribution().getVersion().getVersion() + "/release-features.rendered");
+        if (configuration.isRenderWelcomeMessage()) {
+            welcomeMessageFile.delete();
+        } else {
+            try {
+                FileUtils.touch(welcomeMessageFile);
+            } catch (IOException e) {
+                throw new UncheckedIOException("Could not ensure render message is properly rendered", e);
+            }
+        }
 
         return properties;
     }

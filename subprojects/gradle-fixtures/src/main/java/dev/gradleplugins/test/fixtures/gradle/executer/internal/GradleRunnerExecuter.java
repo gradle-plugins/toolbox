@@ -77,6 +77,11 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
     }
 
     @Override
+    public GradleExecuter withWelcomeMessageEnabled() {
+        throw new UnsupportedOperationException("TestKit always suppress the welcome message");
+    }
+
+    @Override
     protected List<String> getDaemonArguments() {
         // Not technically right...
         return Collections.emptyList();

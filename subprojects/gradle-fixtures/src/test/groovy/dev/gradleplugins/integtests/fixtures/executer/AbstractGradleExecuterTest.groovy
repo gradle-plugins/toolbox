@@ -5,10 +5,15 @@ import dev.gradleplugins.test.fixtures.file.TestFile
 import dev.gradleplugins.test.fixtures.gradle.daemon.DaemonLogsAnalyzer
 import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter
 import dev.gradleplugins.test.fixtures.gradle.executer.internal.AbstractGradleExecuter
+import dev.gradleplugins.test.fixtures.gradle.executer.internal.GradleRunnerExecuter
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Ignore
 import spock.lang.Specification
+
+import static org.hamcrest.Matchers.equalTo
+import static org.hamcrest.Matchers.not
+import static org.junit.Assume.assumeThat
 
 abstract class AbstractGradleExecuterTest extends Specification {
     @Rule
@@ -114,6 +119,21 @@ abstract class AbstractGradleExecuterTest extends Specification {
 
         and:
         new DaemonLogsAnalyzer(file('daemon')).allDaemons*.context.every { !new ProcessFixture(it.pid).alive }
+    }
+
+    def "suppress welcome message by default"() {
+        assumeThat(executerUnderTest.class, not(equalTo(GradleRunnerExecuter)))
+
+        expect:
+        executerUnderTest
+                .withGradleUserHomeDirectory(file('welcome-disabled'))
+                .run()
+                .assertNotOutput('Here are the highlights of this release:')
+        executerUnderTest
+                .withGradleUserHomeDirectory(file('welcome-enabled'))
+                .withWelcomeMessageEnabled()
+                .run()
+                .assertOutputContains('Here are the highlights of this release:')
     }
 
 //    def "can assert successful execution"() {
