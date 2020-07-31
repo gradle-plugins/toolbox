@@ -18,6 +18,8 @@ package dev.gradleplugins.test.fixtures.util;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
+import java.time.Duration;
+
 public final class RetryUtil {
     private RetryUtil() {}
 
@@ -30,7 +32,12 @@ public final class RetryUtil {
         return retry(retries, 0, closure);
     }
 
+    @Deprecated
     public static int retry(int retries, int waitMsBetweenRetries, Runnable closure) throws InterruptedException {
+        return retry(retries, Duration.ofMillis(waitMsBetweenRetries), closure);
+    }
+
+    public static int retry(int retries, Duration waitBetweenRetries, Runnable closure) throws InterruptedException {
         int retryCount = 0;
         Throwable lastException = null;
 
@@ -40,7 +47,7 @@ public final class RetryUtil {
                 return retryCount;
             } catch (Throwable e) {
                 lastException = e;
-                Thread.sleep(waitMsBetweenRetries);
+                Thread.sleep(waitBetweenRetries.toMillis());
             }
         }
 
