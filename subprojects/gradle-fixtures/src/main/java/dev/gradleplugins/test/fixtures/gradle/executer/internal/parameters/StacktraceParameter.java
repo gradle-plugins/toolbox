@@ -1,31 +1,27 @@
 package dev.gradleplugins.test.fixtures.gradle.executer.internal.parameters;
 
-import org.gradle.api.logging.configuration.ShowStacktrace;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public interface StacktraceParameter extends CommandLineGradleParameter {
-    static StacktraceParameter hide() {
-        return new HideStacktraceParameter();
+public final class StacktraceParameter extends GradleExecutionParameterImpl<StacktraceParameter.Stacktrace> implements CommandLineGradleExecutionParameter<StacktraceParameter.Stacktrace> {
+    public enum Stacktrace {
+        HIDE, SHOW
     }
 
-    static StacktraceParameter show() {
-        return new ShowStacktraceParameter();
+    public static StacktraceParameter hide() {
+        return fixed(StacktraceParameter.class, Stacktrace.HIDE);
     }
 
-    class HideStacktraceParameter implements StacktraceParameter {
-        @Override
-        public List<String> getAsArguments() {
-            return Collections.emptyList();
-        }
+    public static StacktraceParameter show() {
+        return fixed(StacktraceParameter.class, Stacktrace.SHOW);
     }
 
-    class ShowStacktraceParameter implements StacktraceParameter {
-        @Override
-        public List<String> getAsArguments() {
+    @Override
+    public List<String> getAsArguments() {
+        if (get().equals(Stacktrace.SHOW)) {
             return Arrays.asList("--stacktrace");
         }
+        return Collections.emptyList();
     }
 }

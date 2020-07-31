@@ -4,26 +4,24 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public interface DeprecationChecksParameter extends CommandLineGradleParameter {
-    static DeprecationChecksParameter fails() {
-        return new FailingDeprecationChecksParameter();
+public class DeprecationChecksParameter extends GradleExecutionParameterImpl<DeprecationChecksParameter.DeprecationChecks> implements CommandLineGradleExecutionParameter<DeprecationChecksParameter.DeprecationChecks> {
+
+    public enum DeprecationChecks {
+        FAILS, IGNORES
+    }
+    public static DeprecationChecksParameter fails() {
+        return fixed(DeprecationChecksParameter.class, DeprecationChecks.FAILS);
     }
 
-    static DeprecationChecksParameter ignores() {
-        return new IgnoringDeprecationChecksParameter();
+    public static DeprecationChecksParameter ignores() {
+        return fixed(DeprecationChecksParameter.class, DeprecationChecks.IGNORES);
     }
 
-    class FailingDeprecationChecksParameter implements DeprecationChecksParameter {
-        @Override
-        public List<String> getAsArguments() {
+    @Override
+    public List<String> getAsArguments() {
+        if (get().equals(DeprecationChecks.FAILS)) {
             return Arrays.asList("--warning-mode", "fail");
         }
-    }
-
-    class IgnoringDeprecationChecksParameter implements DeprecationChecksParameter {
-        @Override
-        public List<String> getAsArguments() {
-            return Collections.emptyList();
-        }
+        return Collections.emptyList();
     }
 }

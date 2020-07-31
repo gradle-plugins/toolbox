@@ -1,35 +1,25 @@
 package dev.gradleplugins.test.fixtures.gradle.executer.internal.parameters;
 
-import lombok.EqualsAndHashCode;
-import lombok.NonNull;
-import lombok.Value;
-
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-public interface BuildScriptParameter extends CommandLineGradleParameter, RegularFileParameter {
-    List<String> getAsArguments();
+public final class BuildScriptParameter extends GradleExecutionParameterImpl<RegularFile> implements CommandLineGradleExecutionParameter<RegularFile>, GradleExecutionParameter<RegularFile> {
 
-    static BuildScriptParameter unset() {
-        return new UnsetBuildScriptParameter();
+    public static BuildScriptParameter unset() {
+        return noValue(BuildScriptParameter.class);
     }
 
-    static BuildScriptParameter of(File buildScript) {
-        return new DefaultBuildScriptParameter(buildScript);
+    public static BuildScriptParameter of(File buildScript) {
+        return fixed(BuildScriptParameter.class, () -> buildScript);
     }
 
-    @Value
-    @EqualsAndHashCode(callSuper = false)
-    class UnsetBuildScriptParameter extends UnsetParameter<File> implements BuildScriptParameter {}
-
-    @Value
-    class DefaultBuildScriptParameter implements BuildScriptParameter {
-        @NonNull File value;
-
-        @Override
-        public List<String> getAsArguments() {
-            return Arrays.asList("--build-file", value.getAbsolutePath());
+    @Override
+    public List<String> getAsArguments() {
+        if (isPresent()) {
+            return Arrays.asList("--build-file", get().getAbsolutePath());
         }
+        return Collections.emptyList();
     }
 }

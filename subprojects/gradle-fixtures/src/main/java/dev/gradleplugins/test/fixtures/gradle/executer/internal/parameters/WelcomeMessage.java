@@ -1,4 +1,5 @@
 package dev.gradleplugins.test.fixtures.gradle.executer.internal.parameters;
 
-public interface RegularFileParameter {
+public enum WelcomeMessage {
+    ENABLED, DISABLED;
 }

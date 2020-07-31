@@ -1,37 +1,23 @@
 package dev.gradleplugins.test.fixtures.gradle.executer.internal.parameters;
 
-import lombok.EqualsAndHashCode;
-import lombok.Value;
-
-import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-public interface GradleUserHomeDirectoryParameter extends CommandLineGradleParameter, DirectoryParameter {
-    static GradleUserHomeDirectoryParameter unset() {
-        return new UnsetGradleUserHomeDirectoryParameter();
+public final class GradleUserHomeDirectoryParameter extends GradleExecutionParameterImpl<GradleUserHomeDirectory> implements CommandLineGradleExecutionParameter<GradleUserHomeDirectory>, DirectoryParameter<GradleUserHomeDirectory> {
+    public static GradleUserHomeDirectoryParameter unset() {
+        return noValue(GradleUserHomeDirectoryParameter.class);
     }
 
-    static GradleUserHomeDirectoryParameter of(File gradleUserHomeDirectory) {
-        return new DefaultGradleUserHomeDirectoryParameter(gradleUserHomeDirectory);
+    public static GradleUserHomeDirectoryParameter of(GradleUserHomeDirectory gradleUserHomeDirectory) {
+        return fixed(GradleUserHomeDirectoryParameter.class, gradleUserHomeDirectory);
     }
 
-    @Value
-    @EqualsAndHashCode(callSuper = false)
-    class UnsetGradleUserHomeDirectoryParameter extends UnsetParameter<File> implements GradleUserHomeDirectoryParameter {}
-
-    @Value
-    class DefaultGradleUserHomeDirectoryParameter implements GradleUserHomeDirectoryParameter {
-        File value;
-
-        @Override
-        public File getAsFile() {
-            return value;
+    @Override
+    public List<String> getAsArguments() {
+        if (isPresent()) {
+            return Arrays.asList("--gradle-user-home", get().getAbsolutePath());
         }
-
-        @Override
-        public List<String> getAsArguments() {
-            return Arrays.asList("--gradle-user-home", value.getAbsolutePath());
-        }
+        return Collections.emptyList();
     }
 }

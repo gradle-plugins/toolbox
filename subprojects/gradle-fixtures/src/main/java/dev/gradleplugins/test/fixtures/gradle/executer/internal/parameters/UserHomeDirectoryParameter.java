@@ -1,32 +1,22 @@
 package dev.gradleplugins.test.fixtures.gradle.executer.internal.parameters;
 
-import lombok.EqualsAndHashCode;
-import lombok.Value;
-
-import java.io.File;
 import java.util.Collections;
 import java.util.Map;
 
-public interface UserHomeDirectoryParameter extends JvmSystemPropertyParameter {
-    static UserHomeDirectoryParameter unset() {
-        return new UnsetUserHomeDirectoryParameter();
+public final class UserHomeDirectoryParameter extends GradleExecutionParameterImpl<UserHomeDirectory> implements JvmSystemPropertyParameter<UserHomeDirectory>, GradleExecutionParameter<UserHomeDirectory> {
+    public static UserHomeDirectoryParameter unset() {
+        return noValue(UserHomeDirectoryParameter.class);
     }
 
-    static UserHomeDirectoryParameter of(File userHomeDirectory) {
-        return new DefaultUserHomeDirectoryParameter(userHomeDirectory);
+    public static UserHomeDirectoryParameter of(UserHomeDirectory userHomeDirectory) {
+        return fixed(UserHomeDirectoryParameter.class, userHomeDirectory);
     }
 
-    @Value
-    @EqualsAndHashCode(callSuper = false)
-    class UnsetUserHomeDirectoryParameter extends UnsetParameter<File> implements UserHomeDirectoryParameter {}
-
-    @Value
-    class DefaultUserHomeDirectoryParameter implements UserHomeDirectoryParameter {
-        File value;
-
-        @Override
-        public Map<String, String> getAsJvmSystemProperties() {
-            return Collections.singletonMap("user.home", value.getAbsolutePath());
+    @Override
+    public Map<String, String> getAsJvmSystemProperties() {
+        if (isPresent()) {
+            return Collections.singletonMap("user.home", get().getAbsolutePath());
         }
+        return Collections.emptyMap();
     }
 }

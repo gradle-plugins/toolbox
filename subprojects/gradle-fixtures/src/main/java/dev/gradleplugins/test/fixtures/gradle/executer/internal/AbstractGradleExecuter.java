@@ -28,7 +28,7 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
     private final TestFile testDirectory;
 
     public AbstractGradleExecuter(@NonNull GradleDistribution distribution, @NonNull TestFile testDirectory, @NonNull GradleExecuterBuildContext buildContext) {
-        this(testDirectory, new GradleExecutionParameters(distribution, buildContext).withGradleUserHomeDirectory(GradleUserHomeDirectoryParameter.of(buildContext.getGradleUserHomeDirectory())).withDaemonBaseDirectory(DaemonBaseDirectoryParameter.of(buildContext.getDaemonBaseDirectory())));
+        this(testDirectory, new GradleExecutionParameters(distribution, buildContext).withGradleUserHomeDirectory(GradleUserHomeDirectoryParameter.of(GradleUserHomeDirectory.of(buildContext.getGradleUserHomeDirectory()))).withDaemonBaseDirectory(DaemonBaseDirectoryParameter.of(DaemonBaseDirectory.of(buildContext.getDaemonBaseDirectory()))));
     }
 
     protected AbstractGradleExecuter(TestFile testDirectory, GradleExecutionParameters configuration) {
@@ -54,31 +54,31 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
 
     //region Working directory configuration
     public File getWorkingDirectory() {
-        return configuration.getWorkingDirectory().orElse(testDirectory);
+        return configuration.getWorkingDirectory().orElse(WorkingDirectory.of(testDirectory)).getAsFile();
     }
 
     @Override
     public GradleExecuter inDirectory(File directory) {
-        return newInstance(configuration.withWorkingDirectory(WorkingDirectoryParameter.of(directory)));
+        return newInstance(configuration.withWorkingDirectory(WorkingDirectoryParameter.of(WorkingDirectory.of(directory))));
     }
     //endregion
 
     //region Flag `-Djava.home` configuration
     @Override
     public GradleExecuter withUserHomeDirectory(File userHomeDirectory) {
-        return newInstance(configuration.withUserHomeDirectory(UserHomeDirectoryParameter.of(userHomeDirectory)));
+        return newInstance(configuration.withUserHomeDirectory(UserHomeDirectoryParameter.of(UserHomeDirectory.of(userHomeDirectory))));
     }
     //endregion
 
     //region Flag `--gradle-user-home` configuration
     @Override
     public GradleExecuter withGradleUserHomeDirectory(File gradleUserHomeDirectory) {
-        return newInstance(configuration.withGradleUserHomeDirectory(GradleUserHomeDirectoryParameter.of(gradleUserHomeDirectory)));
+        return newInstance(configuration.withGradleUserHomeDirectory(GradleUserHomeDirectoryParameter.of(GradleUserHomeDirectory.of(gradleUserHomeDirectory))));
     }
 
     @Override
     public GradleExecuter requireOwnGradleUserHomeDirectory() {
-        return newInstance(configuration.withGradleUserHomeDirectory(GradleUserHomeDirectoryParameter.of(testDirectory.createDirectory("user-home"))));
+        return newInstance(configuration.withGradleUserHomeDirectory(GradleUserHomeDirectoryParameter.of(GradleUserHomeDirectory.of(testDirectory.createDirectory("user-home")))));
     }
     //endregion
 
@@ -106,14 +106,14 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
     //region Flag `--init-script` configuration
     @Override
     public GradleExecuter usingInitScript(File initScript) {
-        return newInstance(configuration.withInitScripts(configuration.getInitScripts().plus(initScript)));
+        return newInstance(configuration.withInitScripts(configuration.getInitScripts().plus(() -> initScript)));
     }
     //endregion
 
     //region Flag `--project-dir` configuration
     @Override
     public GradleExecuter usingProjectDirectory(File projectDirectory) {
-        return newInstance(configuration.withProjectDirectory(ProjectDirectoryParameter.of(projectDirectory)));
+        return newInstance(configuration.withProjectDirectory(ProjectDirectoryParameter.of(ProjectDirectory.of(projectDirectory))));
     }
     //endregion
 
@@ -208,7 +208,7 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
 
     @Override
     public GradleExecuter withDaemonBaseDirectory(File daemonBaseDirectory) {
-        return newInstance(configuration.withDaemonBaseDirectory(DaemonBaseDirectoryParameter.of(daemonBaseDirectory)));
+        return newInstance(configuration.withDaemonBaseDirectory(DaemonBaseDirectoryParameter.of(DaemonBaseDirectory.of(daemonBaseDirectory))));
     }
 
     @Override
@@ -263,7 +263,7 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
     }
 
     protected boolean isSharedDaemons() {
-        return configuration.getDaemonBaseDirectory().getAsFile().equals(configuration.getBuildContext().getDaemonBaseDirectory());
+        return configuration.getDaemonBaseDirectory().get().getAsFile().equals(configuration.getBuildContext().getDaemonBaseDirectory());
     }
 
     @Override
@@ -303,7 +303,7 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
     //region Temporary directory configuration
     @Override
     public GradleExecuter withoutExplicitTemporaryDirectory() {
-        return newInstance(configuration.withTemporaryDirectory(TemporaryDirectoryParameter.explicit(new TemporaryDirectory(configuration.getBuildContext().getTemporaryDirectory()))));
+        return newInstance(configuration.withTemporaryDirectory(TemporaryDirectoryParameter.explicit(TemporaryDirectory.of(configuration.getBuildContext().getTemporaryDirectory()))));
     }
     //endregion
 
@@ -380,7 +380,7 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
 
     private void collectStateBeforeExecution() {
         if (!isSharedDaemons()) {
-            configuration = configuration.withIsolatedDaemonBaseDirectories(ImmutableList.<File>builder().addAll(configuration.getIsolatedDaemonBaseDirectories()).add(configuration.getDaemonBaseDirectory().getAsFile()).build());
+            configuration = configuration.withIsolatedDaemonBaseDirectories(ImmutableList.<File>builder().addAll(configuration.getIsolatedDaemonBaseDirectories()).add(configuration.getDaemonBaseDirectory().get().getAsFile()).build());
         }
     }
 
@@ -408,7 +408,7 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
         allArguments.addAll(configuration.getShowStacktrace().getAsArguments());
 
         // Deal with missing settings.gradle[.kts] file
-        configuration.getSettingsFile().ensureAvailable(getTestDirectory(), getWorkingDirectory());
+        configuration.getSettingsFile().ensureAvailable(() -> getTestDirectory(), WorkingDirectory.of(getWorkingDirectory()));
 
         // This will cause problems on Windows if the path to the Gradle executable that is used has a space in it (e.g. the user's dir is c:/Users/John Smith/)
         // This is fundamentally a windows issue: You can't have arguments with spaces in them if the path to the batch script has a space
@@ -453,7 +453,7 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
         properties.putAll(configuration.getDefaultLocale().getAsJvmSystemProperties());
 
         properties.putAll(configuration.getRenderWelcomeMessage().getAsJvmSystemProperties());
-        configuration.getRenderWelcomeMessage().apply(configuration.getGradleUserHomeDirectory(), configuration.getDistribution().getVersion());
+        configuration.getRenderWelcomeMessage().apply(configuration.getGradleUserHomeDirectory().get(), configuration.getDistribution().getVersion());
 
         return properties;
     }

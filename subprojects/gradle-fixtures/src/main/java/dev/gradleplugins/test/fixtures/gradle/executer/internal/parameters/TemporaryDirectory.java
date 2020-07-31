@@ -1,15 +1,7 @@
 package dev.gradleplugins.test.fixtures.gradle.executer.internal.parameters;
 
-import lombok.Value;
-
-import java.io.File;
-
-@Value
-public class TemporaryDirectory implements DirectoryParameter {
-    File directory;
-
-    @Override
-    public File getAsFile() {
-        return directory;
+public final class TemporaryDirectory extends DirectoryImpl implements Directory {
+    public static TemporaryDirectory of(Object directory) {
+        return newInstance(TemporaryDirectory.class, directory);
     }
 }

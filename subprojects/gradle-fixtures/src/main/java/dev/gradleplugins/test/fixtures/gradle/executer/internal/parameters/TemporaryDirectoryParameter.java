@@ -1,48 +1,31 @@
 package dev.gradleplugins.test.fixtures.gradle.executer.internal.parameters;
 
-import lombok.Value;
-
 import java.util.Collections;
 import java.util.Map;
 
-public interface TemporaryDirectoryParameter extends JvmSystemPropertyParameter {
-    boolean hasWhitespace();
-
-    static TemporaryDirectoryParameter implicit() {
-        return new ImplicitTemporaryDirectoryParameter();
-    }
-
-    static TemporaryDirectoryParameter explicit(TemporaryDirectory directory) {
-        return new ExplicitTemporaryDirectoryParameter(directory);
-    }
-
-    class ImplicitTemporaryDirectoryParameter implements TemporaryDirectoryParameter {
-
-        @Override
-        public Map<String, String> getAsJvmSystemProperties() {
-            return Collections.emptyMap();
+public final class TemporaryDirectoryParameter extends GradleExecutionParameterImpl<TemporaryDirectory> implements JvmSystemPropertyParameter<TemporaryDirectory>, DirectoryParameter<TemporaryDirectory> {
+    public boolean hasWhitespace() {
+        if (isPresent()) {
+            get().getAbsolutePath().contains(" ");
         }
-
-        @Override
-        public boolean hasWhitespace() {
-            return false;
-        }
+        return false;
     }
 
-    @Value
-    class ExplicitTemporaryDirectoryParameter implements TemporaryDirectoryParameter {
-        TemporaryDirectory temporaryDirectory;
+    public static TemporaryDirectoryParameter implicit() {
+        return noValue(TemporaryDirectoryParameter.class);
+    }
 
-        @Override
-        public Map<String, String> getAsJvmSystemProperties() {
-            temporaryDirectory.mkdirs(); // ignore return code
-            String temporaryDirectoryPath = temporaryDirectory.getAbsolutePath();
+    public static TemporaryDirectoryParameter explicit(TemporaryDirectory directory) {
+        return fixed(TemporaryDirectoryParameter.class, directory);
+    }
+
+    @Override
+    public Map<String, String> getAsJvmSystemProperties() {
+        if (isPresent()) {
+            get().mkdirs(); // ignore return code
+            String temporaryDirectoryPath = get().getAbsolutePath();
             return Collections.singletonMap("java.io.tmpdir", temporaryDirectoryPath);
         }
-
-        @Override
-        public boolean hasWhitespace() {
-            return temporaryDirectory.getAbsolutePath().contains(" ");
-        }
+        return Collections.emptyMap();
     }
 }
