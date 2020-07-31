@@ -8,19 +8,18 @@ import org.apache.commons.lang3.SystemUtils;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class GradleWrapperExecuter extends AbstractGradleExecuter {
     public GradleWrapperExecuter(GradleDistribution distribution, TestFile testDirectory, GradleExecuterBuildContext buildContext) {
         super(distribution, testDirectory, buildContext);
     }
 
-    private GradleWrapperExecuter(TestFile testDirectory, GradleExecuterConfiguration configuration) {
+    private GradleWrapperExecuter(TestFile testDirectory, GradleExecutionParameters configuration) {
         super(testDirectory, configuration);
     }
 
     @Override
-    protected GradleExecuter newInstance(TestFile testDirectory, GradleExecuterConfiguration configuration) {
+    protected GradleExecuter newInstance(TestFile testDirectory, GradleExecutionParameters configuration) {
         return new GradleWrapperExecuter(testDirectory, configuration);
     }
 

@@ -46,12 +46,12 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
         super(distribution, testDirectory, buildContext);
     }
 
-    private GradleRunnerExecuter(TestFile testDirectory, GradleExecuterConfiguration configuration) {
+    private GradleRunnerExecuter(TestFile testDirectory, GradleExecutionParameters configuration) {
         super(testDirectory, configuration);
     }
 
     @Override
-    protected GradleExecuter newInstance(TestFile testDirectory, GradleExecuterConfiguration configuration) {
+    protected GradleExecuter newInstance(TestFile testDirectory, GradleExecutionParameters configuration) {
         return new GradleRunnerExecuter(testDirectory, configuration);
     }
 

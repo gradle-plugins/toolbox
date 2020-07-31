@@ -17,19 +17,18 @@ import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 public class ForkingGradleExecuter extends AbstractGradleExecuter {
     public ForkingGradleExecuter(GradleDistribution distribution, TestFile testDirectory, GradleExecuterBuildContext buildContext) {
         super(distribution, testDirectory, buildContext);
     }
 
-    ForkingGradleExecuter(TestFile testDirectory, GradleExecuterConfiguration configuration) {
+    ForkingGradleExecuter(TestFile testDirectory, GradleExecutionParameters configuration) {
         super(testDirectory, configuration);
     }
 
     @Override
-    protected GradleExecuter newInstance(TestFile testDirectory, GradleExecuterConfiguration configuration) {
+    protected GradleExecuter newInstance(TestFile testDirectory, GradleExecutionParameters configuration) {
         return new ForkingGradleExecuter(testDirectory, configuration);
     }
 

@@ -32,23 +32,23 @@ import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
 public abstract class AbstractGradleExecuter implements GradleExecuter {
-    protected GradleExecuterConfiguration configuration;
+    protected GradleExecutionParameters configuration;
     private final TestFile testDirectory;
 
     public AbstractGradleExecuter(@NonNull GradleDistribution distribution, @NonNull TestFile testDirectory, @NonNull GradleExecuterBuildContext buildContext) {
-        this(testDirectory, new GradleExecuterConfiguration(distribution, buildContext).withGradleUserHomeDirectory(GradleUserHomeDirectoryParameter.of(buildContext.getGradleUserHomeDirectory())).withDaemonBaseDirectory(buildContext.getDaemonBaseDirectory()));
+        this(testDirectory, new GradleExecutionParameters(distribution, buildContext).withGradleUserHomeDirectory(GradleUserHomeDirectoryParameter.of(buildContext.getGradleUserHomeDirectory())).withDaemonBaseDirectory(buildContext.getDaemonBaseDirectory()));
     }
 
-    protected AbstractGradleExecuter(TestFile testDirectory, GradleExecuterConfiguration configuration) {
+    protected AbstractGradleExecuter(TestFile testDirectory, GradleExecutionParameters configuration) {
         this.configuration = configuration;
         this.testDirectory = testDirectory;
     }
 
-    protected GradleExecuter newInstance(GradleExecuterConfiguration configuration) {
+    protected GradleExecuter newInstance(GradleExecutionParameters configuration) {
         return newInstance(testDirectory, configuration);
     }
 
-    protected abstract GradleExecuter newInstance(TestFile testDirectory, GradleExecuterConfiguration configuration);
+    protected abstract GradleExecuter newInstance(TestFile testDirectory, GradleExecutionParameters configuration);
 
     @Override
     public GradleDistribution getDistribution() {

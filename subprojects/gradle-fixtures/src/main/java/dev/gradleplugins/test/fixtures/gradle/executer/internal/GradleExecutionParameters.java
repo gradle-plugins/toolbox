@@ -20,7 +20,7 @@ import static java.util.Collections.emptyMap;
 @Data
 @RequiredArgsConstructor
 @AllArgsConstructor
-public class GradleExecuterConfiguration {
+public class GradleExecutionParameters {
     private final GradleDistribution distribution;
     private final GradleExecuterBuildContext buildContext;
     @With @NonNull private WorkingDirectoryParameter workingDirectory = WorkingDirectoryParameter.unset();
