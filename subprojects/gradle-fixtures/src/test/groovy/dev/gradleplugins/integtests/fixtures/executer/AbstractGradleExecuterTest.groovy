@@ -6,10 +6,13 @@ import dev.gradleplugins.test.fixtures.gradle.daemon.DaemonLogsAnalyzer
 import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter
 import dev.gradleplugins.test.fixtures.gradle.executer.internal.AbstractGradleExecuter
 import dev.gradleplugins.test.fixtures.gradle.executer.internal.GradleRunnerExecuter
+import dev.gradleplugins.test.fixtures.util.RetryUtil
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Ignore
 import spock.lang.Specification
+
+import java.time.Duration
 
 import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.not
@@ -118,7 +121,9 @@ abstract class AbstractGradleExecuterTest extends Specification {
         noExceptionThrown()
 
         and:
-        new DaemonLogsAnalyzer(file('daemon')).allDaemons*.context.every { !new ProcessFixture(it.pid).alive }
+        RetryUtil.retry(100, Duration.ofMillis(100)) {
+            assert new DaemonLogsAnalyzer(file('daemon')).allDaemons*.context.every { !new ProcessFixture(it.pid).alive }
+        }
     }
 
     def "suppress welcome message by default"() {
