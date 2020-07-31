@@ -43,7 +43,7 @@ public class ProcessFixture {
             } else if (exitCode == 1) {
                 return false;
             } else {
-                throw new RuntimeException("Erro while checking process state");
+                throw new RuntimeException("Error while checking process state");
             }
         } finally {
             pumperStdout.join();
