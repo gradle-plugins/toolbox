@@ -1,13 +1,13 @@
 package dev.gradleplugins.test.fixtures.gradle.executer.internal;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 import dev.gradleplugins.test.fixtures.file.TestFile;
 import dev.gradleplugins.test.fixtures.gradle.daemon.DaemonLogsAnalyzer;
 import dev.gradleplugins.test.fixtures.gradle.executer.ExecutionFailure;
 import dev.gradleplugins.test.fixtures.gradle.executer.ExecutionResult;
 import dev.gradleplugins.test.fixtures.gradle.executer.GradleDistribution;
 import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter;
+import dev.gradleplugins.test.fixtures.gradle.executer.internal.parameters.*;
 import dev.gradleplugins.test.fixtures.gradle.logging.ConsoleOutput;
 import dev.gradleplugins.test.fixtures.scan.GradleEnterpriseBuildScan;
 import lombok.NonNull;
@@ -24,10 +24,10 @@ import java.time.Duration;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.*;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
@@ -36,7 +36,7 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
     private final TestFile testDirectory;
 
     public AbstractGradleExecuter(@NonNull GradleDistribution distribution, @NonNull TestFile testDirectory, @NonNull GradleExecuterBuildContext buildContext) {
-        this(testDirectory, new GradleExecuterConfiguration(distribution, buildContext).withGradleUserHomeDirectory(buildContext.getGradleUserHomeDirectory()).withDaemonBaseDirectory(buildContext.getDaemonBaseDirectory()));
+        this(testDirectory, new GradleExecuterConfiguration(distribution, buildContext).withGradleUserHomeDirectory(GradleUserHomeDirectoryParameter.of(buildContext.getGradleUserHomeDirectory())).withDaemonBaseDirectory(buildContext.getDaemonBaseDirectory()));
     }
 
     protected AbstractGradleExecuter(TestFile testDirectory, GradleExecuterConfiguration configuration) {
@@ -62,12 +62,12 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
 
     //region Working directory configuration
     public File getWorkingDirectory() {
-        return ofNullable(configuration.getWorkingDirectory()).orElse(testDirectory);
+        return configuration.getWorkingDirectory().orElse(testDirectory);
     }
 
     @Override
     public GradleExecuter inDirectory(File directory) {
-        return newInstance(configuration.withWorkingDirectory(directory));
+        return newInstance(configuration.withWorkingDirectory(WorkingDirectoryParameter.of(directory)));
     }
     //endregion
 
@@ -81,67 +81,47 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
     //region Flag `--gradle-user-home` configuration
     @Override
     public GradleExecuter withGradleUserHomeDirectory(File gradleUserHomeDirectory) {
-        return newInstance(configuration.withGradleUserHomeDirectory(gradleUserHomeDirectory));
+        return newInstance(configuration.withGradleUserHomeDirectory(GradleUserHomeDirectoryParameter.of(gradleUserHomeDirectory)));
     }
 
     @Override
     public GradleExecuter requireOwnGradleUserHomeDirectory() {
-        return newInstance(configuration.withGradleUserHomeDirectory(testDirectory.createDirectory("user-home")));
+        return newInstance(configuration.withGradleUserHomeDirectory(GradleUserHomeDirectoryParameter.of(testDirectory.createDirectory("user-home"))));
     }
     //endregion
 
     //region Flag `--stack-trace` configuration
     @Override
     public GradleExecuter withStacktraceDisabled() {
-        return newInstance(configuration.withShowStacktrace(false));
+        return newInstance(configuration.withShowStacktrace(StacktraceParameter.hide()));
     }
     //endregion
 
     //region Flag `--settings-file` configuration
     @Override
     public GradleExecuter usingSettingsFile(File settingsFile) {
-        return newInstance(configuration.withSettingsFile(settingsFile));
-    }
-
-    // TODO: Maybe we should remove dependency on TestFile within this implementation
-    private void ensureSettingsFileAvailable() {
-        TestFile workingDirectory = new TestFile(getWorkingDirectory());
-        TestFile directory = workingDirectory;
-        while (directory != null && getTestDirectory().isSelfOrDescendent(directory)) {
-            if (hasSettingsFile(directory)) {
-                return;
-            }
-            directory = directory.getParentFile();
-        }
-        workingDirectory.createFile("settings.gradle");
-    }
-
-    private boolean hasSettingsFile(TestFile directory) {
-        if (directory.isDirectory()) {
-            return directory.file("settings.gradle").isFile() || directory.file("settings.gradle.kts").isFile();
-        }
-        return false;
+        return newInstance(configuration.withSettingsFile(SettingsFileParameter.of(settingsFile)));
     }
     //endregion
 
     //region Flag `--build-file` configuration
     @Override
     public GradleExecuter usingBuildScript(File buildScript) {
-        return newInstance(configuration.withBuildScript(buildScript));
+        return newInstance(configuration.withBuildScript(BuildScriptParameter.of(buildScript)));
     }
     //endregion
 
     //region Flag `--init-script` configuration
     @Override
     public GradleExecuter usingInitScript(File initScript) {
-        return newInstance(configuration.withInitScripts(ImmutableList.<File>builder().addAll(configuration.getInitScripts()).add(initScript).build()));
+        return newInstance(configuration.withInitScripts(configuration.getInitScripts().plus(initScript)));
     }
     //endregion
 
     //region Flag `--project-dir` configuration
     @Override
     public GradleExecuter usingProjectDirectory(File projectDirectory) {
-        return newInstance(configuration.withProjectDirectory(projectDirectory));
+        return newInstance(configuration.withProjectDirectory(ProjectDirectoryParameter.of(projectDirectory)));
     }
     //endregion
 
@@ -210,16 +190,14 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
     //region Console type configuration
     @Override
     public GradleExecuter withConsole(ConsoleOutput consoleType) {
-        return newInstance(configuration.withConsoleType(consoleType));
+        return newInstance(configuration.withConsoleType(ConsoleTypeParameter.of(consoleType)));
     }
     //endregion
 
     //region Environment variables configuration
     @Override
     public GradleExecuter withEnvironmentVars(Map<String, ?> environment) {
-        Map<String, Object> env = Maps.newHashMap(configuration.getEnvironment());
-        env.putAll(environment);
-        return newInstance(configuration.withEnvironment(env));
+        return newInstance(configuration.withEnvironment(configuration.getEnvironment().plus(environment)));
     }
     //endregion
 
@@ -426,30 +404,28 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
         allArguments.addAll(getImplicitJvmSystemProperties().entrySet().stream().map(entry -> String.format("-D%s=%s", entry.getKey(), entry.getValue())).collect(toList()));
 
         // Gradle arguments
-        allArguments.addAll(ofNullable(configuration.getBuildScript()).map(it -> asList("--build-file", it.getAbsolutePath())).orElse(emptyList()));
-        allArguments.addAll(ofNullable(configuration.getBuildScript()).map(it -> asList("--project-dir", it.getAbsolutePath())).orElse(emptyList()));
-        allArguments.addAll(ofNullable(configuration.getInitScripts()).map(it -> it.stream().flatMap(initScript -> Stream.of("--init-script", initScript.getAbsolutePath())).collect(toList())).orElse(emptyList()));
-        allArguments.addAll(ofNullable(configuration.getSettingsFile()).map(it -> asList("--settings-file", it.getAbsolutePath())).orElse(emptyList()));
+        allArguments.addAll(configuration.getBuildScript().getAsArguments());
+        allArguments.addAll(configuration.getProjectDirectory().getAsArguments());
+        allArguments.addAll(configuration.getInitScripts().getAsArguments());
+        allArguments.addAll(configuration.getSettingsFile().getAsArguments());
 
         if (noDaemonArgumentGiven()) {
             allArguments.addAll(getDaemonArguments());
         }
 
-        allArguments.addAll(configuration.isShowStacktrace() ? singletonList("--stacktrace") : emptyList());
+        allArguments.addAll(configuration.getShowStacktrace().getAsArguments());
 
         // Deal with missing settings.gradle[.kts] file
-        if (configuration.getSettingsFile() == null) {
-            ensureSettingsFileAvailable();
-        }
+        configuration.getSettingsFile().ensureAvailable(getTestDirectory(), getWorkingDirectory());
 
         // This will cause problems on Windows if the path to the Gradle executable that is used has a space in it (e.g. the user's dir is c:/Users/John Smith/)
         // This is fundamentally a windows issue: You can't have arguments with spaces in them if the path to the batch script has a space
         // We could work around this by setting -Dgradle.user.home but GRADLE-1730 (which affects 1.0-milestone-3) means that that
         // is problematic as well. For now, we just don't support running the int tests from a path with a space in it on Windows.
         // When we stop testing against M3 we should change to use the system property.
-        allArguments.addAll(ofNullable(configuration.getGradleUserHomeDirectory()).map(it -> asList("--gradle-user-home", it.getAbsolutePath())).orElse(emptyList()));
+        allArguments.addAll(configuration.getGradleUserHomeDirectory().getAsArguments());
 
-        allArguments.addAll(ofNullable(configuration.getConsoleType()).map(it -> asList("--console", it.toString().toLowerCase())).orElse(emptyList()));
+        allArguments.addAll(configuration.getConsoleType().getAsArguments());
 
         allArguments.addAll(configuration.isAllowDeprecations() ? emptyList() : asList("--warning-mode", "fail"));
 
@@ -496,7 +472,7 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
         }).orElse(emptyMap()));
 
         properties.put(DefaultCommandLineActionFactory.WELCOME_MESSAGE_ENABLED_SYSTEM_PROPERTY, Boolean.toString(configuration.isRenderWelcomeMessage()));
-        val welcomeMessageFile = new File(configuration.getGradleUserHomeDirectory(), "notifications/" + configuration.getDistribution().getVersion().getVersion() + "/release-features.rendered");
+        val welcomeMessageFile = configuration.getGradleUserHomeDirectory().file("notifications/" + configuration.getDistribution().getVersion().getVersion() + "/release-features.rendered");
         if (configuration.isRenderWelcomeMessage()) {
             welcomeMessageFile.delete();
         } else {

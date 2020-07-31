@@ -70,9 +70,7 @@ public class ForkingGradleExecuter extends AbstractGradleExecuter {
             }
             command.addAll(getAllArguments());
             ProcessBuilder processBuilder = new ProcessBuilder().command(command).directory(getWorkingDirectory());
-            if (!configuration.getEnvironment().isEmpty()) {
-                processBuilder.environment().putAll(configuration.getEnvironment().entrySet().stream().map(it -> new HashMap.SimpleEntry<>(it.getKey(), it.getValue().toString())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-            }
+            processBuilder.environment().putAll(configuration.getEnvironment().getAsMap());
             OutputCapturer standardOutputCapturer = outputCapturerFor(System.out, Charset.defaultCharset());
             OutputCapturer errorOutputCapturer = outputCapturerFor(System.err, Charset.defaultCharset());
             Process process = processBuilder.start();
