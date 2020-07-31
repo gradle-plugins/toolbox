@@ -16,6 +16,7 @@
 
 package dev.gradleplugins.spock.lang;
 
+import dev.gradleplugins.test.fixtures.util.RetryUtil;
 import org.apache.commons.lang3.SystemUtils;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -24,6 +25,7 @@ import org.junit.runners.model.Statement;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.time.Duration;
 import java.util.Random;
 import java.util.regex.Pattern;
 
@@ -65,12 +67,16 @@ abstract class AbstractTestDirectoryProvider implements TestRule, TestDirectoryP
 
     public void cleanup() {
         if (cleanup && dir != null && dir.exists()) {
-            while (dir.exists()) {
-                try {
-                    FileUtils.forceDeleteDirectory(dir);
-                } catch (IOException e) {
-                    throw new UncheckedIOException(e);
-                }
+            try {
+                RetryUtil.retry(3, Duration.ofMillis(100), () -> {
+                    try {
+                        FileUtils.forceDeleteDirectory(dir);
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(e);
+                    }
+                });
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
         }
     }
