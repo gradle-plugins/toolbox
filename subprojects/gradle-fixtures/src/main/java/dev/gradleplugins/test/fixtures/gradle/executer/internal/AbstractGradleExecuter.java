@@ -12,13 +12,8 @@ import dev.gradleplugins.test.fixtures.gradle.logging.ConsoleOutput;
 import dev.gradleplugins.test.fixtures.scan.GradleEnterpriseBuildScan;
 import lombok.NonNull;
 import lombok.val;
-import org.apache.commons.io.FileUtils;
-import org.gradle.launcher.cli.DefaultCommandLineActionFactory;
-import org.gradle.launcher.daemon.configuration.DaemonBuildOptions;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.*;
@@ -26,9 +21,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
-import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
 public abstract class AbstractGradleExecuter implements GradleExecuter {
@@ -36,7 +28,7 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
     private final TestFile testDirectory;
 
     public AbstractGradleExecuter(@NonNull GradleDistribution distribution, @NonNull TestFile testDirectory, @NonNull GradleExecuterBuildContext buildContext) {
-        this(testDirectory, new GradleExecutionParameters(distribution, buildContext).withGradleUserHomeDirectory(GradleUserHomeDirectoryParameter.of(buildContext.getGradleUserHomeDirectory())).withDaemonBaseDirectory(buildContext.getDaemonBaseDirectory()));
+        this(testDirectory, new GradleExecutionParameters(distribution, buildContext).withGradleUserHomeDirectory(GradleUserHomeDirectoryParameter.of(buildContext.getGradleUserHomeDirectory())).withDaemonBaseDirectory(DaemonBaseDirectoryParameter.of(buildContext.getDaemonBaseDirectory())));
     }
 
     protected AbstractGradleExecuter(TestFile testDirectory, GradleExecutionParameters configuration) {
@@ -74,7 +66,7 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
     //region Flag `-Djava.home` configuration
     @Override
     public GradleExecuter withUserHomeDirectory(File userHomeDirectory) {
-        return newInstance(configuration.withUserHomeDirectory(userHomeDirectory));
+        return newInstance(configuration.withUserHomeDirectory(UserHomeDirectoryParameter.of(userHomeDirectory)));
     }
     //endregion
 
@@ -204,7 +196,7 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
     //region Deprecation warning checks configuration
     @Override
     public GradleExecuter withoutDeprecationChecks() {
-        return newInstance(configuration.withAllowDeprecations(true));
+        return newInstance(configuration.withDeprecationChecks(DeprecationChecksParameter.ignores()));
     }
     //endregion
 
@@ -216,12 +208,12 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
 
     @Override
     public GradleExecuter withDaemonBaseDirectory(File daemonBaseDirectory) {
-        return newInstance(configuration.withDaemonBaseDirectory(daemonBaseDirectory));
+        return newInstance(configuration.withDaemonBaseDirectory(DaemonBaseDirectoryParameter.of(daemonBaseDirectory)));
     }
 
     @Override
     public GradleExecuter withDaemonIdleTimeout(Duration daemonIdleTimeout) {
-        return newInstance(configuration.withDaemonIdleTimeout(daemonIdleTimeout));
+        return newInstance(configuration.withDaemonIdleTimeout(DaemonIdleTimeoutParameter.of(daemonIdleTimeout)));
     }
 
     @Override
@@ -271,7 +263,7 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
     }
 
     protected boolean isSharedDaemons() {
-        return configuration.getDaemonBaseDirectory().equals(configuration.getBuildContext().getDaemonBaseDirectory());
+        return configuration.getDaemonBaseDirectory().getAsFile().equals(configuration.getBuildContext().getDaemonBaseDirectory());
     }
 
     @Override
@@ -311,28 +303,28 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
     //region Temporary directory configuration
     @Override
     public GradleExecuter withoutExplicitTemporaryDirectory() {
-        return newInstance(configuration.withExplicitTemporaryDirectory(false));
+        return newInstance(configuration.withTemporaryDirectory(TemporaryDirectoryParameter.explicit(new TemporaryDirectory(configuration.getBuildContext().getTemporaryDirectory()))));
     }
     //endregion
 
     //region Default character encoding configuration
     @Override
     public GradleExecuter withDefaultCharacterEncoding(Charset defaultCharacterEncoding) {
-        return newInstance(configuration.withDefaultCharacterEncoding(defaultCharacterEncoding));
+        return newInstance(configuration.withDefaultCharacterEncoding(CharacterEncodingParameter.of(defaultCharacterEncoding)));
     }
     //endregion
 
     //region Default locale configuration
     @Override
     public GradleExecuter withDefaultLocale(Locale defaultLocale) {
-        return newInstance(configuration.withDefaultLocale(defaultLocale));
+        return newInstance(configuration.withDefaultLocale(LocaleParameter.of(defaultLocale)));
     }
     //endregion
 
     //region Welcome message configuration
     @Override
     public GradleExecuter withWelcomeMessageEnabled() {
-        return newInstance(configuration.withRenderWelcomeMessage(true));
+        return newInstance(configuration.withRenderWelcomeMessage(WelcomeMessageParameter.enabled()));
     }
     //endregion
 
@@ -388,7 +380,7 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
 
     private void collectStateBeforeExecution() {
         if (!isSharedDaemons()) {
-            configuration = configuration.withIsolatedDaemonBaseDirectories(ImmutableList.<File>builder().addAll(configuration.getIsolatedDaemonBaseDirectories()).add(configuration.getDaemonBaseDirectory()).build());
+            configuration = configuration.withIsolatedDaemonBaseDirectories(ImmutableList.<File>builder().addAll(configuration.getIsolatedDaemonBaseDirectories()).add(configuration.getDaemonBaseDirectory().getAsFile()).build());
         }
     }
 
@@ -427,7 +419,7 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
 
         allArguments.addAll(configuration.getConsoleType().getAsArguments());
 
-        allArguments.addAll(configuration.isAllowDeprecations() ? emptyList() : asList("--warning-mode", "fail"));
+        allArguments.addAll(configuration.getDeprecationChecks().getAsArguments());
 
         allArguments.addAll(configuration.getArguments());
         allArguments.addAll(configuration.getTasks());
@@ -448,40 +440,20 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
     protected Map<String, String> getImplicitJvmSystemProperties() {
         Map<String, String> properties = new LinkedHashMap<>();
 
-        properties.putAll(ofNullable(configuration.getUserHomeDirectory()).map(it -> Collections.singletonMap("user.home", it.getAbsolutePath())).orElse(emptyMap()));
+        properties.putAll(configuration.getUserHomeDirectory().getAsJvmSystemProperties());
 
-        properties.put(DaemonBuildOptions.IdleTimeoutOption.GRADLE_PROPERTY, String.valueOf(configuration.getDaemonIdleTimeout().toMillis()));
-        properties.put(DaemonBuildOptions.BaseDirOption.GRADLE_PROPERTY, configuration.getDaemonBaseDirectory().getAbsolutePath());
+        properties.putAll(configuration.getDaemonIdleTimeout().getAsJvmSystemProperties());
+        properties.putAll(configuration.getDaemonBaseDirectory().getAsJvmSystemProperties());
 
-        if (configuration.isExplicitTemporaryDirectory()) {
-            val temporaryDirectory = configuration.getBuildContext().getTemporaryDirectory();
-            temporaryDirectory.mkdirs(); // ignore return code
-            String temporaryDirectoryPath = temporaryDirectory.getAbsolutePath();
-            if (!temporaryDirectoryPath.contains(" ") || (getDistribution().isSupportsSpacesInGradleAndJavaOpts() && supportsWhiteSpaceInEnvVars())) {
-                properties.put("java.io.tmpdir", temporaryDirectoryPath);
-            }
+        if (!configuration.getTemporaryDirectory().hasWhitespace() || (getDistribution().isSupportsSpacesInGradleAndJavaOpts() && supportsWhiteSpaceInEnvVars())) {
+            properties.putAll(configuration.getTemporaryDirectory().getAsJvmSystemProperties());
         }
 
-        properties.put("file.encoding", configuration.getDefaultCharacterEncoding().name());
-        properties.putAll(ofNullable(configuration.getDefaultLocale()).map(locale -> {
-            Map<String, String> result = new HashMap<>();
-            result.put("user.language", locale.getLanguage());
-            result.put("user.country", locale.getCountry());
-            result.put("user.variant", locale.getVariant());
-            return result;
-        }).orElse(emptyMap()));
+        properties.putAll(configuration.getDefaultCharacterEncoding().getAsJvmSystemProperties());
+        properties.putAll(configuration.getDefaultLocale().getAsJvmSystemProperties());
 
-        properties.put(DefaultCommandLineActionFactory.WELCOME_MESSAGE_ENABLED_SYSTEM_PROPERTY, Boolean.toString(configuration.isRenderWelcomeMessage()));
-        val welcomeMessageFile = configuration.getGradleUserHomeDirectory().file("notifications/" + configuration.getDistribution().getVersion().getVersion() + "/release-features.rendered");
-        if (configuration.isRenderWelcomeMessage()) {
-            welcomeMessageFile.delete();
-        } else {
-            try {
-                FileUtils.touch(welcomeMessageFile);
-            } catch (IOException e) {
-                throw new UncheckedIOException("Could not ensure render message is properly rendered", e);
-            }
-        }
+        properties.putAll(configuration.getRenderWelcomeMessage().getAsJvmSystemProperties());
+        configuration.getRenderWelcomeMessage().apply(configuration.getGradleUserHomeDirectory(), configuration.getDistribution().getVersion());
 
         return properties;
     }

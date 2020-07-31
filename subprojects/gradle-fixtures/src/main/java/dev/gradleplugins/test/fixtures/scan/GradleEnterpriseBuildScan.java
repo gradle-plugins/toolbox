@@ -22,7 +22,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.io.UncheckedIOException;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 /**
  * Configure build scan in you build under test. It inject `com.gradle.build-scan` plugin version 2.3 inside the plugin block and append the buildScan configuration for agreeing to the public term of service server.
@@ -32,7 +32,7 @@ import java.util.function.Function;
  * executer.using(new GradleEnterpriseBuildScan())
  * </pre>
  */
-public class GradleEnterpriseBuildScan implements Function<GradleExecuter, GradleExecuter> {
+public class GradleEnterpriseBuildScan implements UnaryOperator<GradleExecuter> {
     @Override
     public GradleExecuter apply(GradleExecuter executer) {
         return executer.beforeExecute(it -> {

@@ -8,4 +8,12 @@ public interface DirectoryParameter {
     default File file(Object... path) {
         return SettingsFileParameter.UnsetSettingsFileParameter.file(getAsFile(), path);
     }
+
+    default boolean mkdirs() {
+        return getAsFile().mkdirs();
+    }
+
+    default String getAbsolutePath() {
+        return getAsFile().getAbsolutePath();
+    }
 }
