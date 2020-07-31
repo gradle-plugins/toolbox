@@ -9,6 +9,7 @@ import dev.gradleplugins.test.fixtures.gradle.executer.ExecutionResult;
 import dev.gradleplugins.test.fixtures.gradle.executer.GradleDistribution;
 import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter;
 import dev.gradleplugins.test.fixtures.gradle.logging.ConsoleOutput;
+import dev.gradleplugins.test.fixtures.scan.GradleEnterpriseBuildScan;
 import lombok.NonNull;
 import lombok.val;
 import org.apache.commons.io.FileUtils;
@@ -354,6 +355,13 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
     @Override
     public GradleExecuter withWelcomeMessageEnabled() {
         return newInstance(configuration.withRenderWelcomeMessage(true));
+    }
+    //endregion
+
+    //region Build scan configuration
+    @Override
+    public GradleExecuter withBuildScanEnabled() {
+        return new GradleEnterpriseBuildScan().apply(this);
     }
     //endregion
 

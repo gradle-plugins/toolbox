@@ -291,4 +291,12 @@ public interface GradleExecuter {
      * @return a {@link GradleExecuter} instance configured with the welcome message on first invocation, never null.
      */
     GradleExecuter withWelcomeMessageEnabled();
+
+    /**
+     * Publishes build scans to the public enterprise server for each build ran by this executer.
+     * Calling this method implicitly accept the Gradle terms and services.
+     *
+     * @return a {@link GradleExecuter} instance configured to publish build scans for each builds executed, never null.
+     */
+    GradleExecuter withBuildScanEnabled();
 }

@@ -136,6 +136,12 @@ abstract class AbstractGradleExecuterTest extends Specification {
                 .assertOutputContains('Here are the highlights of this release:')
     }
 
+    def "can publish build scans"() {
+        expect:
+        executerUnderTest.run().assertNotOutput('Publishing build scan...')
+        executerUnderTest.withBuildScanEnabled().run().output.contains('Publishing build scan...')
+    }
+
 //    def "can assert successful execution"() {
 //        file('build.gradle') << '''
 //            if (System.properties.containsKey('throw')) {
