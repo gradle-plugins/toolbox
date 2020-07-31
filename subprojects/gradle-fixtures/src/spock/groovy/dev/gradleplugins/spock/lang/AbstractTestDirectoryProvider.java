@@ -68,7 +68,7 @@ abstract class AbstractTestDirectoryProvider implements TestRule, TestDirectoryP
     public void cleanup() {
         if (cleanup && dir != null && dir.exists()) {
             try {
-                RetryUtil.retry(3, Duration.ofMillis(100), () -> {
+                RetryUtil.retry(100, Duration.ofMillis(100), () -> {
                     try {
                         FileUtils.forceDeleteDirectory(dir);
                     } catch (IOException e) {
