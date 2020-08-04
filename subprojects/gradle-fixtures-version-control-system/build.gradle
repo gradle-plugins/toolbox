@@ -1,0 +1,24 @@
+plugins {
+    id 'java-library'
+}
+
+import static dev.gradleplugins.GradleRuntimeCompatibility.*
+
+java {
+    sourceCompatibility = minimumJavaVersionFor(minimumGradleVersion)
+    targetCompatibility = minimumJavaVersionFor(minimumGradleVersion)
+    withSourcesJar()
+    withJavadocJar()
+}
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    api 'org.eclipse.jgit:org.eclipse.jgit:5.8.0.202006091008-r'
+
+    implementation project(':gradle-fixtures-file-system')
+    implementation 'commons-io:commons-io:2.6'
+    implementation 'org.apache.commons:commons-lang3:3.9'
+}

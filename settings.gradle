@@ -17,10 +17,20 @@ rootProject.name = 'toolbox'
 // Gradle Fixtures
 include('gradle-fixtures')
 project(':gradle-fixtures').projectDir = file('subprojects/gradle-fixtures')
+project(':gradle-fixtures').buildFileName = 'build.gradle'
+
+include('gradle-fixtures-file-system')
+project(':gradle-fixtures-file-system').projectDir = file('subprojects/gradle-fixtures-file-system')
+project(':gradle-fixtures-file-system').buildFileName = 'build.gradle'
+
+include('gradle-fixtures-version-control-system')
+project(':gradle-fixtures-version-control-system').projectDir = file('subprojects/gradle-fixtures-version-control-system')
+project(':gradle-fixtures-version-control-system').buildFileName = 'build.gradle'
 
 // Plugin developement
 include('gradle-plugin-development')
 project(':gradle-plugin-development').projectDir = file('subprojects/gradle-plugin-development')
+project(':gradle-plugin-development').buildFileName = 'build.gradle'
 
 plugins.withId('com.gradle.enterprise') {
     gradleEnterprise {
