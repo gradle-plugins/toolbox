@@ -101,7 +101,7 @@ public abstract class GradlePluginDevelopmentTestingBasePlugin implements Plugin
         if (getTasks().getNames().contains(taskName)) {
             result = getTasks().named(taskName, Test.class);
         } else {
-            result = getTasks().register(sourceSet.getName() + StringUtils.capitalize(variant), Test.class);
+            result = getTasks().register(taskName, Test.class);
         }
 
         result.configure(it -> {
