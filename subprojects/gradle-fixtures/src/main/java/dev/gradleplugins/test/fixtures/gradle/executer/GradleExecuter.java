@@ -299,4 +299,11 @@ public interface GradleExecuter {
      * @return a {@link GradleExecuter} instance configured to publish build scans for each builds executed, never null.
      */
     GradleExecuter withBuildScanEnabled();
+
+    /**
+     * Does not create an empty settings file when it's missing before execution.
+     *
+     * @return a {@link GradleExecuter} instance configured to ignore default behavior when settings file is missing, never null.
+     */
+    GradleExecuter ignoresMissingSettingsFile();
 }

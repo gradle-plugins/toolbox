@@ -89,10 +89,15 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
     }
     //endregion
 
-    //region Flag `--settings-file` configuration
+    //region Settings file configuration
     @Override
     public GradleExecuter usingSettingsFile(File settingsFile) {
         return newInstance(configuration.withSettingsFile(SettingsFileParameter.of(settingsFile)));
+    }
+
+    @Override
+    public GradleExecuter ignoresMissingSettingsFile() {
+        return newInstance(configuration.withMissingSettingsFilePolicy(MissingSettingsFilePolicy.ignores()));
     }
     //endregion
 
@@ -408,7 +413,7 @@ public abstract class AbstractGradleExecuter implements GradleExecuter {
         allArguments.addAll(configuration.getShowStacktrace().getAsArguments());
 
         // Deal with missing settings.gradle[.kts] file
-        configuration.getSettingsFile().ensureAvailable(() -> getTestDirectory(), WorkingDirectory.of(getWorkingDirectory()));
+        configuration.getMissingSettingsFilePolicy().ensureAvailable(() -> getTestDirectory(), WorkingDirectory.of(getWorkingDirectory()));
 
         // This will cause problems on Windows if the path to the Gradle executable that is used has a space in it (e.g. the user's dir is c:/Users/John Smith/)
         // This is fundamentally a windows issue: You can't have arguments with spaces in them if the path to the batch script has a space

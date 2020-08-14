@@ -23,30 +23,12 @@ public final class SettingsFileParameter extends GradleExecutionParameterImpl<Re
         });
     }
 
-    public void ensureAvailable(Directory testDirectory, WorkingDirectory workingDirectory) {
-        Directory directory = workingDirectory;
-        while (directory != null && testDirectory.isSelfOrDescendent(directory)) {
-            if (hasSettingsFile(directory)) {
-                return;
-            }
-            directory = directory.getParentDirectory();
-        }
-        workingDirectory.file("settings.gradle").createFile();
-    }
-
     @Override
     public List<String> getAsArguments() {
         if (isPresent()) {
             return Arrays.asList("--settings-file", get().getAbsolutePath());
         }
         return Collections.emptyList();
-    }
-
-    private boolean hasSettingsFile(Directory directory) {
-        if (directory.getAsFile().isDirectory()) {
-            return directory.file("settings.gradle").exists() || directory.file("settings.gradle.kts").exists();
-        }
-        return false;
     }
 
     public static File createFile(File self) {

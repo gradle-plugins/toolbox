@@ -48,4 +48,5 @@ public class GradleExecutionParameters {
     @With private boolean daemonCrashChecks = true;
     @With private List<File> isolatedDaemonBaseDirectories = emptyList();
     @With private List<ExecutionResult> executionResults = emptyList();
+    @With @NonNull private MissingSettingsFilePolicy missingSettingsFilePolicy = MissingSettingsFilePolicy.creates();
 }
