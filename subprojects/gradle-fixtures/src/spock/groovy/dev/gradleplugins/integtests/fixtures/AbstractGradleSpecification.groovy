@@ -27,6 +27,7 @@ import org.junit.Rule
 import spock.lang.Specification
 
 import java.util.function.Function
+import java.util.function.UnaryOperator
 
 // TODO: This should be rename to something else... Given it's a Spock specification we could call it GradleSpecification (the fact that it's Functional is putting the wrong spin to this class).
 //    This class should only ties things together for fast starting with gradle, however, each pieces should be usable on it's own and compose into something else if the user wants.
@@ -162,7 +163,7 @@ class AbstractGradleSpecification extends Specification {
         return prop.get("implementation-classpath").toString().split(File.pathSeparator).collect { new File(it) }
     }
 
-    protected GradleExecuter using(Function<? super GradleExecuter, GradleExecuter> action) {
+    protected GradleExecuter using(UnaryOperator<GradleExecuter> action) {
         executer = action.apply(executer)
         return executer
     }
