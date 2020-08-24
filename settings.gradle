@@ -31,6 +31,10 @@ include('gradle-fixtures-file-system')
 project(':gradle-fixtures-file-system').projectDir = file('subprojects/gradle-fixtures-file-system')
 project(':gradle-fixtures-file-system').buildFileName = 'build.gradle'
 
+include('gradle-fixtures-junit-4')
+project(':gradle-fixtures-junit-4').projectDir = file('subprojects/gradle-fixtures-junit-4')
+project(':gradle-fixtures-junit-4').buildFileName = 'build.gradle'
+
 include('gradle-fixtures-version-control-system')
 project(':gradle-fixtures-version-control-system').projectDir = file('subprojects/gradle-fixtures-version-control-system')
 project(':gradle-fixtures-version-control-system').buildFileName = 'build.gradle'
