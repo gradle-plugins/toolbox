@@ -1,5 +1,7 @@
 package dev.gradleplugins.test.fixtures.gradle.executer.internal.parameters;
 
+import dev.gradleplugins.fixtures.file.FileSystemUtils;
+
 import java.io.File;
 
 public interface Directory {
@@ -9,7 +11,7 @@ public interface Directory {
         return new RegularFile() {
             @Override
             public File getAsFile() {
-                return SettingsFileParameter.file(Directory.this.getAsFile(), path);
+                return FileSystemUtils.file(Directory.this.getAsFile(), path);
             }
         };
     }
@@ -23,7 +25,7 @@ public interface Directory {
     }
 
     default boolean isSelfOrDescendent(Directory directory) {
-        return SettingsFileParameter.isSelfOrDescendent(getAsFile(), directory.getAsFile());
+        return FileSystemUtils.isSelfOrDescendent(getAsFile(), directory.getAsFile());
     }
 
     default Directory getParentDirectory() {

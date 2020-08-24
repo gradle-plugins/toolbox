@@ -20,6 +20,7 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.common.hash.HashingOutputStream;
+import dev.gradleplugins.fixtures.file.FileSystemUtils;
 import dev.gradleplugins.test.fixtures.util.RetryUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -44,7 +45,7 @@ public class TestFile extends File {
     private boolean useNativeTools = false;
 
     public TestFile(File file, Object... path) {
-        super(join(file, path).getAbsolutePath());
+        super(FileSystemUtils.file(file, path).getAbsolutePath());
     }
 
     public TestFile(String path) {
@@ -84,9 +85,8 @@ public class TestFile extends File {
      */
     // TODO: Unit test this method
     public TestFile assertHasDescendants(String... descendants) {
-        Set<String> actual = new TreeSet<String>();
         assertIsDirectory();
-        visit(actual, "", this);
+        Set<String> actual = FileSystemUtils.getDescendants(this);
         Set<String> expected = new TreeSet<String>(asList(descendants));
 
         Set<String> extras = new TreeSet<String>(actual);
@@ -97,16 +97,6 @@ public class TestFile extends File {
         assertEquals(String.format("For dir: %s\n extra files: %s, missing files: %s, expected: %s", this, extras, missing, expected), expected, actual);
 
         return this;
-    }
-
-    private void visit(Set<String> names, String prefix, File file) {
-        for (File child : file.listFiles()) {
-            if (child.isFile()) {
-                names.add(prefix + child.getName());
-            } else if (child.isDirectory()) {
-                visit(names, prefix + child.getName() + "/", child);
-            }
-        }
     }
 
     public TestFile assertIsFile() {
@@ -125,8 +115,7 @@ public class TestFile extends File {
     }
 
     public TestFile assertIsEmptyDirectory() {
-        assertIsDirectory();
-        assertHasDescendants();
+        assert FileSystemUtils.isEmptyDirectory(this);
         return this;
     }
 
@@ -150,54 +139,12 @@ public class TestFile extends File {
      * @return this instance
      * @throws IOException if unable to delete the directory
      */
-    // TODO: Test this method
     @Deprecated
     public TestFile forceDeleteDir() throws IOException {
         return forceDeleteDirectory();
     }
     public TestFile forceDeleteDirectory() throws IOException {
-        if (isDirectory()) {
-
-            if (Files.isSymbolicLink(toPath())) {
-                if (!delete()) {
-                    throw new IOException("Unable to delete symlink: " + getCanonicalPath());
-                }
-            } else {
-                List<String> errorPaths = new ArrayList<>();
-                Files.walkFileTree(toPath(), new SimpleFileVisitor<Path>() {
-
-                    @Override
-                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                        if (!file.toFile().delete()) {
-                            errorPaths.add(file.toFile().getCanonicalPath());
-                        }
-                        return FileVisitResult.CONTINUE;
-                    }
-
-                    @Override
-                    public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                        if (!dir.toFile().delete()) {
-                            errorPaths.add(dir.toFile().getCanonicalPath());
-                        }
-                        return FileVisitResult.CONTINUE;
-                    }
-                });
-                if (!errorPaths.isEmpty()) {
-                    StringBuilder builder = new StringBuilder()
-                            .append("Unable to recursively delete directory ")
-                            .append(getCanonicalPath())
-                            .append(", failed paths:\n");
-                    for (String errorPath : errorPaths) {
-                        builder.append("\t- ").append(errorPath).append("\n");
-                    }
-                    throw new IOException(builder.toString());
-                }
-            }
-        } else if (exists()) {
-            if (!delete()) {
-                throw new IOException("Unable to delete file: " + getCanonicalPath());
-            }
-        }
+        FileSystemUtils.forceDeleteDirectory(this);
         return this;
     }
 
@@ -215,12 +162,7 @@ public class TestFile extends File {
     }
 
     public TestFile createFile() {
-        getParentFile().createDirectory();
-        try {
-            assertTrue(isFile() || createNewFile());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        FileSystemUtils.createFile(this);
         return this;
     }
 
@@ -233,14 +175,8 @@ public class TestFile extends File {
     }
 
     public TestFile createDirectory() {
-        if (mkdirs()) {
-            return this;
-        }
-        if (isDirectory()) {
-            return this;
-        }
-        throw new AssertionError("Problems creating dir: " + this
-                + ". Diagnostics: exists=" + this.exists() + ", isFile=" + this.isFile() + ", isDirectory=" + this.isDirectory());
+        FileSystemUtils.createDirectory(this);
+        return this;
     }
 
     public TestFile createSymbolicLink(File target) {
@@ -255,18 +191,6 @@ public class TestFile extends File {
 
     public TestFile createSymbolicLink(String target) {
         return createSymbolicLink(new File(target));
-    }
-
-    private static File join(File file, Object[] path) {
-        File current = file.getAbsoluteFile();
-        for (Object p : path) {
-            current = new File(current, p.toString());
-        }
-        try {
-            return current.getCanonicalFile();
-        } catch (IOException e) {
-            throw new RuntimeException(String.format("Could not canonicalise '%s'.", current), e);
-        }
     }
 
     // TODO: Unit test this method
@@ -298,12 +222,8 @@ public class TestFile extends File {
         return this;
     }
 
-    // TODO: Unit test this method
     public boolean isSelfOrDescendent(File file) {
-        if (file.getAbsolutePath().equals(getAbsolutePath())) {
-            return true;
-        }
-        return file.getAbsolutePath().startsWith(getAbsolutePath() + File.separatorChar);
+        return FileSystemUtils.isSelfOrDescendent(this, file);
     }
 
     @Override

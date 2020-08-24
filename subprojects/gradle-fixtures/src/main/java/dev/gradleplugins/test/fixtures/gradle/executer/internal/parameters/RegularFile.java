@@ -1,5 +1,6 @@
 package dev.gradleplugins.test.fixtures.gradle.executer.internal.parameters;
 
+import dev.gradleplugins.fixtures.file.FileSystemUtils;
 import lombok.val;
 import org.apache.commons.io.FileUtils;
 
@@ -18,7 +19,7 @@ public interface RegularFile {
     }
 
     default RegularFile createFile() {
-        val result = SettingsFileParameter.createFile(getAsFile());
+        val result = FileSystemUtils.createFile(getAsFile());
         return () -> result;
     }
 
