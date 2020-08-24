@@ -1,0 +1,32 @@
+plugins {
+    id 'java-library'
+    id 'dev.nokee.documentation.bintray-publish' version '0.1.13'
+}
+
+import static dev.gradleplugins.GradleRuntimeCompatibility.*
+
+java {
+    sourceCompatibility = minimumJavaVersionFor(minimumGradleVersion)
+    targetCompatibility = minimumJavaVersionFor(minimumGradleVersion)
+    withSourcesJar()
+    withJavadocJar()
+}
+
+repositories {
+    jcenter()
+    gradlePluginDevelopment()
+}
+
+dependencies {
+    compileOnly 'junit:junit:4.13'
+    compileOnly gradleApi(minimumGradleVersion)
+}
+
+publishing {
+    repositories {
+        maven {
+            url = "https://dl.bintray.com/gradle-plugins/distributions"
+            ext.packageName = 'dev.gradleplugins:gradle-fixtures'
+        }
+    }
+}
