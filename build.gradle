@@ -10,3 +10,10 @@ allprojects {
         }
     }
 }
+
+// Configure gradle-fixtures-* versions
+subprojects {
+    if (project.name.startsWith('gradle-fixtures')) {
+        version = '0.0.96'
+    }
+}
