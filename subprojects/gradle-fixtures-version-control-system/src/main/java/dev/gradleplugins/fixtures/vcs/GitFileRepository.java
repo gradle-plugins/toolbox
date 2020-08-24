@@ -26,10 +26,13 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.submodule.SubmoduleWalk;
+import org.eclipse.jgit.transport.RemoteConfig;
+import org.eclipse.jgit.transport.URIish;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,11 +68,22 @@ public class GitFileRepository implements GitRepository, AutoCloseable {
     /**
      * Factory method for creating a GitRepository without using a JUnit @Rule.
      *
-     * Creates a repository in the given repoDir.
+     * Creates a repository in the given repositoryDirectory.
      */
     public static GitFileRepository init(File repositoryDirectory) throws GitAPIException {
         GitFileRepository repo = new GitFileRepository(repositoryDirectory);
         repo.createGitRepo(repositoryDirectory);
+        return repo;
+    }
+
+    /**
+     * Factory method for opening a GitRepository without using a JUnit @Rule.
+     *
+     * Open an existing repository in the given repositoryDirectory.
+     */
+    public static GitFileRepository open(File repositoryDirectory) throws IOException {
+        GitFileRepository repo = new GitFileRepository(repositoryDirectory);
+        repo.openGitRepo(repositoryDirectory);
         return repo;
     }
 
@@ -80,6 +94,10 @@ public class GitFileRepository implements GitRepository, AutoCloseable {
 
     private void createGitRepo(File repositoryDirectory) throws GitAPIException {
         git = Git.init().setDirectory(repositoryDirectory).call();
+    }
+
+    private void openGitRepo(File repositoryDirectory) throws IOException {
+        git = Git.open(repositoryDirectory);
     }
 
 //    @Override
@@ -103,6 +121,17 @@ public class GitFileRepository implements GitRepository, AutoCloseable {
                 .call()) {
             return commit("add submodule " + submoduleRepo.getName(), submoduleRepo.getName());
         }
+    }
+
+    public List<URI> getRemotes() throws GitAPIException, URISyntaxException {
+        List<URI> list = new ArrayList<>();
+        for (RemoteConfig it : git.remoteList().call()) {
+            for (URIish urIish : it.getURIs()) {
+                URI uri = new URI(urIish.toString());
+                list.add(uri);
+            }
+        }
+        return list;
     }
 
     /**

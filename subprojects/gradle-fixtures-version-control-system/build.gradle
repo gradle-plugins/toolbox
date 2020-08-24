@@ -1,5 +1,6 @@
 plugins {
     id 'java-library'
+    id 'dev.nokee.documentation.bintray-publish' version '0.1.13'
 }
 
 import static dev.gradleplugins.GradleRuntimeCompatibility.*
@@ -21,4 +22,13 @@ dependencies {
     implementation project(':gradle-fixtures-file-system')
     implementation 'commons-io:commons-io:2.6'
     implementation 'org.apache.commons:commons-lang3:3.9'
+}
+
+publishing {
+    repositories {
+        maven {
+            url = "https://dl.bintray.com/gradle-plugins/distributions"
+            ext.packageName = 'dev.gradleplugins:gradle-fixtures'
+        }
+    }
 }
