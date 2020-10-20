@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package dev.gradleplugins.test.fixtures.sources;
+package dev.gradleplugins.fixtures.sources;
 
-import dev.gradleplugins.test.fixtures.file.TestFile;
-
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static dev.gradleplugins.fixtures.file.FileSystemUtils.file;
+
 /**
  * An element containing zero or more source files.
  */
-@Deprecated
 public abstract class SourceElement extends Element {
     /**
      * Returns the files associated with this element, possibly none.
@@ -44,8 +44,8 @@ public abstract class SourceElement extends Element {
     /**
      * Writes the source files of this element to the given project, using the Gradle convention for source layout.
      */
-    public void writeToProject(TestFile projectDir) {
-        TestFile srcDir = projectDir.file("src/" + getSourceSetName());
+    public void writeToProject(File projectDir) {
+        File srcDir = file(projectDir, "src/" + getSourceSetName());
         for (SourceFile sourceFile : getFiles()) {
             sourceFile.writeToDirectory(srcDir);
         }
@@ -54,9 +54,9 @@ public abstract class SourceElement extends Element {
     /**
      * Writes the source files of this element to the given source directory.
      */
-    public void writeToSourceDir(TestFile sourceDir) {
+    public void writeToSourceDir(File sourceDir) {
         for (SourceFile sourceFile : getFiles()) {
-            sourceFile.writeToFile(sourceDir.file(sourceFile.getName()));
+            sourceFile.writeToFile(file(sourceDir, sourceFile.getName()));
         }
     }
 
@@ -87,7 +87,7 @@ public abstract class SourceElement extends Element {
             }
 
             @Override
-            public void writeToProject(TestFile projectDir) {
+            public void writeToProject(File projectDir) {
                 for (SourceElement element : elements) {
                     element.writeToProject(projectDir);
                 }

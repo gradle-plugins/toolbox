@@ -18,6 +18,7 @@ package dev.gradleplugins.test.fixtures.sources.objectivec;
 
 import dev.gradleplugins.test.fixtures.sources.NativeSourceElement;
 
+@Deprecated
 public abstract class ObjectiveCSourceElement extends NativeSourceElement {
 
 }

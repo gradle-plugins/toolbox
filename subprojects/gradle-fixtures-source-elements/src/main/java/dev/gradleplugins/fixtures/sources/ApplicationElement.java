@@ -14,20 +14,8 @@
  * limitations under the License.
  */
 
-package dev.gradleplugins.test.fixtures.sources.java;
+package dev.gradleplugins.fixtures.sources;
 
-import dev.gradleplugins.test.fixtures.sources.SourceElement;
-import dev.gradleplugins.test.fixtures.sources.SourceFileElement;
-
-/**
- * A Java source file.
- */
-@Deprecated
-public abstract class JavaSourceFileElement extends JavaLibraryElement {
-    public abstract SourceFileElement getSource();
-
-    @Override
-    public SourceElement getSources() {
-        return getSource();
-    }
+public interface ApplicationElement {
+    String getExpectedOutput();
 }

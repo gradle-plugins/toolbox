@@ -1,12 +1,11 @@
-package dev.gradleplugins.test.fixtures.sources.java;
+package dev.gradleplugins.fixtures.sources.java;
 
 import java.io.File;
 
-@Deprecated
-public class JavaPackage {
+public final class JavaPackage {
     private final String name;
 
-    public JavaPackage(String name) {
+    private JavaPackage(String name) {
         this.name = name;
     }
 
@@ -24,5 +23,9 @@ public class JavaPackage {
 
     public String jniMethodName(String className, String methodName) {
         return "Java_" + name.replace('.', '_') + "_" + className + "_" + methodName;
+    }
+
+    public static JavaPackage ofPackage(String name) {
+        return new JavaPackage(name);
     }
 }

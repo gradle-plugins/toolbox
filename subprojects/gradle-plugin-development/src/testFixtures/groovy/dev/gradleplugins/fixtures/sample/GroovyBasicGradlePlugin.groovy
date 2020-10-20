@@ -16,7 +16,7 @@
 
 package dev.gradleplugins.fixtures.sample
 
-import dev.gradleplugins.test.fixtures.sources.SourceFile
+import dev.gradleplugins.fixtures.sources.SourceFile
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 

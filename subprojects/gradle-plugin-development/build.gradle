@@ -90,6 +90,7 @@ dependencies {
     }
 
     testFixturesCompileOnly gradleApi(minimumGradleVersion)
+    testFixturesApi project(':gradle-fixtures-source-elements')
     testFixturesImplementation project(':gradle-fixtures')
     testFixturesImplementation(project(':gradle-fixtures')) {
         capabilities {

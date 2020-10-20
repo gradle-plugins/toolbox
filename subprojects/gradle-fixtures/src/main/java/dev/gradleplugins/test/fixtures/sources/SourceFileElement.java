@@ -22,6 +22,7 @@ import java.util.List;
 /**
  * A single source file.
  */
+@Deprecated
 public abstract class SourceFileElement extends SourceElement {
     public abstract SourceFile getSourceFile();
 

@@ -22,6 +22,7 @@ import dev.gradleplugins.test.fixtures.sources.SourceFileElement;
 /**
  * A C++ source file and corresponding header file.
  */
+@Deprecated
 public abstract class CSourceFileElement extends CLibraryElement {
     public abstract SourceFileElement getHeader();
 

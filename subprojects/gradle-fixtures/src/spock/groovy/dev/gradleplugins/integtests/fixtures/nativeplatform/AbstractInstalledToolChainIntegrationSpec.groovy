@@ -19,8 +19,8 @@ package dev.gradleplugins.integtests.fixtures.nativeplatform
 import dev.gradleplugins.integtests.fixtures.AbstractGradleSpecification
 import dev.gradleplugins.integtests.fixtures.nativeplatform.NativeToolChainTestRunner
 import dev.gradleplugins.test.fixtures.file.TestFile
-import dev.gradleplugins.test.fixtures.sources.SourceElement
-import dev.gradleplugins.test.fixtures.sources.SourceFile
+import dev.gradleplugins.fixtures.sources.SourceElement
+import dev.gradleplugins.fixtures.sources.SourceFile
 import org.apache.commons.io.FilenameUtils
 import org.gradle.internal.hash.HashUtil
 import org.gradle.internal.os.OperatingSystem

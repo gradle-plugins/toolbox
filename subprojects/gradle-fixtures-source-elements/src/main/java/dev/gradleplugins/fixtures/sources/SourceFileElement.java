@@ -14,11 +14,28 @@
  * limitations under the License.
  */
 
-package dev.gradleplugins.test.fixtures.sources;
+package dev.gradleplugins.fixtures.sources;
 
-@Deprecated
-public class Element {
-    protected SourceFile sourceFile(String path, String name, String content) {
-        return new SourceFile(path, name, content);
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * A single source file.
+ */
+public abstract class SourceFileElement extends SourceElement {
+    public abstract SourceFile getSourceFile();
+
+    @Override
+    public List<SourceFile> getFiles() {
+        return Collections.singletonList(getSourceFile());
+    }
+
+    public static SourceFileElement ofFile(final SourceFile file) {
+        return new SourceFileElement() {
+            @Override
+            public SourceFile getSourceFile() {
+                return file;
+            }
+        };
     }
 }

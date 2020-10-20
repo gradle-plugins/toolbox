@@ -18,6 +18,7 @@ package dev.gradleplugins.test.fixtures.sources.c;
 
 import dev.gradleplugins.test.fixtures.sources.NativeSourceElement;
 
+@Deprecated
 public abstract class CSourceElement extends NativeSourceElement {
 
 }

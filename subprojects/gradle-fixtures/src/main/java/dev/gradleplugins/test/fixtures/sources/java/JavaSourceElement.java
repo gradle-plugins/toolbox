@@ -6,6 +6,7 @@ import dev.gradleplugins.test.fixtures.sources.SourceFile;
 import java.util.ArrayList;
 import java.util.List;
 
+@Deprecated
 public abstract class JavaSourceElement extends SourceElement {
     public abstract SourceElement getSources();
 

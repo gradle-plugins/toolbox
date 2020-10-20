@@ -17,8 +17,8 @@
 package dev.gradleplugins.fixtures.sample
 
 import dev.gradleplugins.integtests.fixtures.AbstractGradleSpecification
-import dev.gradleplugins.test.fixtures.sources.SourceElement
-import dev.gradleplugins.test.fixtures.sources.SourceFile
+import dev.gradleplugins.fixtures.sources.SourceElement
+import dev.gradleplugins.fixtures.sources.SourceFile
 
 class GradleVersionAwareTestKitFunctionalTest extends SourceElement {
     @Override

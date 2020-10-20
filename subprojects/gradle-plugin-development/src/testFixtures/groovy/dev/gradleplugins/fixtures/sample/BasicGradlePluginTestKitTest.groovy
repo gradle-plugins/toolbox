@@ -16,8 +16,8 @@
 
 package dev.gradleplugins.fixtures.sample
 
-import dev.gradleplugins.test.fixtures.sources.SourceElement
-import dev.gradleplugins.test.fixtures.sources.SourceFile
+import dev.gradleplugins.fixtures.sources.SourceElement
+import dev.gradleplugins.fixtures.sources.SourceFile
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification

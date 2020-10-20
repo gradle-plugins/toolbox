@@ -1,9 +1,13 @@
-package dev.gradleplugins.test.fixtures.sources;
+package dev.gradleplugins.fixtures.sources;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-@Deprecated
+import static dev.gradleplugins.fixtures.sources.Element.sourceFile;
+import static dev.gradleplugins.fixtures.sources.SourceElement.empty;
+import static dev.gradleplugins.fixtures.sources.SourceElement.ofElements;
+
 public abstract class NativeLibraryElement extends NativeSourceElement {
     public abstract SourceElement getPublicHeaders();
 
@@ -14,6 +18,14 @@ public abstract class NativeLibraryElement extends NativeSourceElement {
     @Override
     public SourceElement getHeaders() {
         return ofElements(getPublicHeaders(), getPrivateHeaders());
+    }
+
+    public static SourceElement ofPublicHeaders(SourceElement element) {
+        return ofFiles(element.getFiles().stream().filter(it -> it.getKind().equals(SourceKind.HEADER) && it.getPath().equals("public")).collect(Collectors.toList()));
+    }
+
+    public static SourceElement ofPrivateHeaders(SourceElement element) {
+        return ofFiles(element.getFiles().stream().filter(it -> it.getKind().equals(SourceKind.HEADER) && !it.getPath().equals("public")).collect(Collectors.toList()));
     }
 
     /**

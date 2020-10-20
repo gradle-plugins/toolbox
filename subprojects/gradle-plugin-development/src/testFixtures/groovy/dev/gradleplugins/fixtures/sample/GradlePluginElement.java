@@ -16,7 +16,7 @@
 
 package dev.gradleplugins.fixtures.sample;
 
-import dev.gradleplugins.test.fixtures.sources.SourceElement;
+import dev.gradleplugins.fixtures.sources.SourceElement;
 
 public abstract class GradlePluginElement extends SourceElement {
     public abstract String getPluginId();

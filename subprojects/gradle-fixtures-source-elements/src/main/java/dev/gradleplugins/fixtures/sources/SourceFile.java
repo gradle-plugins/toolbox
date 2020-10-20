@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-package dev.gradleplugins.test.fixtures.sources;
+package dev.gradleplugins.fixtures.sources;
 
 import lombok.Value;
 import lombok.val;
 import org.apache.commons.io.FileUtils;
 
+import javax.tools.JavaFileObject;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
 @Value
-@Deprecated
 public class SourceFile {
     String path;
     String name;
@@ -68,5 +69,9 @@ public class SourceFile {
     private static String firstContentLine(String content) {
         String[] tokens = content.split("\n", -1);
         return Arrays.stream(tokens).map(String::trim).filter(line -> !line.isEmpty()).findFirst().map(it -> it + "...").orElse("");
+    }
+
+    public SourceKind getKind() {
+        return SourceKind.valueOf(name);
     }
 }

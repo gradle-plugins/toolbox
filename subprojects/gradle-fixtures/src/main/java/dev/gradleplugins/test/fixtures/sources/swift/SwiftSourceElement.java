@@ -3,6 +3,7 @@ package dev.gradleplugins.test.fixtures.sources.swift;
 import dev.gradleplugins.test.fixtures.sources.SourceElement;
 import org.apache.commons.lang3.StringUtils;
 
+@Deprecated
 public abstract class SwiftSourceElement extends SourceElement {
     private final String projectName;
 

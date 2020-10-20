@@ -18,6 +18,7 @@ package dev.gradleplugins.test.fixtures.sources.cpp;
 
 import dev.gradleplugins.test.fixtures.sources.NativeSourceElement;
 
+@Deprecated
 public abstract class CppSourceElement extends NativeSourceElement {
 
 }

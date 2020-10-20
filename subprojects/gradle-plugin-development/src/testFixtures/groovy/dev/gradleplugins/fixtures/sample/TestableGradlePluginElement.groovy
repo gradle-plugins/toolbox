@@ -1,8 +1,7 @@
 package dev.gradleplugins.fixtures.sample
 
-import dev.gradleplugins.test.fixtures.file.TestFile
-import dev.gradleplugins.test.fixtures.sources.SourceElement
-import dev.gradleplugins.test.fixtures.sources.SourceFile
+import dev.gradleplugins.fixtures.sources.SourceElement
+import dev.gradleplugins.fixtures.sources.SourceFile
 
 class TestableGradlePluginElement extends GradlePluginElement {
     private final GradlePluginElement main
@@ -29,8 +28,8 @@ class TestableGradlePluginElement extends GradlePluginElement {
     }
 
     @Override
-    void writeToProject(TestFile projectDir) {
-        dev.gradleplugins.test.fixtures.sources.SourceElement.ofElements(main, functionalTest).writeToProject(projectDir)
+    void writeToProject(File projectDir) {
+        ofElements(main, functionalTest).writeToProject(projectDir)
     }
 
     GradlePluginElement withTestingStrategySupport() {

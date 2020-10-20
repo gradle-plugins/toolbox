@@ -21,6 +21,7 @@ import dev.gradleplugins.test.fixtures.sources.NativeLibraryElement;
 /**
  * A Objective-C++ source file with optional public and private headers.
  */
+@Deprecated
 public abstract class ObjectiveCppLibraryElement extends NativeLibraryElement {
 
 }
