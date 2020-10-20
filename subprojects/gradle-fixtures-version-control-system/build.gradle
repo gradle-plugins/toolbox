@@ -25,6 +25,11 @@ dependencies {
 }
 
 publishing {
+    publications {
+        library(MavenPublication) {
+            from components.java
+        }
+    }
     repositories {
         maven {
             url = "https://dl.bintray.com/gradle-plugins/distributions"
