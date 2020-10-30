@@ -52,6 +52,11 @@ include('gradle-plugin-development')
 project(':gradle-plugin-development').projectDir = file('subprojects/gradle-plugin-development')
 project(':gradle-plugin-development').buildFileName = 'build.gradle'
 
+// Gradle runners
+include('gradle-runner-kit')
+project(':gradle-runner-kit').projectDir = file('subprojects/gradle-runner-kit')
+project(':gradle-runner-kit').buildFileName = 'build.gradle'
+
 plugins.withId('com.gradle.enterprise') {
     gradleEnterprise {
         buildScan {
