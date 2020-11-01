@@ -17,6 +17,7 @@
 package dev.gradleplugins.integtests.fixtures.nativeplatform;
 
 import com.google.common.collect.ImmutableSet;
+import dev.gradleplugins.fixtures.gradle.runner.GradleRunner;
 import dev.gradleplugins.integtests.fixtures.AbstractMultiVersionSpecRunner;
 import dev.gradleplugins.integtests.fixtures.nativeplatform.internal.NativeServicesTestFixture;
 import dev.gradleplugins.integtests.fixtures.nativeplatform.internal.TestFiles;
@@ -481,6 +482,11 @@ public class AvailableToolChains {
             // Toolchains should be using default configuration
             return executer;
         }
+
+        public GradleRunner configureExecuter(GradleRunner executer) {
+            // Toolchains should be using default configuration
+            return executer;
+        }
     }
 
     public static abstract class GccCompatibleToolChain extends InstalledToolChain {
@@ -805,6 +811,10 @@ public class AvailableToolChains {
             return executer.withEnvironmentVars(Collections.singletonMap("DEVELOPER_DIR", xcodeDir.getAbsolutePath()));
         }
 
+        private GradleRunner configureExecuter(GradleRunner executer) {
+            return executer.withEnvironmentVariables(Collections.singletonMap("DEVELOPER_DIR", xcodeDir.getAbsolutePath()));
+        }
+
         public Optional<InstalledToolChain> getSwiftc() {
             SwiftcMetadataProvider versionDeterminer = new SwiftcMetadataProvider(TestFiles.execActionFactory());
             File swiftc = new File("/usr/bin/swiftc");
@@ -836,6 +846,11 @@ public class AvailableToolChains {
 
                 @Override
                 public GradleExecuter configureExecuter(GradleExecuter executer) {
+                    return InstalledXcode.this.configureExecuter(super.configureExecuter(executer));
+                }
+
+                @Override
+                public GradleRunner configureExecuter(GradleRunner executer) {
                     return InstalledXcode.this.configureExecuter(super.configureExecuter(executer));
                 }
             });
@@ -872,6 +887,11 @@ public class AvailableToolChains {
 
                 @Override
                 public GradleExecuter configureExecuter(GradleExecuter executer) {
+                    return InstalledXcode.this.configureExecuter(super.configureExecuter(executer));
+                }
+
+                @Override
+                public GradleRunner configureExecuter(GradleRunner executer) {
                     return InstalledXcode.this.configureExecuter(super.configureExecuter(executer));
                 }
 
