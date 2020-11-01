@@ -9,6 +9,7 @@ plugins {
     id 'groovy' // for Spock framework
     id 'maven-publish'
     id 'com.jfrog.bintray'
+    id 'java-test-fixtures'
 }
 
 description = "Gradle TestKit fixtures for fast and efficient Gradle plugin development."
@@ -83,6 +84,9 @@ dependencies {
 
     spockSupportCompileOnly "org.projectlombok:lombok:${lombokVersion}"
     spockSupportAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+    testFixturesApi testFixtures(project(':gradle-fixtures-file-system'))
+    testFixturesApi testFixtures(project(':gradle-runner-kit'))
 }
 
 tasks.named('test', Test) {
