@@ -6,7 +6,7 @@ import java.util.Map;
 public final class TemporaryDirectoryParameter extends GradleExecutionParameterImpl<TemporaryDirectory> implements JvmSystemPropertyParameter<TemporaryDirectory>, DirectoryParameter<TemporaryDirectory> {
     public boolean hasWhitespace() {
         if (isPresent()) {
-            get().getAbsolutePath().contains(" ");
+            return get().getAbsolutePath().contains(" ");
         }
         return false;
     }
