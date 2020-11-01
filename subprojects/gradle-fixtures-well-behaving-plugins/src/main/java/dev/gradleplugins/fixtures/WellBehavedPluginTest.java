@@ -8,7 +8,7 @@ import org.junit.Test;
 import java.util.Collections;
 
 public abstract class WellBehavedPluginTest {
-    private Project project = ProjectBuilder.builder().build();
+    private final Project project = ProjectBuilder.builder().build();
 
     protected abstract String getQualifiedPluginId();
 
