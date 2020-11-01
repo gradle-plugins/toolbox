@@ -2,6 +2,7 @@ plugins {
     id 'java-library'
     id 'groovy-base'
     id 'dev.nokee.documentation.bintray-publish' version '0.1.13'
+    id 'java-test-fixtures'
 }
 
 import static dev.gradleplugins.GradleRuntimeCompatibility.*
