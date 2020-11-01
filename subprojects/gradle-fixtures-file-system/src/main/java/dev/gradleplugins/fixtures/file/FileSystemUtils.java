@@ -19,7 +19,7 @@ import java.util.function.Supplier;
 import static dev.gradleplugins.fixtures.file.FilePreconditions.checkIsNotNull;
 import static java.util.Objects.requireNonNull;
 
-public class FileSystemUtils {
+public final class FileSystemUtils {
     public static File createFile(File self) {
         FilePreconditions.checkNotExistingFile(self, "Could not create file");
         self.getParentFile().mkdirs();
