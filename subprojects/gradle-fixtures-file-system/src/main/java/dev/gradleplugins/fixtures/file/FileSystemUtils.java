@@ -1,6 +1,7 @@
 package dev.gradleplugins.fixtures.file;
 
 import com.google.common.base.Preconditions;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -163,6 +164,15 @@ public final class FileSystemUtils {
             } catch (IOException e) {
                 throw new UncheckedIOException(String.format("Could not delete directory '%s' because of an error.", self.getAbsolutePath()), e);
             }
+        }
+        return self;
+    }
+
+    public static File touch(File self) {
+        try {
+            FileUtils.touch(self);
+        } catch (IOException e) {
+            throw new UncheckedIOException(String.format("Could not touch '%s' because of an error.", self.getAbsolutePath()), e);
         }
         return self;
     }
