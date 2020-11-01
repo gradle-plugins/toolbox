@@ -68,7 +68,7 @@ class FileSystemUtils_FileTest extends Specification {
         }
     }
 
-    def "returns uncheck exception if file canonicalization fails"() {
+    def "throws uncheck exception if file canonicalization fails"() {
         given:
         def file = new ThrowingCanonicalFile(temporaryFolder.root.toString())
 

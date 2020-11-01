@@ -66,7 +66,7 @@ public final class FileSystemUtils {
             current = new File(current, pathToString);
             ++i;
         }
-        return canonicalizeFileOrThrowException(current);
+        return canonicalize(current);
     }
 
     private static String wrapObjectStringifyExceptions(int index, Supplier<String> toString) {
@@ -74,14 +74,6 @@ public final class FileSystemUtils {
             return toString.get();
         } catch (Throwable e) {
             throw new RuntimeException(String.format("Could not stringify path object #%d.", index), e);
-        }
-    }
-
-    private static File canonicalizeFileOrThrowException(File file) {
-        try {
-            return file.getCanonicalFile();
-        } catch (IOException e) {
-            throw new UncheckedIOException(String.format("Could not canonicalize '%s'.", file), e);
         }
     }
 
@@ -175,5 +167,19 @@ public final class FileSystemUtils {
             throw new UncheckedIOException(String.format("Could not touch '%s' because of an error.", self.getAbsolutePath()), e);
         }
         return self;
+    }
+
+    /**
+     * Canonicalizes the given file.
+     *
+     * @param file the file to canonicalize
+     * @return a canonicalized file, never null.
+     */
+    public static File canonicalize(File file) {
+        try {
+            return file.getCanonicalFile();
+        } catch (IOException e) {
+            throw new UncheckedIOException(String.format("Could not canonicalize '%s'.", file), e);
+        }
     }
 }
