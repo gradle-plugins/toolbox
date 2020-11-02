@@ -36,9 +36,9 @@ java {
 
 repositories {
     jcenter()
-    mavenCentral()
     gradlePluginPortal()
     gradlePluginDevelopment()
+    maven { url = 'https://dl.bintray.com/nokeedev/distributions-snapshots/' }
 }
 
 dependencies {

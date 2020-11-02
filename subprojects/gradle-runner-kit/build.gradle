@@ -15,10 +15,9 @@ java {
 }
 
 repositories {
-    mavenLocal()
     jcenter()
     mavenCentral()
-//    maven { url = 'https://dl.bintray.com/nokeedev/distributions-snapshots/' }
+    maven { url = 'https://dl.bintray.com/nokeedev/distributions-snapshots/' }
 }
 
 dependencies {
@@ -31,7 +30,7 @@ dependencies {
     implementation 'com.google.guava:guava:28.2-jre'
     implementation 'org.apache.commons:commons-lang3:3.9'
     implementation 'commons-io:commons-io:2.6'
-    implementation 'dev.nokee:coreExec:latest.integration'
+    implementation 'dev.nokee:coreExec:0.5.0-dfbba94d'
     compileOnly gradleTestKit()
 
     testImplementation platform('org.spockframework:spock-bom:1.2-groovy-2.5')
@@ -42,7 +41,7 @@ dependencies {
     testFixturesCompileOnly localGroovy() // to prevent build failures
     testFixturesImplementation project(':gradle-fixtures-file-system')
     testFixturesImplementation testFixtures(project(':gradle-fixtures-file-system'))
-    testFixturesImplementation 'dev.nokee:coreExec:latest.integration'
+    testFixturesImplementation 'dev.nokee:coreExec:0.5.0-dfbba94d'
     testFixturesImplementation 'commons-io:commons-io:2.6'
     testFixturesImplementation 'org.apache.commons:commons-lang3:3.9'
 }
