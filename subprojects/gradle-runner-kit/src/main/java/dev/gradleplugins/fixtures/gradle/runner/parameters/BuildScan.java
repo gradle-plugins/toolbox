@@ -1,13 +1,14 @@
 package dev.gradleplugins.fixtures.gradle.runner.parameters;
 
-import com.google.common.collect.ImmutableList;
-
 import java.io.*;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
+import static java.util.Arrays.asList;
+
 public enum BuildScan implements GradleExecutionCommandLineParameter<BuildScan> {
-    ENABLED(BuildScan::getPublishBuildScanArguments), DISABLED(ImmutableList::of);
+    ENABLED(BuildScan::getPublishBuildScanArguments), DISABLED(Collections::emptyList);
 
     private final Supplier<List<String>> argumentSupplier;
     BuildScan(Supplier<List<String>> argumentSupplier) {
@@ -57,7 +58,7 @@ public enum BuildScan implements GradleExecutionCommandLineParameter<BuildScan> 
         } catch (FileNotFoundException e) {
             throw new UncheckedIOException(e);
         }
-        return ImmutableList.of("--init-script", initScriptFile.getAbsolutePath(), "--scan");
+        return asList("--init-script", initScriptFile.getAbsolutePath(), "--scan");
     }
 
     @Override

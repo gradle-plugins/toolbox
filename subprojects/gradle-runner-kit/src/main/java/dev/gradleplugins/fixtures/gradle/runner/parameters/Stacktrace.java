@@ -1,12 +1,13 @@
 package dev.gradleplugins.fixtures.gradle.runner.parameters;
 
-import com.google.common.collect.ImmutableList;
-
 import java.util.List;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+
 public enum Stacktrace implements GradleExecutionCommandLineParameter<Stacktrace> {
-    HIDE(ImmutableList.of()),
-    SHOW(ImmutableList.of("--stacktrace"));
+    HIDE(emptyList()),
+    SHOW(singletonList("--stacktrace"));
 
     private final List<String> args;
 

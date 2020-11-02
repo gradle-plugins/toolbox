@@ -1,12 +1,13 @@
 package dev.gradleplugins.fixtures.gradle.runner.parameters;
 
-import com.google.common.collect.ImmutableList;
-
 import java.util.List;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+
 public enum DeprecationChecks implements GradleExecutionCommandLineParameter<DeprecationChecks> {
-    FAILS(ImmutableList.of("--warning-mode", "fail")),
-    IGNORES(ImmutableList.of());
+    FAILS(asList("--warning-mode", "fail")),
+    IGNORES(emptyList());
 
     private final List<String> args;
 

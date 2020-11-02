@@ -1,10 +1,10 @@
 package dev.gradleplugins.fixtures.gradle.runner;
 
-import com.google.common.collect.ImmutableList;
 import dev.gradleplugins.fixtures.gradle.runner.parameters.*;
 import lombok.*;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -71,13 +71,13 @@ final class GradleRunnerParameters implements GradleExecutionContext {
 
     @SneakyThrows
     static List<GradleExecutionParameter<?>> allExecutionParameters(GradleExecutionContext parameters) {
-        val result = ImmutableList.<GradleExecutionParameter<?>>builder();
+        val result = new ArrayList<GradleExecutionParameter<?>>();
         for (Method method : GradleExecutionContext.class.getMethods()) {
             if (GradleExecutionParameter.class.isAssignableFrom(method.getReturnType())) {
                 result.add((GradleExecutionParameter<?>) method.invoke(parameters));
             }
         }
-        return result.build();
+        return result;
     }
 
     @Override

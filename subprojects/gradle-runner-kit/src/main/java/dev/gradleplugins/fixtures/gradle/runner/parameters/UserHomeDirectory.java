@@ -1,9 +1,10 @@
 package dev.gradleplugins.fixtures.gradle.runner.parameters;
 
-import com.google.common.collect.ImmutableMap;
-
 import java.io.File;
+import java.util.Collections;
 import java.util.Map;
+
+import static java.util.Collections.singletonMap;
 
 public final class UserHomeDirectory extends GradleExecutionParameterImpl<File> implements GradleExecutionJvmSystemPropertyParameter<File> {
     public static UserHomeDirectory unset() {
@@ -16,10 +17,10 @@ public final class UserHomeDirectory extends GradleExecutionParameterImpl<File> 
 
     @Override
     public Map<String, String> getAsJvmSystemProperties() {
-        return map(UserHomeDirectory::asJvmSystemProperties).orElseGet(ImmutableMap::of);
+        return map(UserHomeDirectory::asJvmSystemProperties).orElseGet(Collections::emptyMap);
     }
 
     private static Map<String, String> asJvmSystemProperties(File userHomeDirectory) {
-        return ImmutableMap.of("user.home", userHomeDirectory.getAbsolutePath());
+        return singletonMap("user.home", userHomeDirectory.getAbsolutePath());
     }
 }

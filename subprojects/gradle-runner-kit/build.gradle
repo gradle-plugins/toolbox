@@ -27,7 +27,6 @@ dependencies {
     api project(':gradle-fixtures') // ONLY WHILE WE FINISH THE MIGRATION TO THE RUNNER API
 
     implementation project(':gradle-fixtures-file-system')
-    implementation 'com.google.guava:guava:28.2-jre'
     implementation 'org.apache.commons:commons-lang3:3.9'
     implementation 'commons-io:commons-io:2.6'
     implementation 'dev.nokee:coreExec:0.5.0-dfbba94d'

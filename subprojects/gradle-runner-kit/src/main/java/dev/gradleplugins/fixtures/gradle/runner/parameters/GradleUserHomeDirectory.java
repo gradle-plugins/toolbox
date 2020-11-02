@@ -1,16 +1,16 @@
 package dev.gradleplugins.fixtures.gradle.runner.parameters;
 
-import com.google.common.collect.ImmutableList;
 import dev.gradleplugins.fixtures.gradle.runner.GradleExecutionContext;
-import lombok.SneakyThrows;
 import org.apache.commons.lang3.SystemUtils;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
 import static dev.gradleplugins.fixtures.file.FileSystemUtils.canonicalize;
 import static dev.gradleplugins.fixtures.file.FileSystemUtils.file;
+import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.SystemUtils.USER_NAME;
 
 public final class GradleUserHomeDirectory extends GradleExecutionParameterImpl<File> implements GradleExecutionCommandLineParameter<File> {
@@ -54,10 +54,10 @@ public final class GradleUserHomeDirectory extends GradleExecutionParameterImpl<
 
     @Override
     public List<String> getAsArguments() {
-        return map(GradleUserHomeDirectory::asArguments).orElseGet(ImmutableList::of);
+        return map(GradleUserHomeDirectory::asArguments).orElseGet(Collections::emptyList);
     }
 
     private static List<String> asArguments(File gradleUserHomeDirectory) {
-        return ImmutableList.of("--gradle-user-home", gradleUserHomeDirectory.getAbsolutePath());
+        return asList("--gradle-user-home", gradleUserHomeDirectory.getAbsolutePath());
     }
 }

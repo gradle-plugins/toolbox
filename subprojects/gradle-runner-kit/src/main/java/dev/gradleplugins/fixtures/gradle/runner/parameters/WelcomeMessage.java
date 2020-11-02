@@ -1,6 +1,5 @@
 package dev.gradleplugins.fixtures.gradle.runner.parameters;
 
-import com.google.common.collect.ImmutableMap;
 import dev.gradleplugins.fixtures.file.FileSystemUtils;
 import dev.gradleplugins.fixtures.gradle.runner.GradleExecutionContext;
 import lombok.val;
@@ -8,11 +7,12 @@ import lombok.val;
 import java.util.Map;
 
 import static dev.gradleplugins.fixtures.file.FileSystemUtils.file;
+import static java.util.Collections.singletonMap;
 import static org.gradle.launcher.cli.DefaultCommandLineActionFactory.WELCOME_MESSAGE_ENABLED_SYSTEM_PROPERTY;
 
 public enum WelcomeMessage implements GradleExecutionJvmSystemPropertyParameter<WelcomeMessage>, BeforeExecute {
-    ENABLED(ImmutableMap.of(WELCOME_MESSAGE_ENABLED_SYSTEM_PROPERTY, Boolean.TRUE.toString())),
-    DISABLED(ImmutableMap.of(WELCOME_MESSAGE_ENABLED_SYSTEM_PROPERTY, Boolean.FALSE.toString()));
+    ENABLED(singletonMap(WELCOME_MESSAGE_ENABLED_SYSTEM_PROPERTY, Boolean.TRUE.toString())),
+    DISABLED(singletonMap(WELCOME_MESSAGE_ENABLED_SYSTEM_PROPERTY, Boolean.FALSE.toString()));
 
     private final Map<String, String> properties;
 

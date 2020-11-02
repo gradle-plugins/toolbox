@@ -1,9 +1,7 @@
 package dev.gradleplugins.fixtures.gradle.runner;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
 import dev.gradleplugins.fixtures.gradle.runner.parameters.*;
+import lombok.val;
 import org.gradle.internal.classloader.ClasspathUtil;
 import org.gradle.internal.classpath.ClassPath;
 import org.gradle.internal.installation.CurrentGradleInstallation;
@@ -13,13 +11,12 @@ import org.gradle.testkit.runner.internal.ToolingApiGradleExecutor;
 
 import java.io.File;
 import java.time.Duration;
-import java.util.AbstractMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static dev.gradleplugins.fixtures.file.FileSystemUtils.file;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 final class GradleExecutorGradleTestKitImpl extends AbstractGradleExecutor {
     static final Duration DEFAULT_TEST_KIT_DAEMON_IDLE_TIMEOUT = Duration.ofSeconds(120);
@@ -80,11 +77,14 @@ final class GradleExecutorGradleTestKitImpl extends AbstractGradleExecutor {
     //endregion
 
     private static List<String> buildArguments(GradleExecutionContext parameters) {
-        return parameters.getExecutionParameters().stream().filter(it -> it instanceof GradleExecutionCommandLineParameter && !(it instanceof GradleExecutionJvmSystemPropertyParameter || it instanceof GradleUserHomeDirectory)).flatMap(GradleExecutorGradleTestKitImpl::asArguments).collect(Collectors.toList());
+        return parameters.getExecutionParameters().stream().filter(it -> it instanceof GradleExecutionCommandLineParameter && !(it instanceof GradleExecutionJvmSystemPropertyParameter || it instanceof GradleUserHomeDirectory)).flatMap(GradleExecutorGradleTestKitImpl::asArguments).collect(toList());
     }
 
     private static List<String> jvmArguments(GradleExecutionContext parameters) {
-        return ImmutableList.copyOf(Iterables.concat(parameters.getExecutionParameters().stream().filter(it -> it instanceof GradleExecutionJvmSystemPropertyParameter && !(it instanceof DaemonBaseDirectory || it instanceof DaemonIdleTimeout)).flatMap(GradleExecutorGradleTestKitImpl::asArguments).collect(Collectors.toList()), getImplicitBuildJvmArgs()));
+        val result = new ArrayList<String>();
+        result.addAll(parameters.getExecutionParameters().stream().filter(it -> it instanceof GradleExecutionJvmSystemPropertyParameter && !(it instanceof DaemonBaseDirectory || it instanceof DaemonIdleTimeout)).flatMap(GradleExecutorGradleTestKitImpl::asArguments).collect(toList()));
+        result.addAll(getImplicitBuildJvmArgs());
+        return result;
     }
 
     private static Stream<String> asArguments(GradleExecutionParameter<?> parameter) {
@@ -93,11 +93,11 @@ final class GradleExecutorGradleTestKitImpl extends AbstractGradleExecutor {
 
     //region Environment variables
     private static Map<String, String> environmentVariables(GradleExecutionContext parameters) {
-        return parameters.getEnvironmentVariables().map(GradleExecutorGradleTestKitImpl::toStringValues).orElseGet(ImmutableMap::of);
+        return parameters.getEnvironmentVariables().map(GradleExecutorGradleTestKitImpl::toStringValues).orElseGet(Collections::emptyMap);
     }
 
     private static Map<String, String> toStringValues(Map<String, ?> environmentVariables) {
-        return environmentVariables.entrySet().stream().map(it -> new AbstractMap.SimpleImmutableEntry<>(it.getKey(), it.getValue().toString())).collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue));
+        return environmentVariables.entrySet().stream().map(it -> new AbstractMap.SimpleImmutableEntry<>(it.getKey(), it.getValue().toString())).collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
     //endregion
 }

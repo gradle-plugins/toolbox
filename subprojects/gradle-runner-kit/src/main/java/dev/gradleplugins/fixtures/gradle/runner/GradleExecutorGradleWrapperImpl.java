@@ -1,7 +1,5 @@
 package dev.gradleplugins.fixtures.gradle.runner;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import dev.gradleplugins.fixtures.gradle.runner.parameters.GradleExecutionCommandLineParameter;
 import dev.gradleplugins.fixtures.gradle.runner.parameters.GradleExecutionParameter;
 import dev.gradleplugins.test.fixtures.gradle.executer.internal.WrapperGradleDistribution;
@@ -14,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -21,6 +20,7 @@ import java.util.stream.Stream;
 
 import static dev.gradleplugins.fixtures.file.FileSystemUtils.file;
 import static dev.nokee.core.exec.CommandLineToolInvocationEnvironmentVariables.inherit;
+import static java.util.Arrays.asList;
 
 final class GradleExecutorGradleWrapperImpl extends AbstractGradleExecutor {
     @Override
@@ -49,9 +49,9 @@ final class GradleExecutorGradleWrapperImpl extends AbstractGradleExecutor {
 
         CommandLine command = null;
         if (SystemUtils.IS_OS_WINDOWS) {
-            command = CommandLine.of(ImmutableList.<String>builder().add("cmd", "/c", "gradlew.bat").addAll(allArguments(parameters)).build());
+            command = CommandLine.of(asList("cmd", "/c", "gradlew.bat"), allArguments(parameters));
         } else {
-            command = CommandLine.of(ImmutableList.<String>builder().add("./gradlew").addAll(allArguments(parameters)).build());
+            command = CommandLine.of("./gradlew", allArguments(parameters));
         }
         val result = command.newInvocation()
                 .withEnvironmentVariables(environmentVariables(parameters))
@@ -65,7 +65,10 @@ final class GradleExecutorGradleWrapperImpl extends AbstractGradleExecutor {
     }
 
     private static List<String> allArguments(GradleExecutionContext parameters) {
-        return ImmutableList.copyOf(Iterables.concat(ImmutableList.of("-Dorg.gradle.jvmargs=" + String.join(" ", getImplicitBuildJvmArgs().stream().map(it -> "'" + it + "'").collect(Collectors.toList()))), parameters.getExecutionParameters().stream().filter(GradleExecutionCommandLineParameter.class::isInstance).flatMap(GradleExecutorGradleWrapperImpl::asArguments).collect(Collectors.toList())));
+        val result = new ArrayList<String>();
+        result.add("-Dorg.gradle.jvmargs=" + getImplicitBuildJvmArgs().stream().map(it -> "'" + it + "'").collect(Collectors.joining(" ")));
+        parameters.getExecutionParameters().stream().filter(GradleExecutionCommandLineParameter.class::isInstance).flatMap(GradleExecutorGradleWrapperImpl::asArguments).forEach(result::add);
+        return result;
     }
 
     private static Stream<String> asArguments(GradleExecutionParameter<?> parameter) {

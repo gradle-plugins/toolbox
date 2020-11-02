@@ -1,7 +1,5 @@
 package dev.gradleplugins.fixtures.gradle.runner;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import dev.nokee.core.exec.CommandLineToolLogContent;
 import lombok.EqualsAndHashCode;
 import lombok.val;
@@ -11,18 +9,17 @@ import org.gradle.launcher.daemon.server.DaemonStateCoordinator;
 import org.gradle.launcher.daemon.server.health.LowHeapSpaceDaemonExpirationStrategy;
 
 import javax.annotation.Nullable;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 
-import static com.google.common.collect.ImmutableList.toImmutableList;
-import static com.google.common.collect.ImmutableMap.toImmutableMap;
+import static java.util.Collections.unmodifiableList;
+import static java.util.Collections.unmodifiableMap;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 @EqualsAndHashCode
 final class GradleBuildResultImpl implements GradleBuildResult {
@@ -42,7 +39,7 @@ final class GradleBuildResultImpl implements GradleBuildResult {
         val visitor = new TaskCollector();
         normalizedOutput.visitEachLine(new TaskOutputVisitorAdapter(new NewLineAdjuster(visitor)));
 
-        val discoveredTasks = ImmutableMap.copyOf(visitor.getDiscoveredTasks());
+        val discoveredTasks = visitor.getDiscoveredTasks();
         val actionableTaskCount = visitor.getActionableTaskCount().orElseGet(() -> ActionableTaskCount.from(discoveredTasks));
 
         return new GradleBuildResultImpl(discoveredTasks, normalizedOutput, actionableTaskCount);
@@ -55,12 +52,12 @@ final class GradleBuildResultImpl implements GradleBuildResult {
 
     @Override
     public List<String> getExecutedTaskPaths() {
-        return executedTaskInOrder.values().stream().map(GradleBuildResultImpl::toPath).collect(toImmutableList());
+        return unmodifiableList(executedTaskInOrder.values().stream().map(GradleBuildResultImpl::toPath).collect(toList()));
     }
 
     @Override
     public List<String> getSkippedTaskPaths() {
-        return executedTaskInOrder.values().stream().filter(it -> it.getOutcome().isSkipped()).map(GradleBuildResultImpl::toPath).collect(toImmutableList());
+        return unmodifiableList(executedTaskInOrder.values().stream().filter(it -> it.getOutcome().isSkipped()).map(GradleBuildResultImpl::toPath).collect(toList()));
     }
 
     private static String toPath(GradleBuildTask buildTask) {
@@ -69,12 +66,12 @@ final class GradleBuildResultImpl implements GradleBuildResult {
 
     @Override
     public List<GradleBuildTask> getTasks() {
-        return ImmutableList.copyOf(executedTaskInOrder.values());
+        return unmodifiableList(new ArrayList<>(executedTaskInOrder.values()));
     }
 
     @Override
     public List<GradleBuildTask> tasks(GradleTaskOutcome outcome) {
-        return executedTaskInOrder.values().stream().filter(it -> it.getOutcome().equals(outcome)).collect(toImmutableList());
+        return unmodifiableList(executedTaskInOrder.values().stream().filter(it -> it.getOutcome().equals(outcome)).collect(toList()));
     }
 
     @Nullable
@@ -85,18 +82,18 @@ final class GradleBuildResultImpl implements GradleBuildResult {
 
     @Override
     public GradleBuildResult withNormalizedTaskOutput(Predicate<GradleTaskPath> predicate, UnaryOperator<String> outputNormalizer) {
-        Map<GradleTaskPath, GradleBuildTask> tasks = executedTaskInOrder.entrySet().stream().map(entry -> {
+        Map<GradleTaskPath, GradleBuildTask> tasks = unmodifiableMap(executedTaskInOrder.entrySet().stream().map(entry -> {
             if (predicate.test(entry.getKey())) {
                 return new LinkedHashMap.SimpleEntry<>(entry.getKey(), new GradleBuildTaskImpl(entry.getKey(), entry.getValue().getOutcome(), outputNormalizer.apply(entry.getValue().getOutput())));
             }
             return entry;
-        }).collect(toImmutableMap(Map.Entry::getKey, Map.Entry::getValue));
+        }).collect(toMap(Map.Entry::getKey, Map.Entry::getValue)));
         return new GradleBuildResultImpl(tasks, output, actionableTaskCount);
     }
 
     @Override
     public GradleBuildResult asRichOutputResult() {
-        return new GradleBuildResultImpl(executedTaskInOrder.entrySet().stream().filter(it -> !it.getValue().getOutput().isEmpty()).collect(toImmutableMap(Map.Entry::getKey, Map.Entry::getValue)), output, actionableTaskCount);
+        return new GradleBuildResultImpl(unmodifiableMap(executedTaskInOrder.entrySet().stream().filter(it -> !it.getValue().getOutput().isEmpty()).collect(toMap(Map.Entry::getKey, Map.Entry::getValue))), output, actionableTaskCount);
     }
 
     private interface TaskOutputVisitor {
@@ -117,7 +114,7 @@ final class GradleBuildResultImpl implements GradleBuildResult {
         }
 
         Map<GradleTaskPath, GradleBuildTask> getDiscoveredTasks() {
-            return discoveredTasks.entrySet().stream().collect(toImmutableMap(Map.Entry::getKey, it -> it.getValue().build()));
+            return unmodifiableMap(discoveredTasks.entrySet().stream().collect(toMap(Map.Entry::getKey, it -> it.getValue().build())));
         }
 
         public void visitTaskHeader(GradleTaskPath taskPath) {

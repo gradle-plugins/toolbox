@@ -1,7 +1,9 @@
 package dev.gradleplugins.fixtures.gradle.runner.parameters;
 
-import com.google.common.collect.ImmutableMap;
+import lombok.val;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public final class Locale extends GradleExecutionParameterImpl<java.util.Locale> implements GradleExecutionJvmSystemPropertyParameter<java.util.Locale>, GradleExecutionParameter<java.util.Locale> {
@@ -19,14 +21,14 @@ public final class Locale extends GradleExecutionParameterImpl<java.util.Locale>
 
     @Override
     public Map<String, String> getAsJvmSystemProperties() {
-        return map(Locale::asJvmSystemProperties).orElseGet(ImmutableMap::of);
+        return map(Locale::asJvmSystemProperties).orElseGet(Collections::emptyMap);
     }
 
     private static Map<String, String> asJvmSystemProperties(java.util.Locale locale) {
-        return ImmutableMap.<String, String>builder()
-                .put("user.language", locale.getLanguage())
-                .put("user.country", locale.getCountry())
-                .put("user.variant", locale.getVariant())
-                .build();
+        val result = new LinkedHashMap<String, String>();
+        result.put("user.language", locale.getLanguage());
+        result.put("user.country", locale.getCountry());
+        result.put("user.variant", locale.getVariant());
+        return result;
     }
 }

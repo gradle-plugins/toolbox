@@ -1,9 +1,10 @@
 package dev.gradleplugins.fixtures.gradle.runner.parameters;
 
-import com.google.common.collect.ImmutableMap;
-
 import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.Map;
+
+import static java.util.Collections.singletonMap;
 
 public final class CharacterEncoding extends GradleExecutionParameterImpl<Charset> implements GradleExecutionJvmSystemPropertyParameter<Charset> {
     public static CharacterEncoding of(Charset characterEncoding) {
@@ -20,10 +21,10 @@ public final class CharacterEncoding extends GradleExecutionParameterImpl<Charse
 
     @Override
     public Map<String, String> getAsJvmSystemProperties() {
-        return map(CharacterEncoding::asJvmSystemProperties).orElseGet(ImmutableMap::of);
+        return map(CharacterEncoding::asJvmSystemProperties).orElseGet(Collections::emptyMap);
     }
 
     private static Map<String, String> asJvmSystemProperties(Charset characterEncoding) {
-        return ImmutableMap.of("file.encoding", characterEncoding.name());
+        return singletonMap("file.encoding", characterEncoding.name());
     }
 }
