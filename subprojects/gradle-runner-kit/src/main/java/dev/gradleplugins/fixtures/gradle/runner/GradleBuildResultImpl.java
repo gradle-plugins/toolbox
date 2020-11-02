@@ -27,7 +27,7 @@ final class GradleBuildResultImpl implements GradleBuildResult {
     private final ActionableTaskCount actionableTaskCount;
     @EqualsAndHashCode.Exclude private final CommandLineToolLogContent output;
 
-    public GradleBuildResultImpl(Map<GradleTaskPath, GradleBuildTask> executedTaskInOrder, CommandLineToolLogContent output, ActionableTaskCount actionableTaskCount) {
+    GradleBuildResultImpl(Map<GradleTaskPath, GradleBuildTask> executedTaskInOrder, CommandLineToolLogContent output, ActionableTaskCount actionableTaskCount) {
         this.executedTaskInOrder = executedTaskInOrder;
         this.output = output;
         this.actionableTaskCount = actionableTaskCount;
@@ -84,7 +84,7 @@ final class GradleBuildResultImpl implements GradleBuildResult {
     public GradleBuildResult withNormalizedTaskOutput(Predicate<GradleTaskPath> predicate, UnaryOperator<String> outputNormalizer) {
         Map<GradleTaskPath, GradleBuildTask> tasks = unmodifiableMap(executedTaskInOrder.entrySet().stream().map(entry -> {
             if (predicate.test(entry.getKey())) {
-                return new LinkedHashMap.SimpleEntry<>(entry.getKey(), new GradleBuildTaskImpl(entry.getKey(), entry.getValue().getOutcome(), outputNormalizer.apply(entry.getValue().getOutput())));
+                return new LinkedHashMap.SimpleEntry<>(entry.getKey(), new GradleBuildTask(entry.getKey(), entry.getValue().getOutcome(), outputNormalizer.apply(entry.getValue().getOutput())));
             }
             return entry;
         }).collect(toMap(Map.Entry::getKey, Map.Entry::getValue)));
@@ -106,7 +106,7 @@ final class GradleBuildResultImpl implements GradleBuildResult {
     }
 
     private static final class TaskCollector implements TaskOutputVisitor {
-        private final Map<GradleTaskPath, GradleBuildTaskImpl.Builder>  discoveredTasks = new LinkedHashMap<>();
+        private final Map<GradleTaskPath, GradleBuildTask.Builder>  discoveredTasks = new LinkedHashMap<>();
         private ActionableTaskCount actionableTaskCount = null;
 
         Optional<ActionableTaskCount> getActionableTaskCount() {
@@ -121,18 +121,18 @@ final class GradleBuildResultImpl implements GradleBuildResult {
             discoveredTasks.computeIfAbsent(taskPath, this::newTaskBuilder);
         }
 
-        private GradleBuildTaskImpl.Builder newTaskBuilder(GradleTaskPath taskPath) {
-            return GradleBuildTaskImpl.builder().withPath(taskPath);
+        private GradleBuildTask.Builder newTaskBuilder(GradleTaskPath taskPath) {
+            return GradleBuildTask.builder().withPath(taskPath);
         }
 
         public void visitTaskHeader(GradleTaskPath taskPath, GradleTaskOutcome taskOutcome) {
             discoveredTasks.compute(taskPath, updateOutcome(taskOutcome));
         }
 
-        private BiFunction<GradleTaskPath, GradleBuildTaskImpl.Builder, GradleBuildTaskImpl.Builder> updateOutcome(GradleTaskOutcome taskOutcome) {
+        private BiFunction<GradleTaskPath, GradleBuildTask.Builder, GradleBuildTask.Builder> updateOutcome(GradleTaskOutcome taskOutcome) {
             return (taskPath, buildTask) -> {
                 if (buildTask == null) {
-                    return GradleBuildTaskImpl.builder().withPath(taskPath).withOutcome(taskOutcome);
+                    return GradleBuildTask.builder().withPath(taskPath).withOutcome(taskOutcome);
                 }
                 return buildTask.withOutcome(taskOutcome);
             };
@@ -152,7 +152,7 @@ final class GradleBuildResultImpl implements GradleBuildResult {
 
         public void visitContentLine(String line) {}
 
-        private BiFunction<GradleTaskPath, GradleBuildTaskImpl.Builder, GradleBuildTaskImpl.Builder> appendContent(String line) {
+        private BiFunction<GradleTaskPath, GradleBuildTask.Builder, GradleBuildTask.Builder> appendContent(String line) {
             return (taskPath, buildTask) -> {
                 assert buildTask != null;
                 return buildTask.appendToOutput(line);
