@@ -78,7 +78,7 @@ dependencies {
     spockSupportCompileOnly gradleApi(minimumGradleVersion) // Required because of the AbstractInstalledToolChainIntegrationSpec which is extremely tied to the internal of Gradle
     spockSupportCompileOnly gradleTestKit()
     spockSupportApi 'org.apache.commons:commons-lang3:3.10'
-    spockSupportImplementation project(':gradle-runner-kit')
+    spockSupportImplementation project(':gradle-runner-kit-api')
     spockSupportImplementation 'commons-io:commons-io:2.6'
     spockSupportImplementation 'org.jsoup:jsoup:1.13.1'
 
@@ -86,7 +86,7 @@ dependencies {
     spockSupportAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
     testFixturesApi testFixtures(project(':gradle-fixtures-file-system'))
-    testFixturesApi testFixtures(project(':gradle-runner-kit'))
+    testFixturesApi testFixtures(project(':gradle-runner-kit-api'))
 }
 
 tasks.named('test', Test) {

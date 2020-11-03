@@ -57,6 +57,26 @@ include('gradle-runner-kit')
 project(':gradle-runner-kit').projectDir = file('subprojects/gradle-runner-kit')
 project(':gradle-runner-kit').buildFileName = 'build.gradle'
 
+include('gradle-runner-kit-api')
+project(':gradle-runner-kit-api').projectDir = file('subprojects/gradle-runner-kit-api')
+project(':gradle-runner-kit-api').buildFileName = 'build.gradle'
+
+include('gradle-runner-kit-impl')
+project(':gradle-runner-kit-impl').projectDir = file('subprojects/gradle-runner-kit-impl')
+project(':gradle-runner-kit-impl').buildFileName = 'build.gradle'
+
+include('gradle-runner-kit-integration-test')
+project(':gradle-runner-kit-integration-test').projectDir = file('subprojects/gradle-runner-kit-integration-test')
+project(':gradle-runner-kit-integration-test').buildFileName = 'build.gradle'
+
+include('gradle-runner-kit-test-kit-impl')
+project(':gradle-runner-kit-test-kit-impl').projectDir = file('subprojects/gradle-runner-kit-test-kit-impl')
+project(':gradle-runner-kit-test-kit-impl').buildFileName = 'build.gradle'
+
+include('gradle-runner-kit-wrapper-impl')
+project(':gradle-runner-kit-wrapper-impl').projectDir = file('subprojects/gradle-runner-kit-wrapper-impl')
+project(':gradle-runner-kit-wrapper-impl').buildFileName = 'build.gradle'
+
 plugins.withId('com.gradle.enterprise') {
     gradleEnterprise {
         buildScan {

@@ -17,7 +17,7 @@
 package dev.gradleplugins.integtests.fixtures.nativeplatform;
 
 import com.google.common.collect.ImmutableSet;
-import dev.gradleplugins.fixtures.gradle.runner.GradleRunner;
+import dev.gradleplugins.runnerkit.GradleRunner;
 import dev.gradleplugins.integtests.fixtures.AbstractMultiVersionSpecRunner;
 import dev.gradleplugins.integtests.fixtures.nativeplatform.internal.NativeServicesTestFixture;
 import dev.gradleplugins.integtests.fixtures.nativeplatform.internal.TestFiles;
