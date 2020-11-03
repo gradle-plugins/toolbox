@@ -1,6 +1,8 @@
 package dev.gradleplugins;
 
 import org.gradle.api.JavaVersion;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
 import org.gradle.util.VersionNumber;
 
 import java.util.Optional;
@@ -11,6 +13,7 @@ import java.util.Optional;
  * It also support the minimum Java version supported by each Gradle version.
  */
 public class GradleRuntimeCompatibility {
+    private static final Logger LOGGER = Logging.getLogger(GradleRuntimeCompatibility.class);
     /**
      * Returns the Groovy version packaged with the specified Gradle version.
      *
@@ -92,10 +95,11 @@ public class GradleRuntimeCompatibility {
                 return "2.5.10"; //"org.gradle.groovy:groovy-all:1.3-2.5.10";
             case "6.5":
                 return "2.5.11"; //"org.gradle.groovy:groovy-all:1.3-2.5.11";
-            case "6.6":
-                return "2.5.12"; //"org.gradle.groovy:groovy-all:1.3-2.5.12";
             default:
-                throw new IllegalArgumentException(String.format("Unknown Groovy version for Gradle '%s', please open an issue on https://github.com/gradle-plugins/toolbox.", gradleVersion.toString()));
+                LOGGER.warn(String.format("Unknown Groovy version for Gradle '%s', please open an issue on https://github.com/gradle-plugins/toolbox. Assuming value of the latest known version.", gradleVersion.toString()));
+            case "6.6":
+            case "6.7":
+                return "2.5.12"; //"org.gradle.groovy:groovy-all:1.3-2.5.12";
         }
     }
 
@@ -126,11 +130,11 @@ public class GradleRuntimeCompatibility {
             case 3:
             case 4:
                 return JavaVersion.VERSION_1_7;
+            default:
+                LOGGER.warn(String.format("Unknown minimum Java version for Gradle '%s', please open an issue on https://github.com/gradle-plugins/toolbox. Assuming value of the latest known version.", gradleVersion.toString()));
             case 5:
             case 6:
                 return JavaVersion.VERSION_1_8;
-            default:
-                throw new IllegalArgumentException(String.format("Unknown minimum Java version for Gradle '%s', please open an issue on https://github.com/gradle-plugins/toolbox.", gradleVersion.toString()));
         }
     }
 
@@ -222,11 +226,12 @@ public class GradleRuntimeCompatibility {
                 return Optional.of("1.3.70");
             case "6.4":
                 return Optional.of("1.3.71");
+            default:
+                LOGGER.warn(String.format("Unknown Kotlin version for Gradle '%s', please open an issue on https://github.com/gradle-plugins/toolbox. Assuming value of the latest known version.", gradleVersion.toString()));
             case "6.5":
             case "6.6":
+            case "6.7":
                 return Optional.of("1.3.72");
-            default:
-                throw new IllegalArgumentException(String.format("Unknown Kotlin version for Gradle '%s', please open an issue on https://github.com/gradle-plugins/toolbox.", gradleVersion.toString()));
         }
     }
 }
