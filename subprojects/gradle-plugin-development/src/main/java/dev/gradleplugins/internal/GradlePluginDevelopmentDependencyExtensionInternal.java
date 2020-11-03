@@ -38,6 +38,12 @@ public class GradlePluginDevelopmentDependencyExtensionInternal implements Gradl
         return dependency;
     }
 
+    @Override
+    public Dependency gradleRunnerKit() {
+        ModuleDependency dependency = (ModuleDependency)getDependencies().create("dev.gradleplugins:gradle-runner-kit:" + DefaultDependencyVersions.GRADLE_FIXTURES_VERSION);
+        return dependency;
+    }
+
     public Dependency groovy(String version) {
         return getDependencies().create("org.codehaus.groovy:groovy-all:" + version);
     }
@@ -95,6 +101,7 @@ public class GradlePluginDevelopmentDependencyExtensionInternal implements Gradl
             Method target = Class.forName("dev.gradleplugins.internal.dsl.groovy.GroovyDslRuntimeExtensions").getMethod("extendWithMethod", Object.class, String.class, Closure.class);
             target.invoke(null, dependencies, "gradleApi", new GradleApiClosure(dependencies));
             target.invoke(null, dependencies, "gradleFixtures", new GradleFixturesClosure(dependencies));
+            target.invoke(null, dependencies, "gradleRunnerKit", new GradleRunnerKitClosure(dependencies));
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             LOGGER.info("Unable to extend DependencyHandler with gradleApi(String) and gradleFixtures().");
         }
@@ -117,6 +124,16 @@ public class GradlePluginDevelopmentDependencyExtensionInternal implements Gradl
 
         public Dependency doCall() {
             return GradlePluginDevelopmentDependencyExtensionInternal.this.gradleFixtures();
+        }
+    }
+
+    private class GradleRunnerKitClosure extends Closure<Dependency> {
+        public GradleRunnerKitClosure(Object owner) {
+            super(owner);
+        }
+
+        public Dependency doCall() {
+            return GradlePluginDevelopmentDependencyExtensionInternal.this.gradleRunnerKit();
         }
     }
 }

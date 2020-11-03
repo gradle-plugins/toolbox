@@ -19,4 +19,10 @@ public interface GradlePluginDevelopmentDependencyExtension {
      * @return a dependency instance for the latest Gradle Fixtures.
      */
     Dependency gradleFixtures();
+
+    /**
+     * Returns the Gradle Runner Kit with all supported executor, that is {@literal dev.gradleplugins:gradle-runner-kit:latest.release}, external dependency.
+     * @return a dependency instance for the latest Gradle Runner Kit with all supported executor.
+     */
+    Dependency gradleRunnerKit();
 }
