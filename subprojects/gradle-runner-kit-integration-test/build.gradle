@@ -11,34 +11,20 @@ java {
 }
 
 repositories {
+    gradlePluginDevelopment()
     jcenter()
     mavenCentral()
     maven { url = 'https://dl.bintray.com/nokeedev/distributions-snapshots/' }
 }
 
 dependencies {
-//    compileOnly "org.projectlombok:lombok:${lombokVersion}"
-//    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
-//
-//    api project(':gradle-fixtures') // ONLY WHILE WE FINISH THE MIGRATION TO THE RUNNER API
-//
-//    implementation project(':gradle-fixtures-file-system')
-//    implementation 'org.apache.commons:commons-lang3:3.9'
-//    implementation 'commons-io:commons-io:2.6'
-//    implementation 'dev.nokee:coreExec:0.5.0-dfbba94d'
-//    compileOnly gradleTestKit()
-//
     testImplementation platform('org.spockframework:spock-bom:1.2-groovy-2.5')
     testImplementation 'org.spockframework:spock-core'
     testImplementation project(':gradle-runner-kit-test-kit-impl')
     testImplementation project(':gradle-runner-kit-wrapper-impl')
-    testImplementation gradleTestKit()
-//    testImplementation testFixtures(project(':gradle-fixtures-file-system'))
-
-//    testFixturesCompileOnly localGroovy() // to prevent build failures
-//    testFixturesImplementation project(':gradle-fixtures-file-system')
-//    testFixturesImplementation testFixtures(project(':gradle-fixtures-file-system'))
-//    testFixturesImplementation 'dev.nokee:coreExec:0.5.0-dfbba94d'
-//    testFixturesImplementation 'commons-io:commons-io:2.6'
-//    testFixturesImplementation 'org.apache.commons:commons-lang3:3.9'
+    testImplementation testFixtures(project(':gradle-runner-kit'))
+    testImplementation testFixtures(project(':gradle-fixtures-file-system'))
+    testImplementation gradleApi(minimumGradleVersion)
+    testImplementation 'commons-io:commons-io:2.6'
+    testImplementation 'org.apache.commons:commons-lang3:3.10'
 }

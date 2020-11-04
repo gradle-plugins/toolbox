@@ -1,8 +1,6 @@
 package dev.gradleplugins.runnerkit;
 
 import dev.gradleplugins.runnerkit.providers.GradleExecutionProvider;
-import dev.gradleplugins.test.fixtures.gradle.executer.GradleDistribution;
-import dev.gradleplugins.test.fixtures.gradle.executer.internal.parameters.GradleExecutionParameter;
 
 import java.io.File;
 import java.io.OutputStream;
@@ -11,13 +9,17 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.Executor;
+import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 
 public interface GradleExecutionContext {
     Class<? extends GradleExecutor> getExecutorType();
     GradleExecutionProvider<GradleDistribution> getDistribution();
     GradleExecutionProvider<OutputStream> getStandardOutput();
     GradleExecutionProvider<OutputStream> getStandardError();
+    GradleExecutionProvider<List<File>> getInjectedClasspath();
+    GradleExecutionProvider<List<UnaryOperator<GradleRunner>>> getBeforeExecute();
+    GradleExecutionProvider<List<Consumer<GradleExecutionContext>>> getAfterExecute();
 
     // JVM arguments
     GradleExecutionProvider<Charset> getDefaultCharacterEncoding();
@@ -49,20 +51,6 @@ public interface GradleExecutionContext {
     List<String> getAllArguments();
 
     List<GradleExecutionProvider<?>> getExecutionParameters();
-
-    enum ExecutorType {
-        UNKNOWN,
-        GRADLE_TEST_KIT,
-        GRADLE_WRAPPER;
-
-        boolean isGradleTestKit() {
-            return equals(GRADLE_TEST_KIT);
-        }
-
-        boolean isGradleWrapper() {
-            return equals(GRADLE_WRAPPER);
-        }
-    }
 
     enum WelcomeMessage {
         ENABLED,

@@ -1,11 +1,10 @@
 package dev.gradleplugins.runnerkit;
 
 import dev.gradleplugins.fixtures.file.FileSystemUtils;
+import dev.gradleplugins.runnerkit.distributions.WrapperAwareGradleDistribution;
 import dev.gradleplugins.runnerkit.providers.GradleExecutionCommandLineProvider;
 import dev.gradleplugins.runnerkit.providers.GradleExecutionEnvironmentVariableProvider;
 import dev.gradleplugins.runnerkit.providers.GradleExecutionProvider;
-import dev.gradleplugins.test.fixtures.gradle.executer.internal.WrapperGradleDistribution;
-import dev.gradleplugins.test.fixtures.gradle.executer.internal.parameters.GradleExecutionParameter;
 import dev.nokee.core.exec.*;
 import lombok.val;
 import org.apache.commons.lang3.SystemUtils;
@@ -20,18 +19,26 @@ import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static dev.nokee.core.exec.CommandLineToolInvocationEnvironmentVariables.from;
 import static dev.nokee.core.exec.CommandLineToolInvocationEnvironmentVariables.inherit;
 import static java.util.Arrays.asList;
 
 final class GradleExecutorGradleWrapperImpl extends AbstractGradleExecutor {
     @Override
     protected GradleExecutionResult doRun(GradleExecutionContext parameters) {
-        if (!(parameters.getDistribution().get() instanceof WrapperGradleDistribution)) {
-            throw new InvalidRunnerConfigurationException("The Gradle wrapper executor doesn't support customizing the distribution");
+        // TODO: Should also check the wrapper distribution is pointing at the right directory?
+        //   But what is the right directory?
+        if (!(parameters.getDistribution().get() instanceof WrapperAwareGradleDistribution)) {
+            throw new InvalidRunnerConfigurationException("The Gradle wrapper executor doesn't support customizing the distribution.");
+        }
+
+        if (!parameters.getInjectedClasspath().get().isEmpty()) {
+            throw new InvalidRunnerConfigurationException("The Gradle wrapper executor doesn't support injected classpath.");
         }
 
 //        System.out.println("Starting with " + parameters.getAllArguments());
 
+        // Try to reuse the current user wrapper cache.
         val workingDirectory = parameters.getProjectDirectory().orElseGet(parameters.getWorkingDirectory()::get);
         val relativePath = parameters.getGradleUserHomeDirectory().get().toPath().relativize(GradleUserHomeLookup.gradleUserHome().toPath());
         val wrapperProperties = new Properties();
@@ -77,10 +84,9 @@ final class GradleExecutorGradleWrapperImpl extends AbstractGradleExecutor {
     }
 
     private static CommandLineToolInvocationEnvironmentVariables environmentVariables(GradleExecutionContext parameters) {
-        return parameters.getEnvironmentVariables().map(CommandLineToolInvocationEnvironmentVariables::from).orElse(inherit()).plus(CommandLineToolInvocationEnvironmentVariables.from(((GradleExecutionEnvironmentVariableProvider)parameters.getJavaHome()).getAsEnvironmentVariables()));
+        return parameters.getEnvironmentVariables()
+                .map(CommandLineToolInvocationEnvironmentVariables::from)
+                .orElse(inherit())
+                .plus(from(((GradleExecutionEnvironmentVariableProvider)parameters.getJavaHome()).getAsEnvironmentVariables()));
     }
-
-//    public GradleHandle start(GradleExecutionParameters parameters) {
-//
-//    }
 }

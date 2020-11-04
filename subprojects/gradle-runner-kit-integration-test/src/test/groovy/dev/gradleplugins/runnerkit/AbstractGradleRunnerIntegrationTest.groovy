@@ -1,9 +1,8 @@
 package dev.gradleplugins.runnerkit
 
 import dev.gradleplugins.fixtures.file.FileSystemFixture
-import dev.gradleplugins.fixtures.gradle.GradleScriptFixture
-import dev.gradleplugins.test.fixtures.gradle.executer.internal.OutputScrapingExecutionResult
-import org.gradle.testkit.runner.GradleRunner
+import dev.gradleplugins.fixtures.runnerkit.GradleScriptFixture
+import org.gradle.util.GradleVersion
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -11,6 +10,8 @@ import spock.lang.Specification
 abstract class AbstractGradleRunnerIntegrationTest extends Specification implements FileSystemFixture, GradleScriptFixture {
     @Rule
     TemporaryFolder temporaryFolder = new TemporaryFolder()
+
+    public static GradleVersion gradleVersion = GradleVersion.current()
 
     protected abstract GradleRunner runner(String... arguments)
 
@@ -297,9 +298,11 @@ abstract class AbstractGradleRunnerIntegrationTest extends Specification impleme
 
         // isn't empty if version < 2.8 or potentially contains Gradle dist download progress output
 //        if (isCompatibleVersion('2.8') && !crossVersion) {
-            def output = OutputScrapingExecutionResult.from(stdStreams.stdOut, stdStreams.stdErr)
-            output.normalizedOutput.empty
-            output.error.empty
+            stdStreams.stdOut.empty
+            stdStreams.stdErr.empty
+//            def output = BuildResult.from(stdStreams.stdOut + stdStreams.stdErr)
+//            output.normalizedOutput.empty
+//            output.error.empty
 //        }
     }
 

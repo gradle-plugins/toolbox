@@ -1,9 +1,9 @@
 package dev.gradleplugins.runnerkit;
 
-import dev.gradleplugins.fixtures.gradle.GradleScriptFixture;
-
 import java.io.*;
+import java.nio.file.CopyOption;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Properties;
 
 import static dev.gradleplugins.fixtures.file.FileSystemUtils.file;
@@ -25,7 +25,7 @@ public interface GradleWrapperFixture {
         } catch (IOException e) {
             throw new UncheckedIOException(String.format("Could not read '%s' because of an error.", wrapperPropertiesFile.getAbsolutePath()), e);
         }
-        wrapperProperties.compute("distributionUrl", (key, oldValue) -> "https\\://services.gradle.org/distributions/gradle-" + version + "-bin.zip");
+        wrapperProperties.compute("distributionUrl", (key, oldValue) -> "https://services.gradle.org/distributions/gradle-" + version + "-bin.zip");
 
         try (OutputStream outStream = new FileOutputStream(wrapperPropertiesFile)) {
             wrapperProperties.store(outStream, null);
@@ -36,14 +36,14 @@ public interface GradleWrapperFixture {
 
     static void writeGradleWrapperTo(File workingDirectory) {
         try {
-            Files.copy(GradleScriptFixture.class.getResourceAsStream("/dev/gradleplugins/fixtures/gradle/wrapper/gradlew"), file(workingDirectory, "gradlew").toPath());
-            Files.copy(GradleScriptFixture.class.getResourceAsStream("/dev/gradleplugins/fixtures/gradle/wrapper/gradlew.bat"), file(workingDirectory, "gradlew.bat").toPath());
+            Files.copy(GradleWrapperFixture.class.getResourceAsStream("/dev/gradleplugins/fixtures/runnerkit/wrapper/gradlew"), file(workingDirectory, "gradlew").toPath(), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(GradleWrapperFixture.class.getResourceAsStream("/dev/gradleplugins/fixtures/runnerkit/wrapper/gradlew.bat"), file(workingDirectory, "gradlew.bat").toPath(), StandardCopyOption.REPLACE_EXISTING);
 
             file(workingDirectory, "gradlew").setExecutable(true);
             file(workingDirectory, "gradle/wrapper").mkdirs();
 
-            Files.copy(GradleScriptFixture.class.getResourceAsStream("/dev/gradleplugins/fixtures/gradle/wrapper/gradle-wrapper.jar"), file(workingDirectory, "gradle/wrapper/gradle-wrapper.jar").toPath());
-            Files.copy(GradleScriptFixture.class.getResourceAsStream("/dev/gradleplugins/fixtures/gradle/wrapper/gradle-wrapper.properties"), file(workingDirectory, "gradle/wrapper/gradle-wrapper.properties").toPath());
+            Files.copy(GradleWrapperFixture.class.getResourceAsStream("/dev/gradleplugins/fixtures/runnerkit/wrapper/gradle-wrapper.jar"), file(workingDirectory, "gradle/wrapper/gradle-wrapper.jar").toPath(), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(GradleWrapperFixture.class.getResourceAsStream("/dev/gradleplugins/fixtures/runnerkit/wrapper/gradle-wrapper.properties"), file(workingDirectory, "gradle/wrapper/gradle-wrapper.properties").toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

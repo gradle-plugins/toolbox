@@ -1,6 +1,8 @@
-package dev.gradleplugins.runnerkit;
+package dev.gradleplugins.fixtures.runnerkit;
 
 import dev.gradleplugins.fixtures.file.FileSystemFixture;
+import dev.gradleplugins.runnerkit.BuildResult;
+import dev.gradleplugins.runnerkit.GradleRunner;
 
 public interface GradleRunnerFixture {
     GradleRunner newRunner();

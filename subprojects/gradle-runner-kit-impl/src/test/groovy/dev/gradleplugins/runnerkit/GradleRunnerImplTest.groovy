@@ -7,11 +7,13 @@ import dev.gradleplugins.runnerkit.providers.CharacterEncodingProvider
 import dev.gradleplugins.runnerkit.providers.ConsoleTypeProvider
 import dev.gradleplugins.runnerkit.providers.DeprecationChecksProvider
 import dev.gradleplugins.runnerkit.providers.GradleUserHomeDirectoryProvider
+import dev.gradleplugins.runnerkit.providers.InjectedClasspathProvider
 import dev.gradleplugins.runnerkit.providers.LocaleProvider
 import dev.gradleplugins.runnerkit.providers.MissingSettingsFilePolicyProvider
 import dev.gradleplugins.runnerkit.providers.StacktraceProvider
 import dev.gradleplugins.runnerkit.providers.StandardStreamProvider
 import dev.gradleplugins.runnerkit.providers.WelcomeMessageProvider
+import dev.gradleplugins.runnerkit.providers.WorkingDirectoryProvider
 import org.apache.commons.lang3.SystemUtils
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -31,7 +33,7 @@ class GradleRunnerImplTest extends Specification implements FileSystemFixture {
 
     def "can account for all execution parameters"() {
         expect:
-        executionDefaults.executionParameters.size() == 25
+        executionDefaults.executionParameters.size() == 26
     }
 
     def "can disable stacktrace"() {
@@ -300,6 +302,35 @@ class GradleRunnerImplTest extends Specification implements FileSystemFixture {
 
         and:
         executionOf { forwardStandardError(stderr) }.standardError != StandardStreamProvider.forwardToStandardError()
+    }
+
+    def "can set injected classpath"() {
+        expect:
+        executionDefaults.injectedClasspath == InjectedClasspathProvider.empty()
+
+        and:
+        executionOf { withPluginClasspath() }.injectedClasspath == InjectedClasspathProvider.fromPluginUnderTestMetadata()
+        executionOf { withPluginClasspath([file('build/classes/java/main'), file('foo.jar'), file('bar.jar')])}.injectedClasspath == InjectedClasspathProvider.of([file('build/classes/java/main'), file('foo.jar'), file('bar.jar')])
+        executionOf { withPluginClasspath().withPluginClasspath([file('build/classes/java/main')]) }.injectedClasspath == InjectedClasspathProvider.of([file('build/classes/java/main')])
+        executionOf { withPluginClasspath([file('build/classes/java/main')]).withPluginClasspath() }.injectedClasspath == InjectedClasspathProvider.fromPluginUnderTestMetadata()
+    }
+
+    def "throws exception when getting unset working directory"() {
+        when:
+        newRunner().workingDirectory
+
+        then:
+        def ex = thrown(InvalidRunnerConfigurationException)
+        ex.message == "Please use GradleRunner#inDirectory(File) API to configure a working directory for this runner."
+    }
+
+    def "returns the working directory when configured"() {
+        expect:
+        executionOf { inDirectory(testDirectory) }.workingDirectory == WorkingDirectoryProvider.of(testDirectory)
+    }
+
+    static GradleRunner newRunner() {
+        return GradleRunner.create(new CapturingGradleExecutor())
     }
 
     static GradleExecutionContext getExecutionDefaults() {

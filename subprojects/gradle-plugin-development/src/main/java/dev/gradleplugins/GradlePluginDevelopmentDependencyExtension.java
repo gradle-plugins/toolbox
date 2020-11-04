@@ -15,6 +15,13 @@ public interface GradlePluginDevelopmentDependencyExtension {
     Dependency gradleApi(String version);
 
     /**
+     * Returns the versioned redistributed Gradle Test Kit, that is {@literal dev.gradleplugins:gradle-test-kit:$version}, external dependency.
+     * @param version the version of the Gradle Test Kit.
+     * @return a dependency instance for the specified version of the Gradle Test Kit.
+     */
+    Dependency gradleTestKit(String version);
+
+    /**
      * Returns the Gradle Fixtures, that is {@literal dev.gradleplugins:gradle-fixtures:latest.release}, external dependency.
      * @return a dependency instance for the latest Gradle Fixtures.
      */

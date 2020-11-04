@@ -30,6 +30,11 @@ public class GradlePluginDevelopmentDependencyExtensionInternal implements Gradl
     }
 
     @Override
+    public Dependency gradleTestKit(String version) {
+        return getDependencies().create("dev.gradleplugins:gradle-test-kit:" + version);
+    }
+
+    @Override
     public Dependency gradleFixtures() {
         ModuleDependency dependency = (ModuleDependency)getDependencies().create("dev.gradleplugins:gradle-fixtures:" + DefaultDependencyVersions.GRADLE_FIXTURES_VERSION);
         dependency.capabilities(it -> {
@@ -100,6 +105,7 @@ public class GradlePluginDevelopmentDependencyExtensionInternal implements Gradl
         try {
             Method target = Class.forName("dev.gradleplugins.internal.dsl.groovy.GroovyDslRuntimeExtensions").getMethod("extendWithMethod", Object.class, String.class, Closure.class);
             target.invoke(null, dependencies, "gradleApi", new GradleApiClosure(dependencies));
+            target.invoke(null, dependencies, "gradleTestKit", new GradleTestKitClosure(dependencies));
             target.invoke(null, dependencies, "gradleFixtures", new GradleFixturesClosure(dependencies));
             target.invoke(null, dependencies, "gradleRunnerKit", new GradleRunnerKitClosure(dependencies));
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
@@ -114,6 +120,16 @@ public class GradlePluginDevelopmentDependencyExtensionInternal implements Gradl
 
         public Dependency doCall(String version) {
             return GradlePluginDevelopmentDependencyExtensionInternal.this.gradleApi(version);
+        }
+    }
+
+    private class GradleTestKitClosure extends Closure<Dependency> {
+        public GradleTestKitClosure(Object owner) {
+            super(owner);
+        }
+
+        public Dependency doCall(String version) {
+            return GradlePluginDevelopmentDependencyExtensionInternal.this.gradleTestKit(version);
         }
     }
 

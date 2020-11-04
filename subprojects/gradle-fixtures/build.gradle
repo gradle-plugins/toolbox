@@ -86,7 +86,7 @@ dependencies {
     spockSupportAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
     testFixturesApi testFixtures(project(':gradle-fixtures-file-system'))
-    testFixturesApi testFixtures(project(':gradle-runner-kit-api'))
+    testFixturesApi testFixtures(project(':gradle-runner-kit'))
 }
 
 tasks.named('test', Test) {

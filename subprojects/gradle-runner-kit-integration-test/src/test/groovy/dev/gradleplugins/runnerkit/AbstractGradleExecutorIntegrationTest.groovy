@@ -1,6 +1,7 @@
 package dev.gradleplugins.runnerkit
 
 import dev.gradleplugins.fixtures.file.FileSystemFixture
+import dev.gradleplugins.fixtures.runnerkit.GradleRunnerFixture
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification

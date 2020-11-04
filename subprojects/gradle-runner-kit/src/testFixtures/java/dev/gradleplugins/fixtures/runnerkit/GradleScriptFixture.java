@@ -1,4 +1,4 @@
-package dev.gradleplugins.fixtures.gradle;
+package dev.gradleplugins.fixtures.runnerkit;
 
 import dev.gradleplugins.fixtures.file.FileSystemUtils;
 

@@ -3,6 +3,7 @@ package dev.gradleplugins.runnerkit.providers;
 import dev.gradleplugins.fixtures.file.FileSystemUtils;
 import dev.gradleplugins.runnerkit.GradleExecutionContext;
 import dev.gradleplugins.runnerkit.InvalidRunnerConfigurationException;
+import dev.gradleplugins.runnerkit.distributions.VersionAwareGradleDistribution;
 import lombok.val;
 
 import java.util.Map;
@@ -33,12 +34,14 @@ public final class WelcomeMessageProvider extends AbstractGradleExecutionProvide
 
     @Override
     public void accept(GradleExecutionContext parameters) {
-        if (get().equals(GradleExecutionContext.WelcomeMessage.ENABLED)) {
-            val welcomeMessageFile = FileSystemUtils.file(parameters.getGradleUserHomeDirectory().get(), "notifications/" + parameters.getDistribution().get().getVersion().getVersion() + "/release-features.rendered");
-            welcomeMessageFile.delete();
-        } else {
-            val welcomeMessageFile = FileSystemUtils.file(parameters.getGradleUserHomeDirectory().get(), "notifications/" + parameters.getDistribution().get().getVersion().getVersion() + "/release-features.rendered");
-            FileSystemUtils.touch(welcomeMessageFile);
+        if (parameters.getDistribution().get() instanceof VersionAwareGradleDistribution) {
+            if (get().equals(GradleExecutionContext.WelcomeMessage.ENABLED)) {
+                val welcomeMessageFile = FileSystemUtils.file(parameters.getGradleUserHomeDirectory().get(), "notifications/" + ((VersionAwareGradleDistribution) parameters.getDistribution().get()).getVersion() + "/release-features.rendered");
+                welcomeMessageFile.delete();
+            } else {
+                val welcomeMessageFile = FileSystemUtils.file(parameters.getGradleUserHomeDirectory().get(), "notifications/" + ((VersionAwareGradleDistribution) parameters.getDistribution().get()).getVersion() + "/release-features.rendered");
+                FileSystemUtils.touch(welcomeMessageFile);
+            }
         }
     }
 

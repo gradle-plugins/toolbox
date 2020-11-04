@@ -15,6 +15,7 @@ java {
 repositories {
     jcenter()
     mavenCentral()
+    gradlePluginDevelopment()
     maven { url = 'https://dl.bintray.com/nokeedev/distributions-snapshots/' }
 }
 
@@ -23,12 +24,12 @@ dependencies {
     implementation project(':gradle-runner-kit-test-kit-impl')
     implementation project(':gradle-runner-kit-wrapper-impl')
 
-//    testFixturesCompileOnly localGroovy() // to prevent build failures
-//    testFixturesImplementation project(':gradle-fixtures-file-system')
-//    testFixturesImplementation testFixtures(project(':gradle-fixtures-file-system'))
-//    testFixturesImplementation 'dev.nokee:coreExec:0.5.0-dfbba94d'
-//    testFixturesImplementation 'commons-io:commons-io:2.6'
-//    testFixturesImplementation 'org.apache.commons:commons-lang3:3.9'
+    testImplementation platform('org.spockframework:spock-bom:1.2-groovy-2.5')
+    testImplementation 'org.spockframework:spock-core'
+
+    testFixturesApi testFixtures(project(':gradle-runner-kit-wrapper-impl'))
+    testFixturesApi 'org.hamcrest:hamcrest:2.2'
+    testFixturesImplementation testFixtures(project(':gradle-fixtures-file-system'))
 }
 
 publishing {

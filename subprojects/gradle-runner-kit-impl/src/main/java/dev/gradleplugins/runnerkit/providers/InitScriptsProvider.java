@@ -1,6 +1,7 @@
 package dev.gradleplugins.runnerkit.providers;
 
-import dev.gradleplugins.runnerkit.*;
+import dev.gradleplugins.runnerkit.GradleExecutionContext;
+import dev.gradleplugins.runnerkit.InvalidRunnerConfigurationException;
 import lombok.val;
 
 import java.io.File;
@@ -10,7 +11,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.toList;
 
 public final class InitScriptsProvider extends AbstractGradleExecutionProvider<List<File>> implements GradleExecutionCommandLineProvider {
@@ -18,7 +18,7 @@ public final class InitScriptsProvider extends AbstractGradleExecutionProvider<L
         val result = new ArrayList<File>();
         result.addAll(get());
         result.add(initScript);
-        return fixed(InitScriptsProvider.class, unmodifiableList(result));
+        return fixed(InitScriptsProvider.class, result);
     }
 
     public static InitScriptsProvider empty() {

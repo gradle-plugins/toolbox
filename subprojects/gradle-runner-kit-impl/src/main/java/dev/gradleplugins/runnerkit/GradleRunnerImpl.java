@@ -5,10 +5,16 @@ import lombok.val;
 
 import java.io.File;
 import java.io.Writer;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
+
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.StreamSupport.stream;
 
 final class GradleRunnerImpl implements GradleRunner {
     private final GradleExecutor executor;
@@ -27,10 +33,52 @@ final class GradleRunnerImpl implements GradleRunner {
         return new GradleRunnerImpl(executor, parameters);
     }
 
+    //region Gradle Distribution configuration
+    @Override
+    public GradleRunner withGradleVersion(String versionNumber) {
+        return newInstance(parameters.withDistribution(GradleDistributionProvider.version(versionNumber)));
+    }
+
+    @Override
+    public GradleRunner withGradleInstallation(File installation) {
+        return newInstance(parameters.withDistribution(GradleDistributionProvider.installation(installation)));
+    }
+
+    @Override
+    public GradleRunner withGradleDistribution(URI distribution) {
+        return newInstance(parameters.withDistribution(GradleDistributionProvider.uri(distribution)));
+    }
+    //endregion
+
+    //region Plugin classpath configuration
+    @Override
+    public List<? extends File> getPluginClasspath() {
+        return parameters.getInjectedClasspath().get();
+    }
+
+    @Override
+    public GradleRunner withPluginClasspath() throws InvalidPluginMetadataException {
+        return newInstance(parameters.withInjectedClasspath(InjectedClasspathProvider.fromPluginUnderTestMetadata()));
+    }
+
+    @Override
+    public GradleRunner withPluginClasspath(Iterable<? extends File> classpath) {
+        return newInstance(parameters.withInjectedClasspath(InjectedClasspathProvider.of(stream(classpath.spliterator(), false).collect(toList()))));
+    }
+    //endregion
+
     //region Working directory configuration
     @Override
     public GradleRunner inDirectory(File workingDirectory) {
         return newInstance(parameters.withWorkingDirectory(WorkingDirectoryProvider.of(workingDirectory)));
+    }
+
+    @Override
+    public File getWorkingDirectory() {
+        if (parameters.getWorkingDirectory().isPresent()) {
+            return parameters.getWorkingDirectory().get();
+        }
+        throw new InvalidRunnerConfigurationException("Please use GradleRunner#inDirectory(File) API to configure a working directory for this runner.");
     }
     //endregion
 
@@ -190,24 +238,60 @@ final class GradleRunnerImpl implements GradleRunner {
     }
     //endregion
 
+    //region After execute actions
+    @Override
+    public GradleRunner afterExecute(Consumer<GradleExecutionContext> action) {
+        return newInstance(parameters.withAfterExecute(parameters.getAfterExecute().plus(action)));
+    }
+
+    private void fireAfterExecute() {
+        parameters.getAfterExecute().get().forEach(it -> it.accept(parameters));
+    }
+    //endregion
+
+    //region Before execute actions
+    @Override
+    public GradleRunner beforeExecute(UnaryOperator<GradleRunner> action) {
+        return newInstance(parameters.withBeforeExecute(parameters.getBeforeExecute().plus(action)));
+    }
+
+    private GradleRunner fireBeforeExecute() {
+        GradleRunner executer = newInstance(parameters.withBeforeExecute(BeforeExecuteActionsProvider.empty()));
+        for (val it : parameters.getBeforeExecute().get()) {
+            executer = it.apply(executer);
+        }
+        return executer;
+    }
+    //endregion
+
     @Override
     public BuildResult build() {
-        val gradleExecutionResult = executor.run(parameters.calculateValues());
-        val result = BuildResult.from(gradleExecutionResult.getOutput());
-        if (!gradleExecutionResult.isSuccessful()) {
-            throw new UnexpectedBuildFailure(createDiagnosticsMessage("Unexpected build execution failure", gradleExecutionResult), result);
+        if (parameters.getBeforeExecute().get().isEmpty()) {
+            val gradleExecutionResult = executor.run(parameters.calculateValues());
+            val result = BuildResult.from(gradleExecutionResult.getOutput());
+            if (!gradleExecutionResult.isSuccessful()) {
+                throw new UnexpectedBuildFailure(createDiagnosticsMessage("Unexpected build execution failure", gradleExecutionResult), result);
+            }
+            fireAfterExecute();
+            return result;
+        } else {
+            return fireBeforeExecute().build();
         }
-        return result;
     }
 
     @Override
     public BuildResult buildAndFail() {
-        val gradleExecutionResult = executor.run(parameters.calculateValues());
-        val result = BuildResult.from(gradleExecutionResult.getOutput());
-        if (gradleExecutionResult.isSuccessful()) {
-            throw new UnexpectedBuildSuccess(createDiagnosticsMessage("Unexpected build execution success", gradleExecutionResult), result);
+        if (parameters.getBeforeExecute().get().isEmpty()) {
+            val gradleExecutionResult = executor.run(parameters.calculateValues());
+            val result = BuildResult.from(gradleExecutionResult.getOutput());
+            if (gradleExecutionResult.isSuccessful()) {
+                throw new UnexpectedBuildSuccess(createDiagnosticsMessage("Unexpected build execution success", gradleExecutionResult), result);
+            }
+            fireAfterExecute();
+            return result;
+        } else {
+            return fireBeforeExecute().buildAndFail();
         }
-        return result;
     }
 
     String createDiagnosticsMessage(String trailingMessage, GradleExecutionResult gradleExecutionResult) {

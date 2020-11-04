@@ -1,9 +1,11 @@
 package dev.gradleplugins.runnerkit
 
 import spock.lang.Specification
+import spock.lang.Subject
 
 import static dev.gradleplugins.runnerkit.BuildResult.from
 
+@Subject(BuildResultImpl)
 class BuildResultDryRunOutputScrappingTest extends Specification {
     def "can extract task"() {
         def output = ''':foo SKIPPED

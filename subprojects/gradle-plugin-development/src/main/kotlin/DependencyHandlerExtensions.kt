@@ -8,3 +8,5 @@ fun DependencyHandler.gradleApi(version: String): Dependency = ExtensionAware::c
 fun DependencyHandler.gradleFixtures(): Dependency = ExtensionAware::class.java.cast(this).extensions.getByType(GradlePluginDevelopmentDependencyExtension::class.java).gradleFixtures()
 
 fun DependencyHandler.gradleRunnerKit(): Dependency = ExtensionAware::class.java.cast(this).extensions.getByType(GradlePluginDevelopmentDependencyExtension::class.java).gradleRunnerKit()
+
+fun DependencyHandler.gradleTestKit(version: String): Dependency = ExtensionAware::class.java.cast(this).extensions.getByType(GradlePluginDevelopmentDependencyExtension::class.java).gradleTestKit(version)

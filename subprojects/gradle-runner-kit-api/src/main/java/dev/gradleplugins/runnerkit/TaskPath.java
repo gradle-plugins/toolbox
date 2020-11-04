@@ -16,6 +16,14 @@ public final class TaskPath {
         return segments[segments.length - 1];
     }
 
+    public String getProjectPath() {
+        val result = taskPath.substring(0, taskPath.lastIndexOf(':'));
+        if (result.isEmpty()) {
+            return ":";
+        }
+        return result;
+    }
+
     public String get() {
         return taskPath;
     }

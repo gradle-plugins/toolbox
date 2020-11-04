@@ -1,10 +1,13 @@
 package dev.gradleplugins.runnerkit;
 
+import dev.gradleplugins.runnerkit.distributions.DownloadableGradleDistribution;
+import dev.gradleplugins.runnerkit.distributions.LocalGradleDistribution;
+import dev.gradleplugins.runnerkit.distributions.VersionAwareGradleDistribution;
 import dev.gradleplugins.runnerkit.providers.*;
-import dev.gradleplugins.test.fixtures.gradle.executer.GradleDistribution;
 import lombok.val;
 import org.gradle.internal.classloader.ClasspathUtil;
 import org.gradle.internal.classpath.ClassPath;
+import org.gradle.internal.classpath.DefaultClassPath;
 import org.gradle.internal.installation.CurrentGradleInstallation;
 import org.gradle.internal.installation.GradleInstallation;
 import org.gradle.testkit.runner.internal.GradleProvider;
@@ -15,10 +18,9 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static dev.gradleplugins.fixtures.file.FileSystemUtils.file;
-import static dev.gradleplugins.runnerkit.providers.DaemonBaseDirectoryProvider.TEST_KIT_DAEMON_DIR_NAME;
-import static dev.gradleplugins.runnerkit.providers.DaemonIdleTimeoutProvider.DEFAULT_TEST_KIT_DAEMON_IDLE_TIMEOUT;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static org.gradle.testkit.runner.internal.ToolingApiGradleExecutor.TEST_KIT_DAEMON_DIR_NAME;
 
 final class GradleExecutorGradleTestKitImpl extends AbstractGradleExecutor {
     private final ToolingApiGradleExecutor delegate = new ToolingApiGradleExecutor();
@@ -26,13 +28,18 @@ final class GradleExecutorGradleTestKitImpl extends AbstractGradleExecutor {
     @Override
     protected GradleExecutionResult doRun(GradleExecutionContext parameters) {
         // TODO: TEst
-        if (!parameters.getDaemonIdleTimeout().get().equals(DEFAULT_TEST_KIT_DAEMON_IDLE_TIMEOUT)) {
-            throw new InvalidRunnerConfigurationException("Custom daemon idle timeout not supported for Gradle TestKit executor");
+        if (!parameters.getDaemonIdleTimeout().equals(DaemonIdleTimeoutProvider.testKitIdleTimeout())) {
+            throw new InvalidRunnerConfigurationException("Custom daemon idle timeout not supported for Gradle TestKit executor.");
         }
 
         // TODO: Test
         if (!parameters.getDaemonBaseDirectory().get().equals(file(parameters.getGradleUserHomeDirectory().get(), TEST_KIT_DAEMON_DIR_NAME))) {
-            throw new InvalidRunnerConfigurationException("Custom daemon directory not supported for Gradle TestKit executor");
+            throw new InvalidRunnerConfigurationException("Custom daemon directory not supported for Gradle TestKit executor.");
+        }
+
+        // TODO: Test
+        if (parameters.getWelcomeMessageRendering().get().equals(GradleExecutionContext.WelcomeMessage.ENABLED)) {
+            throw new InvalidRunnerConfigurationException("Rendering the welcome message is not supported for Gradle TestKit executor.");
         }
 
 //        System.out.println("Starting with " + parameters.getAllArguments());
@@ -47,7 +54,7 @@ final class GradleExecutorGradleTestKitImpl extends AbstractGradleExecutor {
                 parameters.getProjectDirectory().orElseGet(parameters.getWorkingDirectory()::get),
                 buildArguments(parameters),
                 jvmArguments(parameters),
-                ClassPath.EMPTY,
+                injectedClasspath(parameters),
                 false,
                 parameters.getStandardOutput().get(),
                 parameters.getStandardError().get(),
@@ -55,9 +62,26 @@ final class GradleExecutorGradleTestKitImpl extends AbstractGradleExecutor {
                 environmentVariables(parameters));
     }
 
+    //region Injected classpath
+    private static ClassPath injectedClasspath(GradleExecutionContext context) {
+        return DefaultClassPath.of(context.getInjectedClasspath().get());
+    }
+    //endregion
+
     //region Gradle provider
     private static GradleProvider gradleProvider(GradleExecutionProvider<GradleDistribution> parameter) {
-        return parameter.map(it -> GradleProvider.installation(it.getGradleHomeDirectory())).orElseGet(GradleExecutorGradleTestKitImpl::findGradleInstallFromGradleRunner);
+        return parameter.map(it -> {
+            if (it instanceof VersionAwareGradleDistribution) {
+                return GradleProvider.version(((VersionAwareGradleDistribution) it).getVersion());
+            }
+            if (it instanceof LocalGradleDistribution) {
+                return GradleProvider.installation(((LocalGradleDistribution) it).getInstallationDirectory());
+            }
+            if (it instanceof DownloadableGradleDistribution) {
+                return GradleProvider.uri(((DownloadableGradleDistribution) it).getUri());
+            }
+            throw new InvalidRunnerConfigurationException("Unknown Gradle distribution.");
+        }).orElseGet(GradleExecutorGradleTestKitImpl::findGradleInstallFromGradleRunner);
     }
 
     private static GradleProvider findGradleInstallFromGradleRunner() {

@@ -1,10 +1,11 @@
 package dev.gradleplugins.runnerkit
 
-
 import spock.lang.Specification
+import spock.lang.Subject
 
 import static dev.gradleplugins.runnerkit.BuildResult.from
 
+@Subject(BuildResultImpl)
 class BuildResultRichOutputScrappingTest extends Specification {
     def "two rich output of different amount of task executed are not equals"() {
         def output1 = '''

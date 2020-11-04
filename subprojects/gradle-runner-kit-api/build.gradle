@@ -1,11 +1,8 @@
 plugins {
     id 'java-library'
     id 'groovy-base'
-//    id 'java-test-fixtures'
     id 'dev.nokee.documentation.bintray-publish' version '0.1.13'
 }
-
-import static dev.gradleplugins.GradleRuntimeCompatibility.*
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -24,21 +21,11 @@ dependencies {
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
-    api project(':gradle-fixtures') // ONLY WHILE WE FINISH THE MIGRATION TO THE RUNNER API
-
+    api 'com.google.code.findbugs:jsr305:3.0.2'
     implementation project(':gradle-fixtures-file-system')
 
-//    testImplementation platform('org.spockframework:spock-bom:1.2-groovy-2.5')
-//    testImplementation 'org.spockframework:spock-core'
-//    testImplementation gradleTestKit()
-//    testImplementation testFixtures(project(':gradle-fixtures-file-system'))
-//
-//    testFixturesCompileOnly localGroovy() // to prevent build failures
-//    testFixturesImplementation project(':gradle-fixtures-file-system')
-//    testFixturesImplementation testFixtures(project(':gradle-fixtures-file-system'))
-//    testFixturesImplementation 'dev.nokee:coreExec:0.5.0-dfbba94d'
-//    testFixturesImplementation 'commons-io:commons-io:2.6'
-//    testFixturesImplementation 'org.apache.commons:commons-lang3:3.9'
+    testImplementation platform('org.spockframework:spock-bom:1.2-groovy-2.5')
+    testImplementation 'org.spockframework:spock-core'
 }
 
 publishing {

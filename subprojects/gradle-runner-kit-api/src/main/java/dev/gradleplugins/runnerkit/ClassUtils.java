@@ -20,7 +20,7 @@ final class ClassUtils {
     public static <T> T newInstance(String className) {
         try {
             Class<?> clazz = Class.forName(className);
-            Constructor<T> constructor = (Constructor<T>) clazz.getConstructor();
+            Constructor<T> constructor = (Constructor<T>) clazz.getDeclaredConstructor();
             return (T) constructor.newInstance();
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             throw new RuntimeException("Please verify your dependencies on runnerKit.", e);

@@ -9,7 +9,7 @@ java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
     withSourcesJar()
-    withJavadocJar()
+//    withJavadocJar()
 }
 
 repositories {
@@ -21,27 +21,10 @@ dependencies {
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
-    api project(':gradle-fixtures') // ONLY WHILE WE FINISH THE MIGRATION TO THE RUNNER API
     api project(':gradle-runner-kit-api')
-
-    implementation(project(':gradle-runner-kit-impl')) {
-        because 'we need the common executor classes'
-    }
-
-    implementation project(':gradle-fixtures-file-system') // TODO: shadow
-    compileOnly gradleTestKit() // TODO: Pull jar from rereleased
-
-//    testImplementation platform('org.spockframework:spock-bom:1.2-groovy-2.5')
-//    testImplementation 'org.spockframework:spock-core'
-//    testImplementation gradleTestKit()
-//    testImplementation testFixtures(project(':gradle-fixtures-file-system'))
-//
-//    testFixturesCompileOnly localGroovy() // to prevent build failures
-//    testFixturesImplementation project(':gradle-fixtures-file-system')
-//    testFixturesImplementation testFixtures(project(':gradle-fixtures-file-system'))
-//    testFixturesImplementation 'dev.nokee:coreExec:0.5.0-dfbba94d'
-//    testFixturesImplementation 'commons-io:commons-io:2.6'
-//    testFixturesImplementation 'org.apache.commons:commons-lang3:3.9'
+    api(project(':gradle-runner-kit-impl')) { because 'we need the common executor classes' }
+    implementation project(':gradle-fixtures-file-system') // TODO: shadow or rename project
+    implementation gradleTestKit(minimumGradleVersion)
 }
 
 def createWrapper = tasks.register('createWrapper', Wrapper) {

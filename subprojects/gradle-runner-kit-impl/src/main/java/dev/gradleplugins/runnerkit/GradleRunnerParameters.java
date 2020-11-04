@@ -14,8 +14,12 @@ import java.util.stream.Stream;
 final class GradleRunnerParameters implements GradleExecutionContext {
     private final Class<? extends GradleExecutor> executorType;
 
+    @With @NonNull private BeforeExecuteActionsProvider beforeExecute = BeforeExecuteActionsProvider.empty();
+    @With @NonNull private AfterExecuteActionsProvider afterExecute = AfterExecuteActionsProvider.empty();
+
     @With @NonNull private StandardStreamProvider standardOutput = StandardStreamProvider.forwardToStandardOutput();
     @With @NonNull private StandardStreamProvider standardError = StandardStreamProvider.forwardToStandardError();
+    @With @NonNull private InjectedClasspathProvider injectedClasspath = InjectedClasspathProvider.empty();
 //    private final GradleExecuterBuildContext buildContext;
     @With @NonNull private GradleDistributionProvider distribution = GradleDistributionProvider.executorDefault();
     @With @NonNull private WorkingDirectoryProvider workingDirectory = WorkingDirectoryProvider.unset();

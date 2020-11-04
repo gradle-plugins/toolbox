@@ -1,28 +1,33 @@
 package dev.gradleplugins.runnerkit
 
 import dev.gradleplugins.fixtures.file.FileSystemFixture
-import dev.gradleplugins.fixtures.gradle.GradleScriptFixture
+import dev.gradleplugins.fixtures.runnerkit.GradleScriptFixture
+import dev.gradleplugins.runnerkit.GradleWrapperFixture
 import org.apache.commons.lang3.JavaVersion
 import org.apache.commons.lang3.SystemUtils
+import org.gradle.util.GradleVersion
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.IgnoreIf
 import spock.lang.Specification
 
-class GradleExecutorCompatibilityIntegrationTest extends Specification implements FileSystemFixture, GradleScriptFixture {
+class GradleExecutorCompatibilityIntegrationTest extends Specification implements FileSystemFixture, GradleScriptFixture, GradleWrapperFixture {
     @Rule
     TemporaryFolder temporaryFolder = new TemporaryFolder()
 
     @IgnoreIf({ SystemUtils.isJavaVersionAtMost(JavaVersion.JAVA_1_8) })
     def "reuse daemon for compatible executor"() {
         given:
-        dev.gradleplugins.runnerkit.GradleWrapperFixture.writeGradleWrapperTo(testDirectory)
-        def testKitRunner = dev.gradleplugins.runnerkit.GradleRunner.create(dev.gradleplugins.runnerkit.GradleExecutor.gradleTestKit()).inDirectory(testDirectory)
-        def wrapperRunner = dev.gradleplugins.runnerkit.GradleRunner.create(dev.gradleplugins.runnerkit.GradleExecutor.gradleWrapper()).inDirectory(testDirectory)
+        writeGradleWrapperToTestDirectory(GradleVersion.current().version)
+        def testKitRunner = GradleRunner.create(GradleExecutor.gradleTestKit()).inDirectory(testDirectory)
+        def wrapperRunner = GradleRunner.create(GradleExecutor.gradleWrapper()).inDirectory(testDirectory)
 
         buildFile << '''
             tasks.register('verify') {
                 doLast {
+                    println "=== Runtime information of ${ProcessHandle.current().pid()} ==="
+                    System.getenv().each { k, v -> println "ENV -> $k = $v" }
+                    System.properties.each { k, v -> println "PRO -> $k = $v" }
                     file(project.property('pid')) << ProcessHandle.current().pid()
                 }
             }

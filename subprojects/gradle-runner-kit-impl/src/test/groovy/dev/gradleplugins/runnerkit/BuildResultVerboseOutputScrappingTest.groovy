@@ -2,11 +2,15 @@ package dev.gradleplugins.runnerkit
 
 import spock.lang.Ignore
 import spock.lang.Specification
+import spock.lang.Subject
 import spock.lang.Unroll
 
 import static dev.gradleplugins.runnerkit.BuildResult.from
+import static dev.gradleplugins.runnerkit.TaskOutcome.SUCCESS
 import static dev.gradleplugins.runnerkit.TaskOutcome.values
+import static dev.gradleplugins.runnerkit.TaskOutcomeUtils.toString
 
+@Subject(BuildResultImpl)
 class BuildResultVerboseOutputScrappingTest extends Specification {
 
     def "can normalize successful build result"() {
@@ -59,6 +63,31 @@ class BuildResultVerboseOutputScrappingTest extends Specification {
             |
             |BUILD FAILED
             |1 actionable task: 1 executed'''.stripMargin()
+    }
+
+    def "last task before failure doesn't include failure in task output"() {
+        given:
+        def output = '''> Task :foo FAILED
+            |
+            |FAILURE: Build failed with an exception.
+            |
+            |* Where:
+            |Build file '/Users/daniel/gradle/tmp/build-result-test/build.gradle' line: 10
+            |
+            |* What went wrong:
+            |Execution failed for task ':foo'.
+            |> Fail to execute
+            |
+            |* Try:
+            |Run with --stacktrace option to get the stack trace. Run with --info or --debug option to get more log output. Run with --scan to get full insights.
+            |
+            |* Get more help at https://help.gradle.org
+            |
+            |BUILD FAILED in 488ms
+            |1 actionable task: 1 executed'''.stripMargin()
+
+        expect:
+        from(output).task(':foo').output.empty
     }
 
     def "two build result of exactly same log are equals"() {
@@ -145,7 +174,7 @@ class BuildResultVerboseOutputScrappingTest extends Specification {
         from(output1) != from(output2)
 
         where:
-        outcome << [values().findAll { it.message != null }.collect { it.message }]
+        outcome << [values().findAll { it != SUCCESS }.collect { toString(it) }]
     }
 
     def "can capture executed tasks"() {

@@ -13,6 +13,7 @@ java {
 }
 
 repositories {
+    gradlePluginDevelopment()
     jcenter()
     mavenCentral()
     maven { url = 'https://dl.bintray.com/nokeedev/distributions-snapshots/' }
@@ -22,41 +23,33 @@ dependencies {
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
-    api project(':gradle-fixtures') // ONLY WHILE WE FINISH THE MIGRATION TO THE RUNNER API
-
     implementation project(':gradle-runner-kit-api')
     implementation project(':gradle-fixtures-file-system')
     implementation 'org.apache.commons:commons-lang3:3.9'
     implementation 'commons-io:commons-io:2.6'
     implementation 'dev.nokee:coreExec:0.5.0-dfbba94d'
-    compileOnly gradleTestKit()
+    compileOnly gradleApi(minimumGradleVersion)
 
-//    testRuntimeOnly project(':gradle-runner-kit')
     testImplementation platform('org.spockframework:spock-bom:1.2-groovy-2.5')
     testImplementation 'org.spockframework:spock-core'
-    testImplementation gradleTestKit()
+    testImplementation gradleTestKit(gradle.gradleVersion)
     testImplementation testFixtures(project(':gradle-fixtures-file-system'))
-//    testImplementation testFixtures(project(':gradle-runner-kit'))
-    testImplementation testFixtures(project(':gradle-runner-kit-wrapper-impl'))
-//
-//    testFixturesCompileOnly localGroovy() // to prevent build failures
-//    testFixturesImplementation project(':gradle-fixtures-file-system')
-//    testFixturesImplementation testFixtures(project(':gradle-fixtures-file-system'))
-//    testFixturesImplementation 'dev.nokee:coreExec:0.5.0-dfbba94d'
-//    testFixturesImplementation 'commons-io:commons-io:2.6'
-//    testFixturesImplementation 'org.apache.commons:commons-lang3:3.9'
+    testImplementation 'org.apache.commons:commons-lang3:3.9'
+    testImplementation testFixtures(project(':gradle-runner-kit'))
+    testImplementation 'dev.nokee:coreExec:0.5.0-dfbba94d'
 }
 
-//def createWrapper = tasks.register('createWrapper', Wrapper) {
-//    it.jarFile = layout.buildDirectory.file('wrapper-support/gradle/wrapper/gradle-wrapper.jar')
-//    it.scriptFile = layout.buildDirectory.file('wrapper-support/gradlew')
-//}
-//
-//tasks.processTestFixturesResources {
-//    from(createWrapper) {
-//        into('dev/gradleplugins/fixtures/gradle/wrapper')
-//    }
-//}
+def generatePluginUnderTestMetadataUnderTestTask = tasks.register('generatePluginUnderTestMetadataUnderTest') { task ->
+    ext.outputFile = layout.buildDirectory.file('plugin-under-test-metadata.properties')
+    task.outputs.file(ext.outputFile)
+    task.doLast {
+        ext.outputFile.get().asFile << "implementation-classpath = ${files('build/classes/java/main', 'foo.jar', 'bar.jar').asPath}\n"
+    }
+}
+
+tasks.named('processTestResources', ProcessResources) { task ->
+    task.from(generatePluginUnderTestMetadataUnderTestTask.map { it.outputFile })
+}
 
 publishing {
     publications {
