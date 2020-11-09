@@ -18,6 +18,7 @@ import java.nio.charset.Charset;
 import java.util.*;
 import java.util.function.Supplier;
 
+@Deprecated
 public class ForkingGradleExecuter extends AbstractGradleExecuter {
     public ForkingGradleExecuter(GradleDistribution distribution, TestFile testDirectory, GradleExecuterBuildContext buildContext) {
         super(distribution, testDirectory, buildContext);

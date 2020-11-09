@@ -2,6 +2,7 @@ package dev.gradleplugins.test.fixtures.gradle.executer.internal.parameters;
 
 import java.lang.reflect.InvocationTargetException;
 
+@Deprecated
 public class GradleExecutionParameterImpl<T> {
     private static final ThreadLocal<GradleExecutionParameter<?>> NEXT_PARAMETER = new ThreadLocal<>();
     private final GradleExecutionParameter<T> value;

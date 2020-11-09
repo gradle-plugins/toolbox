@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+@Deprecated
 public final class ProjectDirectoryParameter extends GradleExecutionParameterImpl<ProjectDirectory> implements CommandLineGradleExecutionParameter<ProjectDirectory>, DirectoryParameter<ProjectDirectory> {
     @Override
     public List<String> getAsArguments() {

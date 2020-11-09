@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+@Deprecated
 public interface GradleExecuter {
     /**
      * Return the Gradle distribution used by this executer.

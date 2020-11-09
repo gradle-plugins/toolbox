@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+@Deprecated
 public final class StacktraceParameter extends GradleExecutionParameterImpl<StacktraceParameter.Stacktrace> implements CommandLineGradleExecutionParameter<StacktraceParameter.Stacktrace> {
     public enum Stacktrace {
         HIDE, SHOW

@@ -32,6 +32,7 @@ import java.util.function.UnaryOperator;
  * executer.using(new GradleEnterpriseBuildScan())
  * </pre>
  */
+@Deprecated
 public class GradleEnterpriseBuildScan implements UnaryOperator<GradleExecuter> {
     @Override
     public GradleExecuter apply(GradleExecuter executer) {

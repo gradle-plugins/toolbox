@@ -23,6 +23,7 @@ import java.util.function.Function;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 
+@Deprecated
 public abstract class AbstractGradleExecuter implements GradleExecuter {
     protected GradleExecutionParameters configuration;
     private final TestFile testDirectory;

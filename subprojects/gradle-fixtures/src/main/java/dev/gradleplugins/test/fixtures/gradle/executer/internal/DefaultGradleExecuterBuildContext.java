@@ -8,6 +8,7 @@ import java.util.Optional;
 /**
  * Provides values that are set during the build, or defaulted when not running in a build context (e.g. IDE).
  */
+@Deprecated
 public class DefaultGradleExecuterBuildContext implements GradleExecuterBuildContext {
     // Collect this early, as the process' current directory can change during embedded test execution
     public static final File TEST_DIR = new File(System.getProperty("user.dir"));

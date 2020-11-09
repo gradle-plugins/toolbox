@@ -20,6 +20,7 @@ import dev.gradleplugins.test.fixtures.gradle.executer.ExecutionFailure;
 
 import static org.hamcrest.CoreMatchers.startsWith;
 
+@Deprecated
 public class DetailedExecutionFailure {
     public final ExecutionFailure failure;
 

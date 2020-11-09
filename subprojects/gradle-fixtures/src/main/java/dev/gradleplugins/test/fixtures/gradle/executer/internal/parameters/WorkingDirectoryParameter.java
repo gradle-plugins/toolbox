@@ -1,5 +1,6 @@
 package dev.gradleplugins.test.fixtures.gradle.executer.internal.parameters;
 
+@Deprecated
 public final class WorkingDirectoryParameter extends GradleExecutionParameterImpl<WorkingDirectory> implements DirectoryParameter<WorkingDirectory> {
     public static WorkingDirectoryParameter unset() {
         return noValue(WorkingDirectoryParameter.class);

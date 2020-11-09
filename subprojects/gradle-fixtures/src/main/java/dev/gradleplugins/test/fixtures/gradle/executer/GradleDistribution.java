@@ -44,11 +44,6 @@ public interface GradleDistribution {
     GradleVersion getVersion();
 
     /**
-     * Creates an executer which will use this distribution.
-     */
-    GradleExecuter executer(TestFile testDirectoryProvider/*, IntegrationTestBuildContext buildContext*/);
-
-    /**
      * Returns true if this distribution supports the given JVM.
      */
     boolean worksWith(Jvm jvm);

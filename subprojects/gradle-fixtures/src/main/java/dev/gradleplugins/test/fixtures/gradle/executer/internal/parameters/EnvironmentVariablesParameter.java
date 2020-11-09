@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Deprecated
 public interface EnvironmentVariablesParameter {
     EnvironmentVariablesParameter plus(Map<String, ?> environmentVariables);
 

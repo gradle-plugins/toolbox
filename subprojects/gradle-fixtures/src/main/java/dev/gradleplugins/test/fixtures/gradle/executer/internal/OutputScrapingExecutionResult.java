@@ -31,6 +31,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
+@Deprecated
 public class OutputScrapingExecutionResult implements ExecutionResult {
     static final Pattern STACK_TRACE_ELEMENT = Pattern.compile("\\s+(at\\s+)?([\\w.$_]+/)?[\\w.$_]+\\.[\\w$_ =\\+\'-<>]+\\(.+?\\)(\\x1B\\[0K)?");
     private static final String TASK_PREFIX = "> Task ";
@@ -134,7 +135,6 @@ public class OutputScrapingExecutionResult implements ExecutionResult {
         return output.ansiCharsToPlainText().withNormalizedEol();
     }
 
-    @Override
     public GroupedOutputFixture getGroupedOutput() {
         if (groupedOutputFixture == null) {
             groupedOutputFixture = new GroupedOutputFixture(getMainContent());

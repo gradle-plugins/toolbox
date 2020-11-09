@@ -17,7 +17,6 @@
 package dev.gradleplugins.test.fixtures.gradle.executer.internal;
 
 import dev.gradleplugins.test.fixtures.file.TestFile;
-import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter;
 import org.gradle.util.GradleVersion;
 
 public class DefaultGradleDistribution extends AbstractGradleDistribution {
@@ -49,11 +48,5 @@ public class DefaultGradleDistribution extends AbstractGradleDistribution {
     @Override
     public GradleVersion getVersion() {
         return version;
-    }
-
-    @Override
-    public GradleExecuter executer(TestFile testDirectoryProvider/*, IntegrationTestBuildContext buildContext*/) {
-//        return new NoDaemonGradleExecuter(this, testDirectoryProvider, version, buildContext).withWarningMode(null);
-        return null;
     }
 }

@@ -9,6 +9,7 @@ import java.io.UncheckedIOException;
 import java.util.Collections;
 import java.util.Map;
 
+@Deprecated
 public final class WelcomeMessageParameter extends GradleExecutionParameterImpl<WelcomeMessage> implements JvmSystemPropertyParameter<WelcomeMessage>, GradleExecutionParameter<WelcomeMessage> {
     public void apply(GradleUserHomeDirectory gradleUserHomeDirectory, GradleVersion version) {
         if (get().equals(WelcomeMessage.ENABLED)) {

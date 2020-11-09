@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 /**
  * Parses console output into its pieces for verification in functional tests
  */
+@Deprecated
 public class GroupedOutputFixture {
     /**
      * All tasks will start with > Task, captures everything starting with : and going until end of line

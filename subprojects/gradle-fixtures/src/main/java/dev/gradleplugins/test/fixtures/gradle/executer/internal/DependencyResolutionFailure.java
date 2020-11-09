@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 
 import static org.hamcrest.Matchers.matchesPattern;
 
+@Deprecated
 public class DependencyResolutionFailure {
     private final ExecutionFailure failure;
 

@@ -17,14 +17,13 @@
 package dev.gradleplugins.integtests.fixtures.nativeplatform;
 
 import com.google.common.collect.ImmutableSet;
-import dev.gradleplugins.runnerkit.GradleRunner;
 import dev.gradleplugins.integtests.fixtures.AbstractMultiVersionSpecRunner;
 import dev.gradleplugins.integtests.fixtures.nativeplatform.internal.NativeServicesTestFixture;
 import dev.gradleplugins.integtests.fixtures.nativeplatform.internal.TestFiles;
 import dev.gradleplugins.integtests.fixtures.nativeplatform.msvcpp.VisualStudioLocatorTestFixture;
 import dev.gradleplugins.integtests.fixtures.nativeplatform.msvcpp.VisualStudioVersion;
+import dev.gradleplugins.runnerkit.GradleRunner;
 import dev.gradleplugins.test.fixtures.file.TestFile;
-import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter;
 import org.gradle.api.specs.Spec;
 import org.gradle.internal.FileUtils;
 import org.gradle.internal.nativeintegration.ProcessEnvironment;
@@ -478,11 +477,6 @@ public class AvailableToolChains {
             return "";
         }
 
-        public GradleExecuter configureExecuter(GradleExecuter executer) {
-            // Toolchains should be using default configuration
-            return executer;
-        }
-
         public GradleRunner configureExecuter(GradleRunner executer) {
             // Toolchains should be using default configuration
             return executer;
@@ -807,10 +801,6 @@ public class AvailableToolChains {
             }
         }
 
-        private GradleExecuter configureExecuter(GradleExecuter executer) {
-            return executer.withEnvironmentVars(Collections.singletonMap("DEVELOPER_DIR", xcodeDir.getAbsolutePath()));
-        }
-
         private GradleRunner configureExecuter(GradleRunner executer) {
             return executer.withEnvironmentVariables(Collections.singletonMap("DEVELOPER_DIR", xcodeDir.getAbsolutePath()));
         }
@@ -842,11 +832,6 @@ public class AvailableToolChains {
                 public void resetEnvironment() {
                     InstalledXcode.this.resetEnvironment();
                     super.resetEnvironment();
-                }
-
-                @Override
-                public GradleExecuter configureExecuter(GradleExecuter executer) {
-                    return InstalledXcode.this.configureExecuter(super.configureExecuter(executer));
                 }
 
                 @Override
@@ -883,11 +868,6 @@ public class AvailableToolChains {
                 public void resetEnvironment() {
                     InstalledXcode.this.resetEnvironment();
                     super.resetEnvironment();
-                }
-
-                @Override
-                public GradleExecuter configureExecuter(GradleExecuter executer) {
-                    return InstalledXcode.this.configureExecuter(super.configureExecuter(executer));
                 }
 
                 @Override

@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
 
+@Deprecated
 public final class DaemonIdleTimeoutParameter extends GradleExecutionParameterImpl<Duration> implements JvmSystemPropertyParameter<Duration>, GradleExecutionParameter<Duration> {
     public static DaemonIdleTimeoutParameter of(Duration daemonIdleTimeout) {
         return fixed(DaemonIdleTimeoutParameter.class, daemonIdleTimeout);

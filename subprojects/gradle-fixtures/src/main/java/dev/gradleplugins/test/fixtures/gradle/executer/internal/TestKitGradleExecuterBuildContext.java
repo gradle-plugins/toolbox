@@ -5,6 +5,7 @@ import lombok.val;
 import java.io.File;
 import java.util.Optional;
 
+@Deprecated
 public class TestKitGradleExecuterBuildContext implements GradleExecuterBuildContext {
     // Collect this early, as the process' current directory can change during embedded test execution
     public static final File TEST_DIR = new File(System.getProperty("user.dir"));

@@ -25,6 +25,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 
+@Deprecated
 class OutputCapturer {
     private final ByteArrayOutputStream buffer;
     private final OutputStream outputStream;

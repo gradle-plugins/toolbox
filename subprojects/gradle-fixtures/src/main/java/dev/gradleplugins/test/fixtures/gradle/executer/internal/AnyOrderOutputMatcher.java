@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 /**
  * Checks that all lines contained in the expected output are present in the actual output, in any order.
  */
+@Deprecated
 public class AnyOrderOutputMatcher extends SequentialOutputMatcher {
     protected void assertOutputLinesMatch(List<String> expectedLines, List<String> actualLines, boolean ignoreExtraLines, String actual) {
         List<String> unmatchedLines = new ArrayList<String>(actualLines);

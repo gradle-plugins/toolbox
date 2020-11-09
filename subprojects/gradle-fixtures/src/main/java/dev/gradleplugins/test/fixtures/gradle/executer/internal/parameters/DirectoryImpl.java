@@ -6,6 +6,7 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 
+@Deprecated
 @EqualsAndHashCode
 class DirectoryImpl {
     private static final ThreadLocal<File> NEXT_DIRECTORY = new ThreadLocal<>();

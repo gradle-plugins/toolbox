@@ -1,5 +1,6 @@
 package dev.gradleplugins.test.fixtures.gradle.executer.internal.parameters;
 
+@Deprecated
 public abstract class MissingSettingsFilePolicy {
     public abstract void ensureAvailable(Directory testDirectory, WorkingDirectory workingDirectory);
 

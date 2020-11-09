@@ -1,28 +1,20 @@
 package dev.gradleplugins.integtests.fixtures.executer
 
-import dev.gradleplugins.test.fixtures.ProcessFixture
+import dev.gradleplugins.runnerkit.GradleRunner
 import dev.gradleplugins.test.fixtures.file.TestFile
-import dev.gradleplugins.test.fixtures.gradle.daemon.DaemonLogsAnalyzer
-import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter
-import dev.gradleplugins.test.fixtures.gradle.executer.internal.AbstractGradleExecuter
-import dev.gradleplugins.test.fixtures.gradle.executer.internal.GradleRunnerExecuter
-import dev.gradleplugins.test.fixtures.util.RetryUtil
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Ignore
 import spock.lang.Specification
 
-import java.time.Duration
-
-import static org.hamcrest.Matchers.equalTo
-import static org.hamcrest.Matchers.not
+import static org.hamcrest.Matchers.*
 import static org.junit.Assume.assumeThat
 
 abstract class AbstractGradleExecuterTest extends Specification {
     @Rule
     protected final TemporaryFolder temporaryFolder = new TemporaryFolder()
 
-    protected abstract GradleExecuter getExecuterUnderTest()
+    protected abstract GradleRunner getExecuterUnderTest()
 
     protected TestFile getTestDirectory() {
         return TestFile.of(temporaryFolder.root)
@@ -37,7 +29,7 @@ abstract class AbstractGradleExecuterTest extends Specification {
         settingsFile.assertDoesNotExist()
 
         when:
-        executerUnderTest.run()
+        executerUnderTest.build()
 
         then:
         noExceptionThrown()
@@ -51,7 +43,7 @@ abstract class AbstractGradleExecuterTest extends Specification {
         settingsFile << settingsFileContent
 
         when:
-        def result = executerUnderTest.usingSettingsFile(settingsFile).run()
+        def result = executerUnderTest.usingSettingsFile(settingsFile).build()
 
         then:
         result.output.contains("The executer is using '${settingsFile}' as its settings file")
@@ -65,7 +57,7 @@ abstract class AbstractGradleExecuterTest extends Specification {
         workingDirectory.file('settings.gradle') << settingsFileContent
 
         when:
-        def result = executerUnderTest.inDirectory(workingDirectory).run()
+        def result = executerUnderTest.inDirectory(workingDirectory).build()
 
         then:
         result.output.contains("The executer is using '${workingDirectory}' as its working directory")
@@ -80,7 +72,7 @@ abstract class AbstractGradleExecuterTest extends Specification {
         projectDirectory.file('settings.gradle') << settingsFileContent
 
         when:
-        def result = executerUnderTest.usingProjectDirectory(projectDirectory).run()
+        def result = executerUnderTest.usingProjectDirectory(projectDirectory).build()
 
         then:
         result.output.contains("The executer is using '${projectDirectory}' as its project directory")
@@ -93,7 +85,7 @@ abstract class AbstractGradleExecuterTest extends Specification {
         buildFile << buildFileContent
 
         when:
-        def result = executerUnderTest.usingSettingsFile(buildFile).run()
+        def result = executerUnderTest.usingSettingsFile(buildFile).build()
 
         then:
         result.output.contains("The executer is using '${buildFile}' as its build file")
@@ -111,40 +103,40 @@ abstract class AbstractGradleExecuterTest extends Specification {
         !executer.usesSharedDaemons()
     }
 
-    def "can cleanup isolated daemons"() {
-        def executer = executerUnderTest.requireIsolatedDaemons().requireDaemon()
-        executer.run()
-        when:
-        (executer as AbstractGradleExecuter).cleanup()
-
-        then:
-        noExceptionThrown()
-
-        and:
-        RetryUtil.retry(100, Duration.ofMillis(100)) {
-            assert new DaemonLogsAnalyzer(file('daemon')).allDaemons*.context.every { !new ProcessFixture(it.pid).alive }
-        }
-    }
+//    def "can cleanup isolated daemons"() {
+//        def executer = executerUnderTest.requireIsolatedDaemons().requireDaemon()
+//        executer.run()
+//        when:
+//        (executer as AbstractGradleExecuter).cleanup()
+//
+//        then:
+//        noExceptionThrown()
+//
+//        and:
+//        RetryUtil.retry(100, Duration.ofMillis(100)) {
+//            assert new DaemonLogsAnalyzer(file('daemon')).allDaemons*.context.every { !new ProcessFixture(it.pid).alive }
+//        }
+//    }
 
     def "suppress welcome message by default"() {
-        assumeThat(executerUnderTest.class, not(equalTo(GradleRunnerExecuter)))
+        assumeThat(this.class.simpleName, not(containsString("GradleRunner")))
 
         expect:
+        !executerUnderTest
+                .withGradleUserHomeDirectory(file('welcome-disabled').createDirectory())
+                .build()
+                .output.contains('Here are the highlights of this release:')
         executerUnderTest
-                .withGradleUserHomeDirectory(file('welcome-disabled'))
-                .run()
-                .assertNotOutput('Here are the highlights of this release:')
-        executerUnderTest
-                .withGradleUserHomeDirectory(file('welcome-enabled'))
+                .withGradleUserHomeDirectory(file('welcome-enabled').createDirectory())
                 .withWelcomeMessageEnabled()
-                .run()
-                .assertOutputContains('Here are the highlights of this release:')
+                .build()
+                .output.contains('Here are the highlights of this release:')
     }
 
     def "can publish build scans"() {
         expect:
-        executerUnderTest.run().assertNotOutput('Publishing build scan...')
-        executerUnderTest.withBuildScanEnabled().run().output.contains('Publishing build scan...')
+        !executerUnderTest.build().output.contains('Publishing build scan...')
+        executerUnderTest.publishBuildScans().build().output.contains('Publishing build scan...')
     }
 
 //    def "can assert successful execution"() {

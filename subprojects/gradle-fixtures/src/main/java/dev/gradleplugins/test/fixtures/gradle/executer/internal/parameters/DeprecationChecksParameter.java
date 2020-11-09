@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+@Deprecated
 public class DeprecationChecksParameter extends GradleExecutionParameterImpl<DeprecationChecksParameter.DeprecationChecks> implements CommandLineGradleExecutionParameter<DeprecationChecksParameter.DeprecationChecks> {
 
     public enum DeprecationChecks {

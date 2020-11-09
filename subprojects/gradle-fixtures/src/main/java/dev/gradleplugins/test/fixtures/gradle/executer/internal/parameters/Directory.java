@@ -4,6 +4,7 @@ import dev.gradleplugins.fixtures.file.FileSystemUtils;
 
 import java.io.File;
 
+@Deprecated
 public interface Directory {
     File getAsFile();
 

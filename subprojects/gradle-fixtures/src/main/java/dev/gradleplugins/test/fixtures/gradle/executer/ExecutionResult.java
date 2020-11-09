@@ -1,6 +1,5 @@
 package dev.gradleplugins.test.fixtures.gradle.executer;
 
-import dev.gradleplugins.test.fixtures.gradle.logging.GroupedOutputFixture;
 import org.hamcrest.Matcher;
 
 public interface ExecutionResult {
@@ -10,11 +9,6 @@ public interface ExecutionResult {
      * <p>You should avoid using this method as it couples the tests to a particular layout for the console. Instead use the more descriptive assertion methods on this class.</p>
      */
     String getOutput();
-
-    /**
-     * Returns a fixture that parses the output and forms them into the expected groups
-     */
-    GroupedOutputFixture getGroupedOutput();
 
     /**
      * Stdout of the Gradle execution, with ANSI characters interpreted and text attributes discarded.

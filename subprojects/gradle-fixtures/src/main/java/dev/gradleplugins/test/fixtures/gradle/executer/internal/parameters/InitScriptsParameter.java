@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Deprecated
 public final class InitScriptsParameter extends GradleExecutionParameterImpl<List<RegularFile>> implements CommandLineGradleExecutionParameter<List<RegularFile>>, GradleExecutionParameter<List<RegularFile>> {
     public InitScriptsParameter plus(RegularFile initScript) {
         return fixed(InitScriptsParameter.class, Collections.unmodifiableList(new ArrayList<RegularFile>() {{

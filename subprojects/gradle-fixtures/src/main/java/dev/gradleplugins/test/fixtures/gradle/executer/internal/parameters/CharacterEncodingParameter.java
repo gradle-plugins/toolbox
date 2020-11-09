@@ -6,6 +6,7 @@ import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.Map;
 
+@Deprecated
 @Value(staticConstructor = "of")
 public class CharacterEncodingParameter implements JvmSystemPropertyParameter<Charset> {
     Charset value;

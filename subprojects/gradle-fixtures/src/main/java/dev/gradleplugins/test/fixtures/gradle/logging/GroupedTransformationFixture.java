@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Deprecated
 public class GroupedTransformationFixture {
     private final String initialSubjectType;
     private final String subject;

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+@Deprecated
 public final class SettingsFileParameter extends GradleExecutionParameterImpl<RegularFile> implements CommandLineGradleExecutionParameter<RegularFile>, GradleExecutionParameter<RegularFile> {
 
     public static SettingsFileParameter unset() {

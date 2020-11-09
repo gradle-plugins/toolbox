@@ -1,15 +1,15 @@
 package dev.gradleplugins.integtests.fixtures.executer
 
-import dev.gradleplugins.test.fixtures.gradle.executer.GradleDistributionFactory
-import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter
-import dev.gradleplugins.test.fixtures.gradle.executer.internal.DefaultGradleExecuterBuildContext
-import dev.gradleplugins.test.fixtures.gradle.executer.internal.ForkingGradleExecuter
-import spock.lang.Subject
+import dev.gradleplugins.runnerkit.GradleExecutor
+import dev.gradleplugins.runnerkit.GradleRunner
+import dev.gradleplugins.runnerkit.GradleWrapperFixture
 
-@Subject(ForkingGradleExecuter)
+//@Subject(ForkingGradleExecuter)
 class ForkingGradleExecuterTest extends AbstractGradleExecuterTest {
     @Override
-    protected GradleExecuter getExecuterUnderTest() {
-        return new ForkingGradleExecuter(GradleDistributionFactory.current(), testDirectory, DefaultGradleExecuterBuildContext.INSTANCE)
+    protected GradleRunner getExecuterUnderTest() {
+        GradleWrapperFixture.writeGradleWrapperTo(testDirectory)
+        return GradleRunner.create(GradleExecutor.gradleWrapper()).inDirectory(testDirectory);
+//        return new ForkingGradleExecuter(GradleDistributionFactory.current(), testDirectory, DefaultGradleExecuterBuildContext.INSTANCE)
     }
 }

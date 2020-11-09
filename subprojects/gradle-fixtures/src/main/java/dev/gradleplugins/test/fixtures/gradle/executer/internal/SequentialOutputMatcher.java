@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 /**
  * Check that the actual output lines match the expected output lines in content and order.
  */
+@Deprecated
 public class SequentialOutputMatcher {
     public void assertOutputMatches(String expected, String actual, boolean ignoreExtraLines) {
         List<String> actualLines = normaliseOutput(readLines(actual)).stream().filter(it -> !it.isEmpty()).collect(Collectors.toList());

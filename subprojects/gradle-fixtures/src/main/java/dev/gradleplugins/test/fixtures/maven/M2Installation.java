@@ -16,35 +16,38 @@
 
 package dev.gradleplugins.test.fixtures.maven;
 
+import dev.gradleplugins.runnerkit.GradleRunner;
 import dev.gradleplugins.test.fixtures.file.TestFile;
-import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter;
 
 import java.io.File;
 import java.util.Collections;
 import java.util.function.Function;
 
-public class M2Installation implements Function<GradleExecuter, GradleExecuter> {
-    private final TestFile testDirectory;
+import static dev.gradleplugins.fixtures.file.FileSystemUtils.*;
+import static org.junit.Assert.assertTrue;
+
+public class M2Installation implements Function<GradleRunner, GradleRunner> {
+    private final File testDirectory;
     private boolean initialized = false;
-    private TestFile userHomeDirectory;
-    private TestFile userM2Directory;
-    private TestFile userSettingsFile;
-    private TestFile globalMavenDirectory;
-    private TestFile globalSettingsFile;
-    private TestFile isolatedMavenRepoForLeakageChecks;
+    private File userHomeDirectory;
+    private File userM2Directory;
+    private File userSettingsFile;
+    private File globalMavenDirectory;
+    private File globalSettingsFile;
+    private File isolatedMavenRepoForLeakageChecks;
     private boolean isolateMavenLocal = true;
 
-    public M2Installation(TestFile testDirectory) {
+    public M2Installation(File testDirectory) {
         this.testDirectory = testDirectory;
     }
 
     private void init() {
         if (!initialized) {
-            userHomeDirectory = testDirectory.createDirectory("maven_home");
-            userM2Directory = userHomeDirectory.createDirectory(".m2");
-            userSettingsFile = userM2Directory.file("settings.xml");
-            globalMavenDirectory = userHomeDirectory.createDirectory("m2_home");
-            globalSettingsFile = globalMavenDirectory.file("conf/settings.xml");
+            userHomeDirectory = createDirectory(file(testDirectory, "maven_home"));
+            userM2Directory = createDirectory(file(userHomeDirectory, ".m2"));
+            userSettingsFile = file(userM2Directory, "settings.xml");
+            globalMavenDirectory = createDirectory(file(userHomeDirectory, "m2_home"));
+            globalSettingsFile = file(globalMavenDirectory, "conf/settings.xml");
             System.out.println("M2 home: " + userHomeDirectory);
 
             initialized = true;
@@ -53,37 +56,37 @@ public class M2Installation implements Function<GradleExecuter, GradleExecuter> 
 
     public TestFile getUserHomeDir() {
         init();
-        return userHomeDirectory;
+        return TestFile.of(userHomeDirectory);
     }
 
     public TestFile getUserM2Directory() {
         init();
-        return userM2Directory;
+        return TestFile.of(userM2Directory);
     }
 
     public TestFile getUserSettingsFile() {
         init();
-        return userSettingsFile;
+        return TestFile.of(userSettingsFile);
     }
 
     public TestFile getGlobalMavenDirectory() {
         init();
-        return globalMavenDirectory;
+        return TestFile.of(globalMavenDirectory);
     }
 
     public TestFile getGlobalSettingsFile() {
         init();
-        return globalSettingsFile;
+        return TestFile.of(globalSettingsFile);
     }
 
     public MavenLocalRepository mavenRepo() {
         init();
-        return new MavenLocalRepository(userM2Directory.file("repository"));
+        return new MavenLocalRepository(TestFile.of(file(userM2Directory, "repository")));
     }
 
     public M2Installation generateUserSettingsFile(MavenLocalRepository userRepository) {
         init();
-        userSettingsFile.write("<settings>\n"
+        TestFile.of(userSettingsFile).write("<settings>\n"
                         + "    <localRepository>${userRepository.rootDir.absolutePath}</localRepository>\n"
                         + "</settings>");
         return this;
@@ -95,43 +98,43 @@ public class M2Installation implements Function<GradleExecuter, GradleExecuter> 
 
     public M2Installation generateGlobalSettingsFile(MavenLocalRepository globalRepository) {
         init();
-        globalSettingsFile.createFile().write("<settings>\n"
+        TestFile.of(createFile(globalSettingsFile)).write("<settings>\n"
                 + "    <localRepository>${globalRepository.rootDir.absolutePath}</localRepository>\n"
                 + "</settings>");
         return this;
     }
 
     @Override
-    public GradleExecuter apply(GradleExecuter gradleExecuter) {
+    public GradleRunner apply(GradleRunner gradleExecuter) {
         init();
-        GradleExecuter result = gradleExecuter.withUserHomeDirectory(userHomeDirectory);
+        GradleRunner result = gradleExecuter.withUserHomeDirectory(userHomeDirectory);
         // if call `using m2`, then we disable the automatic isolation of m2
         isolateMavenLocal = false;
         if (globalMavenDirectory.exists()) {
-            result = result.withEnvironmentVars(Collections.singletonMap("M2_HOME", globalMavenDirectory.getAbsolutePath()));
+            result = result.withEnvironmentVariables(Collections.singletonMap("M2_HOME", globalMavenDirectory.getAbsolutePath()));
         }
         return result;
     }
 
-    public GradleExecuter isolateMavenLocalRepo(GradleExecuter gradleExecuter) {
+    public GradleRunner isolateMavenLocalRepo(GradleRunner gradleExecuter) {
         gradleExecuter = gradleExecuter.beforeExecute(executer -> {
             if (isolateMavenLocal) {
-                isolatedMavenRepoForLeakageChecks = executer.getTestDirectory().createDirectory("m2-home-should-not-be-filled");
+                isolatedMavenRepoForLeakageChecks = createDirectory(file(executer.getWorkingDirectory(), "m2-home-should-not-be-filled"));
                 return setMavenLocalLocation(executer, isolatedMavenRepoForLeakageChecks);
             }
             return executer;
         });
         gradleExecuter = gradleExecuter.afterExecute(executer -> {
             if (isolateMavenLocal) {
-                isolatedMavenRepoForLeakageChecks.assertIsEmptyDirectory();
+                assertTrue(String.format("%s is not an empty directory.", isolatedMavenRepoForLeakageChecks), isEmptyDirectory(isolatedMavenRepoForLeakageChecks));
             }
         });
 
         return gradleExecuter;
     }
 
-    private static GradleExecuter setMavenLocalLocation(GradleExecuter gradleExecuter, File destination) {
-        return gradleExecuter.withArgument("-Dmaven.repo.local=" + destination.getAbsolutePath());
+    private static GradleRunner setMavenLocalLocation(GradleRunner runner, File destination) {
+        return runner.withArgument("-Dmaven.repo.local=" + destination.getAbsolutePath());
     }
 }
 

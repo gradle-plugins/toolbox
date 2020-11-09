@@ -19,6 +19,7 @@ package dev.gradleplugins.test.fixtures.gradle.logging;
 /**
  * Specifies how to treat color and dynamic console output.
  */
+@Deprecated
 public enum ConsoleOutput {
     /**
      * Disable all color and rich output. Generate plain text only.

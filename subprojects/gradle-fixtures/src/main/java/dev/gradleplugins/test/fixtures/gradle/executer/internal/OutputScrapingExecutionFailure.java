@@ -32,6 +32,7 @@ import java.util.regex.Pattern;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
+@Deprecated
 public class OutputScrapingExecutionFailure extends OutputScrapingExecutionResult implements ExecutionFailure {
     private static final Pattern FAILURE_PATTERN = Pattern.compile("FAILURE: (.+)");
     private static final Pattern CAUSE_PATTERN = Pattern.compile("(?m)(^\\s*> )");

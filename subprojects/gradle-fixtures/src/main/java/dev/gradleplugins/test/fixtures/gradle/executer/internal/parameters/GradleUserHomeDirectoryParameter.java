@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+@Deprecated
 public final class GradleUserHomeDirectoryParameter extends GradleExecutionParameterImpl<GradleUserHomeDirectory> implements CommandLineGradleExecutionParameter<GradleUserHomeDirectory>, DirectoryParameter<GradleUserHomeDirectory> {
     public static GradleUserHomeDirectoryParameter unset() {
         return noValue(GradleUserHomeDirectoryParameter.class);

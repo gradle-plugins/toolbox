@@ -3,6 +3,7 @@ package dev.gradleplugins.test.fixtures.gradle.executer.internal.parameters;
 import java.util.Collections;
 import java.util.Map;
 
+@Deprecated
 public final class TemporaryDirectoryParameter extends GradleExecutionParameterImpl<TemporaryDirectory> implements JvmSystemPropertyParameter<TemporaryDirectory>, DirectoryParameter<TemporaryDirectory> {
     public boolean hasWhitespace() {
         if (isPresent()) {

@@ -37,6 +37,7 @@ import static org.hamcrest.CoreMatchers.hasItem;
 // TODO: This is implementation details and should be moved to internal package
 //    We should instead offer a factory to construct the right executer
 //    The contextual executer would also be beneficial here.
+@Deprecated
 public class GradleRunnerExecuter extends AbstractGradleExecuter {
     public GradleRunnerExecuter(GradleDistribution distribution, TestFile testDirectory) {
         this(distribution, testDirectory, TestKitGradleExecuterBuildContext.INSTANCE);
@@ -159,11 +160,6 @@ public class GradleRunnerExecuter extends AbstractGradleExecuter {
                     flattenTaskPaths.add(it.toString());
                 }
             });
-        }
-
-        @Override
-        public GroupedOutputFixture getGroupedOutput() {
-            return delegate.getGroupedOutput();
         }
 
         @Override

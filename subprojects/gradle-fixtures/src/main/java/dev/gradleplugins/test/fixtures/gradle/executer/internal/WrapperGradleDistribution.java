@@ -1,9 +1,7 @@
 package dev.gradleplugins.test.fixtures.gradle.executer.internal;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import dev.gradleplugins.test.fixtures.file.TestFile;
-import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter;
 import dev.gradleplugins.test.fixtures.internal.FilePreconditions;
 import lombok.val;
 import org.gradle.util.GradleVersion;
@@ -63,10 +61,5 @@ public class WrapperGradleDistribution extends AbstractGradleDistribution {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-    }
-
-    @Override
-    public GradleExecuter executer(TestFile testDirectoryProvider) {
-        return null;
     }
 }

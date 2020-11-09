@@ -17,7 +17,6 @@
 package dev.gradleplugins.test.fixtures.gradle.executer.internal;
 
 import dev.gradleplugins.test.fixtures.file.TestFile;
-import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter;
 import lombok.EqualsAndHashCode;
 import org.gradle.internal.installation.CurrentGradleInstallation;
 import org.gradle.util.GradleVersion;
@@ -37,12 +36,6 @@ public class CurrentGradleDistribution extends AbstractGradleDistribution {
     @Override
     public GradleVersion getVersion() {
         return GradleVersion.current();
-    }
-
-    @Override
-    public GradleExecuter executer(TestFile testDirectoryProvider/*, IntegrationTestBuildContext buildContext*/) {
-//        return new GradleContextualExecuter(this, testDirectoryProvider, buildContext).withWarningMode(null);
-        return null;
     }
 }
 

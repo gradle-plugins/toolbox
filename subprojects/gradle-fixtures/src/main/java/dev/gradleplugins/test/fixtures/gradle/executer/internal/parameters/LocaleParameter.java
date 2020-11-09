@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+@Deprecated
 public final class LocaleParameter extends GradleExecutionParameterImpl<Locale> implements JvmSystemPropertyParameter<Locale>, GradleExecutionParameter<Locale> {
     public static LocaleParameter of(Locale locale) {
         return fixed(LocaleParameter.class, locale);

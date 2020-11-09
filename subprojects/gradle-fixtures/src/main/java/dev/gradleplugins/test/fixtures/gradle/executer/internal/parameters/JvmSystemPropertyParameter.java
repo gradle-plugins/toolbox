@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Deprecated
 public interface JvmSystemPropertyParameter<T> extends CommandLineGradleExecutionParameter<T> {
     default List<String> getAsArguments() {
         return getAsJvmSystemProperties().entrySet().stream().map(it -> "-D" + it.getKey() + "=" + it.getValue()).collect(Collectors.toList());

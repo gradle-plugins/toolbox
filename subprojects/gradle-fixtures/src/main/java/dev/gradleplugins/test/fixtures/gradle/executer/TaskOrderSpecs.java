@@ -52,6 +52,7 @@ import java.util.*;
  *   - [ ':a', ':c', ':b' ]
  *   or any other combination where :c occurs before :b
  */
+@Deprecated
 public class TaskOrderSpecs {
 
     public static TaskOrderSpec any(Object[] constraints) {

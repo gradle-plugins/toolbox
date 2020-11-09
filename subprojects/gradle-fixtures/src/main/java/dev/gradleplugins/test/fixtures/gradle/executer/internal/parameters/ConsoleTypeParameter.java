@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+@Deprecated
 public final class ConsoleTypeParameter extends GradleExecutionParameterImpl<ConsoleOutput> implements CommandLineGradleExecutionParameter<ConsoleOutput>, GradleExecutionParameter<ConsoleOutput> {
     public static ConsoleTypeParameter unset() {
         return noValue(ConsoleTypeParameter.class);

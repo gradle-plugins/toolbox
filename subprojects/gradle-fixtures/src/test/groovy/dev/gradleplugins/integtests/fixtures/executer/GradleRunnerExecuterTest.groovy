@@ -1,26 +1,23 @@
 package dev.gradleplugins.integtests.fixtures.executer
 
-import dev.gradleplugins.test.fixtures.gradle.executer.GradleDistributionFactory
-import dev.gradleplugins.test.fixtures.gradle.executer.GradleExecuter
-import dev.gradleplugins.test.fixtures.gradle.executer.internal.GradleRunnerExecuter
-import dev.gradleplugins.test.fixtures.gradle.executer.internal.ForkingGradleExecuter
-import dev.gradleplugins.test.fixtures.gradle.executer.internal.TestKitGradleExecuterBuildContext
-import spock.lang.Subject
+import dev.gradleplugins.runnerkit.GradleExecutor
+import dev.gradleplugins.runnerkit.GradleRunner
 
-@Subject(GradleRunnerExecuter)
+//@Subject(GradleRunnerExecuter)
 class GradleRunnerExecuterTest extends AbstractGradleExecuterTest {
     @Override
-    protected GradleExecuter getExecuterUnderTest() {
-        return new GradleRunnerExecuter(GradleDistributionFactory.current(), testDirectory, TestKitGradleExecuterBuildContext.INSTANCE)
+    protected GradleRunner getExecuterUnderTest() {
+        return GradleRunner.create(GradleExecutor.gradleTestKit()).inDirectory(testDirectory)
+//        return new GradleRunnerExecuter(GradleDistributionFactory.current(), testDirectory, TestKitGradleExecuterBuildContext.INSTANCE)
     }
 
-    def "creates out-of-process executer when requiring distribution"() {
-        when:
-        def executer = executerUnderTest.requireGradleDistribution()
-
-        then:
-        executer instanceof ForkingGradleExecuter
-        executer.testDirectory == testDirectory
-        executer.distribution == executerUnderTest.distribution
-    }
+//    def "creates out-of-process executer when requiring distribution"() {
+//        when:
+//        def executer = executerUnderTest.requireGradleDistribution()
+//
+//        then:
+//        executer instanceof ForkingGradleExecuter
+//        executer.testDirectory == testDirectory
+//        executer.distribution == executerUnderTest.distribution
+//    }
 }

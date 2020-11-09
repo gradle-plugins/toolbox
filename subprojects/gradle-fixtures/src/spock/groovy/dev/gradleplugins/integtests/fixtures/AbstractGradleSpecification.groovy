@@ -16,17 +16,22 @@
 
 package dev.gradleplugins.integtests.fixtures
 
+
+import dev.gradleplugins.runnerkit.GradleExecutor
+import dev.gradleplugins.runnerkit.GradleRunner
 import dev.gradleplugins.spock.lang.CleanupTestDirectory
 import dev.gradleplugins.spock.lang.TestNameTestDirectoryProvider
 import dev.gradleplugins.test.fixtures.file.TestFile
-import dev.gradleplugins.test.fixtures.gradle.executer.*
-import dev.gradleplugins.test.fixtures.gradle.executer.internal.GradleRunnerExecuter
+import dev.gradleplugins.test.fixtures.gradle.executer.ExecutionFailure
+import dev.gradleplugins.test.fixtures.gradle.executer.ExecutionResult
+import dev.gradleplugins.test.fixtures.gradle.executer.GradleDistribution
+import dev.gradleplugins.test.fixtures.gradle.executer.internal.ExecutionResultImpl
 import dev.gradleplugins.test.fixtures.maven.M2Installation
 import groovy.transform.PackageScope
+import org.gradle.util.GradleVersion
 import org.junit.Rule
 import spock.lang.Specification
 
-import java.util.function.Function
 import java.util.function.UnaryOperator
 
 // TODO: This should be rename to something else... Given it's a Spock specification we could call it GradleSpecification (the fact that it's Functional is putting the wrong spin to this class).
@@ -37,7 +42,7 @@ class AbstractGradleSpecification extends Specification {
     @Rule
     final TestNameTestDirectoryProvider temporaryFolder = new TestNameTestDirectoryProvider(getClass())
     final M2Installation m2 = new M2Installation(TestFile.of(temporaryFolder.testDirectory))
-    GradleExecuter executer = createExecuter()
+    GradleRunner executer = newRunner()
     private boolean useKotlinDsl = false
 
     // TODO: I'm hesitant to keep the following here
@@ -58,19 +63,19 @@ class AbstractGradleSpecification extends Specification {
         useKotlinDsl = true
     }
 
-    protected GradleDistribution getGradleDistributionUnderTest() {
-        if (gradleDistribution != null) {
-            return gradleDistribution
-        }
+    protected String getGradleDistributionUnderTest() {
+//        if (gradleDistribution != null) {
+//            return gradleDistribution
+//        }
         String defaultGradleVersionUnderTest = System.getProperty(DEFAULT_GRADLE_VERSION_SYSPROP_NAME, null)
         if (defaultGradleVersionUnderTest == null) {
-            return GradleDistributionFactory.current();
+            return GradleVersion.current().version;
         }
-        return GradleDistributionFactory.distribution(defaultGradleVersionUnderTest)
+        return defaultGradleVersionUnderTest
     }
 
-    private GradleExecuter createExecuter() {
-        return new GradleRunnerExecuter(gradleDistributionUnderTest, TestFile.of(temporaryFolder.testDirectory)).withPluginClasspath().requireDaemon()
+    private GradleRunner newRunner() {
+        return GradleRunner.create(GradleExecutor.gradleTestKit()).inDirectory(temporaryFolder.testDirectory).withPluginClasspath().withGradleVersion(getGradleDistributionUnderTest())
     }
 
     protected TestFile getProjectDir() {
@@ -86,11 +91,11 @@ class AbstractGradleSpecification extends Specification {
     }
 
     protected ExecutionResult succeeds(String... tasks) {
-        return (result = executer.withTasks(tasks).run())
+        return (result = new ExecutionResultImpl(executer.withTasks(tasks).build()))
     }
 
     protected ExecutionFailure fails(String... tasks) {
-        return (result = failure = executer.withTasks(tasks).runWithFailure())
+        return (result = failure = new ExecutionResultImpl(executer.withTasks(tasks).buildAndFail()))
     }
 
     protected ExecutionResult run(String... arguments) {
@@ -98,12 +103,14 @@ class AbstractGradleSpecification extends Specification {
     }
 
     // TODO: Given the comment on the class, this method should be removed
+    @Deprecated
     void assertTasksExecutedAndNotSkipped(String... tasks) {
         assertHasResult()
         result.assertTasksExecutedAndNotSkipped(tasks)
     }
 
     // TODO: Given the comment on the class, this method should be removed
+    @Deprecated
     void assertTasksSkipped(String... tasks) {
         assertHasResult()
         result.assertTasksSkipped(tasks)
@@ -113,10 +120,7 @@ class AbstractGradleSpecification extends Specification {
      * NOTE: The method is public so it can align with Trait classes like {@link ArchiveTestFixture}.
      */
     TestFile file(Object... path) {
-        if (path.length == 1 && path[0] instanceof TestFile) {
-            return path[0] as TestFile
-        }
-        getTestDirectory().file(path)
+        return getTestDirectory().file(path)
     }
 
     protected String getBuildFileName() {
@@ -163,19 +167,20 @@ class AbstractGradleSpecification extends Specification {
         return prop.get("implementation-classpath").toString().split(File.pathSeparator).collect { new File(it) }
     }
 
-    protected GradleExecuter using(UnaryOperator<GradleExecuter> action) {
+    protected GradleRunner using(UnaryOperator<GradleRunner> action) {
         executer = action.apply(executer)
         return executer
     }
 
-    protected GradleExecuter usingInitScript(File initScript) {
+    protected GradleRunner usingInitScript(File initScript) {
         return executer = executer.usingInitScript(initScript);
     }
 
-    // Used by GradleCompatibilityTestRunner
-    private static GradleDistribution gradleDistribution = null
+//    // Used by GradleCompatibilityTestRunner
+//    private static GradleDistribution gradleDistribution = null
     @PackageScope
     static void useGradleDistribution(GradleDistribution gradleDistribution) {
-        this.gradleDistribution = gradleDistribution
+        throw new UnsupportedOperationException("Not implemented");
+//        this.gradleDistribution = gradleDistribution
     }
 }

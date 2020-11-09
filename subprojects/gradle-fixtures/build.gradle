@@ -52,6 +52,10 @@ dependencies {
     api 'org.hamcrest:hamcrest:2.2'
     api 'com.google.guava:guava:28.2-jre'
 
+    // TODO: For convenience until we fully migrate
+    api project(':gradle-runner-kit')
+    api testFixtures(project(':gradle-runner-kit'))
+
     implementation 'org.apache.commons:commons-lang3:3.9' // For StringUtils
     implementation 'org.apache.ant:ant:1.9.13'
     implementation 'org.ow2.asm:asm:6.0'
@@ -70,6 +74,7 @@ dependencies {
     testImplementation gradleTestKit() // Only for TestKit tests
 
     // SPOCK SUPPORT
+    spockSupportApi testFixtures(project(':gradle-runner-kit'))
     spockSupportApi project(':gradle-fixtures')
     spockSupportApi project(':gradle-fixtures-source-elements')
     spockSupportApi "org.codehaus.groovy:groovy-all:${groovyVersionOf(minimumGradleVersion)}"

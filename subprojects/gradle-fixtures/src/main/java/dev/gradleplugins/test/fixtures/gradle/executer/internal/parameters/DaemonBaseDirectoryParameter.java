@@ -5,6 +5,7 @@ import org.gradle.launcher.daemon.configuration.DaemonBuildOptions;
 import java.util.Collections;
 import java.util.Map;
 
+@Deprecated
 public final class DaemonBaseDirectoryParameter extends GradleExecutionParameterImpl<DaemonBaseDirectory> implements JvmSystemPropertyParameter<DaemonBaseDirectory>, DirectoryParameter<DaemonBaseDirectory> {
     public static DaemonBaseDirectoryParameter unset() {
         return noValue(DaemonBaseDirectoryParameter.class);

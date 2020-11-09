@@ -9,6 +9,7 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.util.*;
 
+@Deprecated
 public class GradleWrapperExecuter extends AbstractGradleExecuter {
     public GradleWrapperExecuter(GradleDistribution distribution, TestFile testDirectory, GradleExecuterBuildContext buildContext) {
         super(distribution, testDirectory, buildContext);

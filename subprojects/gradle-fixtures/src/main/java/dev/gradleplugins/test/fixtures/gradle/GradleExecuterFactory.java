@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.io.File;
 
+@Deprecated
 @RequiredArgsConstructor
 public class GradleExecuterFactory {
     private final File testDirectory;

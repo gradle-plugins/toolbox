@@ -19,6 +19,7 @@ package dev.gradleplugins.test.fixtures.gradle.executer;
 import java.util.List;
 import java.util.Set;
 
+@Deprecated
 public interface TaskOrderSpec {
     int assertMatches(int lastIndex, List<String> executedTaskPaths);
 

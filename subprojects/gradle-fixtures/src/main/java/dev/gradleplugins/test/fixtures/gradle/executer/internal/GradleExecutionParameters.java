@@ -17,6 +17,7 @@ import static java.util.Collections.emptyList;
 @Data
 @RequiredArgsConstructor
 @AllArgsConstructor
+@Deprecated
 public class GradleExecutionParameters {
     private final GradleDistribution distribution;
     private final GradleExecuterBuildContext buildContext;
