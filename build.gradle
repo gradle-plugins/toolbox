@@ -13,7 +13,7 @@ allprojects {
 
 // Configure gradle-fixtures-* versions
 subprojects {
-    if (project.name.startsWith('gradle-fixtures')) {
-        version = '0.0.101'
+    if (project.name.startsWith('gradle-fixtures') || project.name.startsWith('gradle-runner-kit')) {
+        version = '0.0.106'
     }
 }

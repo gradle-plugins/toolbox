@@ -15,7 +15,7 @@ apply plugin: 'dev.gradleplugins.java-gradle-plugin'
 apply plugin: 'dev.gradleplugins.gradle-plugin-unit-test'
 apply plugin: 'dev.gradleplugins.gradle-plugin-functional-test'
 
-version = '1.1.19'
+version = '1.1.24'
 
 gradlePlugin {
     plugins {
