@@ -16,15 +16,24 @@ repositories {
     maven { url = 'https://dl.bintray.com/nokeedev/distributions-snapshots/' }
 }
 
+// Caveman dependency shading
+def shadedConfiguration = configurations.create('shaded')
+configurations.compileOnly.extendsFrom(shadedConfiguration)
+configurations.testImplementation.extendsFrom(shadedConfiguration)
+tasks.named('jar', Jar) { task ->
+    task.from({ shadedConfiguration.files.collect { zipTree(it) } })
+}
+
 dependencies {
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
+    shaded "dev.nokee:coreExec:${nokeeCoreExecVersion}"
+
     api project(':gradle-runner-kit-api')
     api(project(':gradle-runner-kit-impl')) { because 'we need the common executor classes' }
-    implementation project(':gradle-fixtures-file-system') // TODO: shadow or rename project
-    implementation 'org.apache.commons:commons-lang3:3.9' // TODO: shadow
-    implementation 'dev.nokee:coreExec:0.5.0-dfbba94d' // TODO: shadow
+    implementation project(':gradle-fixtures-file-system')
+    implementation 'org.apache.commons:commons-lang3:3.9'
 
     testImplementation platform('org.spockframework:spock-bom:1.2-groovy-2.5')
     testImplementation 'org.spockframework:spock-core'
