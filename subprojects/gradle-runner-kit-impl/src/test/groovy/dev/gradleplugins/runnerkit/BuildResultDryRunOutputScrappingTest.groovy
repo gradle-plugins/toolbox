@@ -43,4 +43,23 @@ class BuildResultDryRunOutputScrappingTest extends Specification {
         expect:
         from(outputVerbose) == from(outputDryRun)
     }
+
+    def "can extract task from mixed dry-ran/verbose console output"() {
+        def output = ''':compileJava SKIPPED
+            |:processResources SKIPPED
+            |:classes SKIPPED
+            |:jar SKIPPED
+            |:compileMacosCpp SKIPPED
+            |:linkMacos SKIPPED
+            |:jarMacos SKIPPED
+            |:assembleMacos SKIPPED
+            |> Task :library:compileCpp
+            |> Task :library:link
+            |
+            |BUILD SUCCESSFUL in 788ms'''.stripMargin()
+
+        expect:
+        from(output).executedTaskPaths == [':compileJava', ':processResources', ':classes', ':jar', ':compileMacosCpp', ':linkMacos', ':jarMacos', ':assembleMacos', ':library:compileCpp', ':library:link']
+        from(output).skippedTaskPaths == [':compileJava', ':processResources', ':classes', ':jar', ':compileMacosCpp', ':linkMacos', ':jarMacos', ':assembleMacos']
+    }
 }
