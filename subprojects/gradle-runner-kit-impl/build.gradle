@@ -16,7 +16,7 @@ repositories {
     gradlePluginDevelopment()
     jcenter()
     mavenCentral()
-    maven { url = 'https://dl.bintray.com/nokeedev/distributions-snapshots/' }
+    maven { url = 'https://repo.nokeedev.net/snapshot' }
 }
 
 // Caveman dependency shading

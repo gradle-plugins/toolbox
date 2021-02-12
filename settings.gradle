@@ -1,8 +1,8 @@
 pluginManagement {
     repositories {
         gradlePluginPortal()
-        maven { url = 'https://dl.bintray.com/nokeedev/documentations' }
-        maven { url = 'https://dl.bintray.com/nokeedev/distributions-snapshots' }
+        maven { url = 'https://repo.nokeedev.net/release' }
+        maven { url = 'https://repo.nokeedev.net/snapshot' }
     }
     resolutionStrategy {
         eachPlugin {
@@ -19,7 +19,7 @@ pluginManagement {
 buildscript {
     repositories {
         gradlePluginPortal()
-        maven { url = 'https://dl.bintray.com/gradle-plugins/distributions' }
+        maven { url = 'https://repo.nokeedev.net/release' }
     }
     dependencies {
         classpath 'dev.gradleplugins:gradle-plugin-development:1.1.22'
