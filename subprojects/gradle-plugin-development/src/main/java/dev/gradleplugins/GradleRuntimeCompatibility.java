@@ -99,6 +99,7 @@ public class GradleRuntimeCompatibility {
                 LOGGER.warn(String.format("Unknown Groovy version for Gradle '%s', please open an issue on https://github.com/gradle-plugins/toolbox. Assuming value of the latest known version.", gradleVersion.toString()));
             case "6.6":
             case "6.7":
+            case "6.8":
                 return "2.5.12"; //"org.gradle.groovy:groovy-all:1.3-2.5.12";
         }
     }
@@ -232,6 +233,8 @@ public class GradleRuntimeCompatibility {
             case "6.6":
             case "6.7":
                 return Optional.of("1.3.72");
+            case "6.8":
+                return Optional.of("1.4.20");
         }
     }
 }
