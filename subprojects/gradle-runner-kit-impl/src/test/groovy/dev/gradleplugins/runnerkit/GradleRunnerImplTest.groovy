@@ -34,7 +34,7 @@ class GradleRunnerImplTest extends Specification implements FileSystemFixture {
 
     def "can account for all execution parameters"() {
         expect:
-        executionDefaults.executionParameters.size() == 26
+        executionDefaults.executionParameters.size() == 28
     }
 
     def "can disable stacktrace"() {
@@ -420,6 +420,7 @@ class GradleRunnerImplTest extends Specification implements FileSystemFixture {
 
         @Override
         GradleExecutionResult run(GradleExecutionContext parameters) {
+            ((GradleRunnerParameters) parameters).calculateValues()
             this.parameters = parameters
             this.executed = true
             return new GradleExecutionResult() {
