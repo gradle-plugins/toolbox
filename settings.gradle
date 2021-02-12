@@ -4,6 +4,13 @@ pluginManagement {
         maven { url = 'https://dl.bintray.com/nokeedev/documentations' }
         maven { url = 'https://dl.bintray.com/nokeedev/distributions-snapshots' }
     }
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.name == 'bintray-publish') {
+                it.useVersion('0.5.0-430640a7')
+            }
+        }
+    }
 }
 
 // WORKAROUND: There seems to be a bug where Gradle is too eager to perform dependency substitution.

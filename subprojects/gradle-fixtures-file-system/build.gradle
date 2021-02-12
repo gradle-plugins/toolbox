@@ -1,7 +1,7 @@
 plugins {
     id 'java-library'
     id 'groovy-base'
-    id 'dev.nokee.documentation.bintray-publish' version '0.1.13'
+    id 'dev.nokee.experimental.bintray-publish'
     id 'java-test-fixtures'
 }
 
