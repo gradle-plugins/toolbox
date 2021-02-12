@@ -319,6 +319,17 @@ public interface GradleRunner {
     GradleRunner withGradleUserHomeDirectory(File gradleUserHomeDirectory);
 
     /**
+     * Configures a unique Gradle user home directory for the test.
+     *
+     * The Gradle user home directory used will be underneath the {@link #getWorkingDirectory()} directory.
+     *
+     * <p>Note: does not affect the daemon base dir.</p>
+     *
+     * @return a new {@link GradleRunner} instance configured with a unique Gradle user home directory, neverl null.
+     */
+    GradleRunner requireOwnGradleUserHomeDirectory();
+
+    /**
      * Sets the environment variables to use when executing the build. Defaults to the environment of this process.
      *
      * @param environmentVariables the environment variables to use

@@ -91,4 +91,18 @@ class GradleUserHomeDirectoryProviderTest extends Specification implements FileS
         where:
         [flag, provider] << [['--gradle-user-home', '-g'], [testKitDirectory(), of(new File('foo'))]].combinations()
     }
+
+    def "can create isolated Gradle user home directory"() {
+        given:
+        def context = Stub(GradleExecutionContext) {
+            getWorkingDirectory() >> WorkingDirectoryProvider.of(testDirectory)
+        }
+        def subject = GradleUserHomeDirectoryProvider.isolatedGradleUserHomeDirectory()
+
+        when:
+        subject.calculateValue(context)
+
+        then:
+        subject.get() == file('user-home')
+    }
 }

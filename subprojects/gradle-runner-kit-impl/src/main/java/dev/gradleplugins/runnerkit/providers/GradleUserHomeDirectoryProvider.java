@@ -28,7 +28,10 @@ public final class GradleUserHomeDirectoryProvider extends AbstractGradleExecuti
     }
 
     public static Function<GradleExecutionContext, File> relativeToGradleUserHome(String path) {
-        return context -> FileSystemUtils.file(context.getGradleUserHomeDirectory().get(), path);
+        return context -> {
+            ((GradleExecutionProviderInternal<File>) context.getGradleUserHomeDirectory()).calculateValue(context);
+            return FileSystemUtils.file(context.getGradleUserHomeDirectory().get(), path);
+        };
     }
 
 //    private File createTestKitDir(TestKitDirProvider testKitDirProvider) {
@@ -49,6 +52,10 @@ public final class GradleUserHomeDirectoryProvider extends AbstractGradleExecuti
 
     public static GradleUserHomeDirectoryProvider of(File gradleUserHomeDirectory) {
         return fixed(GradleUserHomeDirectoryProvider.class, gradleUserHomeDirectory);
+    }
+
+    public static GradleUserHomeDirectoryProvider isolatedGradleUserHomeDirectory() {
+        return calculated(GradleUserHomeDirectoryProvider.class, WorkingDirectoryProvider.relativeToWorkingDirectory("user-home"));
     }
 
     @Override

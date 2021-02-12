@@ -272,6 +272,14 @@ class GradleRunnerImplTest extends Specification implements FileSystemFixture {
         executionOf { withGradleUserHomeDirectory(file('user-home')) }.allArguments.containsAll(['--gradle-user-home', file('user-home').absolutePath])
     }
 
+    def "can isolate Gradle user home directory"() {
+        expect:
+        executionOf { inDirectory(testDirectory).requireOwnGradleUserHomeDirectory() }.gradleUserHomeDirectory.get() == file('user-home')
+        executionOf { requireOwnGradleUserHomeDirectory().inDirectory(testDirectory) }.gradleUserHomeDirectory.get() == file('user-home')
+        executionOf { requireOwnGradleUserHomeDirectory().withGradleUserHomeDirectory(file('foo')) }.gradleUserHomeDirectory.get() == file('foo')
+        executionOf { inDirectory(testDirectory).withGradleUserHomeDirectory(file('foo')).requireOwnGradleUserHomeDirectory() }.gradleUserHomeDirectory.get() == file('user-home')
+    }
+
     def "can set environment variables"() {
         expect:
         !executionDefaults.environmentVariables.isPresent()

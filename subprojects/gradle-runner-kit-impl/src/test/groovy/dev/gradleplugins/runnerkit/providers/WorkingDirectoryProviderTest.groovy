@@ -1,6 +1,7 @@
 package dev.gradleplugins.runnerkit.providers
 
 import dev.gradleplugins.fixtures.file.FileSystemFixture
+import dev.gradleplugins.runnerkit.GradleExecutionContext
 import dev.gradleplugins.runnerkit.providers.WorkingDirectoryProvider
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -28,5 +29,15 @@ class WorkingDirectoryProviderTest extends Specification implements FileSystemFi
         def subject = WorkingDirectoryProvider.of(file('working-dir'))
         subject.isPresent()
         subject.get() == file('working-dir')
+    }
+
+    def "can calculate directory relative to working directory"() {
+        given:
+        def context = Stub(GradleExecutionContext) {
+            getWorkingDirectory() >> WorkingDirectoryProvider.of(file('foo'))
+        }
+        expect:
+        def subject = WorkingDirectoryProvider.relativeToWorkingDirectory('bar')
+        subject.apply(context) == file('foo/bar')
     }
 }

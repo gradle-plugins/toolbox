@@ -199,10 +199,10 @@ final class GradleRunnerImpl implements GradleRunner {
         return newInstance(parameters.withGradleUserHomeDirectory(GradleUserHomeDirectoryProvider.of(gradleUserHomeDirectory)));
     }
 
-//    @Override
-//    public GradleRunner requireOwnGradleUserHomeDirectory() {
-//        return newInstance(configuration.withGradleUserHomeDirectory(GradleUserHomeDirectoryParameter.of(GradleUserHomeDirectory.of(testDirectory.createDirectory("user-home")))));
-//    }
+    @Override
+    public GradleRunner requireOwnGradleUserHomeDirectory() {
+        return newInstance(parameters.withGradleUserHomeDirectory(GradleUserHomeDirectoryProvider.isolatedGradleUserHomeDirectory()));
+    }
     //endregion
 
     //region Environment variables configuration
