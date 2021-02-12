@@ -24,6 +24,7 @@ import dev.gradleplugins.internal.GradlePluginDevelopmentDependencyExtensionInte
 import lombok.val;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.util.GradleVersion;
 
 import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.*;
 
@@ -37,7 +38,12 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
         assertKotlinDslPluginIsNeverApplied(project.getPluginManager(), PLUGIN_ID);
 
         project.getPluginManager().apply(GradlePluginDevelopmentExtensionPlugin.class);
-        project.getPluginManager().apply("java-gradle-plugin"); // For plugin development
+        // Starting with Gradle 6.4, precompiled Groovy DSL plugins are available
+        if (GradleVersion.current().compareTo(GradleVersion.version("6.4")) >= 0) {
+            project.getPluginManager().apply("groovy-gradle-plugin"); // For plugin development
+        } else {
+            project.getPluginManager().apply("java-gradle-plugin"); // For plugin development
+        }
         removeGradleApiProjectDependency(project);
         project.getPluginManager().apply("groovy");
 
