@@ -229,6 +229,13 @@ final class GradleRunnerImpl implements GradleRunner {
     }
     //endregion
 
+    //region General configuration
+    @Override
+    public GradleRunner configure(UnaryOperator<GradleRunner> action) {
+        return Objects.requireNonNull(action.apply(this), "Please return a non-null GradleRunner from the configuration action when using GradleRunner#configure(action).");
+    }
+    //endregion
+
     //region Standard output configuration
     @Override
     public GradleRunner forwardStandardOutput(Writer writer) {

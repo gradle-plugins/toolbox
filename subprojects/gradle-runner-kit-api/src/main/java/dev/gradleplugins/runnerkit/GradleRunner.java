@@ -378,6 +378,13 @@ public interface GradleRunner {
     GradleRunner withRichConsoleEnabled();
 
     /**
+     * Configures current runner using the specified operator.
+     *
+     * @return a the {@link GradleRunner} instance returned by the configuration action, never null.
+     */
+    GradleRunner configure(UnaryOperator<GradleRunner> action);
+
+    /**
      * Configures the runner to forward standard output from builds to the given writer.
      * <p>
      * The output of the build is always available via {@link BuildResult#getOutput()}.

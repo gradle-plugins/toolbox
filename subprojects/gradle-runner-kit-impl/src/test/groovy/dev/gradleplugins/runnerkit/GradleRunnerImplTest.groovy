@@ -21,6 +21,7 @@ import spock.lang.Specification
 import spock.lang.Subject
 
 import java.nio.charset.Charset
+import java.util.function.UnaryOperator
 
 @Subject(GradleRunnerImpl)
 class GradleRunnerImplTest extends Specification implements FileSystemFixture {
@@ -347,6 +348,47 @@ class GradleRunnerImplTest extends Specification implements FileSystemFixture {
     def "returns the working directory when configured"() {
         expect:
         executionOf { inDirectory(testDirectory) }.workingDirectory == WorkingDirectoryProvider.of(testDirectory)
+    }
+
+    def "throws exception if configuration action return null"() {
+        when:
+        executionOf { configure {null } }
+
+        then:
+        def ex = thrown(NullPointerException)
+        ex.message == "Please return a non-null GradleRunner from the configuration action when using GradleRunner#configure(action)."
+    }
+
+    def "returns runner returned from action"() {
+        given:
+        def runner = Stub(GradleRunner)
+
+        expect:
+        executionOf {
+            assert configure {runner } == runner
+            it
+        }
+    }
+
+    def "calls configuration action"() {
+        given:
+        def action = Mock(UnaryOperator)
+
+        when:
+        executionOf { configure(action) }
+
+        then:
+        1 * action.apply(_) >> { args -> args[0] }
+    }
+
+    def "pass current runner to action"() {
+        expect:
+        executionOf { runner ->
+            configure {
+                assert it == runner
+                it
+            }
+        }
     }
 
     static GradleRunner newRunner() {
