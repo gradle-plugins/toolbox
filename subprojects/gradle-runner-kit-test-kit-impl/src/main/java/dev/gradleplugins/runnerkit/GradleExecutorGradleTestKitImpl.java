@@ -117,7 +117,7 @@ final class GradleExecutorGradleTestKitImpl extends AbstractGradleExecutor {
 
     //region Environment variables
     private static Map<String, String> environmentVariables(GradleExecutionContext parameters) {
-        return parameters.getEnvironmentVariables().map(GradleExecutorGradleTestKitImpl::toStringValues).orElseGet(Collections::emptyMap);
+        return parameters.getEnvironmentVariables().map(GradleExecutorGradleTestKitImpl::toStringValues).orElse(null);
     }
 
     private static Map<String, String> toStringValues(Map<String, ?> environmentVariables) {

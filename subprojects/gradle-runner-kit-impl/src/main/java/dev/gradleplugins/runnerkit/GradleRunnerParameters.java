@@ -24,8 +24,8 @@ final class GradleRunnerParameters implements GradleExecutionContext {
     @With @NonNull private GradleDistributionProvider distribution = GradleDistributionProvider.executorDefault();
     @With @NonNull private WorkingDirectoryProvider workingDirectory = WorkingDirectoryProvider.unset();
     @With @NonNull private MissingSettingsFilePolicyProvider missingSettingsFilePolicy = MissingSettingsFilePolicyProvider.createWhenMissing();
-    @With @NonNull private EnvironmentVariablesProvider environmentVariables = EnvironmentVariablesProvider.contextDefault();
-    @With @NonNull private JavaHomeProvider javaHome = JavaHomeProvider.current();
+    @With @NonNull private EnvironmentVariablesProvider environmentVariables = EnvironmentVariablesProvider.inherited();
+    @With @NonNull private JavaHomeProvider javaHome = JavaHomeProvider.inherited();
     @With @NonNull private ConsoleTypeProvider consoleType = ConsoleTypeProvider.defaultConsole();
 //    @With private boolean debuggerAttached = false;
 //    @With private boolean pluginClasspath = false;

@@ -802,7 +802,7 @@ public class AvailableToolChains {
         }
 
         private GradleRunner configureExecuter(GradleRunner executer) {
-            return executer.withEnvironmentVariables(Collections.singletonMap("DEVELOPER_DIR", xcodeDir.getAbsolutePath()));
+            return executer.withEnvironmentVariable("DEVELOPER_DIR", xcodeDir.getAbsolutePath());
         }
 
         public Optional<InstalledToolChain> getSwiftc() {

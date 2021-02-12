@@ -2,13 +2,12 @@ package dev.gradleplugins.runnerkit.providers
 
 import dev.gradleplugins.runnerkit.GradleExecutionContext
 import dev.gradleplugins.runnerkit.InvalidRunnerConfigurationException
-import dev.gradleplugins.runnerkit.providers.EnvironmentVariablesProvider
-import dev.gradleplugins.runnerkit.providers.JavaHomeProvider
 import org.apache.commons.lang3.SystemUtils
 import spock.lang.Specification
 import spock.lang.Subject
 
 import static dev.gradleplugins.runnerkit.providers.JavaHomeProvider.current
+import static dev.gradleplugins.runnerkit.providers.JavaHomeProvider.inherited
 
 @Subject(JavaHomeProvider)
 class JavaHomeProviderTest extends Specification {
@@ -20,10 +19,17 @@ class JavaHomeProviderTest extends Specification {
         subject.asEnvironmentVariables == [JAVA_HOME: SystemUtils.javaHome.absolutePath]
     }
 
+    def "can provide JAVA_HOME from environment variables"() {
+        expect:
+        def subject = inherited()
+        !subject.isPresent()
+        subject.asEnvironmentVariables == [:]
+    }
+
     def "throws exception when using environment variable"() {
         given:
         def context = Stub(GradleExecutionContext) {
-            getEnvironmentVariables() >> EnvironmentVariablesProvider.contextDefault().plus([JAVA_HOME: SystemUtils.javaHome])
+            getEnvironmentVariables() >> EnvironmentVariablesProvider.inherited().plus([JAVA_HOME: SystemUtils.javaHome])
         }
 
         when:

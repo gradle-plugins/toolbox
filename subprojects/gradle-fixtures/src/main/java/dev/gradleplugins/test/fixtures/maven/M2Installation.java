@@ -111,7 +111,7 @@ public class M2Installation implements Function<GradleRunner, GradleRunner> {
         // if call `using m2`, then we disable the automatic isolation of m2
         isolateMavenLocal = false;
         if (globalMavenDirectory.exists()) {
-            result = result.withEnvironmentVariables(Collections.singletonMap("M2_HOME", globalMavenDirectory.getAbsolutePath()));
+            result = result.withEnvironmentVariable("M2_HOME", globalMavenDirectory.getAbsolutePath());
         }
         return result;
     }

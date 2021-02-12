@@ -14,6 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -87,6 +88,7 @@ final class GradleExecutorGradleWrapperImpl extends AbstractGradleExecutor {
         return parameters.getEnvironmentVariables()
                 .map(CommandLineToolInvocationEnvironmentVariables::from)
                 .orElse(inherit())
-                .plus(from(((GradleExecutionEnvironmentVariableProvider)parameters.getJavaHome()).getAsEnvironmentVariables()));
+                .plus(from(((GradleExecutionEnvironmentVariableProvider)parameters.getJavaHome()).getAsEnvironmentVariables()))
+                .plus(from(Collections.singletonMap("GRADLE_USER_HOME", parameters.getGradleUserHomeDirectory().get())));
     }
 }

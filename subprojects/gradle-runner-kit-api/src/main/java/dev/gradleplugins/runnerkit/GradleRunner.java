@@ -321,10 +321,43 @@ public interface GradleRunner {
     /**
      * Sets the environment variables to use when executing the build. Defaults to the environment of this process.
      *
-     * @param environment the environment variables to use
+     * @param environmentVariables the environment variables to use
      * @return a new {@link GradleRunner} instance configured with the specified environment variables, never null.
      */
-    GradleRunner withEnvironmentVariables(Map<String, ?> environment);
+    GradleRunner withEnvironmentVariables(Map<String, ?> environmentVariables);
+
+    /**
+     * Adds an additional environment variable to use when executing the build.
+     *
+     * @param key the environment variable key
+     * @param value the environment variable value
+     * @return a new {@link GradleRunner} instance configured with the specified additional environment variable, never null.
+     */
+    GradleRunner withEnvironmentVariable(String key, String value);
+
+    /**
+     * Sets the environment variables to use when executing the build. Defaults to the environment of this process.
+     * <p>
+     * Convenience method to allow migration from, older, Gradle Executer API.
+     *
+     * @param environmentVariables the environment variables to use
+     * @return a new {@link GradleRunner} instance configured with the specified environment variables, never null.
+     * @see #withEnvironmentVariables(Map)
+     */
+    @Deprecated
+    GradleRunner withEnvironmentVars(Map<String, ?> environmentVariables);
+
+    /**
+     * Sets the environment variables to use when executing the build. Defaults to the environment of this process.
+     * <p>
+     * Convenience method to allow migration from Gradle Test Kit API.
+     *
+     * @param environmentVariables the environment variables to use
+     * @return a new {@link GradleRunner} instance configured with the specified environment variables, never null.
+     */
+    default GradleRunner withEnvironment(Map<String, String> environmentVariables) {
+        return withEnvironmentVariables(environmentVariables);
+    }
 
     /**
      * Forces the rich console output.

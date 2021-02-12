@@ -279,7 +279,19 @@ class GradleRunnerImplTest extends Specification implements FileSystemFixture {
         and:
         executionOf { withEnvironmentVariables([A: 'a']) }.environmentVariables.get() == [A: 'a']
         executionOf { withEnvironmentVariables([A: 'a']).withEnvironmentVariables([A: 'gg']) }.environmentVariables.get() == [A: 'gg']
-        executionOf { withEnvironmentVariables([A: 'a']).withEnvironmentVariables([B: 'b']) }.environmentVariables.get() == [A: 'a', B: 'b']
+        executionOf { withEnvironmentVariables([A: 'a']).withEnvironmentVariables([B: 'b']) }.environmentVariables.get() == [B: 'b']
+
+        and:
+        executionOf { withEnvironmentVariable('A', 'a') }.environmentVariables.get() == System.getenv() + [A: 'a']
+        executionOf { withEnvironmentVariable('A', 'a').withEnvironmentVariable('B', 'b') }.environmentVariables.get() == System.getenv() + [A: 'a', B: 'b']
+
+        and:
+        executionOf { withEnvironmentVars([A: 'a', B: 'b']) }.environmentVariables.get() == System.getenv() + [A: 'a', B: 'b']
+        executionOf { withEnvironmentVars([A: 'a', B: 'b']).withEnvironmentVars([C: 'c']) }.environmentVariables.get() == System.getenv() + [C: 'c']
+
+        and:
+        executionOf { withEnvironment([A: 'a', B: 'b']) }.environmentVariables.get() == [A: 'a', B: 'b']
+        executionOf { withEnvironment([A: 'a', B: 'b']).withEnvironment([C: 'c']) }.environmentVariables.get() == [C: 'c']
     }
 
     def "can set standard output"() {

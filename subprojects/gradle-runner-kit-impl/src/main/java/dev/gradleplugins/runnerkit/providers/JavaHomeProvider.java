@@ -15,6 +15,10 @@ public final class JavaHomeProvider extends AbstractGradleExecutionProvider<File
         return fixed(JavaHomeProvider.class, SystemUtils.getJavaHome());
     }
 
+    public static JavaHomeProvider inherited() {
+        return noValue(JavaHomeProvider.class);
+    }
+
     @Override
     public Map<String, String> getAsEnvironmentVariables() {
         return map(JavaHomeProvider::asEnvironmentVariables).orElseGet(Collections::emptyMap);

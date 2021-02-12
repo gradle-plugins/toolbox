@@ -7,9 +7,7 @@ import java.io.File;
 import java.io.Writer;
 import java.net.URI;
 import java.nio.charset.Charset;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
@@ -210,7 +208,17 @@ final class GradleRunnerImpl implements GradleRunner {
     //region Environment variables configuration
     @Override
     public GradleRunner withEnvironmentVariables(Map<String, ?> environment) {
-        return newInstance(parameters.withEnvironmentVariables(parameters.getEnvironmentVariables().plus(environment)));
+        return newInstance(parameters.withEnvironmentVariables(EnvironmentVariablesProvider.of(environment)));
+    }
+
+    @Override
+    public GradleRunner withEnvironmentVariable(String key, String value) {
+        return newInstance(parameters.withEnvironmentVariables(parameters.getEnvironmentVariables().plus(Collections.singletonMap(key, value))));
+    }
+
+    @Override
+    public GradleRunner withEnvironmentVars(Map<String, ?> environmentVariables) {
+        return newInstance(parameters.withEnvironmentVariables(parameters.getEnvironmentVariables().plus(environmentVariables)));
     }
     //endregion
 
