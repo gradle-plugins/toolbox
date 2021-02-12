@@ -316,7 +316,7 @@ final class GradleRunnerImpl implements GradleRunner {
         message.append(" in ");
         message.append(parameters.getProjectDirectory().orElseGet(parameters.getWorkingDirectory()::get).getAbsolutePath());
         message.append(" with arguments ");
-        message.append(parameters.getArguments().get()); // TODO: Should we just use all arguments
+        message.append(parameters.getAllArguments());
 
         String output = gradleExecutionResult.getOutput();
         if (output != null && !output.isEmpty()) {
