@@ -2,10 +2,9 @@ package dev.gradleplugins
 
 import dev.gradleplugins.fixtures.sample.GroovyBasicGradlePlugin
 import dev.gradleplugins.fixtures.sample.JavaBasicGradlePlugin
+import dev.gradleplugins.fixtures.sources.SourceElement
 import dev.gradleplugins.fixtures.test.DefaultTestExecutionResult
 import dev.gradleplugins.integtests.fixtures.ArchiveTestFixture
-import dev.gradleplugins.test.fixtures.scan.GradleEnterpriseBuildScan
-import dev.gradleplugins.test.fixtures.sources.SourceElement
 import org.hamcrest.CoreMatchers
 
 abstract class AbstractGradlePluginDevelopmentUnitTestingFunctionalTest extends AbstractGradlePluginDevelopmentFunctionalSpec implements ArchiveTestFixture {
@@ -15,7 +14,6 @@ abstract class AbstractGradlePluginDevelopmentUnitTestingFunctionalTest extends 
         componentUnderTest.writeToProject(testDirectory)
 
         when:
-        executer = new GradleEnterpriseBuildScan().apply(executer)
         succeeds('build')
 
         then:

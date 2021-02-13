@@ -2,9 +2,9 @@ package dev.gradleplugins
 
 import dev.gradleplugins.fixtures.sample.GroovyBasicGradlePlugin
 import dev.gradleplugins.fixtures.sample.JavaBasicGradlePlugin
+import dev.gradleplugins.fixtures.sources.SourceElement
 import dev.gradleplugins.fixtures.test.DefaultTestExecutionResult
 import dev.gradleplugins.integtests.fixtures.AbstractGradleSpecification
-import dev.gradleplugins.test.fixtures.sources.SourceElement
 
 abstract class AbstractGradlePluginDevelopmentTestKitFunctionalTest extends AbstractGradleSpecification {
     def "can execute vanilla TestKit tests"() {
