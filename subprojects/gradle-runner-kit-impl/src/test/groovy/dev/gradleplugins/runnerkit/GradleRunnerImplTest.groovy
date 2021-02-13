@@ -296,7 +296,7 @@ class GradleRunnerImplTest extends Specification implements FileSystemFixture {
 
         and:
         executionOf { withEnvironmentVars([A: 'a', B: 'b']) }.environmentVariables.get() == System.getenv() + [A: 'a', B: 'b']
-        executionOf { withEnvironmentVars([A: 'a', B: 'b']).withEnvironmentVars([C: 'c']) }.environmentVariables.get() == System.getenv() + [C: 'c']
+        executionOf { withEnvironmentVars([A: 'a', B: 'b']).withEnvironmentVars([C: 'c']) }.environmentVariables.get() == System.getenv() + [A: 'a', B: 'b', C: 'c']
 
         and:
         executionOf { withEnvironment([A: 'a', B: 'b']) }.environmentVariables.get() == [A: 'a', B: 'b']
