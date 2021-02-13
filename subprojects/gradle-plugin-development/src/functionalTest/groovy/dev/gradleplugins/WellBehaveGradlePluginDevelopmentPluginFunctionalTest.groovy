@@ -319,7 +319,7 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
             rootProject.name = "hello-gradle-plugin"
         """
         using m2
-        executer.inDirectory(pluginDirectory).withTasks("publish").run()
+        executer.inDirectory(pluginDirectory).withTasks("publish").build()
     }
 
     // TODO: This could maybe be move into some fixtures around publishing and using plugins...
