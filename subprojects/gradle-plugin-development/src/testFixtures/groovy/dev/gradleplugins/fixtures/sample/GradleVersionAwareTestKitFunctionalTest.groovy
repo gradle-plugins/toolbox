@@ -28,10 +28,10 @@ import ${AbstractGradleSpecification.canonicalName}
 
 class VersionAwareFunctionalTest extends ${AbstractGradleSpecification.simpleName} {
     def setup() {
-        if (gradleDistributionUnderTest == null) {
-            println "No default Gradle version"
+        if (System.properties.containsKey(DEFAULT_GRADLE_VERSION_SYSPROP_NAME)) {
+            println "Default Gradle version: \${gradleDistributionUnderTest}"
         } else {
-            println "Default Gradle version: \${gradleDistributionUnderTest.version.version.toString()}"
+            println "No default Gradle version"
         }
     }
 
