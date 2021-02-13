@@ -70,7 +70,7 @@ abstract class AbstractGradlePluginDevelopmentFunctionalTestingFunctionalTest ex
             }
             
             repositories {
-                jcenter()
+                mavenCentral()
             }
             
             functionalTest {

@@ -134,7 +134,7 @@ abstract class AbstractGradlePluginDevelopmentTestingStrategyFunctionalTest exte
             }
 
             repositories {
-                jcenter()
+                mavenCentral()
             }
 
             functionalTest {

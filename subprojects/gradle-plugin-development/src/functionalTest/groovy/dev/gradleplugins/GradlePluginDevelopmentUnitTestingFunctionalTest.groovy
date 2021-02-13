@@ -66,7 +66,7 @@ abstract class AbstractGradlePluginDevelopmentUnitTestingFunctionalTest extends 
             }
             
             repositories {
-                jcenter()
+                mavenCentral()
             }
             
             import static ${GradleRuntimeCompatibility.canonicalName}.groovyVersionOf

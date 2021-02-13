@@ -327,7 +327,7 @@ public class Bar {}
             }
 
             repositories {
-                jcenter()
+                mavenCentral()
             }
         """
         new JavaBasicGradlePlugin().writeToProject(testDirectory)

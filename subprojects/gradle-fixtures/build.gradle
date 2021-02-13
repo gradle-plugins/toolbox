@@ -35,9 +35,12 @@ java {
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
     gradlePluginPortal()
     gradlePluginDevelopment()
+    jcenter() {
+        mavenContent { includeGroup("net.rubygrapefruit") }
+    }
     maven { url = 'https://repo.nokeedev.net/snapshots' }
 }
 
