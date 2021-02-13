@@ -22,11 +22,12 @@ import dev.gradleplugins.test.fixtures.file.TestFile;
 import java.io.File;
 import java.util.Collections;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import static dev.gradleplugins.fixtures.file.FileSystemUtils.*;
 import static org.junit.Assert.assertTrue;
 
-public class M2Installation implements Function<GradleRunner, GradleRunner> {
+public class M2Installation implements UnaryOperator<GradleRunner> {
     private final File testDirectory;
     private boolean initialized = false;
     private File userHomeDirectory;
