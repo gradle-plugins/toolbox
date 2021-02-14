@@ -14,11 +14,6 @@ java {
 repositories {
     mavenCentral()
     maven { url = 'https://repo.nokeedev.net/snapshot' }
-
-    // For dev.nokee:coreExec
-    jcenter() {
-        mavenContent { includeGroup("net.rubygrapefruit") }
-    }
 }
 
 // Caveman dependency shading
