@@ -2,6 +2,7 @@ plugins {
     id 'java-library'
     id 'groovy-base'
     id 'dev.nokee.experimental.bintray-publish'
+    id 'maven-publish'
 }
 
 java {

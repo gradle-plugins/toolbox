@@ -17,3 +17,17 @@ subprojects {
         version = '0.0.117'
     }
 }
+
+allprojects {
+    pluginManager.withPlugin('maven-publish') {
+        publishing {
+            repositories {
+                maven {
+                    name = 'nokeeRelease'
+                    url = providers.gradleProperty("${name}Url").forUseAtConfigurationTime().orElse('')
+                    credentials(AwsCredentials)
+                }
+            }
+        }
+    }
+}

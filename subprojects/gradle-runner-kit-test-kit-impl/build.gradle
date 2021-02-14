@@ -3,6 +3,7 @@ plugins {
     id 'groovy-base'
     id 'java-test-fixtures'
     id 'dev.nokee.experimental.bintray-publish'
+    id 'maven-publish'
 }
 
 java {
