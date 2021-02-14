@@ -1,4 +1,4 @@
-:jbake-version: 1.1
+:jbake-version: 1.2
 // TODO: Add test for the version above
 = Gradle Plugin Development Toolbox
 
@@ -13,6 +13,18 @@ The Nokee team developed the toolbox plugins and offer them for free to everyone
 
 Apply link:https://nokee.dev/docs/nightly/manual/plugin-references.html#sec:plugin-reference-gradledev[any of the toolbox plugins] to your build just like any other Gradle plugin:
 
+settings.gradle
+[source,groovy]
+----
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven { url = 'https://repo.nokeedev.net/release' }
+    }
+}
+----
+
+build.gradle
 [source,groovy,subs=attributes+]
 ----
 plugins {

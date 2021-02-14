@@ -9,6 +9,18 @@ Head over to link:https://nokee.dev/docs/nightly/samples/gradle-plugin-developme
 
 Apply the following plugin in your `settings.gradle[.kts]`:
 
+settings.gradle
+[source,groovy]
+----
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven { url = 'https://repo.nokeedev.net/release' }
+    }
+}
+----
+
+build.gradle
 [source,groovy,subs=attributes+]
 ----
 plugins {

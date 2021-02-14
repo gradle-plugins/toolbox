@@ -1,4 +1,4 @@
-:jbake-version: 1.1
+:jbake-version: 1.2
 = Gradle Plugin Development Plugins
 
 The Gradle plugin development plugins are a set of plugins accelerating Gradle plugin development.
@@ -8,6 +8,18 @@ Head over to the link:https://nokee.dev/docs/nightly/manual/gradle-plugin-develo
 
 Apply link:https://nokee.dev/docs/nightly/manual/plugin-references.html#sec:plugin-reference-gradledev[any of the toolbox plugins] in your build script, e.g. `build.gradle[.kts]`:
 
+settings.gradle
+[source,groovy]
+----
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven { url = 'https://repo.nokeedev.net/release' }
+    }
+}
+----
+
+build.gradle
 [source,groovy,subs=attributes+]
 ----
 plugins {
