@@ -2,7 +2,6 @@ plugins {
     id 'java-library'
     id 'groovy-base'
     id 'java-test-fixtures'
-    id 'dev.nokee.experimental.bintray-publish'
     id 'maven-publish'
 }
 
@@ -36,12 +35,6 @@ publishing {
     publications {
         library(MavenPublication) {
             from components.java
-        }
-    }
-    repositories {
-        maven {
-            url = "https://dl.bintray.com/gradle-plugins/distributions"
-            ext.packageName = 'dev.gradleplugins:gradle-fixtures'
         }
     }
 }

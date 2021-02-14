@@ -1,14 +1,9 @@
-import com.jfrog.bintray.gradle.tasks.BintrayUploadTask
-import org.gradle.api.publish.maven.internal.artifact.FileBasedMavenArtifact
 import static dev.gradleplugins.GradleRuntimeCompatibility.*
-
-import java.text.SimpleDateFormat
 
 plugins {
     id 'java-library'
     id 'groovy' // for Spock framework
     id 'maven-publish'
-    id 'com.jfrog.bintray'
     id 'java-test-fixtures'
 }
 
@@ -115,75 +110,6 @@ publishing {
     }
 }
 
-// Temporary workaround for https://github.com/bintray/gradle-bintray-plugin/issues/229
-PublishingExtension publishing = project.extensions.getByType(PublishingExtension)
-project.tasks.withType(BintrayUploadTask).configureEach {
-    doFirst {
-        publishing.publications.withType(MavenPublication).each { publication ->
-            File moduleFile = project.buildDir.toPath()
-                    .resolve("publications/${publication.name}/module.json").toFile()
-
-            if (moduleFile.exists()) {
-                publication.artifact(new FileBasedMavenArtifact(moduleFile) {
-                    @Override
-                    protected String getDefaultExtension() {
-                        return "module"
-                    }
-                })
-            }
-        }
-    }
-}
-
-private String resolveProperty(Project project, String envVarKey, String projectPropKey) {
-    Object propValue = System.getenv().get(envVarKey);
-
-    if (propValue != null) {
-        return propValue.toString();
-    }
-
-    propValue = project.findProperty(projectPropKey);
-    if (propValue != null) {
-        return propValue.toString();
-    }
-
-    return null;
-}
-
-
-afterEvaluate {
-    bintray {
-        user = resolveProperty(project, "BINTRAY_USER", "dev.gradleplugins.bintray.user")
-        key = resolveProperty(project, "BINTRAY_KEY", "dev.gradleplugins.bintray.key")
-        publications = publishing.publications.collect { it.name }
-
-        publish = true
-        override = System.getProperties().containsKey('force')
-
-        pkg {
-            repo = 'distributions'
-            name = 'dev.gradleplugins:gradle-fixtures'
-            desc = project.description
-            userOrg = 'gradle-plugins'
-            websiteUrl = 'https://nokee.dev'
-            issueTrackerUrl = 'https://github.com/gradle-plugins/toolbox/issues'
-            vcsUrl = 'https://github.com/gradle-plugins/toolbox.git'
-            labels = ['gradle', 'gradle-api', 'gradle-plugins']
-            licenses = ['Apache-2.0']
-            publicDownloadNumbers = false
-
-            version {
-                released = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").format(new Date())
-                // TODO: Sign artifacts
-                gpg {
-                    sign = false
-                    passphrase = resolveProperty(project, "GPG_PASSPHRASE", "dev.gradleplugins.bintray.gpgPassphrase")
-                }
-            }
-        }
-    }
-}
-
 tasks.register('release') {
-    dependsOn('bintrayUpload')
+    dependsOn('publishAllPublicationsToNokeeReleaseRepository')
 }

@@ -1,13 +1,6 @@
-import com.jfrog.bintray.gradle.tasks.BintrayUploadTask
-import groovy.json.JsonOutput
-import org.gradle.api.publish.maven.internal.artifact.FileBasedMavenArtifact
 import static dev.gradleplugins.GradleRuntimeCompatibility.*
 
-import java.text.SimpleDateFormat
-
 plugins {
-    id 'com.jfrog.bintray'
-    id 'maven-publish'
     id 'org.jetbrains.kotlin.jvm' version "1.3.72"
     id 'java-test-fixtures'
     id 'maven-publish'
@@ -106,108 +99,6 @@ dependencies {
     testFixturesImplementation "org.codehaus.groovy:groovy-all:${groovyVersionOf(minimumGradleVersion)}"
 }
 
-// Temporary workaround for https://github.com/bintray/gradle-bintray-plugin/issues/229
-PublishingExtension publishing = project.extensions.getByType(PublishingExtension)
-project.tasks.withType(BintrayUploadTask).configureEach {
-    doFirst {
-        publishing.publications.withType(MavenPublication).each { publication ->
-            File moduleFile = project.buildDir.toPath()
-                    .resolve("publications/${publication.name}/module.json").toFile()
-
-            if (moduleFile.exists()) {
-                publication.artifact(new FileBasedMavenArtifact(moduleFile) {
-                    @Override
-                    protected String getDefaultExtension() {
-                        return "module"
-                    }
-                })
-            }
-        }
-    }
-}
-
-private String resolveProperty(Project project, String envVarKey, String projectPropKey) {
-    Object propValue = System.getenv().get(envVarKey);
-
-    if (propValue != null) {
-        return propValue.toString();
-    }
-
-    propValue = project.findProperty(projectPropKey);
-    if (propValue != null) {
-        return propValue.toString();
-    }
-
-    return null;
-}
-
-
-afterEvaluate {
-    bintray {
-        user = resolveProperty(project, "BINTRAY_USER", "dev.gradleplugins.bintray.user")
-        key = resolveProperty(project, "BINTRAY_KEY", "dev.gradleplugins.bintray.key")
-        publications = publishing.publications.collect { it.name }
-
-        publish = true
-        override = System.getProperties().containsKey('force')
-
-        pkg {
-            repo = 'distributions'
-            name = 'dev.gradleplugins:gradle-development-plugins'
-            desc = project.description
-            userOrg = 'gradle-plugins'
-            websiteUrl = 'https://nokee.dev'
-            issueTrackerUrl = 'https://github.com/gradle-plugins/toolbox/issues'
-            vcsUrl = 'https://github.com/gradle-plugins/toolbox.git'
-            labels = ['gradle', 'gradle-api', 'gradle-plugins']
-            licenses = ['Apache-2.0']
-            publicDownloadNumbers = false
-
-            version {
-                released = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").format(new Date())
-                // TODO: Sign artifacts
-                gpg {
-                    sign = false
-                    passphrase = resolveProperty(project, "GPG_PASSPHRASE", "dev.gradleplugins.bintray.gpgPassphrase")
-                }
-            }
-        }
-    }
-}
-
-def updateBintrayMetadata = tasks.register('updateBintrayMetadata') {
-    doLast {
-        // Set attributes
-        if (project.version.toString().split('\\.').length == 2) {
-            println 'Publishing plugin metadata for plugins.gradle.org update...'
-            // Credentials
-            def user = resolveProperty(project, "BINTRAY_USER", "dev.gradleplugins.bintray.user")
-            def key = resolveProperty(project, "BINTRAY_KEY", "dev.gradleplugins.bintray.key")
-            def repository = 'distributions'
-            def packageName = 'dev.gradleplugins:gradle-development-plugins'
-
-            def data = ['gradle-plugin': [
-                    "dev.gradleplugins.java-gradle-plugin:${project.group}:${project.name}",
-                    "dev.gradleplugins.groovy-gradle-plugin:${project.group}:${project.name}",
-                    "dev.gradleplugins.gradle-plugin-development:${project.group}:${project.name}",
-                    "dev.gradleplugins.gradle-plugin-unit-test:${project.group}:${project.name}",
-                    "dev.gradleplugins.gradle-plugin-functional-test:${project.group}:${project.name}"
-            ]]
-            data = data.collect { k, v ->
-                return [name: k, values: v, type: 'string']
-            }
-
-            ['curl', '-X', 'POST', '-H', 'Content-Type: application/json', '--data', JsonOutput.toJson(data), "-u${user}:${key}", "https://api.bintray.com/packages/gradle-plugins/${repository}/${packageName}/versions/${project.version}/attributes"].execute().waitFor()
-        } else {
-            println 'No plugin metadata publishing for plugins.gradle.org'
-        }
-    }
-}
-
-rootProject.tasks.named('bintrayPublish') {
-    finalizedBy(updateBintrayMetadata)
-}
-
 tasks.register('release') {
-    dependsOn('bintrayUpload')
+    dependsOn('publishAllPublicationsToNokeeReleaseRepository')
 }
