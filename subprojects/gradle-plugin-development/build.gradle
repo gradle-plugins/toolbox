@@ -45,11 +45,6 @@ gradlePlugin {
 
 repositories {
     mavenCentral()
-
-    // For gradle-fixtures
-    jcenter() {
-        mavenContent { includeGroup("net.rubygrapefruit") }
-    }
 }
 
 test {

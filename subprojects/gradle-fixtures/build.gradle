@@ -33,9 +33,6 @@ repositories {
     mavenCentral()
     gradlePluginPortal()
     gradlePluginDevelopment()
-    jcenter() {
-        mavenContent { includeGroup("net.rubygrapefruit") }
-    }
     maven { url = 'https://repo.nokeedev.net/snapshots' }
 }
 
@@ -44,11 +41,6 @@ dependencies {
     //   Let's put the burden on the user to declare that as well
     //   They should be declaring that dependency anyway as this library is not meant to be used outside of the Gradle plugin development plugins within Gradle runtime.
     compileOnly gradleTestKit()
-
-    // TODO: this is required only if you are using rich console
-    api 'net.rubygrapefruit:ansi-control-sequence-util:0.2'
-    api 'org.hamcrest:hamcrest:2.2'
-    api 'com.google.guava:guava:28.2-jre'
 
     // TODO: For convenience until we fully migrate
     api project(':gradle-runner-kit')
