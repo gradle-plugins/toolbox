@@ -26,10 +26,6 @@ public class GradlePluginDevelopmentRepositoryExtensionInternal implements Gradl
             repo.setName("Gradle Plugin Development - Groovy");
             repo.mavenContent(content -> content.includeModule("org.codehaus.groovy", "groovy"));
         });
-        getRepositories().jcenter(repo -> {
-            repo.setName("net.rubygrapefruit Repository");
-            repo.mavenContent(content -> content.includeModule("net.rubygrapefruit", "ansi-control-sequence-util"));
-        });
         return getRepositories().maven(repository -> {
             repository.setName("Gradle Plugin Development");
             repository.setUrl("https://repo-release.nokeedev.net");
