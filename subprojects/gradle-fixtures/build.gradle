@@ -37,10 +37,7 @@ repositories {
 }
 
 dependencies {
-    // This is tricky as it's a API dependency but isn't published anywhere
-    //   Let's put the burden on the user to declare that as well
-    //   They should be declaring that dependency anyway as this library is not meant to be used outside of the Gradle plugin development plugins within Gradle runtime.
-    compileOnly gradleTestKit()
+    compileOnly gradleApi(minimumGradleVersion)
 
     // TODO: For convenience until we fully migrate
     api project(':gradle-runner-kit')
@@ -61,7 +58,6 @@ dependencies {
     testImplementation platform('org.spockframework:spock-bom:1.2-groovy-2.5')
     testImplementation 'org.spockframework:spock-core'
     testImplementation gradleApi(minimumGradleVersion)
-    testImplementation gradleTestKit() // Only for TestKit tests
 
     // SPOCK SUPPORT
     spockSupportApi testFixtures(project(':gradle-runner-kit'))
@@ -71,9 +67,8 @@ dependencies {
     spockSupportApi platform('org.spockframework:spock-bom:1.2-groovy-2.5')
     spockSupportApi 'org.spockframework:spock-core'
     spockSupportCompileOnly gradleApi(minimumGradleVersion) // Required because of the AbstractInstalledToolChainIntegrationSpec which is extremely tied to the internal of Gradle
-    spockSupportCompileOnly gradleTestKit()
     spockSupportApi 'org.apache.commons:commons-lang3:3.10'
-    spockSupportImplementation project(':gradle-runner-kit-api')
+    spockSupportImplementation project(':gradle-runner-kit')
     spockSupportImplementation 'commons-io:commons-io:2.6'
     spockSupportImplementation 'org.jsoup:jsoup:1.13.1'
 
