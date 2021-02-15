@@ -9,7 +9,7 @@ Head over to link:https://nokee.dev/docs/nightly/samples/gradle-plugin-developme
 
 Apply the following plugin in your `settings.gradle[.kts]`:
 
-settings.gradle
+.settings.gradle
 [source,groovy]
 ----
 pluginManagement {
@@ -20,7 +20,7 @@ pluginManagement {
 }
 ----
 
-build.gradle
+.build.gradle
 [source,groovy,subs=attributes+]
 ----
 plugins {

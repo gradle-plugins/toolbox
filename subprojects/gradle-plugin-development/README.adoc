@@ -8,7 +8,7 @@ Head over to the link:https://nokee.dev/docs/nightly/manual/gradle-plugin-develo
 
 Apply link:https://nokee.dev/docs/nightly/manual/plugin-references.html#sec:plugin-reference-gradledev[any of the toolbox plugins] in your build script, e.g. `build.gradle[.kts]`:
 
-settings.gradle
+.settings.gradle
 [source,groovy]
 ----
 pluginManagement {
@@ -19,7 +19,7 @@ pluginManagement {
 }
 ----
 
-build.gradle
+.build.gradle
 [source,groovy,subs=attributes+]
 ----
 plugins {
