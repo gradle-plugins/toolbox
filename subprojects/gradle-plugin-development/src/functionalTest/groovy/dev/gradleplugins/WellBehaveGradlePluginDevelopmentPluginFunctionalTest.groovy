@@ -108,7 +108,7 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
         succeeds('build')
 
         then:
-        result.assertTasksExecuted(allTasksToBuild)
+        result.delegate.executedTaskPaths.containsAll(allTasksToBuild)
         testTasks.each { result.assertTaskSkipped(it) }
         jar("build/libs/${projectName}.jar").hasDescendants('com/example/BasicPlugin.class',"META-INF/gradle-plugins/${componentUnderTest.pluginId}.properties")
         jar("build/libs/${projectName}.jar").assertFileContent("META-INF/gradle-plugins/${componentUnderTest.pluginId}.properties", CoreMatchers.startsWith('implementation-class=com.example.BasicPlugin'))

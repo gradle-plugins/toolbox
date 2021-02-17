@@ -10,7 +10,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 public final class ExecutionResultImpl implements ExecutionResult, ExecutionFailure {
-    private final BuildResult delegate;
+    public final BuildResult delegate;
 
     public ExecutionResultImpl(BuildResult delegate) {
         this.delegate = delegate;
