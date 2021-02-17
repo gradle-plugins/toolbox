@@ -18,7 +18,6 @@ abstract class AbstractGradlePluginDevelopmentFunctionalTestingFunctionalTest ex
         succeeds('build')
 
         then:
-        result.assertTasksExecuted(allTasksToBuild)
         result.assertTaskSkipped(':test')
         result.assertTaskNotSkipped(':functionalTest')
 

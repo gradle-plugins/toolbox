@@ -139,7 +139,7 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
 
         then:
         result.output.contains("An exception occurred applying plugin request [id: '${pluginIdUnderTest}']")
-        result.output.contains("Failed to apply plugin [id '${pluginIdUnderTest}']")
+        result.output.contains("Failed to apply plugin [id '${pluginIdUnderTest}']") || result.output.contains("Failed to apply plugin '${pluginIdUnderTest}'.")
         result.output.contains("The Gradle plugin 'kotlin-dsl' should not be applied within your build when using '${pluginIdUnderTest}'.")
     }
 

@@ -16,7 +16,7 @@ abstract class AbstractGradlePluginDevelopmentTestKitFunctionalTest extends Abst
         succeeds('test')
 
         then:
-        result.assertTasksExecuted(':compileJava', ':compileGroovy', ':pluginDescriptors', ':processResources', ':classes', ':pluginUnderTestMetadata', ':compileTestJava', ':compileTestGroovy', ':processTestResources', ':testClasses', ':test')
+        result.assertTaskNotSkipped(':test')
         new DefaultTestExecutionResult(testDirectory).testClass('com.example.BasicPluginFunctionalTest').assertTestPassed('can do basic test')
     }
 
