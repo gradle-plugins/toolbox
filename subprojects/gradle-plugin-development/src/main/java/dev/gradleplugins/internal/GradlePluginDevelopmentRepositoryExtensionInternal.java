@@ -28,7 +28,7 @@ public class GradlePluginDevelopmentRepositoryExtensionInternal implements Gradl
         });
         return getRepositories().maven(repository -> {
             repository.setName("Gradle Plugin Development");
-            repository.setUrl("https://repo-release.nokeedev.net");
+            repository.setUrl("https://repo.nokee.dev/release");
             repository.mavenContent(content -> {
                 content.includeGroup("dev.gradleplugins");
             });

@@ -28,7 +28,7 @@ class GradlePluginDevelopmentFunctionalTest extends AbstractGradleSpecification 
 
             tasks.register("verify") {
                 doLast {
-                    assert(repositories.withType(${dsl.asClassNotation(MavenArtifactRepository.simpleName)}).find { it.url.toString() == "https://repo-release.nokeedev.net" } != null)
+                    assert(repositories.withType(${dsl.asClassNotation(MavenArtifactRepository.simpleName)}).find { it.url.toString() == "https://repo.nokee.dev/release" } != null)
                     assert(repositories.withType(${dsl.asClassNotation(MavenArtifactRepository.simpleName)}).find { it.name == "Gradle Plugin Development" } != null)
                 }
             }
