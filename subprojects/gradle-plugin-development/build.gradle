@@ -9,7 +9,7 @@ apply plugin: 'dev.gradleplugins.java-gradle-plugin'
 apply plugin: 'dev.gradleplugins.gradle-plugin-unit-test'
 apply plugin: 'dev.gradleplugins.gradle-plugin-functional-test'
 
-version = '1.2.1'
+version = '1.2.2'
 
 gradlePlugin {
     plugins {
