@@ -43,6 +43,7 @@ dependencies {
     api project(':gradle-runner-kit')
     api testFixtures(project(':gradle-runner-kit'))
 
+    api 'com.google.guava:guava:28.2-jre'
     implementation 'org.apache.commons:commons-lang3:3.9' // For StringUtils
     implementation 'org.apache.ant:ant:1.9.13'
     implementation 'org.ow2.asm:asm:6.0'

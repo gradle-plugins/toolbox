@@ -17,7 +17,7 @@ repositories {
 }
 
 // Caveman dependency shading
-def shadedConfiguration = configurations.create('shaded')
+def shadedConfiguration = configurations.create('shaded') { transitive = false }
 configurations.compileOnly.extendsFrom(shadedConfiguration)
 configurations.testImplementation.extendsFrom(shadedConfiguration)
 tasks.named('jar', Jar) { task ->
@@ -28,7 +28,18 @@ dependencies {
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
+    //region Until we release coreExec as part of Grava
     shaded "dev.nokee:coreExec:${nokeeCoreExecVersion}"
+    shaded "dev.nokee:coreUtils:${nokeeCoreExecVersion}"
+    def commonsExecVersion = '1.3'
+    def guavaVersion = '28.2-jre'
+    def commonsLangVersion = '3.9'
+    def commonsIoVersion = '2.6'
+    implementation "org.apache.commons:commons-exec:${commonsExecVersion}"
+    implementation "com.google.guava:guava:${guavaVersion}"
+    implementation "commons-io:commons-io:${commonsIoVersion}"
+    implementation "org.apache.commons:commons-lang3:${commonsLangVersion}"
+    //endregion
 
     api project(':gradle-runner-kit-api')
     api(project(':gradle-runner-kit-impl')) { because 'we need the common executor classes' }
