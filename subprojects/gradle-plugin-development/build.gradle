@@ -10,7 +10,7 @@ apply plugin: 'dev.gradleplugins.gradle-plugin-unit-test'
 apply plugin: 'dev.gradleplugins.gradle-plugin-functional-test'
 
 description = 'Gradle plugin development plugins.'
-version = '1.2.2'
+version = '1.2.3'
 
 gradlePlugin {
     plugins {
