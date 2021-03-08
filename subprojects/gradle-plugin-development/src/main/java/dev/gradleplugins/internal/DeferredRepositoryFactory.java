@@ -1,9 +1,18 @@
 package dev.gradleplugins.internal;
 
+import dev.gradleplugins.GroovyGradlePluginDevelopmentExtension;
+import dev.gradleplugins.JavaGradlePluginDevelopmentExtension;
+import lombok.val;
+import org.gradle.api.Action;
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.dsl.RepositoryHandler;
+import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.artifacts.repositories.MavenRepositoryContentDescriptor;
+import org.gradle.api.plugins.ExtensionAware;
+import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 
 import javax.inject.Inject;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -28,17 +37,27 @@ public abstract class DeferredRepositoryFactory {
         project.afterEvaluate(DeferredRepositoryFactory::createSpockRepository);
     }
 
+    private static void mutateRepositories(Project project, Action<? super RepositoryHandler> action) {
+        val extension = ((ExtensionAware) project.getExtensions().getByType(GradlePluginDevelopmentExtension.class));
+        val defaultRepositoriesDisabled = ((GradlePluginDevelopmentExtensionInternal) Optional.<Object>ofNullable(extension.getExtensions().findByType(JavaGradlePluginDevelopmentExtension.class)).orElseGet(() -> extension.getExtensions().findByType(GroovyGradlePluginDevelopmentExtension.class))).isDefaultRepositoriesDisabled();
+        if (!defaultRepositoriesDisabled) {
+            action.execute(project.getRepositories());
+        }
+    }
+
     private static void createGroovyRepository(Project project) {
-        project.getRepositories().mavenCentral(repo -> {
-            repo.setName("Gradle Plugin Development - Groovy");
-            repo.mavenContent(content -> allowGroovy().accept(content));
+        mutateRepositories(project, repositories -> {
+            repositories.withType(MavenArtifactRepository.class)
+                    .getByName("Gradle Plugin Development")
+                    .mavenContent(allowGroovy()::accept);
         });
     }
 
     private static void createSpockRepository(Project project) {
-        project.getRepositories().mavenCentral(repository -> {
-            repository.setName("Gradle Plugin Development - Spock Framework");
-            repository.mavenContent(content -> allowSpock().andThen(allowGroovy()).accept(content));
+        mutateRepositories(project, repositories -> {
+            repositories.withType(MavenArtifactRepository.class)
+                    .getByName("Gradle Plugin Development")
+                    .mavenContent(allowSpock().andThen(allowGroovy())::accept);
         });
     }
 

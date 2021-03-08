@@ -201,6 +201,42 @@ abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends Ab
         succeeds('verify')
     }
 
+    def "can disable automatic repository configuration on extension"() {
+        given:
+        disableLocalRepositoryInjection()
+        makeSingleProject()
+        buildFile << """
+            gradlePlugin.${languageName} {
+                disableDefaultRepositories()
+            }
+
+            tasks.register('verify') {
+                doLast {
+                    assert repositories*.name.size() == 0
+                }
+            }
+        """
+
+        expect:
+        succeeds('verify')
+    }
+
+    def "can disable automatic repository configuration via Gradle properties"() {
+        given:
+        disableLocalRepositoryInjection()
+        makeSingleProject()
+        buildFile << '''
+            tasks.register('verify') {
+                doLast {
+                    assert repositories*.name.size() == 0
+                }
+            }
+        '''
+
+        expect:
+        succeeds('verify', '-Ddev.gradleplugins.default-repositories=disabled')
+    }
+
     protected abstract String getPluginIdUnderTest()
 
     protected abstract GradlePluginElement getComponentUnderTest()
@@ -248,6 +284,22 @@ class GroovyGradlePluginDevelopmentExtensionFunctionalTest extends AbstractGradl
         expect:
         succeeds('groovydocJar')
     }
+
+    def "adds default repositories to resolve key artifacts"() {
+        given:
+        disableLocalRepositoryInjection()
+        makeSingleProject()
+        buildFile << '''
+            tasks.register('verify') {
+                doLast {
+                    assert repositories*.name == ['Gradle Plugin Development']
+                }
+            }
+        '''
+
+        expect:
+        succeeds('verify')
+    }
 }
 
 class JavaGradlePluginDevelopmentExtensionFunctionalTest extends AbstractGradlePluginDevelopmentExtensionFunctionalTest implements JavaGradlePluginDevelopmentPlugin {
@@ -259,6 +311,23 @@ class JavaGradlePluginDevelopmentExtensionFunctionalTest extends AbstractGradleP
     @Override
     protected String getLanguageName() {
         return 'java'
+    }
+
+
+    def "adds default repositories to resolve key artifacts"() {
+        given:
+        disableLocalRepositoryInjection()
+        makeSingleProject()
+        buildFile << '''
+            tasks.register('verify') {
+                doLast {
+                    assert repositories*.name == ['Gradle Plugin Development']
+                }
+            }
+        '''
+
+        expect:
+        succeeds('verify')
     }
 }
 

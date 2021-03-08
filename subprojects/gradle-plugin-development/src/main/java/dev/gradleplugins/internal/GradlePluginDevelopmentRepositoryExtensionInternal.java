@@ -5,12 +5,14 @@ import groovy.lang.Closure;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.gradle.api.Action;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.dsl.RepositoryHandler;
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.plugins.ExtensionAware;
+import org.gradle.internal.Actions;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -22,16 +24,18 @@ public class GradlePluginDevelopmentRepositoryExtensionInternal implements Gradl
 
     @Override
     public MavenArtifactRepository gradlePluginDevelopment() {
-        getRepositories().mavenCentral(repo -> {
-            repo.setName("Gradle Plugin Development - Groovy");
-            repo.mavenContent(content -> content.includeModule("org.codehaus.groovy", "groovy"));
-        });
-        return getRepositories().maven(repository -> {
+        return gradlePluginDevelopment(Actions.doNothing());
+    }
+
+    @Override
+    public MavenArtifactRepository gradlePluginDevelopment(Action<? super MavenArtifactRepository> action) {
+        return getRepositories().mavenCentral(repository -> {
             repository.setName("Gradle Plugin Development");
-            repository.setUrl("https://repo.nokee.dev/release");
             repository.mavenContent(content -> {
                 content.includeGroup("dev.gradleplugins");
+                content.includeModule("org.codehaus.groovy", "groovy");
             });
+            action.execute(repository);
         });
     }
 

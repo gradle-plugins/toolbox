@@ -1,5 +1,6 @@
 package dev.gradleplugins;
 
+import org.gradle.api.Action;
 import org.gradle.api.artifacts.dsl.RepositoryHandler;
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 
@@ -15,4 +16,14 @@ public interface GradlePluginDevelopmentRepositoryExtension {
      * @return the Gradle Plugin Development repository instance added to the repository handler.
      */
     MavenArtifactRepository gradlePluginDevelopment();
+
+    /**
+     * Adds the Gradle Plugin Development repository containing the Gradle API and fixtures configured using the specified action.
+     * This repository is enough for compiling against any versioned Gradle API.
+     * The Gradle fixtures may require more repositories to be configured.
+     *
+     * @param action  the configure action for the repository
+     * @return the Gradle Plugin Development repository instance added to the repository handler.
+     */
+    MavenArtifactRepository gradlePluginDevelopment(Action<? super MavenArtifactRepository> action);
 }

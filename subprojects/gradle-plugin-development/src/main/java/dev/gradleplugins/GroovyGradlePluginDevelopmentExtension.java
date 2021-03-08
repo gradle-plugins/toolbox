@@ -10,4 +10,5 @@ public interface GroovyGradlePluginDevelopmentExtension {
     void withJavadocJar();
     void withGroovydocJar();
     Property<String> getGroovyVersion();
+    void disableDefaultRepositories();
 }

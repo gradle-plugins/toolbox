@@ -102,6 +102,12 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
         GradlePluginDevelopmentExtensionInternal extension = project.getObjects().newInstance(GradlePluginDevelopmentExtensionInternal.class, project.getExtensions().getByType(JavaPluginExtension.class));
         ((ExtensionAware)gradlePlugin).getExtensions().add(type, languageName, type.cast(extension));
 
+        project.afterEvaluate(proj -> {
+            if (!extension.isDefaultRepositoriesDisabled()) {
+                GradlePluginDevelopmentRepositoryExtensionInternal.of(project.getRepositories()).gradlePluginDevelopment();
+            }
+        });
+
         return extension;
     }
 
@@ -142,6 +148,5 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
         });
         val dependencies = GradlePluginDevelopmentDependencyExtensionInternal.of(project.getDependencies());
         dependencies.add("compileOnly", extension.getMinimumGradleVersion().map(dependencies::gradleApi));
-        GradlePluginDevelopmentRepositoryExtensionInternal.of(project.getRepositories()).gradlePluginDevelopment();
     }
 }

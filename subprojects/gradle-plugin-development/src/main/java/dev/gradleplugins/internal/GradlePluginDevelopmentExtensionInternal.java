@@ -17,6 +17,8 @@ import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.plugins.internal.JavaConfigurationVariantMapping;
+import org.gradle.api.provider.Property;
+import org.gradle.api.provider.ProviderFactory;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.javadoc.Groovydoc;
@@ -28,6 +30,7 @@ import javax.inject.Inject;
 
 public abstract class GradlePluginDevelopmentExtensionInternal implements GroovyGradlePluginDevelopmentExtension, JavaGradlePluginDevelopmentExtension {
     private final JavaPluginExtension java;
+    private boolean defaultRepositoriesDisabled = System.getProperty("dev.gradleplugins.default-repositories", "enabled").equals("disabled");
 
     @Inject
     public GradlePluginDevelopmentExtensionInternal(JavaPluginExtension java) {
@@ -54,6 +57,15 @@ public abstract class GradlePluginDevelopmentExtensionInternal implements Groovy
     @Override
     public void withJavadocJar() {
         java.withJavadocJar();
+    }
+
+    @Override
+    public void disableDefaultRepositories() {
+        defaultRepositoriesDisabled = true;
+    }
+
+    public boolean isDefaultRepositoriesDisabled() {
+        return defaultRepositoriesDisabled;
     }
 
     @Override
