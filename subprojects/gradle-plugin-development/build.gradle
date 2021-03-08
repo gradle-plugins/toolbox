@@ -4,6 +4,7 @@ plugins {
     id 'org.jetbrains.kotlin.jvm' version "1.3.72"
     id 'java-test-fixtures'
     id 'dev.fukgradleplugins.toolbox-publish'
+    id 'com.gradle.plugin-publish' version '0.13.0'
 }
 apply plugin: 'dev.gradleplugins.java-gradle-plugin'
 apply plugin: 'dev.gradleplugins.gradle-plugin-unit-test'
@@ -41,6 +42,41 @@ gradlePlugin {
     java {
         withSourcesJar()
         withJavadocJar()
+    }
+}
+
+pluginBundle {
+    website = 'https://gradleplugins.dev'
+    vcsUrl = 'https://github.com/gradle-plugins/toolbox'
+    description = 'Painless and fast Gradle plugin development 🚀'
+    tags = ['gradle-plugin-development', 'gradle-plugin']
+
+    plugins {
+        javaGradlePlugin {
+            displayName = 'Java Gradle Plugin Development plugin'
+            description = 'Provides support for developing Gradle plugins implemented in Java.'
+            tags = ['gradle-plugin-development', 'gradle-plugin', 'java-gradle-plugin', 'java']
+        }
+        groovyGradlePlugin {
+            displayName = 'Groovy Gradle Plugin Development plugin'
+            description = 'Provides support for developing Gradle plugins implemented in Groovy.'
+            tags = ['gradle-plugin-development', 'gradle-plugin', 'groovy-gradle-plugin', 'groovy']
+        }
+        gradlePluginDevelopment {
+            displayName = 'Gradle Plugin Development plugin'
+            description = 'Provides additional support for developing Gradle plugin-related projects (settings plugin only).'
+            tags = ['gradle-plugin-development', 'gradle-plugin', 'settings-plugin']
+        }
+        unitTest {
+            displayName = 'Gradle Plugin Unit Test plugin'
+            description = 'Provides support for unit testing Gradle plugins.'
+            tags = ['gradle-plugin-development', 'gradle-plugin', 'unit-test']
+        }
+        functionalTest {
+            displayName = 'Gradle Plugin Functional Test plugin'
+            description = 'Provides support for functional testing Gradle plugins.'
+            tags = ['gradle-plugin-development', 'gradle-plugin', 'functional-test']
+        }
     }
 }
 
