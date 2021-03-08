@@ -370,4 +370,20 @@ abstract class AbstractGradleRunnerIntegrationTest extends Specification impleme
         """
     }
     //endregion
+
+    //region Isolation
+    def "can configure user home directory for Gradle runner"() {
+        given:
+        file('build.gradle') << """
+            tasks.register('verify') {
+                doLast {
+                    assert System.properties['user.home'] == '${testDirectory.canonicalPath}/user-home'
+                }
+            }
+        """
+
+        expect:
+        runner('verify').withUserHomeDirectory(file('user-home')).build()
+    }
+    //endregion
 }

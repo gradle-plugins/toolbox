@@ -101,12 +101,12 @@ final class GradleExecutorGradleTestKitImpl extends AbstractGradleExecutor {
     //endregion
 
     private static List<String> buildArguments(GradleExecutionContext parameters) {
-        return parameters.getExecutionParameters().stream().filter(it -> it instanceof GradleExecutionCommandLineProvider && !(it instanceof GradleExecutionJvmSystemPropertyProvider || it instanceof GradleUserHomeDirectoryProvider)).flatMap(GradleExecutorGradleTestKitImpl::asArguments).collect(toList());
+        return parameters.getExecutionParameters().stream().filter(it -> it instanceof UserHomeDirectoryProvider || (it instanceof GradleExecutionCommandLineProvider && !(it instanceof GradleExecutionJvmSystemPropertyProvider || it instanceof GradleUserHomeDirectoryProvider))).flatMap(GradleExecutorGradleTestKitImpl::asArguments).collect(toList());
     }
 
     private static List<String> jvmArguments(GradleExecutionContext parameters) {
         val result = new ArrayList<String>();
-        result.addAll(parameters.getExecutionParameters().stream().filter(it -> it instanceof GradleExecutionJvmSystemPropertyProvider && !(it instanceof DaemonBaseDirectoryProvider || it instanceof DaemonIdleTimeoutProvider)).flatMap(GradleExecutorGradleTestKitImpl::asArguments).collect(toList()));
+        result.addAll(parameters.getExecutionParameters().stream().filter(it -> it instanceof GradleExecutionJvmSystemPropertyProvider && !(it instanceof DaemonBaseDirectoryProvider || it instanceof DaemonIdleTimeoutProvider || it instanceof UserHomeDirectoryProvider)).flatMap(GradleExecutorGradleTestKitImpl::asArguments).collect(toList()));
         result.addAll(getImplicitBuildJvmArgs());
         return result;
     }
