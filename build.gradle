@@ -1,6 +1,11 @@
+plugins {
+    id 'io.github.gradle-nexus.publish-plugin' version '1.0.0'
+}
+
 allprojects {
     group = 'dev.gradleplugins'
 }
+version = '1.2.3'
 
 // Configure javadoc
 allprojects {
@@ -18,16 +23,8 @@ subprojects {
     }
 }
 
-allprojects {
-    pluginManager.withPlugin('maven-publish') {
-        publishing {
-            repositories {
-                maven {
-                    name = 'nokeeRelease'
-                    url = providers.gradleProperty("${name}Url").forUseAtConfigurationTime().orElse('')
-                    credentials(AwsCredentials)
-                }
-            }
-        }
+nexusPublishing {
+    repositories {
+        sonatype()
     }
 }

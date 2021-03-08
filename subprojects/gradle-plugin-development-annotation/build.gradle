@@ -16,7 +16,7 @@
 
 plugins {
     id 'java-library'
-    id 'maven-publish'
+    id 'dev.fukgradleplugins.toolbox-publish'
 }
 
 java {

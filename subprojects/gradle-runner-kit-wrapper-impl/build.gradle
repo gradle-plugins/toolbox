@@ -2,13 +2,16 @@ plugins {
     id 'java-library'
     id 'groovy-base'
     id 'java-test-fixtures'
-    id 'maven-publish'
+    id 'dev.fukgradleplugins.toolbox-publish'
 }
+
+description = 'Gradle runner kit implementation for Gradle wrapper executor.'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
     withSourcesJar()
+    withJavadocJar()
 }
 
 repositories {
@@ -63,6 +66,8 @@ tasks.processTestFixturesResources {
         into('dev/gradleplugins/fixtures/runnerkit/wrapper')
     }
 }
+
+tasks.named('javadoc') { enabled = false }
 
 publishing {
     publications {

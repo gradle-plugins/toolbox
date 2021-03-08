@@ -1,8 +1,10 @@
 plugins {
     id 'java-library'
     id 'groovy-base'
-    id 'maven-publish'
+    id 'dev.fukgradleplugins.toolbox-publish'
 }
+
+description = 'Gradle fixtures'
 
 import static dev.gradleplugins.GradleRuntimeCompatibility.*
 
