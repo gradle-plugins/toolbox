@@ -4,11 +4,13 @@ import java.io.File;
 import java.io.Writer;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 public interface GradleRunner {
@@ -134,12 +136,28 @@ public interface GradleRunner {
     GradleRunner withPluginClasspath(Iterable<? extends File> classpath);
 
     /**
-     * Sets the working directory to use. Defaults to the test's temporary directory.
+     * Sets the working directory to use.
      *
-     * @param workingDirectory the working directory to use
-     * @return a new {@link GradleRunner} instance configured with the specified working directory, never null.
+     * @param workingDirectory the working directory to use, must not be null
+     * @return a new {@link GradleRunner} instance configured with the specified working directory, never null
      */
     GradleRunner inDirectory(File workingDirectory);
+
+    /**
+     * Sets the working directory to use.
+     *
+     * @param workingDirectory the working directory to use, must not be null
+     * @return a new {@link GradleRunner} instance configured with the specified working directory, never null
+     */
+    GradleRunner inDirectory(Path workingDirectory);
+
+    /**
+     * Sets the working directory to use using the supplier.
+     *
+     * @param workingDirectorySupplier a working directory supplier to use, must not be null
+     * @return a new {@link GradleRunner} instance configured with the specified working directory, never null
+     */
+    GradleRunner inDirectory(Supplier<?> workingDirectorySupplier);
 
     /**
      * The directory that the build will be executed in.

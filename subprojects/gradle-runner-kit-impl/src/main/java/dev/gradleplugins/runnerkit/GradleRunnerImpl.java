@@ -7,10 +7,13 @@ import java.io.File;
 import java.io.Writer;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
@@ -69,6 +72,24 @@ final class GradleRunnerImpl implements GradleRunner {
     @Override
     public GradleRunner inDirectory(File workingDirectory) {
         return newInstance(parameters.withWorkingDirectory(WorkingDirectoryProvider.of(workingDirectory)));
+    }
+
+    @Override
+    public GradleRunner inDirectory(Path workingDirectory) {
+        return newInstance(parameters.withWorkingDirectory(WorkingDirectoryProvider.of(workingDirectory.toFile())));
+    }
+
+    @Override
+    public GradleRunner inDirectory(Supplier<?> workingDirectorySupplier) {
+        return newInstance(parameters.withWorkingDirectory(WorkingDirectoryProvider.of(() -> {
+            val workingDirectory = requireNonNull(workingDirectorySupplier.get());
+            if (workingDirectory instanceof File) {
+                return (File) workingDirectory;
+            } else if (workingDirectory instanceof Path) {
+                return ((Path) workingDirectory).toFile();
+            }
+            throw new IllegalArgumentException(String.format("Supplied working directory cannot be converted to a File instance: %s", workingDirectory.getClass()));
+        })));
     }
 
     @Override
@@ -232,7 +253,7 @@ final class GradleRunnerImpl implements GradleRunner {
     //region General configuration
     @Override
     public GradleRunner configure(UnaryOperator<GradleRunner> action) {
-        return Objects.requireNonNull(action.apply(this), "Please return a non-null GradleRunner from the configuration action when using GradleRunner#configure(action).");
+        return requireNonNull(action.apply(this), "Please return a non-null GradleRunner from the configuration action when using GradleRunner#configure(action).");
     }
     //endregion
 

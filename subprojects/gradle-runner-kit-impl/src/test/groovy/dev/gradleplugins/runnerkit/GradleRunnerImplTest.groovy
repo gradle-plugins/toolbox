@@ -348,6 +348,20 @@ class GradleRunnerImplTest extends Specification implements FileSystemFixture {
     def "returns the working directory when configured"() {
         expect:
         executionOf { inDirectory(testDirectory) }.workingDirectory == WorkingDirectoryProvider.of(testDirectory)
+        executionOf { inDirectory(testDirectory.toPath()) }.workingDirectory == WorkingDirectoryProvider.of(testDirectory)
+
+        and:
+        executionOf { inDirectory({ testDirectory }) }.workingDirectory.get() == testDirectory
+        executionOf { inDirectory({ testDirectory.toPath() }) }.workingDirectory.get() == testDirectory
+    }
+
+    def "throws exception when supplied working directory is not a File convertable type"() {
+        when:
+        executionOf { inDirectory({ new Object() }) }.workingDirectory.get()
+
+        then:
+        def ex = thrown(IllegalArgumentException.class)
+        ex.message == 'Supplied working directory cannot be converted to a File instance: class java.lang.Object'
     }
 
     def "throws exception if configuration action return null"() {

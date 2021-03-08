@@ -40,4 +40,11 @@ class WorkingDirectoryProviderTest extends Specification implements FileSystemFi
         def subject = WorkingDirectoryProvider.relativeToWorkingDirectory('bar')
         subject.apply(context) == file('foo/bar')
     }
+
+    def "can supply working directory as File instance"() {
+        expect:
+        def subject = WorkingDirectoryProvider.of { file('working-dir') }
+        subject.isPresent()
+        subject.get() == file('working-dir')
+    }
 }
