@@ -186,7 +186,9 @@ class GradlePluginDevelopmentFunctionalTest extends AbstractGradleSpecification 
             }
 
             repositories {
-                mavenCentral()
+                maven {
+                    url = 'https://repo.nokee.dev/dummy'
+                }
             }
 
             dependencies {
