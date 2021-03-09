@@ -30,6 +30,7 @@ import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.plugins.PluginManager;
 import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
+import org.gradle.util.GradleVersion;
 import org.gradle.util.VersionNumber;
 
 import java.util.List;
@@ -37,6 +38,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static dev.gradleplugins.GradleRuntimeCompatibility.minimumJavaVersionFor;
+import static dev.gradleplugins.internal.GradlePluginDevelopmentDependencyExtensionInternal.LOCAL_GRADLE_VERSION;
 
 public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Project> {
 
@@ -122,6 +124,13 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
     }
 
     public static void configureExtension(GradlePluginDevelopmentCompatibilityExtension extension, Project project) {
+        extension.getGradleApiVersion().convention(extension.getMinimumGradleVersion().map(it -> {
+            if (GradleVersion.version(it).isSnapshot()) {
+                return LOCAL_GRADLE_VERSION;
+            }
+            return it;
+        }));
+
         val java = project.getExtensions().getByType(JavaPluginExtension.class);
         val defaultSourceCompatibility = java.getSourceCompatibility();
         val defaultTargetCompatibility = java.getTargetCompatibility();
@@ -147,6 +156,13 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
             extension.getMinimumGradleVersion().disallowChanges();
         });
         val dependencies = GradlePluginDevelopmentDependencyExtensionInternal.of(project.getDependencies());
-        dependencies.add("compileOnly", extension.getMinimumGradleVersion().map(dependencies::gradleApi));
+        dependencies.add(getCompileOnlyApiConfigurationName(), extension.getGradleApiVersion().map(dependencies::gradleApi));
+    }
+
+    private static String getCompileOnlyApiConfigurationName() {
+        if (GradleVersion.current().compareTo(GradleVersion.version("6.7")) >= 0) {
+            return "compileOnlyApi";
+        }
+        return "compileOnly";
     }
 }

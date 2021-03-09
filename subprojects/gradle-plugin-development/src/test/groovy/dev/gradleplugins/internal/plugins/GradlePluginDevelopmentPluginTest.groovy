@@ -1,5 +1,8 @@
 package dev.gradleplugins.internal.plugins
 
+import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.ExternalDependency
+import org.gradle.api.artifacts.SelfResolvingDependency
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -45,6 +48,42 @@ abstract class AbstractGradlePluginDevelopmentPluginTest extends Specification {
 
         where:
         minimumGradleVersion << ['6.0', '2.14']
+    }
+
+    def "default Gradle API version to minimum Gradle version when not targeting snapshot"() {
+        given:
+        project.apply plugin: pluginIdUnderTest
+
+        when:
+        project.gradlePlugin.compatibility.minimumGradleVersion = '6.3'
+        project.evaluate()
+
+        then:
+        project.gradlePlugin.compatibility.gradleApiVersion.get() == '6.3'
+        hasExternalGradleApi(project.configurations.compileClasspath, '6.3')
+    }
+
+    def "default Gradle API version to local when targeting snapshot"() {
+        given:
+        project.apply plugin: pluginIdUnderTest
+
+        when:
+        project.gradlePlugin.compatibility.minimumGradleVersion = '7.0-20210308230047+0000'
+        project.evaluate()
+
+        then:
+        project.gradlePlugin.compatibility.gradleApiVersion.get() == 'local'
+        hasLocalGradleApi(project.configurations.compileClasspath)
+    }
+
+    private static boolean hasLocalGradleApi(Configuration compileClasspath) {
+        assert compileClasspath.allDependencies.findAll { it instanceof SelfResolvingDependency }.any { it.targetComponentId.displayName == 'Gradle API' }
+        return true
+    }
+
+    private static boolean hasExternalGradleApi(Configuration compileClasspath, String version) {
+        assert compileClasspath.allDependencies.findAll { it instanceof ExternalDependency }.any { it.group == 'dev.gradleplugins' && it.name == 'gradle-api' && it.version == version }
+        return true
     }
 
     protected abstract String getPluginIdUnderTest()

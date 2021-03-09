@@ -21,16 +21,23 @@ import java.lang.reflect.Method;
 @RequiredArgsConstructor
 public class GradlePluginDevelopmentDependencyExtensionInternal implements GradlePluginDevelopmentDependencyExtension {
     private static final Logger LOGGER = Logging.getLogger(GradlePluginDevelopmentDependencyExtensionInternal.class);
+    public static final String LOCAL_GRADLE_VERSION = "local";
     @Getter(AccessLevel.PROTECTED) private final DependencyHandler dependencies;
     private final Project project; // for the provider as notation shim
 
     @Override
     public Dependency gradleApi(String version) {
+        if (LOCAL_GRADLE_VERSION.equals(version)) {
+            return getDependencies().gradleApi();
+        }
         return getDependencies().create("dev.gradleplugins:gradle-api:" + version);
     }
 
     @Override
     public Dependency gradleTestKit(String version) {
+        if (LOCAL_GRADLE_VERSION.equals(version)) {
+            return getDependencies().gradleTestKit();
+        }
         return getDependencies().create("dev.gradleplugins:gradle-test-kit:" + version);
     }
 
