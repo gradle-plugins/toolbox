@@ -5,7 +5,7 @@ plugins {
 allprojects {
     group = 'dev.gradleplugins'
 }
-version = '1.2.3'
+version = '1.3'
 
 // Configure javadoc
 allprojects {
@@ -19,12 +19,24 @@ allprojects {
 // Configure gradle-fixtures-* versions
 subprojects {
     if (project.name.startsWith('gradle-fixtures') || project.name.startsWith('gradle-runner-kit')) {
-        version = '0.0.123'
+        version = '0.0.124'
     }
 }
 
 nexusPublishing {
     repositories {
         sonatype()
+    }
+}
+
+def releaseTask = tasks.register('release') {
+    dependsOn('publishToSonatype', 'closeAndReleaseSonatypeStagingRepository')
+}
+subprojects {
+    pluginManager.withPlugin('maven-publish') {
+        releaseTask.configure { dependsOn('publishToSonatype')}
+    }
+    pluginManager.withPlugin('com.gradle.plugin-publish') {
+        releaseTask.configure { dependsOn('publishPlugins') }
     }
 }
