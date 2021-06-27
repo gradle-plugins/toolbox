@@ -35,10 +35,6 @@ include('gradle-fixtures-version-control-system')
 project(':gradle-fixtures-version-control-system').projectDir = file('subprojects/gradle-fixtures-version-control-system')
 project(':gradle-fixtures-version-control-system').buildFileName = 'build.gradle'
 
-include('gradle-fixtures-well-behaving-plugins')
-project(':gradle-fixtures-well-behaving-plugins').projectDir = file('subprojects/gradle-fixtures-well-behaving-plugins')
-project(':gradle-fixtures-well-behaving-plugins').buildFileName = 'build.gradle'
-
 // Plugin developement
 include('gradle-plugin-development')
 project(':gradle-plugin-development').projectDir = file('subprojects/gradle-plugin-development')
