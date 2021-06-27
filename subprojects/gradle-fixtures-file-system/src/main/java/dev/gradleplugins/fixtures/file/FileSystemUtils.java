@@ -1,6 +1,5 @@
 package dev.gradleplugins.fixtures.file;
 
-import com.google.common.base.Preconditions;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
