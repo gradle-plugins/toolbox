@@ -1,6 +1,7 @@
 plugins {
     id 'java-library'
     id 'dev.fukgradleplugins.toolbox-publish'
+    id 'dev.fukgradleplugins.functional-test-repository'
 }
 
 description = 'Gradle fixtures'

@@ -3,6 +3,7 @@ plugins {
     id 'groovy-base'
     id 'java-test-fixtures'
     id 'dev.fukgradleplugins.toolbox-publish'
+    id 'dev.fukgradleplugins.functional-test-repository'
 }
 
 description = 'Gradle fixtures'

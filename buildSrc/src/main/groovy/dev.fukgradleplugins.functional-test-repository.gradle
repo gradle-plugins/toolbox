@@ -1,0 +1,10 @@
+pluginManager.withPlugin('maven-publish') {
+    publishing {
+        repositories {
+            maven {
+                name = 'LocalRepository'
+                url = file('../gradle-plugin-development/build/repository')
+            }
+        }
+    }
+}

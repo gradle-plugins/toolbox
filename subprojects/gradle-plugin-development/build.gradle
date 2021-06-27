@@ -93,7 +93,10 @@ test {
 
 functionalTest {
     testTasks.configureEach {
-        dependsOn(':gradle-fixtures:publishAllPublicationsToLocalRepositoryRepository')
+        dependsOn({ allprojects
+                .findAll { it.pluginManager.hasPlugin('dev.fukgradleplugins.functional-test-repository') }
+                .collect { it.tasks.named('publishAllPublicationsToLocalRepositoryRepository') }
+        })
         it.systemProperty('localRepository', layout.buildDirectory.dir('repository').get().asFile)
     }
     testingStrategies = [strategies.coverageForMinimumVersion, strategies.coverageForLatestGlobalAvailableVersion]
