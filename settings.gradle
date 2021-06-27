@@ -23,10 +23,6 @@ include('gradle-fixtures-file-system')
 project(':gradle-fixtures-file-system').projectDir = file('subprojects/gradle-fixtures-file-system')
 project(':gradle-fixtures-file-system').buildFileName = 'build.gradle'
 
-include('gradle-fixtures-junit-4')
-project(':gradle-fixtures-junit-4').projectDir = file('subprojects/gradle-fixtures-junit-4')
-project(':gradle-fixtures-junit-4').buildFileName = 'build.gradle'
-
 include('gradle-fixtures-source-elements')
 project(':gradle-fixtures-source-elements').projectDir = file('subprojects/gradle-fixtures-source-elements')
 project(':gradle-fixtures-source-elements').buildFileName = 'build.gradle'
