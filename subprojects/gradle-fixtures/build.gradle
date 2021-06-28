@@ -4,6 +4,7 @@ plugins {
     id 'java-library'
     id 'groovy' // for Spock framework
     id 'dev.fukgradleplugins.toolbox-publish'
+    id 'dev.fukgradleplugins.functional-test-repository'
     id 'java-test-fixtures'
 }
 
@@ -88,12 +89,6 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             from(components.java)
-        }
-    }
-    repositories {
-        maven {
-            name = 'LocalRepository'
-            url = file('../gradle-plugin-development/build/repository')
         }
     }
 }
