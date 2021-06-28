@@ -18,9 +18,6 @@ package dev.gradleplugins.fixtures.sample
 
 import dev.gradleplugins.fixtures.sources.SourceElement
 import dev.gradleplugins.fixtures.sources.SourceFile
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
-import spock.lang.Specification
 
 class BasicGradlePluginTestKitTest extends SourceElement {
     private final String sourceSetName
@@ -35,18 +32,18 @@ class BasicGradlePluginTestKitTest extends SourceElement {
 
 import org.gradle.testkit.runner.GradleRunner
 import static org.gradle.testkit.runner.TaskOutcome.*
-import ${Rule.canonicalName}
-import ${TemporaryFolder.canonicalName}
-import ${Specification.canonicalName}
+import spock.lang.TempDir
+import spock.lang.Specification
+import java.nio.file.Path
 
-class BasicPluginFunctionalTest extends ${Specification.simpleName} {
-    @Rule TemporaryFolder testProjectDir = new TemporaryFolder()
+class BasicPluginFunctionalTest extends Specification {
+    @TempDir Path testProjectDir
     File settingsFile
     File buildFile
 
     def setup() {
-        settingsFile = testProjectDir.newFile('settings.gradle')
-        buildFile = testProjectDir.newFile('build.gradle')
+        settingsFile = testProjectDir.resolve('settings.gradle').toFile()
+        buildFile = testProjectDir.resolve('build.gradle').toFile()
     }
 
     def "can do basic test"() {
@@ -61,7 +58,8 @@ class BasicPluginFunctionalTest extends ${Specification.simpleName} {
         when:
         def result = GradleRunner.create()
             .withPluginClasspath()
-            .withProjectDir(testProjectDir.root)
+            .forwardOutput()
+            .withProjectDir(testProjectDir.toFile())
             .withArguments('help')
             .build()
 

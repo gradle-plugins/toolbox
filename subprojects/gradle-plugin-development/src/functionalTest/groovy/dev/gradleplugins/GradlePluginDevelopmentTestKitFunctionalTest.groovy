@@ -25,7 +25,7 @@ abstract class AbstractGradlePluginDevelopmentTestKitFunctionalTest extends Abst
         buildFile << """
             plugins {
                 id '${pluginIdUnderTest}'
-                id 'groovy-base'
+                id 'groovy-base' // for spock framework
             }
 
             gradlePlugin {
@@ -43,10 +43,13 @@ abstract class AbstractGradlePluginDevelopmentTestKitFunctionalTest extends Abst
             }
             
             dependencies {
-                testImplementation platform('org.spockframework:spock-bom:1.2-groovy-2.5')
+                testImplementation platform('org.spockframework:spock-bom:2.0-groovy-3.0')
                 testImplementation 'org.spockframework:spock-core'
                 testImplementation gradleTestKit()
             }
+
+            // Because spock framework 2.0 use JUnit 5
+            tasks.withType(Test).configureEach { useJUnitPlatform() }
         """
     }
 

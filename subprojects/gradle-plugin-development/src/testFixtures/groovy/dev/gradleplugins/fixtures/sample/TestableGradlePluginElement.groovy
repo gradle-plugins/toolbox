@@ -31,8 +31,4 @@ class TestableGradlePluginElement extends GradlePluginElement {
     void writeToProject(File projectDir) {
         ofElements(main, functionalTest).writeToProject(projectDir)
     }
-
-    GradlePluginElement withTestingStrategySupport() {
-        return new TestableGradlePluginElement(main, functionalTest.withTestingStrategySupport())
-    }
 }

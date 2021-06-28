@@ -16,7 +16,6 @@
 
 package dev.gradleplugins.fixtures.sample
 
-import dev.gradleplugins.integtests.fixtures.AbstractGradleSpecification
 import dev.gradleplugins.fixtures.sources.SourceElement
 import dev.gradleplugins.fixtures.sources.SourceFile
 
@@ -24,10 +23,23 @@ class GradleVersionAwareTestKitFunctionalTest extends SourceElement {
     @Override
     List<SourceFile> getFiles() {
         return Collections.singletonList(sourceFile('groovy', 'com/example/VersionAwareFunctionalTest.groovy', """package com.example
-import ${AbstractGradleSpecification.canonicalName}
+import org.gradle.testkit.runner.GradleRunner
+import static org.gradle.testkit.runner.TaskOutcome.*
+import spock.lang.TempDir
+import spock.lang.Specification
+import java.nio.file.Path
+import org.gradle.util.GradleVersion
 
-class VersionAwareFunctionalTest extends ${AbstractGradleSpecification.simpleName} {
+class VersionAwareFunctionalTest extends Specification {
+    private static final String DEFAULT_GRADLE_VERSION_SYSPROP_NAME = 'dev.gradleplugins.defaultGradleVersion'
+    @TempDir Path testProjectDir
+    File settingsFile
+    File buildFile
+
     def setup() {
+        settingsFile = testProjectDir.resolve('settings.gradle').toFile()
+        buildFile = testProjectDir.resolve('build.gradle').toFile()
+
         if (System.properties.containsKey(DEFAULT_GRADLE_VERSION_SYSPROP_NAME)) {
             println "Default Gradle version: \${gradleDistributionUnderTest}"
         } else {
@@ -35,18 +47,33 @@ class VersionAwareFunctionalTest extends ${AbstractGradleSpecification.simpleNam
         }
     }
 
+    private static String getGradleDistributionUnderTest() {
+        String defaultGradleVersionUnderTest = System.getProperty(DEFAULT_GRADLE_VERSION_SYSPROP_NAME, null)
+        if (defaultGradleVersionUnderTest == null) {
+            return GradleVersion.current().version;
+        }
+        return defaultGradleVersionUnderTest
+    }
+
     def "print gradle version from within the executor"() {
         given:
+        settingsFile << "rootProject.name = 'hello-world'"
         buildFile << '''
             plugins {
                 id('com.example.hello')
             }
-            
+
             println "Using Gradle version: \${project.gradle.gradleVersion}"
         '''
 
         when:
-        succeeds('help')
+        def result = GradleRunner.create()
+            .withPluginClasspath()
+            .forwardOutput()
+            .withGradleVersion(gradleDistributionUnderTest)
+            .withProjectDir(testProjectDir.toFile())
+            .withArguments('help')
+            .build()
 
         then:
         result.output.contains('Hello')

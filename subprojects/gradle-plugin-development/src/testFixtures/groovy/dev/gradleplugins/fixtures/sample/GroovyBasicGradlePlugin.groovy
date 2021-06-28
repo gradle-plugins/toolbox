@@ -35,6 +35,6 @@ class BasicPlugin implements Plugin<Project> {
 
     @Override
     TestableGradlePluginElement withFunctionalTest() {
-        return new TestableGradlePluginElement(this, new BasicGradlePluginTestKitFunctionalTest())
+        return new TestableGradlePluginElement(this, new BasicGradlePluginTestKitTest('functionalTest'))
     }
 }
