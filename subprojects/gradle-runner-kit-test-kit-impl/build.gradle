@@ -27,7 +27,7 @@ dependencies {
     api project(':gradle-runner-kit-api')
     api(project(':gradle-runner-kit-impl')) { because 'we need the common executor classes' }
     implementation project(':gradle-fixtures-file-system')
-    implementation gradleTestKit(minimumGradleVersion)
+    compileOnly gradleTestKit(minimumGradleVersion) // Good enough
 }
 
 def createWrapper = tasks.register('createWrapper', Wrapper) {
