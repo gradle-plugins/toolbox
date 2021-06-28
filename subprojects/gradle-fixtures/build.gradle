@@ -97,7 +97,3 @@ publishing {
         }
     }
 }
-
-tasks.register('release') {
-    dependsOn('publishAllPublicationsToNokeeReleaseRepository')
-}

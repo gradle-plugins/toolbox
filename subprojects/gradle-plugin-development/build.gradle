@@ -133,7 +133,3 @@ dependencies {
     }
     testFixturesImplementation "org.codehaus.groovy:groovy-all:${groovyVersionOf(minimumGradleVersion)}"
 }
-
-tasks.register('release') {
-    dependsOn('publishAllPublicationsToNokeeReleaseRepository')
-}

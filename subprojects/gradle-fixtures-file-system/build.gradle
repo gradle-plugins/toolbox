@@ -38,7 +38,3 @@ publishing {
         }
     }
 }
-
-tasks.register('release') {
-    dependsOn('publish')
-}
