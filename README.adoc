@@ -19,7 +19,7 @@ Apply link:https://nokee.dev/docs/nightly/manual/plugin-references.html#sec:plug
 pluginManagement {
     repositories {
         gradlePluginPortal()
-        maven { url = 'https://repo.nokeedev.net/release' }
+        maven { url = 'https://repo.nokee.dev/release' }
     }
 }
 ----

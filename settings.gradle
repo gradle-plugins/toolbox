@@ -4,7 +4,7 @@
 buildscript {
     repositories {
         gradlePluginPortal()
-        maven { url = 'https://repo.nokeedev.net/release' }
+        maven { url = 'https://repo.nokee.dev/release' }
     }
     dependencies {
         classpath 'dev.gradleplugins:gradle-plugin-development:1.3'

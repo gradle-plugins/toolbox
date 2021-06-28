@@ -15,7 +15,7 @@ Apply the following plugin in your `settings.gradle[.kts]`:
 pluginManagement {
     repositories {
         gradlePluginPortal()
-        maven { url = 'https://repo.nokeedev.net/release' }
+        maven { url = 'https://repo.nokee.dev/release' }
     }
 }
 ----

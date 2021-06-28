@@ -16,7 +16,7 @@ java {
 
 repositories {
     mavenCentral()
-    maven { url = 'https://repo.nokeedev.net/snapshots' }
+    maven { url = 'https://repo.nokee.dev/snapshot' }
 }
 
 dependencies {
