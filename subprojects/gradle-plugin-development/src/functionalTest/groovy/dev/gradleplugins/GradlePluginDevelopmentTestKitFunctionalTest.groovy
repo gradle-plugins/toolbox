@@ -5,6 +5,7 @@ import dev.gradleplugins.fixtures.sample.JavaBasicGradlePlugin
 import dev.gradleplugins.fixtures.sources.SourceElement
 import dev.gradleplugins.fixtures.test.DefaultTestExecutionResult
 import dev.gradleplugins.integtests.fixtures.AbstractGradleSpecification
+import org.gradle.util.GradleVersion
 
 abstract class AbstractGradlePluginDevelopmentTestKitFunctionalTest extends AbstractGradleSpecification {
     def "can execute vanilla TestKit tests"() {
@@ -28,6 +29,8 @@ abstract class AbstractGradlePluginDevelopmentTestKitFunctionalTest extends Abst
                 id 'groovy-base' // for spock framework
             }
 
+            import ${GradleVersion.canonicalName}
+
             gradlePlugin {
                 testSourceSets sourceSets.test
                 plugins {
@@ -43,7 +46,11 @@ abstract class AbstractGradlePluginDevelopmentTestKitFunctionalTest extends Abst
             }
             
             dependencies {
-                testImplementation platform('org.spockframework:spock-bom:2.0-groovy-3.0')
+                if (GradleVersion.current() > GradleVersion.version('6.5')) {
+                    testImplementation platform('org.spockframework:spock-bom:2.0-groovy-3.0')
+                } else {
+                    testImplementation platform('org.spockframework:spock-bom:2.0-groovy-2.5')
+                }
                 testImplementation 'org.spockframework:spock-core'
                 testImplementation gradleTestKit()
             }

@@ -3,6 +3,7 @@ package dev.gradleplugins
 import dev.gradleplugins.fixtures.sample.*
 import dev.gradleplugins.fixtures.test.DefaultTestExecutionResult
 import groovy.json.JsonSlurper
+import org.gradle.util.GradleVersion
 import org.hamcrest.Matchers
 import spock.lang.Unroll
 
@@ -125,6 +126,8 @@ abstract class AbstractGradlePluginDevelopmentTestingStrategyFunctionalTest exte
                 id 'groovy-base' // for spock framework
             }
 
+            import ${GradleVersion.canonicalName}
+
             gradlePlugin {
                 plugins {
                     hello {
@@ -140,7 +143,11 @@ abstract class AbstractGradlePluginDevelopmentTestingStrategyFunctionalTest exte
 
             functionalTest {
                 dependencies {
-                    implementation platform('org.spockframework:spock-bom:2.0-groovy-3.0')
+                    if (GradleVersion.current() > GradleVersion.version('6.5')) {
+                        implementation platform('org.spockframework:spock-bom:2.0-groovy-3.0')
+                    } else {
+                        implementation platform('org.spockframework:spock-bom:2.0-groovy-2.5')
+                    }
                     implementation 'org.spockframework:spock-core'
                     implementation gradleTestKit()
                 }
