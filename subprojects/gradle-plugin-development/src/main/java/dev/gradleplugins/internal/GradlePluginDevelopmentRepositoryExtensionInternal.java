@@ -34,6 +34,10 @@ public class GradlePluginDevelopmentRepositoryExtensionInternal implements Gradl
             repository.mavenContent(content -> {
                 content.includeGroup("dev.gradleplugins");
                 content.includeModule("org.codehaus.groovy", "groovy");
+
+                // Groovy 3+ transitive dependencies
+                content.includeModule("com.github.javaparser", "javaparser-core");
+                content.includeModule("org.junit", "junit-bom");
             });
             action.execute(repository);
         });
