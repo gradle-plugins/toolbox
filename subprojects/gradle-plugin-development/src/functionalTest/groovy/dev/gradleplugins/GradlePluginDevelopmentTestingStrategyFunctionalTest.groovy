@@ -20,7 +20,7 @@ abstract class AbstractGradlePluginDevelopmentTestingStrategyFunctionalTest exte
                 }
             }
 
-            components.functionalTest {
+            functionalTest {
                 testingStrategies = [strategies.coverageForMinimumVersion, strategies.coverageForLatestGlobalAvailableVersion]
             }
         """
@@ -75,7 +75,7 @@ abstract class AbstractGradlePluginDevelopmentTestingStrategyFunctionalTest exte
                 }
             }
 
-            components.functionalTest {
+            functionalTest {
                 testingStrategies = [strategies.${coverage}]
             }
         """
