@@ -42,12 +42,12 @@ abstract class AbstractInstalledToolChainIntegrationSpec extends AbstractGradleS
     def setup() {
         initScript = file("init.gradle") << """
             allprojects { p ->
-                apply plugin: ${toolChain.pluginClass}
-
-                model {
-                      toolChains {
-                        ${toolChain.buildScriptConfig}
-                      }
+                plugins.withType(NativeComponentModelPlugin) {
+                    model {
+                        toolChains {
+                            ${toolChain.buildScriptConfig}
+                        }
+                    }
                 }
             }
         """
