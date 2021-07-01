@@ -38,10 +38,15 @@ public abstract class DeferredRepositoryFactory {
     }
 
     private static void mutateRepositories(Project project, Action<? super RepositoryHandler> action) {
-        val extension = ((ExtensionAware) project.getExtensions().getByType(GradlePluginDevelopmentExtension.class));
-        val defaultRepositoriesDisabled = ((GradlePluginDevelopmentExtensionInternal) Optional.<Object>ofNullable(extension.getExtensions().findByType(JavaGradlePluginDevelopmentExtension.class)).orElseGet(() -> extension.getExtensions().findByType(GroovyGradlePluginDevelopmentExtension.class))).isDefaultRepositoriesDisabled();
-        if (!defaultRepositoriesDisabled) {
+        // NOTE: We work around the existence (or not) of the extension because Nokee repository is naughty and use GroovySpockFrameworkTestSuite via SpockFrameworkTestSuiteBasePlugin
+        val extension = ((ExtensionAware) project.getExtensions().findByType(GradlePluginDevelopmentExtension.class));
+        if (extension == null) {
             action.execute(project.getRepositories());
+        } else {
+            val defaultRepositoriesDisabled = ((GradlePluginDevelopmentExtensionInternal) Optional.<Object>ofNullable(extension.getExtensions().findByType(JavaGradlePluginDevelopmentExtension.class)).orElseGet(() -> extension.getExtensions().findByType(GroovyGradlePluginDevelopmentExtension.class))).isDefaultRepositoriesDisabled();
+            if (!defaultRepositoriesDisabled) {
+                action.execute(project.getRepositories());
+            }
         }
     }
 
