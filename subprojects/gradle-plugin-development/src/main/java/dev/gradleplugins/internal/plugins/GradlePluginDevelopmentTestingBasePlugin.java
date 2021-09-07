@@ -83,7 +83,10 @@ public abstract class GradlePluginDevelopmentTestingBasePlugin implements Plugin
                     version = new ReleasedVersionDistributions().getMostRecentRelease().getVersion();
                     break;
                 default:
-                    throw new RuntimeException("Unknown testing strategy");
+                    version = strategy.getName();
+                    if (new ReleasedVersionDistributions().getAllVersions().stream().noneMatch(it -> it.getVersion().equals(version))) {
+                        throw new RuntimeException(String.format("Unknown Gradle version '%s' for testing strategy.", version));
+                    }
             }
             task.systemProperty("dev.gradleplugins.defaultGradleVersion", version);
         };

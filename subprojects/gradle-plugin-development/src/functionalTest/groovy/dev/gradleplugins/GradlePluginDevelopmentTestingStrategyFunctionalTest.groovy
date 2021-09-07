@@ -99,6 +99,32 @@ abstract class AbstractGradlePluginDevelopmentTestingStrategyFunctionalTest exte
         'coverageForMinimumVersion'                 | '6.2'
         'coverageForLatestNightlyVersion'           | latestNightlyVersion
         'coverageForLatestGlobalAvailableVersion'   | latestGlobalAvailableVersion
+        'coverageForGradleVersion("6.5")'           | '6.5'
+    }
+
+    def "throws exception when coverage Gradle version is not known"() {
+        given:
+        makeSingleProject()
+        componentUnderTest.writeToProject(testDirectory)
+
+        and:
+        buildFile << """
+            gradlePlugin {
+                compatibility {
+                    minimumGradleVersion = '6.2'
+                }
+            }
+
+            functionalTest {
+                testingStrategies = [strategies.coverageForGradleVersion('99.1')]
+            }
+        """
+
+        when:
+        def failure = fails('check')
+
+        then:
+        failure.assertHasCause("Unknown Gradle version '99.1' for testing strategy.")
     }
 
     private String getLatestNightlyVersion() {

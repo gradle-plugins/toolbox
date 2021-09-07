@@ -26,4 +26,9 @@ public abstract class GradlePluginTestingStrategyFactoryInternal implements Grad
     public GradlePluginTestingStrategy getCoverageForLatestGlobalAvailableVersion() {
         return getObjects().newInstance(GradlePluginTestingStrategyInternal.class, LATEST_GLOBAL_AVAILABLE);
     }
+
+    @Override
+    public GradlePluginTestingStrategy coverageForGradleVersion(String version) {
+        return getObjects().newInstance(GradlePluginTestingStrategyInternal.class, version);
+    }
 }
