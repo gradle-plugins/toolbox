@@ -7,7 +7,7 @@ public interface GradlePluginTestingStrategyFactory {
      *
      * @return a {@link GradlePluginTestingStrategy} instance for the minimum Gradle version supported by the plugin, never null
      */
-    GradlePluginTestingStrategy getCoverageForMinimumVersion();
+    GradleVersionCoverageTestingStrategy getCoverageForMinimumVersion();
 
     /**
      * Returns a testing strategy which will cover the latest Gradle nightly version.
@@ -15,7 +15,7 @@ public interface GradlePluginTestingStrategyFactory {
      *
      * @return a {@link GradlePluginTestingStrategy} instance for the latest Gradle nightly version, never null
      */
-    GradlePluginTestingStrategy getCoverageForLatestNightlyVersion();
+    GradleVersionCoverageTestingStrategy getCoverageForLatestNightlyVersion();
 
     /**
      * Returns a testing strategy which will cover the latest Gradle released version.
@@ -23,12 +23,12 @@ public interface GradlePluginTestingStrategyFactory {
      *
      * @return a {@link GradlePluginTestingStrategy} instance for the latest Gradle nightly version, never null
      */
-    GradlePluginTestingStrategy getCoverageForLatestGlobalAvailableVersion();
+    GradleVersionCoverageTestingStrategy getCoverageForLatestGlobalAvailableVersion();
 
     /**
      * Returns a testing strategy which will cover the specified Gradle version.
      *
      * @return a {@link GradlePluginTestingStrategy} instance for the specified Gradle version, never null
      */
-    GradlePluginTestingStrategy coverageForGradleVersion(String version);
+    GradleVersionCoverageTestingStrategy coverageForGradleVersion(String version);
 }

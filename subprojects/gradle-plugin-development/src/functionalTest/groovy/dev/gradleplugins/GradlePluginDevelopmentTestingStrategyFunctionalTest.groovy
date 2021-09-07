@@ -124,7 +124,7 @@ abstract class AbstractGradlePluginDevelopmentTestingStrategyFunctionalTest exte
         def failure = fails('check')
 
         then:
-        failure.assertHasCause("Unknown Gradle version '99.1' for testing strategy.")
+        failure.assertHasCause("Unknown Gradle version '99.1' for adhoc testing strategy.")
     }
 
     private String getLatestNightlyVersion() {

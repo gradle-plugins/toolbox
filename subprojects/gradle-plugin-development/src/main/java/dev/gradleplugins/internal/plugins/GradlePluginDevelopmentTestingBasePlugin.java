@@ -1,13 +1,16 @@
 package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.GradlePluginTestingStrategy;
+import dev.gradleplugins.GradleVersionCoverageTestingStrategy;
 import dev.gradleplugins.internal.GradlePluginDevelopmentTestSuiteInternal;
 import dev.gradleplugins.internal.GradlePluginTestingStrategyInternal;
-import dev.gradleplugins.internal.ReleasedVersionDistributions;
+import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.provider.Property;
+import org.gradle.api.reflect.TypeOf;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskProvider;
@@ -18,8 +21,6 @@ import org.gradle.util.GUtil;
 import javax.inject.Inject;
 import java.util.Set;
 
-import static dev.gradleplugins.internal.GradlePluginTestingStrategyInternal.*;
-
 public abstract class GradlePluginDevelopmentTestingBasePlugin implements Plugin<Project> {
     @Inject
     protected abstract TaskContainer getTasks();
@@ -27,6 +28,10 @@ public abstract class GradlePluginDevelopmentTestingBasePlugin implements Plugin
     @Override
     public void apply(Project project) {
         project.getComponents().withType(GradlePluginDevelopmentTestSuiteInternal.class).configureEach(testSuite -> {
+            testSuite.getTestTasks().configureEach(task -> {
+                val testingStrategy = project.getObjects().property(GradlePluginTestingStrategy.class);
+                task.getExtensions().add(new TypeOf<Property<GradlePluginTestingStrategy>>() {}, "testingStrategy", testingStrategy);
+            });
             project.afterEvaluate(proj -> {
                 testSuite.getTestedSourceSet().disallowChanges();
                 if (testSuite.getTestedSourceSet().isPresent()) {
@@ -71,24 +76,12 @@ public abstract class GradlePluginDevelopmentTestingBasePlugin implements Plugin
 
     private Action<Test> testingStrategy(GradlePluginDevelopmentTestSuiteInternal testSuite, GradlePluginTestingStrategyInternal strategy) {
         return task -> {
-            String version;
-            switch (strategy.getName()) {
-                case MINIMUM_GRADLE:
-                    version = testSuite.getTestedGradlePlugin().get().getMinimumGradleVersion().get();
-                    break;
-                case LATEST_NIGHTLY:
-                    version = new ReleasedVersionDistributions().getMostRecentSnapshot().getVersion();
-                    break;
-                case LATEST_GLOBAL_AVAILABLE:
-                    version = new ReleasedVersionDistributions().getMostRecentRelease().getVersion();
-                    break;
-                default:
-                    version = strategy.getName();
-                    if (new ReleasedVersionDistributions().getAllVersions().stream().noneMatch(it -> it.getVersion().equals(version))) {
-                        throw new RuntimeException(String.format("Unknown Gradle version '%s' for testing strategy.", version));
-                    }
+            if (!(strategy instanceof GradleVersionCoverageTestingStrategy)) {
+                throw new RuntimeException("Unknown testing strategy");
             }
+            String version = ((GradleVersionCoverageTestingStrategy) strategy).getVersion();
             task.systemProperty("dev.gradleplugins.defaultGradleVersion", version);
+            ((Property<GradlePluginTestingStrategy>) task.getExtensions().getByName("testingStrategy")).set(strategy);
         };
     }
 

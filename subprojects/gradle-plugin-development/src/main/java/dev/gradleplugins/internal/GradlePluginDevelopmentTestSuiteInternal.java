@@ -26,7 +26,7 @@ import java.util.List;
 import static dev.gradleplugins.internal.DefaultDependencyVersions.SPOCK_FRAMEWORK_VERSION;
 
 public abstract class GradlePluginDevelopmentTestSuiteInternal implements GradlePluginDevelopmentTestSuite, SoftwareComponent {
-    private final GradlePluginTestingStrategyFactory strategyFactory = getObjects().newInstance(GradlePluginTestingStrategyFactoryInternal.class);
+    private final GradlePluginTestingStrategyFactory strategyFactory;
     @Getter private final Dependencies dependencies;
     @Getter private final String name;
     @Getter private final SourceSet sourceSet;
@@ -40,6 +40,7 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
 
     @Inject
     public GradlePluginDevelopmentTestSuiteInternal(String name, SourceSet sourceSet, PluginManager pluginManager) {
+        this.strategyFactory = new GradlePluginTestingStrategyFactoryInternal(getTestedGradlePlugin().flatMap(GradlePluginDevelopmentCompatibilityExtension::getMinimumGradleVersion));
         this.name = name;
         this.sourceSet = sourceSet;
         this.dependencies = getObjects().newInstance(Dependencies.class, sourceSet, pluginManager, getTestedGradlePlugin().flatMap(GradlePluginDevelopmentCompatibilityExtension::getMinimumGradleVersion).map(GradleRuntimeCompatibility::groovyVersionOf));
