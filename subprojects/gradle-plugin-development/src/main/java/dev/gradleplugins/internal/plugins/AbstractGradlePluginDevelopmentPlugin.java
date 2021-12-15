@@ -37,8 +37,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static dev.gradleplugins.GradlePluginDevelopmentDependencyExtension.GRADLE_API_LOCAL_VERSION;
 import static dev.gradleplugins.GradleRuntimeCompatibility.minimumJavaVersionFor;
-import static dev.gradleplugins.internal.GradlePluginDevelopmentDependencyExtensionInternal.LOCAL_GRADLE_VERSION;
 
 public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Project> {
 
@@ -126,7 +126,7 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
     public static void configureExtension(GradlePluginDevelopmentCompatibilityExtension extension, Project project) {
         extension.getGradleApiVersion().convention(extension.getMinimumGradleVersion().map(it -> {
             if (GradleVersion.version(it).isSnapshot()) {
-                return LOCAL_GRADLE_VERSION;
+                return GRADLE_API_LOCAL_VERSION;
             }
             return it;
         }));

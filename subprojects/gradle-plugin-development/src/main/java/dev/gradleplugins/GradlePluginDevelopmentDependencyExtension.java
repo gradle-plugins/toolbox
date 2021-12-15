@@ -9,6 +9,8 @@ import java.util.Objects;
  * Extension methods for {@link DependencyHandler}.
  */
 public interface GradlePluginDevelopmentDependencyExtension {
+    String GRADLE_API_LOCAL_VERSION = "local";
+
     /**
      * Returns the versioned redistributed Gradle API, that is {@literal dev.gradleplugins:gradle-api:$version}, external dependency.
      *
