@@ -3,6 +3,8 @@ package dev.gradleplugins;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
 
+import java.util.Objects;
+
 /**
  * Extension methods for {@link DependencyHandler}.
  */
@@ -36,4 +38,15 @@ public interface GradlePluginDevelopmentDependencyExtension {
      * @return a dependency instance for the latest Gradle Runner Kit with all supported executor, never null
      */
     Dependency gradleRunnerKit();
+
+    /**
+     * Returns {@link DependencyHandler} extension methods.
+     *
+     * @param dependencies  the dependencies to extends, must not be null
+     * @return the extension methods, never null
+     */
+    static GradlePluginDevelopmentDependencyExtension from(DependencyHandler dependencies) {
+        Objects.requireNonNull(dependencies);
+        return new DefaultGradlePluginDevelopmentDependencyExtension(dependencies);
+    }
 }
