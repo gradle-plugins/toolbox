@@ -88,7 +88,10 @@ test {
     dependencies {
         implementation spockFramework()
         implementation groovy()
+        implementation "org.junit.jupiter:junit-jupiter:5.8.2"
+        runtimeOnly "org.junit.vintage:junit-vintage-engine:5.8.2"
     }
+    testTasks.configureEach { useJUnitPlatform() }
 }
 
 functionalTest {
