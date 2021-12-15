@@ -5,10 +5,12 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.ModuleDependency;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
+import org.gradle.api.reflect.HasPublicType;
+import org.gradle.api.reflect.TypeOf;
 
 import java.util.Objects;
 
-final class DefaultGradlePluginDevelopmentDependencyExtension implements GradlePluginDevelopmentDependencyExtension {
+final class DefaultGradlePluginDevelopmentDependencyExtension implements GradlePluginDevelopmentDependencyExtension, HasPublicType {
     private static final String LOCAL_GRADLE_VERSION = "local";
     private final DependencyHandler dependencies;
 
@@ -44,5 +46,10 @@ final class DefaultGradlePluginDevelopmentDependencyExtension implements GradleP
     @Override
     public Dependency gradleRunnerKit() {
         return dependencies.create("dev.gradleplugins:gradle-runner-kit:" + DefaultDependencyVersions.GRADLE_FIXTURES_VERSION);
+    }
+
+    @Override
+    public TypeOf<?> getPublicType() {
+        return TypeOf.typeOf(GradlePluginDevelopmentDependencyExtension.class);
     }
 }

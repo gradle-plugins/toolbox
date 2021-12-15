@@ -17,9 +17,9 @@
 package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension;
+import dev.gradleplugins.GradlePluginDevelopmentRepositoryExtension;
 import dev.gradleplugins.internal.GradlePluginDevelopmentDependencyExtensionInternal;
 import dev.gradleplugins.internal.GradlePluginDevelopmentExtensionInternal;
-import dev.gradleplugins.internal.GradlePluginDevelopmentRepositoryExtensionInternal;
 import lombok.val;
 import org.gradle.api.GradleException;
 import org.gradle.api.JavaVersion;
@@ -106,7 +106,7 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
 
         project.afterEvaluate(proj -> {
             if (!extension.isDefaultRepositoriesDisabled()) {
-                GradlePluginDevelopmentRepositoryExtensionInternal.of(project.getRepositories()).gradlePluginDevelopment();
+                GradlePluginDevelopmentRepositoryExtension.from(project.getRepositories()).gradlePluginDevelopment();
             }
         });
 

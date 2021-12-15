@@ -9,15 +9,19 @@ import org.gradle.api.artifacts.dsl.RepositoryHandler;
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
+import org.gradle.api.plugins.ExtensionAware;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
+import static dev.gradleplugins.GradlePluginDevelopmentRepositoryExtension.from;
 
 final class RegisterGradlePluginDevelopmentRepositoryExtensionRule implements Action<Project> {
     private static final Logger LOGGER = Logging.getLogger(RegisterGradlePluginDevelopmentRepositoryExtensionRule.class);
 
     public void execute(Project project) {
         RepositoryHandler repositories = project.getRepositories();
+        ((ExtensionAware) repositories).getExtensions().add("gradlePluginDevelopment", from(repositories));
         try {
             Method target = Class.forName("dev.gradleplugins.internal.dsl.groovy.GroovyDslRuntimeExtensions").getMethod("extendWithMethod", Object.class, String.class, Closure.class);
             target.invoke(null, repositories, "gradlePluginDevelopment", new GradlePluginDevelopmentClosure(repositories));
@@ -27,15 +31,12 @@ final class RegisterGradlePluginDevelopmentRepositoryExtensionRule implements Ac
     }
 
     private static class GradlePluginDevelopmentClosure extends Closure<Dependency> {
-        private final GradlePluginDevelopmentRepositoryExtension extension;
-
         public GradlePluginDevelopmentClosure(RepositoryHandler repositories) {
             super(repositories);
-            this.extension = GradlePluginDevelopmentRepositoryExtension.from(repositories);
         }
 
         public MavenArtifactRepository doCall() {
-            return extension.gradlePluginDevelopment();
+            return ((ExtensionAware) getOwner()).getExtensions().getByType(GradlePluginDevelopmentRepositoryExtension.class).gradlePluginDevelopment();
         }
     }
 }

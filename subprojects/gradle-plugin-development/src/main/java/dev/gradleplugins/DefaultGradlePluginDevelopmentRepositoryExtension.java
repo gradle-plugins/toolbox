@@ -3,9 +3,11 @@ package dev.gradleplugins;
 import org.gradle.api.Action;
 import org.gradle.api.artifacts.dsl.RepositoryHandler;
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
+import org.gradle.api.reflect.HasPublicType;
+import org.gradle.api.reflect.TypeOf;
 import org.gradle.internal.Actions;
 
-final class DefaultGradlePluginDevelopmentRepositoryExtension implements GradlePluginDevelopmentRepositoryExtension {
+final class DefaultGradlePluginDevelopmentRepositoryExtension implements GradlePluginDevelopmentRepositoryExtension, HasPublicType {
     private final RepositoryHandler repositories;
 
     DefaultGradlePluginDevelopmentRepositoryExtension(RepositoryHandler repositories) {
@@ -31,5 +33,10 @@ final class DefaultGradlePluginDevelopmentRepositoryExtension implements GradleP
             });
             action.execute(repository);
         });
+    }
+
+    @Override
+    public TypeOf<?> getPublicType() {
+        return TypeOf.typeOf(GradlePluginDevelopmentRepositoryExtension.class);
     }
 }
