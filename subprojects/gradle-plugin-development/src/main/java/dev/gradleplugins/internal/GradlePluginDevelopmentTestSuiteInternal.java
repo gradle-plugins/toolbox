@@ -2,7 +2,6 @@ package dev.gradleplugins.internal;
 
 import dev.gradleplugins.*;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.Action;
 import org.gradle.api.artifacts.Configuration;
@@ -28,8 +27,8 @@ import static dev.gradleplugins.internal.DefaultDependencyVersions.SPOCK_FRAMEWO
 
 public abstract class GradlePluginDevelopmentTestSuiteInternal implements GradlePluginDevelopmentTestSuite, SoftwareComponent {
     private final GradlePluginTestingStrategyFactory strategyFactory;
-    @Getter private final Dependencies dependencies;
-    @Getter private final String name;
+    private final Dependencies dependencies;
+    private final String name;
     @Getter private SourceSet sourceSet;
     @Getter private final List<Action<? super Test>> testTaskActions = new ArrayList<>();
 
@@ -57,6 +56,11 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
     }
 
     @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
     public GradlePluginTestingStrategyFactory getStrategies() {
         return strategyFactory;
     }
@@ -68,14 +72,23 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         return getObjects().newInstance(TestTaskView.class, testTaskActions);
     }
 
-    @RequiredArgsConstructor(onConstructor_={@Inject})
-    protected static class TestTaskView implements TaskView<Test> {
+    protected static /*final*/ class TestTaskView implements TaskView<Test> {
         private final List<Action<? super Test>> testTaskActions;
+
+        @Inject
+        public TestTaskView(List<Action<? super Test>> testTaskActions) {
+            this.testTaskActions = testTaskActions;
+        }
 
         @Override
         public void configureEach(Action<? super Test> action) {
             testTaskActions.add(action);
         }
+    }
+
+    @Override
+    public Dependencies getDependencies() {
+        return dependencies;
     }
 
     @Override
