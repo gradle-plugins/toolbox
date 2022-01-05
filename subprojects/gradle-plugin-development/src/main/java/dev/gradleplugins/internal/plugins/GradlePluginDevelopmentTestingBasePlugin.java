@@ -27,6 +27,7 @@ public abstract class GradlePluginDevelopmentTestingBasePlugin implements Plugin
 
     @Override
     public void apply(Project project) {
+        project.getPluginManager().withPlugin("java-gradle-plugin", new RegisterTestingExtensionOnGradleDevelExtensionRule(project));
         project.getComponents().withType(GradlePluginDevelopmentTestSuiteInternal.class).configureEach(testSuite -> {
             testSuite.getTestTasks().configureEach(task -> {
                 val testingStrategy = project.getObjects().property(GradlePluginTestingStrategy.class);
