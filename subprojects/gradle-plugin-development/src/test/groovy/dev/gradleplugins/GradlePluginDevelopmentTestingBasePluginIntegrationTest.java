@@ -1,6 +1,7 @@
-package dev.gradleplugins.internal.plugins;
+package dev.gradleplugins;
 
 import dev.gradleplugins.GradlePluginDevelopmentTestingExtension;
+import dev.gradleplugins.internal.plugins.GradlePluginDevelopmentTestingBasePlugin;
 import org.gradle.api.Project;
 import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 import org.gradle.testfixtures.ProjectBuilder;
@@ -17,7 +18,7 @@ class GradlePluginDevelopmentTestingBasePluginIntegrationTest {
 
     @BeforeEach
     void applyPlugins() {
-        project.getPluginManager().apply(GradlePluginDevelopmentTestingBasePlugin.class);
+        project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-testing-base");
     }
 
     @Test

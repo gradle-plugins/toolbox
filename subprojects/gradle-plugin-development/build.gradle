@@ -27,6 +27,10 @@ gradlePlugin {
             id = 'dev.gradleplugins.gradle-plugin-development'
             implementationClass = 'dev.gradleplugins.internal.plugins.GradlePluginDevelopmentPlugin'
         }
+        testingBase {
+            id = 'dev.gradleplugins.gradle-plugin-testing-base'
+            implementationClass = 'dev.gradleplugins.internal.plugins.GradlePluginDevelopmentTestingBasePlugin'
+        }
         unitTest {
             id = 'dev.gradleplugins.gradle-plugin-unit-test'
             implementationClass = 'dev.gradleplugins.internal.plugins.GradlePluginDevelopmentUnitTestingPlugin'
@@ -66,6 +70,11 @@ pluginBundle {
             displayName = 'Gradle Plugin Development plugin'
             description = 'Provides additional support for developing Gradle plugin-related projects (settings plugin only).'
             tags = ['gradle-plugin-development', 'gradle-plugin', 'settings-plugin']
+        }
+        testingBase {
+            displayName = 'Gradle Plugin Testing base plugin'
+            description = 'Provides support for testing Gradle plugins.'
+            tags = ['gradle-plugin-development', 'gradle-plugin', 'testing']
         }
         unitTest {
             displayName = 'Gradle Plugin Unit Test plugin'
