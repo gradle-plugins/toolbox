@@ -28,7 +28,8 @@ public abstract class GradlePluginDevelopmentUnitTestingPlugin implements Plugin
     private void createUnitTestSuite(Project project) {
         val sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
         val sourceSet = sourceSets.maybeCreate(TEST_NAME);
-        val testSuite = project.getObjects().newInstance(GradlePluginDevelopmentTestSuiteInternal.class, TEST_NAME, sourceSet);
+        val testSuite = project.getObjects().newInstance(GradlePluginDevelopmentTestSuiteInternal.class, TEST_NAME);
+        testSuite.usingSourceSet(sourceSet);
         testSuite.getTestedSourceSet().convention(project.provider(() -> sourceSets.getByName("main")));
         testSuite.getTestedGradlePlugin().set((GradlePluginDevelopmentCompatibilityExtension) ((ExtensionAware)project.getExtensions().getByType(GradlePluginDevelopmentExtension.class)).getExtensions().getByName("compatibility"));
         testSuite.getTestedGradlePlugin().disallowChanges();

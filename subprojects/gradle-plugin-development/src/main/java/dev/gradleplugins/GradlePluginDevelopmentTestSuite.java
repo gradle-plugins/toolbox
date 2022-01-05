@@ -1,12 +1,13 @@
 package dev.gradleplugins;
 
 import org.gradle.api.Action;
+import org.gradle.api.Named;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.testing.Test;
 
-public interface GradlePluginDevelopmentTestSuite {
+public interface GradlePluginDevelopmentTestSuite extends Named {
     /**
      * Configure the testing strategies for this test suite.
      *

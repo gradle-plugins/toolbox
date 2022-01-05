@@ -22,6 +22,7 @@ import org.gradle.plugin.devel.tasks.PluginUnderTestMetadata;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.StreamSupport;
 
 import static dev.gradleplugins.internal.DefaultDependencyVersions.SPOCK_FRAMEWORK_VERSION;
 
@@ -29,7 +30,7 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
     private final GradlePluginTestingStrategyFactory strategyFactory;
     @Getter private final Dependencies dependencies;
     @Getter private final String name;
-    @Getter private final SourceSet sourceSet;
+    @Getter private SourceSet sourceSet;
     @Getter private final List<Action<? super Test>> testTaskActions = new ArrayList<>();
 
     @Inject
@@ -39,14 +40,20 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
     protected abstract TaskContainer getTasks();
 
     @Inject
-    public GradlePluginDevelopmentTestSuiteInternal(String name, SourceSet sourceSet, PluginManager pluginManager) {
+    public GradlePluginDevelopmentTestSuiteInternal(String name, PluginManager pluginManager) {
         this.strategyFactory = new GradlePluginTestingStrategyFactoryInternal(getTestedGradlePlugin().flatMap(GradlePluginDevelopmentCompatibilityExtension::getMinimumGradleVersion));
         this.name = name;
-        this.sourceSet = sourceSet;
-        this.dependencies = getObjects().newInstance(Dependencies.class, sourceSet, pluginManager, getTestedGradlePlugin().flatMap(GradlePluginDevelopmentCompatibilityExtension::getMinimumGradleVersion).map(GradleRuntimeCompatibility::groovyVersionOf));
-        getTasks().named("pluginUnderTestMetadata", PluginUnderTestMetadata.class, task -> {
-            task.getPluginClasspath().from(dependencies.pluginUnderTestMetadata);
+        this.dependencies = getObjects().newInstance(Dependencies.class, pluginManager, getTestedGradlePlugin().flatMap(GradlePluginDevelopmentCompatibilityExtension::getMinimumGradleVersion).map(GradleRuntimeCompatibility::groovyVersionOf));
+        StreamSupport.stream(getTasks().getCollectionSchema().getElements().spliterator(), false).filter(it -> it.getName().equals("pluginUnderTestMetadata")).findFirst().ifPresent(ignored -> {
+            getTasks().named("pluginUnderTestMetadata", PluginUnderTestMetadata.class, task -> {
+                task.getPluginClasspath().from(dependencies.pluginUnderTestMetadata);
+            });
         });
+    }
+
+    public void usingSourceSet(SourceSet sourceSet) {
+        this.sourceSet = sourceSet;
+        this.dependencies.usingSourceSet(sourceSet);
     }
 
     @Override
@@ -77,10 +84,10 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
     }
 
     protected abstract static class Dependencies implements GradlePluginDevelopmentTestSuiteDependencies {
-        private final SourceSet sourceSet;
+        private SourceSet sourceSet;
         private final PluginManager pluginManager;
         private final Provider<String> defaultGroovyVersion;
-        private final Configuration pluginUnderTestMetadata;
+        private Configuration pluginUnderTestMetadata;
 
         @Inject
         protected abstract ConfigurationContainer getConfigurations();
@@ -89,10 +96,13 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         protected abstract DependencyHandler getDependencies();
 
         @Inject
-        public Dependencies(SourceSet sourceSet, PluginManager pluginManager, Provider<String> defaultGroovyVersion) {
-            this.sourceSet = sourceSet;
+        public Dependencies(PluginManager pluginManager, Provider<String> defaultGroovyVersion) {
             this.pluginManager = pluginManager;
             this.defaultGroovyVersion = defaultGroovyVersion;
+        }
+
+        public void usingSourceSet(SourceSet sourceSet) {
+            this.sourceSet = sourceSet;
             this.pluginUnderTestMetadata = getConfigurations().create(sourceSet.getName() + StringUtils.capitalize("pluginUnderTestMetadata"));
         }
 
