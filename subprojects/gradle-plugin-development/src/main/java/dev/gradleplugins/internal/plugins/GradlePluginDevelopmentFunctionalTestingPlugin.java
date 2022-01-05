@@ -2,6 +2,7 @@ package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension;
 import dev.gradleplugins.GradlePluginDevelopmentTestSuite;
+import dev.gradleplugins.GradlePluginDevelopmentTestSuiteFactory;
 import dev.gradleplugins.internal.GradlePluginDevelopmentTestSuiteInternal;
 import lombok.val;
 import org.gradle.api.Plugin;
@@ -27,7 +28,8 @@ public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements 
     private void createFunctionalTestSuite(Project project) {
         val sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
         val sourceSet = sourceSets.maybeCreate(FUNCTIONAL_TEST_NAME);
-        val functionalTestSuite = project.getObjects().newInstance(GradlePluginDevelopmentTestSuiteInternal.class, FUNCTIONAL_TEST_NAME);
+        val factory = GradlePluginDevelopmentTestSuiteFactory.forProject(project);
+        val functionalTestSuite = (GradlePluginDevelopmentTestSuiteInternal) factory.create(FUNCTIONAL_TEST_NAME);
         functionalTestSuite.usingSourceSet(sourceSet);
         functionalTestSuite.getTestedSourceSet().convention(project.provider(() -> sourceSets.getByName("main")));
         functionalTestSuite.getTestedGradlePlugin().set((GradlePluginDevelopmentCompatibilityExtension) ((ExtensionAware)project.getExtensions().getByType(GradlePluginDevelopmentExtension.class)).getExtensions().getByName("compatibility"));

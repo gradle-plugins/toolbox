@@ -2,6 +2,7 @@ package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension;
 import dev.gradleplugins.GradlePluginDevelopmentTestSuite;
+import dev.gradleplugins.GradlePluginDevelopmentTestSuiteFactory;
 import dev.gradleplugins.internal.GradlePluginDevelopmentDependencyExtensionInternal;
 import dev.gradleplugins.internal.GradlePluginDevelopmentTestSuiteInternal;
 import lombok.val;
@@ -28,7 +29,8 @@ public abstract class GradlePluginDevelopmentUnitTestingPlugin implements Plugin
     private void createUnitTestSuite(Project project) {
         val sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
         val sourceSet = sourceSets.maybeCreate(TEST_NAME);
-        val testSuite = project.getObjects().newInstance(GradlePluginDevelopmentTestSuiteInternal.class, TEST_NAME);
+        val factory = GradlePluginDevelopmentTestSuiteFactory.forProject(project);
+        val testSuite = (GradlePluginDevelopmentTestSuiteInternal) factory.create(TEST_NAME);
         testSuite.usingSourceSet(sourceSet);
         testSuite.getTestedSourceSet().convention(project.provider(() -> sourceSets.getByName("main")));
         testSuite.getTestedGradlePlugin().set((GradlePluginDevelopmentCompatibilityExtension) ((ExtensionAware)project.getExtensions().getByType(GradlePluginDevelopmentExtension.class)).getExtensions().getByName("compatibility"));
