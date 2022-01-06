@@ -22,7 +22,6 @@ import dev.gradleplugins.internal.GradlePluginDevelopmentDependencyExtensionInte
 import dev.gradleplugins.internal.GradlePluginDevelopmentExtensionInternal;
 import lombok.val;
 import org.gradle.api.GradleException;
-import org.gradle.api.JavaVersion;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.internal.artifacts.dependencies.SelfResolvingDependencyInternal;
@@ -31,14 +30,10 @@ import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.plugins.PluginManager;
 import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 import org.gradle.util.GradleVersion;
-import org.gradle.util.VersionNumber;
 
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static dev.gradleplugins.GradlePluginDevelopmentDependencyExtension.GRADLE_API_LOCAL_VERSION;
-import static dev.gradleplugins.GradleRuntimeCompatibility.minimumJavaVersionFor;
 
 public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Project> {
 
@@ -101,13 +96,6 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
     }
 
     public static void configureExtension(GradlePluginDevelopmentCompatibilityExtension extension, Project project) {
-        extension.getGradleApiVersion().convention(extension.getMinimumGradleVersion().map(it -> {
-            if (GradleVersion.version(it).isSnapshot()) {
-                return GRADLE_API_LOCAL_VERSION;
-            }
-            return it;
-        }));
-
         val dependencies = GradlePluginDevelopmentDependencyExtensionInternal.of(project.getDependencies());
         dependencies.add(getCompileOnlyApiConfigurationName(), extension.getGradleApiVersion().map(dependencies::gradleApi));
     }
