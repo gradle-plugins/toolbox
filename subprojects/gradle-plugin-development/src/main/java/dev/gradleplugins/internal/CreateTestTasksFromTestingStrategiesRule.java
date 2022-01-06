@@ -4,6 +4,7 @@ import dev.gradleplugins.GradlePluginTestingStrategy;
 import dev.gradleplugins.GradleVersionCoverageTestingStrategy;
 import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.Action;
+import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskContainer;
@@ -13,12 +14,15 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin;
 import org.gradle.util.GUtil;
 
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 public final class CreateTestTasksFromTestingStrategiesRule implements Action<GradlePluginDevelopmentTestSuiteInternal> {
     private final TaskContainer tasks;
+    private final ObjectFactory objects;
 
-    public CreateTestTasksFromTestingStrategiesRule(TaskContainer tasks) {
+    public CreateTestTasksFromTestingStrategiesRule(TaskContainer tasks, ObjectFactory objects) {
         this.tasks = tasks;
+        this.objects = objects;
     }
 
     @Override
@@ -82,8 +86,8 @@ public final class CreateTestTasksFromTestingStrategiesRule implements Action<Gr
             it.setDescription("Runs the " + GUtil.toWords(testSuite.getName()) + "s.");
             it.setGroup(LifecycleBasePlugin.VERIFICATION_GROUP);
 
-            it.setTestClassesDirs(sourceSet.getOutput().getClassesDirs());
-            it.setClasspath(sourceSet.getRuntimeClasspath());
+            it.setTestClassesDirs(objects.fileCollection().from((Callable<Object>) () -> sourceSet.getOutput().getClassesDirs()));
+            it.setClasspath(objects.fileCollection().from((Callable<Object>) () -> sourceSet.getRuntimeClasspath()));
         });
         return result;
     }

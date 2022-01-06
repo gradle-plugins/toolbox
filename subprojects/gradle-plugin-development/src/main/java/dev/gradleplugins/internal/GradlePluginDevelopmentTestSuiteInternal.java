@@ -43,7 +43,7 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
     protected abstract TaskContainer getTasks();
 
     @Inject
-    public GradlePluginDevelopmentTestSuiteInternal(String name, TaskContainer tasks, PluginManager pluginManager) {
+    public GradlePluginDevelopmentTestSuiteInternal(String name, TaskContainer tasks, ObjectFactory objects, PluginManager pluginManager) {
         this.strategyFactory = new GradlePluginTestingStrategyFactoryInternal(getTestedGradlePlugin().flatMap(GradlePluginDevelopmentCompatibilityExtension::getMinimumGradleVersion));
         this.name = name;
         this.dependencies = getObjects().newInstance(Dependencies.class, pluginManager, getTestedGradlePlugin().flatMap(GradlePluginDevelopmentCompatibilityExtension::getMinimumGradleVersion).map(GradleRuntimeCompatibility::groovyVersionOf));
@@ -52,7 +52,7 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
                 task.getPluginClasspath().from(dependencies.pluginUnderTestMetadata);
             });
         });
-        this.finalizeAction = Actions.composite(new TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule(), new CreateTestTasksFromTestingStrategiesRule(tasks));
+        this.finalizeAction = Actions.composite(new TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule(), new CreateTestTasksFromTestingStrategiesRule(tasks, objects));
     }
 
     public void usingSourceSet(SourceSet sourceSet) {
