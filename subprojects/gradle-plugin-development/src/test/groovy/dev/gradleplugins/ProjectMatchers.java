@@ -36,7 +36,11 @@ public final class ProjectMatchers {
     }
 
     public static <T> Matcher<T> publicType(Class<?> type) {
-        return new FeatureMatcher<T, TypeOf<?>>(equalTo(TypeOf.typeOf(type)), "", "") {
+        return publicType(TypeOf.typeOf(type));
+    }
+
+    public static <T> Matcher<T> publicType(TypeOf<?> type) {
+        return new FeatureMatcher<T, TypeOf<?>>(equalTo(type), "", "") {
             @Override
             protected TypeOf<?> featureValueOf(T actual) {
                 if (actual instanceof HasPublicType) {
