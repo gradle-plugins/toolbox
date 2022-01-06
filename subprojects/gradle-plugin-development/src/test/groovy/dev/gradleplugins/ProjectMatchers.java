@@ -2,6 +2,7 @@ package dev.gradleplugins;
 
 import org.gradle.api.Named;
 import org.gradle.api.NamedDomainObjectCollectionSchema;
+import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.plugins.ExtensionsSchema;
 import org.gradle.api.plugins.PluginAware;
@@ -76,6 +77,19 @@ public final class ProjectMatchers {
             @Override
             public void describeTo(Description description) {
 
+            }
+        };
+    }
+
+    public static Matcher<Dependency> coordinate(String coordinate) {
+        return new FeatureMatcher<Dependency, String>(equalTo(coordinate), "", "") {
+            @Override
+            protected String featureValueOf(Dependency actual) {
+                final StringBuilder builder = new StringBuilder();
+                builder.append(actual.getGroup());
+                builder.append(":").append(actual.getName());
+                builder.append(":").append(actual.getVersion());
+                return builder.toString();
             }
         };
     }

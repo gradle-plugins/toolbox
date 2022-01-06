@@ -4,11 +4,11 @@ import dev.gradleplugins.GradlePluginDevelopmentDependencyExtension;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
 import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.provider.Provider;
-import org.gradle.util.GradleVersion;
 
 import javax.inject.Inject;
 
@@ -16,12 +16,14 @@ public class GradlePluginDevelopmentDependencyExtensionInternal implements Gradl
     @Getter(AccessLevel.PROTECTED) private final DependencyHandler dependencies;
     private final Project project; // for the provider as notation shim
     private final GradlePluginDevelopmentDependencyExtension extension;
+    private final ConfigurationContainer configurations;
 
     @Inject
-    public GradlePluginDevelopmentDependencyExtensionInternal(DependencyHandler dependencies, Project project, GradlePluginDevelopmentDependencyExtension extension) {
+    public GradlePluginDevelopmentDependencyExtensionInternal(DependencyHandler dependencies, Project project, GradlePluginDevelopmentDependencyExtension extension, ConfigurationContainer configurations) {
         this.dependencies = dependencies;
         this.project = project;
         this.extension = extension;
+        this.configurations = configurations;
     }
 
     @Override
@@ -64,31 +66,15 @@ public class GradlePluginDevelopmentDependencyExtensionInternal implements Gradl
 
     // Shim for supporting older Gradle versions
     public void add(Project project, String configuration, Provider<Object> notation) {
-        if (isGradleVersionGreaterOrEqualsTo6Dot5()) {
-            getDependencies().add(configuration, notation);
-        } else {
-            project.afterEvaluate(proj -> getDependencies().add(configuration, notation.get()));
-        }
+        configurations.named(configuration, new AddDependency(notation, getDependencies()::create));
     }
 
     public void add(String configuration, Provider<Object> notation) {
-        if (isGradleVersionGreaterOrEqualsTo6Dot5()) {
-            getDependencies().add(configuration, notation);
-        } else {
-            project.afterEvaluate(proj -> getDependencies().add(configuration, notation.get()));
-        }
+        configurations.named(configuration, new AddDependency(notation, getDependencies()::create));
     }
 
     public void add(String configuration, Object notation) {
-        if (isGradleVersionGreaterOrEqualsTo6Dot5() || !(notation instanceof Provider)) {
-            getDependencies().add(configuration, notation);
-        } else {
-            project.afterEvaluate(proj -> getDependencies().add(configuration, ((Provider<Object>)notation).get()));
-        }
-    }
-
-    private static boolean isGradleVersionGreaterOrEqualsTo6Dot5() {
-        return GradleVersion.current().compareTo(GradleVersion.version("6.5")) >= 0;
+        configurations.named(configuration, new AddDependency(notation, getDependencies()::create));
     }
 
     public static GradlePluginDevelopmentDependencyExtensionInternal of(DependencyHandler dependencies) {
