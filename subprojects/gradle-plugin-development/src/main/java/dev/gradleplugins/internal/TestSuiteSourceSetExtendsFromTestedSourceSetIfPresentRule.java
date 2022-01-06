@@ -8,7 +8,7 @@ final class TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule implements
     public void execute(GradlePluginDevelopmentTestSuiteInternal testSuite) {
         testSuite.getTestedSourceSet().disallowChanges();
         if (testSuite.getTestedSourceSet().isPresent()) {
-            SourceSet sourceSet = testSuite.getSourceSet();
+            SourceSet sourceSet = testSuite.getSourceSet().get();
             SourceSet testedSourceSet = testSuite.getTestedSourceSet().get();
             sourceSet.setCompileClasspath(sourceSet.getCompileClasspath().plus(testedSourceSet.getOutput()));
             sourceSet.setRuntimeClasspath(sourceSet.getRuntimeClasspath().plus(sourceSet.getOutput()).plus(sourceSet.getCompileClasspath()));

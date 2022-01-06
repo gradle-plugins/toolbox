@@ -45,7 +45,7 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
     public GradlePluginDevelopmentTestSuiteInternal(String name, TaskContainer tasks, ObjectFactory objects, PluginManager pluginManager) {
         this.strategyFactory = new GradlePluginTestingStrategyFactoryInternal(getTestedGradlePlugin().flatMap(GradlePluginDevelopmentCompatibilityExtension::getMinimumGradleVersion));
         this.name = name;
-        this.dependencies = getObjects().newInstance(Dependencies.class, pluginManager, getTestedGradlePlugin().flatMap(GradlePluginDevelopmentCompatibilityExtension::getMinimumGradleVersion).map(GradleRuntimeCompatibility::groovyVersionOf));
+        this.dependencies = getObjects().newInstance(Dependencies.class, name, getSourceSet(), pluginManager, getTestedGradlePlugin().flatMap(GradlePluginDevelopmentCompatibilityExtension::getMinimumGradleVersion).map(GradleRuntimeCompatibility::groovyVersionOf));
         StreamSupport.stream(getTasks().getCollectionSchema().getElements().spliterator(), false).filter(it -> it.getName().equals("pluginUnderTestMetadata")).findFirst().ifPresent(ignored -> {
             getTasks().named("pluginUnderTestMetadata", PluginUnderTestMetadata.class, task -> {
                 task.getPluginClasspath().from(dependencies.pluginUnderTestMetadata);
@@ -112,7 +112,8 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         action.execute(dependencies);
     }
 
-    protected abstract class Dependencies implements GradlePluginDevelopmentTestSuiteDependencies {
+    protected abstract static class Dependencies implements GradlePluginDevelopmentTestSuiteDependencies {
+        private final Provider<SourceSet> sourceSetProvider;
         private final PluginManager pluginManager;
         private final Provider<String> defaultGroovyVersion;
         private final Configuration pluginUnderTestMetadata;
@@ -124,11 +125,12 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         protected abstract DependencyHandler getDependencies();
 
         private SourceSet sourceSet() {
-            return getSourceSet().get();
+            return sourceSetProvider.get();
         }
 
         @Inject
-        public Dependencies(PluginManager pluginManager, Provider<String> defaultGroovyVersion) {
+        public Dependencies(String name, Provider<SourceSet> sourceSetProvider, PluginManager pluginManager, Provider<String> defaultGroovyVersion) {
+            this.sourceSetProvider = sourceSetProvider;
             this.pluginManager = pluginManager;
             this.defaultGroovyVersion = defaultGroovyVersion;
             this.pluginUnderTestMetadata = getConfigurations().create(name + StringUtils.capitalize("pluginUnderTestMetadata"));
