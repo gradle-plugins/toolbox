@@ -87,8 +87,4 @@ public class GradlePluginDevelopmentDependencyExtensionInternal implements Gradl
     public static GradlePluginDevelopmentDependencyExtensionInternal of(DependencyHandler dependencies) {
         return (GradlePluginDevelopmentDependencyExtensionInternal) ExtensionAware.class.cast(dependencies).getExtensions().getByType(GradlePluginDevelopmentDependencyExtension.class);
     }
-
-    public void applyTo(DependencyHandler dependencies) {
-        ExtensionAware.class.cast(dependencies).getExtensions().add(GradlePluginDevelopmentDependencyExtension.class, "gradlePluginDevelopment", this);
-    }
 }
