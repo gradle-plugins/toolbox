@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import static dev.gradleplugins.GradlePluginDevelopmentTestingExtension.testing;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class GradlePluginDevelopmentTestingBasePluginTestingExtensionIntegrationTest {
+public class GradlePluginDevelopmentExtensionTestingBasePluginIntegrationTest {
     private final Project project = ProjectBuilder.builder().build();
     private GradlePluginDevelopmentExtension subject;
 
