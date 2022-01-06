@@ -30,7 +30,7 @@ public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements 
         val sourceSet = sourceSets.maybeCreate(FUNCTIONAL_TEST_NAME);
         val factory = GradlePluginDevelopmentTestSuiteFactory.forProject(project);
         val functionalTestSuite = (GradlePluginDevelopmentTestSuiteInternal) factory.create(FUNCTIONAL_TEST_NAME);
-        functionalTestSuite.usingSourceSet(sourceSet);
+        functionalTestSuite.getSourceSet().value(sourceSet).disallowChanges();
         functionalTestSuite.getTestedSourceSet().convention(project.provider(() -> sourceSets.getByName("main")));
         functionalTestSuite.getTestedGradlePlugin().set((GradlePluginDevelopmentCompatibilityExtension) ((ExtensionAware)project.getExtensions().getByType(GradlePluginDevelopmentExtension.class)).getExtensions().getByName("compatibility"));
         functionalTestSuite.getTestedGradlePlugin().disallowChanges();

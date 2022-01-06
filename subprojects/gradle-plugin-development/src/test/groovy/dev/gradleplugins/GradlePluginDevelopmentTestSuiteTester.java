@@ -22,6 +22,11 @@ public interface GradlePluginDevelopmentTestSuiteTester {
     }
 
     @Test
+    default void hasSourceSet() {
+        assertNotNull(subject().getSourceSet());
+    }
+
+    @Test
     default void hasTestedSourceSet() {
         assertNotNull(subject().getTestedSourceSet());
     }

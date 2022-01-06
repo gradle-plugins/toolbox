@@ -31,7 +31,7 @@ public abstract class GradlePluginDevelopmentUnitTestingPlugin implements Plugin
         val sourceSet = sourceSets.maybeCreate(TEST_NAME);
         val factory = GradlePluginDevelopmentTestSuiteFactory.forProject(project);
         val testSuite = (GradlePluginDevelopmentTestSuiteInternal) factory.create(TEST_NAME);
-        testSuite.usingSourceSet(sourceSet);
+        testSuite.getSourceSet().value(sourceSet).disallowChanges();
         testSuite.getTestedSourceSet().convention(project.provider(() -> sourceSets.getByName("main")));
         testSuite.getTestedGradlePlugin().set((GradlePluginDevelopmentCompatibilityExtension) ((ExtensionAware)project.getExtensions().getByType(GradlePluginDevelopmentExtension.class)).getExtensions().getByName("compatibility"));
         testSuite.getTestedGradlePlugin().disallowChanges();
@@ -45,7 +45,7 @@ public abstract class GradlePluginDevelopmentUnitTestingPlugin implements Plugin
 
         // Automatically add Gradle API as a dependency. We assume unit tests are accomplish via ProjectBuilder
         val dependencies = GradlePluginDevelopmentDependencyExtensionInternal.of(project.getDependencies());
-        dependencies.add(testSuite.getSourceSet().getImplementationConfigurationName(), testSuite.getTestedGradlePlugin().get().getMinimumGradleVersion().map(dependencies::gradleApi));
+        dependencies.add(sourceSet.getImplementationConfigurationName(), testSuite.getTestedGradlePlugin().get().getMinimumGradleVersion().map(dependencies::gradleApi));
 
         project.getComponents().add(testSuite);
         project.getExtensions().add(GradlePluginDevelopmentTestSuite.class, TEST_NAME, testSuite);

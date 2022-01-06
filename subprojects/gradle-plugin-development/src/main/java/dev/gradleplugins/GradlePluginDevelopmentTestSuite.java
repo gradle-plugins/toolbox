@@ -16,6 +16,13 @@ public interface GradlePluginDevelopmentTestSuite extends Named {
     SetProperty<GradlePluginTestingStrategy> getTestingStrategies();
 
     /**
+     * Configure the test suite source set.
+     *
+     * @return a property for configuring the {@link SourceSet}, never null
+     */
+    Property<SourceSet> getSourceSet();
+
+    /**
      * Configure the Gradle plugin source set to test by this test suite.
      *
      * @return a property for configuring the {@link SourceSet}
