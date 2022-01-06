@@ -69,7 +69,7 @@ public final class CreateTestTasksFromTestingStrategiesRule implements Action<Gr
 
     private TaskProvider<Test> createTestTask(GradlePluginDevelopmentTestSuiteInternal testSuite, String variant) {
         SourceSet sourceSet = testSuite.getSourceSet();
-        String taskName = sourceSet.getName() + StringUtils.capitalize(variant);
+        String taskName = testSuite.getName() + StringUtils.capitalize(variant);
 
         TaskProvider<Test> result = null;
         if (tasks.getNames().contains(taskName)) {
@@ -79,7 +79,7 @@ public final class CreateTestTasksFromTestingStrategiesRule implements Action<Gr
         }
 
         result.configure(it -> {
-            it.setDescription("Runs the " + GUtil.toWords(sourceSet.getName()) + "s.");
+            it.setDescription("Runs the " + GUtil.toWords(testSuite.getName()) + "s.");
             it.setGroup(LifecycleBasePlugin.VERIFICATION_GROUP);
 
             it.setTestClassesDirs(sourceSet.getOutput().getClassesDirs());
