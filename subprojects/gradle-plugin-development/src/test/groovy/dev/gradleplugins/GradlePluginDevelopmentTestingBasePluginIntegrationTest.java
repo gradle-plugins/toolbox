@@ -1,7 +1,5 @@
 package dev.gradleplugins;
 
-import dev.gradleplugins.GradlePluginDevelopmentTestingExtension;
-import dev.gradleplugins.internal.plugins.GradlePluginDevelopmentTestingBasePlugin;
 import org.gradle.api.Project;
 import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 import org.gradle.testfixtures.ProjectBuilder;

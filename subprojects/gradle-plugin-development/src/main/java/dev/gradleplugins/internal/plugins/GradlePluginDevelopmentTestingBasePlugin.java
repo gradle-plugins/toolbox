@@ -21,7 +21,10 @@ import org.gradle.util.GUtil;
 import javax.inject.Inject;
 import java.util.Set;
 
-public abstract class GradlePluginDevelopmentTestingBasePlugin implements Plugin<Project> {
+abstract class GradlePluginDevelopmentTestingBasePlugin implements Plugin<Project> {
+    @Inject
+    public GradlePluginDevelopmentTestingBasePlugin() {}
+
     @Inject
     protected abstract TaskContainer getTasks();
 
