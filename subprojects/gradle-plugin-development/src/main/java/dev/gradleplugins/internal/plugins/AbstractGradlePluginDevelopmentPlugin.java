@@ -16,11 +16,8 @@
 
 package dev.gradleplugins.internal.plugins;
 
-import dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension;
 import dev.gradleplugins.GradlePluginDevelopmentRepositoryExtension;
-import dev.gradleplugins.internal.GradlePluginDevelopmentDependencyExtensionInternal;
 import dev.gradleplugins.internal.GradlePluginDevelopmentExtensionInternal;
-import lombok.val;
 import org.gradle.api.GradleException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -28,7 +25,6 @@ import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.plugins.PluginManager;
 import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
-import org.gradle.util.GradleVersion;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -82,17 +78,5 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
         });
 
         return extension;
-    }
-
-    public static void configureExtension(GradlePluginDevelopmentCompatibilityExtension extension, Project project) {
-        val dependencies = GradlePluginDevelopmentDependencyExtensionInternal.of(project.getDependencies());
-        dependencies.add(getCompileOnlyApiConfigurationName(), extension.getGradleApiVersion().map(dependencies::gradleApi));
-    }
-
-    private static String getCompileOnlyApiConfigurationName() {
-        if (GradleVersion.current().compareTo(GradleVersion.version("6.7")) >= 0) {
-            return "compileOnlyApi";
-        }
-        return "compileOnly";
     }
 }

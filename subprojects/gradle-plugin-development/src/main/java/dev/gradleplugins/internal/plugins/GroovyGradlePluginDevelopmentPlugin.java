@@ -50,7 +50,6 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
 
         val groovy = registerLanguageExtension(project, "groovy", GroovyGradlePluginDevelopmentExtension.class);
         val extension = compatibility(gradlePlugin(project));
-        configureExtension(extension, project);
 
         // Configure the Groovy version and dependency
         groovy.getGroovyVersion().convention(extension.getMinimumGradleVersion().map(GradleRuntimeCompatibility::groovyVersionOf));
