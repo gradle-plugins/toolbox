@@ -1,6 +1,10 @@
 package dev.gradleplugins;
 
+import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.provider.Property;
+import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
+
+import java.util.Objects;
 
 /**
  * An extension for controlling the Gradle plugin development compatibility.
@@ -24,4 +28,16 @@ public interface GradlePluginDevelopmentCompatibilityExtension {
      * @return a property to configure the Gradle API version to use, never null
      */
     Property<String> getGradleApiVersion();
+
+    /**
+     * Returns {@literal compatibility} extension from Gradle plugin development extension.
+     * The plugin {@literal dev.gradleplugins.base} registers this extension.
+     *
+     * @param extension  the {@literal gradlePlugin} extension, must not be null
+     * @return the compatibility extension, never null
+     */
+    static GradlePluginDevelopmentCompatibilityExtension compatibility(GradlePluginDevelopmentExtension extension) {
+        Objects.requireNonNull(extension);
+        return (GradlePluginDevelopmentCompatibilityExtension) ((ExtensionAware) extension).getExtensions().getByName("compatibility");
+    }
 }

@@ -15,6 +15,10 @@ version = '1.5.1'
 
 gradlePlugin {
     plugins {
+        basePlugin {
+            id = 'dev.gradleplugins.base'
+            implementationClass = 'dev.gradleplugins.internal.plugins.GradlePluginDevelopmentBasePlugin'
+        }
         javaGradlePlugin {
             id = 'dev.gradleplugins.java-gradle-plugin'
             implementationClass = 'dev.gradleplugins.internal.plugins.JavaGradlePluginDevelopmentPlugin'
@@ -56,6 +60,11 @@ pluginBundle {
     tags = ['gradle-plugin-development', 'gradle-plugin']
 
     plugins {
+        basePlugin {
+            displayName = 'Gradle Plugin Development base plugin'
+            description = 'Provides base support for developing Gradle plugin-related projects.'
+            tags = ['gradle-plugin-development', 'gradle-plugin']
+        }
         javaGradlePlugin {
             displayName = 'Java Gradle Plugin Development plugin'
             description = 'Provides support for developing Gradle plugins implemented in Java.'
