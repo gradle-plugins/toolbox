@@ -11,7 +11,7 @@ import org.gradle.api.reflect.TypeOf;
 
 import javax.inject.Inject;
 
-/*final*/ class DefaultGradlePluginDevelopmentTestingExtension implements GradlePluginDevelopmentTestingExtension, HasPublicType {
+abstract /*final*/ class DefaultGradlePluginDevelopmentTestingExtension implements GradlePluginDevelopmentTestingExtension, HasPublicType {
     private final GradlePluginDevelopmentTestSuiteFactory factory;
     private final SoftwareComponentContainer components;
 
