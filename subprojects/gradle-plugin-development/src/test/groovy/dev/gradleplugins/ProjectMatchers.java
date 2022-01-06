@@ -4,11 +4,14 @@ import org.gradle.api.Named;
 import org.gradle.api.NamedDomainObjectCollectionSchema;
 import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.plugins.ExtensionsSchema;
+import org.gradle.api.plugins.PluginAware;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.reflect.HasPublicType;
 import org.gradle.api.reflect.TypeOf;
+import org.hamcrest.Description;
 import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 
 import static org.hamcrest.Matchers.equalTo;
 
@@ -59,6 +62,20 @@ public final class ProjectMatchers {
             @Override
             protected T featureValueOf(Provider<? extends T> actual) {
                 return actual.get();
+            }
+        };
+    }
+
+    public static Matcher<PluginAware> hasPlugin(String pluginId) {
+        return new TypeSafeMatcher<PluginAware>() {
+            @Override
+            protected boolean matchesSafely(PluginAware item) {
+                return item.getPluginManager().hasPlugin(pluginId);
+            }
+
+            @Override
+            public void describeTo(Description description) {
+
             }
         };
     }
