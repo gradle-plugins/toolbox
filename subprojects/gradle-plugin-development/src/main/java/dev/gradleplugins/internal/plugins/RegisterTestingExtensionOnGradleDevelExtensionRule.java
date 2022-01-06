@@ -1,5 +1,6 @@
 package dev.gradleplugins.internal.plugins;
 
+import dev.gradleplugins.GradlePluginDevelopmentTestSuiteFactory;
 import lombok.val;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
@@ -17,6 +18,6 @@ final class RegisterTestingExtensionOnGradleDevelExtensionRule implements Action
     @Override
     public void execute(AppliedPlugin ignored) {
         val gradlePluginExtension = project.getExtensions().getByType(GradlePluginDevelopmentExtension.class);
-        ((ExtensionAware) gradlePluginExtension).getExtensions().add("testing", project.getObjects().newInstance(DefaultGradlePluginDevelopmentTestingExtension.class));
+        ((ExtensionAware) gradlePluginExtension).getExtensions().add("testing", project.getObjects().newInstance(DefaultGradlePluginDevelopmentTestingExtension.class, GradlePluginDevelopmentTestSuiteFactory.forProject(project)));
     }
 }

@@ -13,6 +13,8 @@ import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.plugins.PluginManager;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
+import org.gradle.api.reflect.HasPublicType;
+import org.gradle.api.reflect.TypeOf;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.testing.Test;
@@ -25,7 +27,7 @@ import java.util.stream.StreamSupport;
 
 import static dev.gradleplugins.internal.DefaultDependencyVersions.SPOCK_FRAMEWORK_VERSION;
 
-public abstract class GradlePluginDevelopmentTestSuiteInternal implements GradlePluginDevelopmentTestSuite, SoftwareComponent {
+public abstract class GradlePluginDevelopmentTestSuiteInternal implements GradlePluginDevelopmentTestSuite, SoftwareComponent, HasPublicType {
     private final GradlePluginTestingStrategyFactory strategyFactory;
     private final Dependencies dependencies;
     private final String name;
@@ -58,6 +60,11 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public TypeOf<?> getPublicType() {
+        return TypeOf.typeOf(GradlePluginDevelopmentTestSuite.class);
     }
 
     @Override
