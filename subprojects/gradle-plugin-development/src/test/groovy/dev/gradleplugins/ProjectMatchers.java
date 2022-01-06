@@ -30,8 +30,7 @@ public final class ProjectMatchers {
                 } else if (actual instanceof NamedDomainObjectCollectionSchema.NamedDomainObjectSchema) {
                     return ((NamedDomainObjectCollectionSchema.NamedDomainObjectSchema) actual).getName();
                 }
-                return null;
-//                throw new UnsupportedOperationException();
+                throw new UnsupportedOperationException();
             }
         };
     }
