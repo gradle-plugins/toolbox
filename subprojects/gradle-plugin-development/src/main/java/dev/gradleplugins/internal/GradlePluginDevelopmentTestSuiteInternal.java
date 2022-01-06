@@ -18,6 +18,7 @@ import org.gradle.api.reflect.TypeOf;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.testing.Test;
+import org.gradle.internal.Actions;
 import org.gradle.plugin.devel.tasks.PluginUnderTestMetadata;
 
 import javax.inject.Inject;
@@ -27,12 +28,13 @@ import java.util.stream.StreamSupport;
 
 import static dev.gradleplugins.internal.DefaultDependencyVersions.SPOCK_FRAMEWORK_VERSION;
 
-public abstract class GradlePluginDevelopmentTestSuiteInternal implements GradlePluginDevelopmentTestSuite, SoftwareComponent, HasPublicType {
+public abstract class GradlePluginDevelopmentTestSuiteInternal implements GradlePluginDevelopmentTestSuite, SoftwareComponent, HasPublicType, FinalizableComponent {
     private final GradlePluginTestingStrategyFactory strategyFactory;
     private final Dependencies dependencies;
     private final String name;
     @Getter private SourceSet sourceSet;
     @Getter private final List<Action<? super Test>> testTaskActions = new ArrayList<>();
+    private final Action<GradlePluginDevelopmentTestSuiteInternal> finalizeAction;
 
     @Inject
     protected abstract ObjectFactory getObjects();
@@ -41,7 +43,7 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
     protected abstract TaskContainer getTasks();
 
     @Inject
-    public GradlePluginDevelopmentTestSuiteInternal(String name, PluginManager pluginManager) {
+    public GradlePluginDevelopmentTestSuiteInternal(String name, TaskContainer tasks, PluginManager pluginManager) {
         this.strategyFactory = new GradlePluginTestingStrategyFactoryInternal(getTestedGradlePlugin().flatMap(GradlePluginDevelopmentCompatibilityExtension::getMinimumGradleVersion));
         this.name = name;
         this.dependencies = getObjects().newInstance(Dependencies.class, pluginManager, getTestedGradlePlugin().flatMap(GradlePluginDevelopmentCompatibilityExtension::getMinimumGradleVersion).map(GradleRuntimeCompatibility::groovyVersionOf));
@@ -50,6 +52,7 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
                 task.getPluginClasspath().from(dependencies.pluginUnderTestMetadata);
             });
         });
+        this.finalizeAction = Actions.composite(new TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule(), new CreateTestTasksFromTestingStrategiesRule(tasks));
     }
 
     public void usingSourceSet(SourceSet sourceSet) {
@@ -96,6 +99,11 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         public void configureEach(Action<? super Test> action) {
             testTaskActions.add(action);
         }
+    }
+
+    @Override
+    public void finalizeComponent() {
+        finalizeAction.execute(this);
     }
 
     @Override

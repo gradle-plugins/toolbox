@@ -25,11 +25,7 @@ abstract class GradlePluginDevelopmentTestingBasePlugin implements Plugin<Projec
                 task.getExtensions().add(new TypeOf<Property<GradlePluginTestingStrategy>>() {}, "testingStrategy", testingStrategy);
             });
             project.afterEvaluate(proj -> {
-                new TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule().execute(testSuite);
-            });
-
-            project.afterEvaluate(proj -> {
-                new CreateTestTasksFromTestingStrategiesRule(project.getTasks()).execute(testSuite);
+                testSuite.finalizeComponent();
             });
         });
     }

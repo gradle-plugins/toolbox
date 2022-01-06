@@ -1,6 +1,5 @@
 package dev.gradleplugins.internal;
 
-import dev.gradleplugins.GradlePluginDevelopmentTestSuite;
 import dev.gradleplugins.GradlePluginTestingStrategy;
 import dev.gradleplugins.GradleVersionCoverageTestingStrategy;
 import org.apache.commons.lang3.StringUtils;
@@ -15,7 +14,7 @@ import org.gradle.util.GUtil;
 
 import java.util.Set;
 
-public final class CreateTestTasksFromTestingStrategiesRule implements Action<GradlePluginDevelopmentTestSuite> {
+public final class CreateTestTasksFromTestingStrategiesRule implements Action<GradlePluginDevelopmentTestSuiteInternal> {
     private final TaskContainer tasks;
 
     public CreateTestTasksFromTestingStrategiesRule(TaskContainer tasks) {
@@ -23,7 +22,7 @@ public final class CreateTestTasksFromTestingStrategiesRule implements Action<Gr
     }
 
     @Override
-    public void execute(GradlePluginDevelopmentTestSuite testSuite) {
+    public void execute(GradlePluginDevelopmentTestSuiteInternal testSuite) {
         testSuite.getTestingStrategies().disallowChanges();
         Set<GradlePluginTestingStrategy> strategies = testSuite.getTestingStrategies().get();
         if (strategies.isEmpty()) {
@@ -45,15 +44,15 @@ public final class CreateTestTasksFromTestingStrategiesRule implements Action<Gr
         }
     }
 
-    private Action<Test> applyTestActions(GradlePluginDevelopmentTestSuite testSuite) {
+    private Action<Test> applyTestActions(GradlePluginDevelopmentTestSuiteInternal testSuite) {
         return task -> {
-            for (Action<? super Test> action : ((GradlePluginDevelopmentTestSuiteInternal) testSuite).getTestTaskActions()) {
+            for (Action<? super Test> action : testSuite.getTestTaskActions()) {
                 action.execute(task);
             }
         };
     }
 
-    private Action<Test> testingStrategy(GradlePluginDevelopmentTestSuite testSuite, GradlePluginTestingStrategyInternal strategy) {
+    private Action<Test> testingStrategy(GradlePluginDevelopmentTestSuiteInternal testSuite, GradlePluginTestingStrategyInternal strategy) {
         return task -> {
             if (!(strategy instanceof GradleVersionCoverageTestingStrategy)) {
                 throw new RuntimeException("Unknown testing strategy");
@@ -64,12 +63,12 @@ public final class CreateTestTasksFromTestingStrategiesRule implements Action<Gr
         };
     }
 
-    private TaskProvider<Test> createTestTask(GradlePluginDevelopmentTestSuite testSuite) {
+    private TaskProvider<Test> createTestTask(GradlePluginDevelopmentTestSuiteInternal testSuite) {
         return createTestTask(testSuite, "");
     }
 
-    private TaskProvider<Test> createTestTask(GradlePluginDevelopmentTestSuite testSuite, String variant) {
-        SourceSet sourceSet = ((GradlePluginDevelopmentTestSuiteInternal) testSuite).getSourceSet();
+    private TaskProvider<Test> createTestTask(GradlePluginDevelopmentTestSuiteInternal testSuite, String variant) {
+        SourceSet sourceSet = testSuite.getSourceSet();
         String taskName = sourceSet.getName() + StringUtils.capitalize(variant);
 
         TaskProvider<Test> result = null;
