@@ -1,6 +1,7 @@
 package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.GradlePluginDevelopmentDependencyExtension;
+import dev.gradleplugins.internal.DependencyFactory;
 import dev.gradleplugins.internal.GradlePluginDevelopmentDependencyExtensionInternal;
 import groovy.lang.Closure;
 import org.gradle.api.Action;
@@ -22,7 +23,7 @@ final class RegisterGradlePluginDevelopmentDependencyExtensionRule implements Ac
     @Override
     public void execute(Project project) {
         final DependencyHandler dependencies = project.getDependencies();
-        dependencies.getExtensions().add("gradlePluginDevelopment", new GradlePluginDevelopmentDependencyExtensionInternal(dependencies, from(project.getDependencies()), project.getConfigurations()));
+        dependencies.getExtensions().add("gradlePluginDevelopment", new GradlePluginDevelopmentDependencyExtensionInternal(dependencies, from(project.getDependencies()), project.getConfigurations(), DependencyFactory.forProject(project)));
         try {
             Method target = Class.forName("dev.gradleplugins.internal.dsl.groovy.GroovyDslRuntimeExtensions").getMethod("extendWithMethod", Object.class, String.class, Closure.class);
             target.invoke(null, dependencies, "gradleApi", new GradleApiClosure(dependencies));

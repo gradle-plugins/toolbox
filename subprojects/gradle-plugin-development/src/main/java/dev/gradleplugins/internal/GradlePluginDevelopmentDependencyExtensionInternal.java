@@ -1,8 +1,6 @@
 package dev.gradleplugins.internal;
 
 import dev.gradleplugins.GradlePluginDevelopmentDependencyExtension;
-import lombok.AccessLevel;
-import lombok.Getter;
 import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
@@ -12,15 +10,17 @@ import org.gradle.api.provider.Provider;
 import javax.inject.Inject;
 
 public class GradlePluginDevelopmentDependencyExtensionInternal implements GradlePluginDevelopmentDependencyExtension {
-    @Getter(AccessLevel.PROTECTED) private final DependencyHandler dependencies;
+    private final DependencyHandler dependencies;
     private final GradlePluginDevelopmentDependencyExtension extension;
     private final ConfigurationContainer configurations;
+    private final DependencyFactory factory;
 
     @Inject
-    public GradlePluginDevelopmentDependencyExtensionInternal(DependencyHandler dependencies, GradlePluginDevelopmentDependencyExtension extension, ConfigurationContainer configurations) {
+    public GradlePluginDevelopmentDependencyExtensionInternal(DependencyHandler dependencies, GradlePluginDevelopmentDependencyExtension extension, ConfigurationContainer configurations, DependencyFactory factory) {
         this.dependencies = dependencies;
         this.extension = extension;
         this.configurations = configurations;
+        this.factory = factory;
     }
 
     @Override
@@ -44,30 +44,30 @@ public class GradlePluginDevelopmentDependencyExtensionInternal implements Gradl
     }
 
     public Dependency groovy(String version) {
-        return getDependencies().create("org.codehaus.groovy:groovy-all:" + version);
+        return factory.create("org.codehaus.groovy:groovy-all:" + version);
     }
 
     public Dependency spockFramework(String version) {
-        return getDependencies().create("org.spockframework:spock-core:" + version);
+        return factory.create("org.spockframework:spock-core:" + version);
     }
 
     // Used by SpockFrameworkTestSuiteBasePlugin
     public Dependency spockFramework() {
-        return getDependencies().create("org.spockframework:spock-core");
+        return factory.create("org.spockframework:spock-core");
     }
 
     // Used by SpockFrameworkTestSuiteBasePlugin
     public Dependency spockFrameworkPlatform(String version) {
-        return getDependencies().platform(getDependencies().create("org.spockframework:spock-bom:" + version));
+        return dependencies.platform(factory.create("org.spockframework:spock-bom:" + version));
     }
 
     // Shim for supporting older Gradle versions
     public void add(String configuration, Provider<Object> notation) {
-        configurations.named(configuration, new AddDependency(notation, getDependencies()::create));
+        configurations.named(configuration, new AddDependency(notation, factory));
     }
 
     public void add(String configuration, Object notation) {
-        configurations.named(configuration, new AddDependency(notation, getDependencies()::create));
+        configurations.named(configuration, new AddDependency(notation, factory));
     }
 
     public static GradlePluginDevelopmentDependencyExtensionInternal of(DependencyHandler dependencies) {
