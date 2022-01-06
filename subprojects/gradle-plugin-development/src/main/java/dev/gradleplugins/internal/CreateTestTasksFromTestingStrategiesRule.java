@@ -16,6 +16,8 @@ import org.gradle.util.GUtil;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+import static dev.gradleplugins.internal.util.TestingStrategyPropertyUtils.testingStrategy;
+
 public final class CreateTestTasksFromTestingStrategiesRule implements Action<GradlePluginDevelopmentTestSuiteInternal> {
     private final TaskContainer tasks;
     private final ObjectFactory objects;
@@ -63,7 +65,7 @@ public final class CreateTestTasksFromTestingStrategiesRule implements Action<Gr
             }
             String version = ((GradleVersionCoverageTestingStrategy) strategy).getVersion();
             task.systemProperty("dev.gradleplugins.defaultGradleVersion", version);
-            ((Property<GradlePluginTestingStrategy>) task.getExtensions().getByName("testingStrategy")).set(strategy);
+            testingStrategy(task).set(strategy);
         };
     }
 

@@ -4,6 +4,7 @@ import org.gradle.api.Named;
 import org.gradle.api.NamedDomainObjectCollectionSchema;
 import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.plugins.ExtensionsSchema;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.reflect.HasPublicType;
 import org.gradle.api.reflect.TypeOf;
 import org.hamcrest.FeatureMatcher;
@@ -49,6 +50,15 @@ public final class ProjectMatchers {
                     return ((NamedDomainObjectCollectionSchema.NamedDomainObjectSchema) actual).getPublicType();
                 }
                 throw new UnsupportedOperationException();
+            }
+        };
+    }
+
+    public static <T> Matcher<Provider<? extends T>> providerOf(T instance) {
+        return new FeatureMatcher<Provider<? extends T>, T>(equalTo(instance), "", "") {
+            @Override
+            protected T featureValueOf(Provider<? extends T> actual) {
+                return actual.get();
             }
         };
     }

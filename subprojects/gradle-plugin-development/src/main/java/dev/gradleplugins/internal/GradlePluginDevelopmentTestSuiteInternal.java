@@ -52,6 +52,7 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
                 task.getPluginClasspath().from(dependencies.pluginUnderTestMetadata);
             });
         });
+        this.testTaskActions.add(new RegisterTestingStrategyPropertyExtensionRule(objects));
         this.finalizeAction = Actions.composite(new TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule(), new CreateTestTasksFromTestingStrategiesRule(tasks, objects));
     }
 
