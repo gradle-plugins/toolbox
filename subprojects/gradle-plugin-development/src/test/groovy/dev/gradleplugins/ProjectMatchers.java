@@ -16,7 +16,7 @@ public final class ProjectMatchers {
         return new FeatureMatcher<T, Iterable<ExtensionsSchema.ExtensionSchema>>(matcher, "", "") {
             @Override
             protected Iterable<ExtensionsSchema.ExtensionSchema> featureValueOf(T actual) {
-                return ((ExtensionAware) actual).getExtensions().getExtensionsSchema();
+                return ((ExtensionAware) actual).getExtensions().getExtensionsSchema().getElements();
             }
         };
     }
