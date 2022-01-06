@@ -24,7 +24,6 @@ import lombok.val;
 import org.gradle.api.GradleException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.internal.artifacts.dependencies.SelfResolvingDependencyInternal;
 import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.plugins.PluginManager;
@@ -83,16 +82,6 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
         });
 
         return extension;
-    }
-
-    public static void removeGradleApiProjectDependency(Project project) {
-        // Surgical procedure of removing the Gradle API and replacing it with dev.gradleplugins:gradle-api
-        project.getConfigurations().getByName("api").getDependencies().removeIf(it -> {
-            if (it instanceof SelfResolvingDependencyInternal) {
-                return ((SelfResolvingDependencyInternal) it).getTargetComponentId().getDisplayName().equals("Gradle API");
-            }
-            return false;
-        });
     }
 
     public static void configureExtension(GradlePluginDevelopmentCompatibilityExtension extension, Project project) {

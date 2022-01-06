@@ -36,7 +36,6 @@ public class JavaGradlePluginDevelopmentPlugin implements Plugin<Project> {
         project.getPluginManager().apply("dev.gradleplugins.base");
         project.getPluginManager().apply(GradlePluginDevelopmentExtensionPlugin.class);
         project.getPluginManager().apply("java-gradle-plugin"); // For plugin development
-        removeGradleApiProjectDependency(project);
 
         registerLanguageExtension(project, "java", JavaGradlePluginDevelopmentExtension.class);
         configureExtension(compatibility(gradlePlugin(project)), project);
