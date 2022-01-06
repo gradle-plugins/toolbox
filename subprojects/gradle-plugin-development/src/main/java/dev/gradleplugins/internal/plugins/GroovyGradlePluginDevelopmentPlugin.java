@@ -39,7 +39,6 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
         assertKotlinDslPluginIsNeverApplied(project.getPluginManager(), PLUGIN_ID);
 
         project.getPluginManager().apply("dev.gradleplugins.base");
-        project.getPluginManager().apply(GradlePluginDevelopmentExtensionPlugin.class);
         // Starting with Gradle 6.4, precompiled Groovy DSL plugins are available
         if (GradleVersion.current().compareTo(GradleVersion.version("6.4")) >= 0) {
             project.getPluginManager().apply("groovy-gradle-plugin"); // For plugin development
