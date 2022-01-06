@@ -3,7 +3,6 @@ package dev.gradleplugins.internal;
 import dev.gradleplugins.GradlePluginDevelopmentDependencyExtension;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.gradle.api.Project;
 import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
@@ -14,14 +13,12 @@ import javax.inject.Inject;
 
 public class GradlePluginDevelopmentDependencyExtensionInternal implements GradlePluginDevelopmentDependencyExtension {
     @Getter(AccessLevel.PROTECTED) private final DependencyHandler dependencies;
-    private final Project project; // for the provider as notation shim
     private final GradlePluginDevelopmentDependencyExtension extension;
     private final ConfigurationContainer configurations;
 
     @Inject
-    public GradlePluginDevelopmentDependencyExtensionInternal(DependencyHandler dependencies, Project project, GradlePluginDevelopmentDependencyExtension extension, ConfigurationContainer configurations) {
+    public GradlePluginDevelopmentDependencyExtensionInternal(DependencyHandler dependencies, GradlePluginDevelopmentDependencyExtension extension, ConfigurationContainer configurations) {
         this.dependencies = dependencies;
-        this.project = project;
         this.extension = extension;
         this.configurations = configurations;
     }
@@ -65,10 +62,6 @@ public class GradlePluginDevelopmentDependencyExtensionInternal implements Gradl
     }
 
     // Shim for supporting older Gradle versions
-    public void add(Project project, String configuration, Provider<Object> notation) {
-        configurations.named(configuration, new AddDependency(notation, getDependencies()::create));
-    }
-
     public void add(String configuration, Provider<Object> notation) {
         configurations.named(configuration, new AddDependency(notation, getDependencies()::create));
     }
