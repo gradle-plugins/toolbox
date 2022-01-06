@@ -109,6 +109,7 @@ test {
         implementation "org.junit.jupiter:junit-jupiter:5.8.2"
         runtimeOnly "org.junit.vintage:junit-vintage-engine:5.8.2"
         implementation "org.hamcrest:hamcrest:2.2"
+        implementation "org.mockito:mockito-core:4.2.0"
     }
     testTasks.configureEach { useJUnitPlatform() }
 }
