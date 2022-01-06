@@ -4,14 +4,12 @@ import dev.gradleplugins.GradlePluginTestingStrategy;
 import lombok.val;
 import org.gradle.api.Action;
 import org.gradle.api.model.ObjectFactory;
-import org.gradle.api.provider.Property;
-import org.gradle.api.reflect.TypeOf;
 import org.gradle.api.tasks.testing.Test;
 
 import static dev.gradleplugins.internal.util.TestingStrategyPropertyUtils.TESTING_STRATEGY_EXTENSION_NAME;
 import static dev.gradleplugins.internal.util.TestingStrategyPropertyUtils.TESTING_STRATEGY_PROPERTY_TYPE;
 
-public final class RegisterTestingStrategyPropertyExtensionRule implements Action<Test> {
+final class RegisterTestingStrategyPropertyExtensionRule implements Action<Test> {
     private final ObjectFactory objects;
 
     public RegisterTestingStrategyPropertyExtensionRule(ObjectFactory objects) {

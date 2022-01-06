@@ -3,7 +3,7 @@ package dev.gradleplugins.internal;
 import org.gradle.api.Action;
 import org.gradle.api.tasks.SourceSet;
 
-public final class TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule implements Action<GradlePluginDevelopmentTestSuiteInternal> {
+final class TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule implements Action<GradlePluginDevelopmentTestSuiteInternal> {
     @Override
     public void execute(GradlePluginDevelopmentTestSuiteInternal testSuite) {
         testSuite.getTestedSourceSet().disallowChanges();

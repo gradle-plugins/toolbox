@@ -18,7 +18,7 @@ import java.util.concurrent.Callable;
 
 import static dev.gradleplugins.internal.util.TestingStrategyPropertyUtils.testingStrategy;
 
-public final class CreateTestTasksFromTestingStrategiesRule implements Action<GradlePluginDevelopmentTestSuiteInternal> {
+final class CreateTestTasksFromTestingStrategiesRule implements Action<GradlePluginDevelopmentTestSuiteInternal> {
     private final TaskContainer tasks;
     private final ObjectFactory objects;
 
