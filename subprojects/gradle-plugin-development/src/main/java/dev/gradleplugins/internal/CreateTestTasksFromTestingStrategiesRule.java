@@ -32,13 +32,13 @@ public final class CreateTestTasksFromTestingStrategiesRule implements Action<Gr
         } else if (strategies.size() == 1) {
             TaskProvider<Test> testTask = createTestTask(testSuite);
             testTask.configure(applyTestActions(testSuite));
-            testTask.configure(testingStrategy(testSuite, (GradlePluginTestingStrategyInternal) strategies.iterator().next()));
+            testTask.configure(configureTestingStrategy(testSuite, (GradlePluginTestingStrategyInternal) strategies.iterator().next()));
             tasks.named("check", it -> it.dependsOn(testTask));
         } else {
             for (GradlePluginTestingStrategy strategy : strategies) {
                 TaskProvider<Test> testTask = createTestTask(testSuite, ((GradlePluginTestingStrategyInternal)strategy).getName());
                 testTask.configure(applyTestActions(testSuite));
-                testTask.configure(testingStrategy(testSuite, (GradlePluginTestingStrategyInternal) strategy));
+                testTask.configure(configureTestingStrategy(testSuite, (GradlePluginTestingStrategyInternal) strategy));
                 tasks.named("check", it -> it.dependsOn(testTask));
             }
         }
@@ -52,7 +52,7 @@ public final class CreateTestTasksFromTestingStrategiesRule implements Action<Gr
         };
     }
 
-    private Action<Test> testingStrategy(GradlePluginDevelopmentTestSuiteInternal testSuite, GradlePluginTestingStrategyInternal strategy) {
+    private Action<Test> configureTestingStrategy(GradlePluginDevelopmentTestSuiteInternal testSuite, GradlePluginTestingStrategyInternal strategy) {
         return task -> {
             if (!(strategy instanceof GradleVersionCoverageTestingStrategy)) {
                 throw new RuntimeException("Unknown testing strategy");
