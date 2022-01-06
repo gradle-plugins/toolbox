@@ -3,7 +3,6 @@ package dev.gradleplugins.internal;
 import dev.gradleplugins.GradlePluginDevelopmentDependencyExtension;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
@@ -11,11 +10,19 @@ import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.provider.Provider;
 import org.gradle.util.GradleVersion;
 
-@RequiredArgsConstructor
+import javax.inject.Inject;
+
 public class GradlePluginDevelopmentDependencyExtensionInternal implements GradlePluginDevelopmentDependencyExtension {
     @Getter(AccessLevel.PROTECTED) private final DependencyHandler dependencies;
     private final Project project; // for the provider as notation shim
     private final GradlePluginDevelopmentDependencyExtension extension;
+
+    @Inject
+    public GradlePluginDevelopmentDependencyExtensionInternal(DependencyHandler dependencies, Project project, GradlePluginDevelopmentDependencyExtension extension) {
+        this.dependencies = dependencies;
+        this.project = project;
+        this.extension = extension;
+    }
 
     @Override
     public Dependency gradleApi(String version) {
