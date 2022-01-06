@@ -3,21 +3,21 @@ package dev.gradleplugins.internal.jvm;
 import org.gradle.api.JavaVersion;
 
 public final class JvmCompatibilityProperties {
-    private final JvmSourceCompatibilityProperty sourceCompatibility;
     private final JvmTargetCompatibilityProperty targetCompatibility;
+    private final JvmSourceCompatibilityProperty sourceCompatibility;
 
-    public JvmCompatibilityProperties(JvmSourceCompatibilityProperty sourceCompatibility, JvmTargetCompatibilityProperty targetCompatibility) {
-        this.sourceCompatibility = sourceCompatibility;
+    public JvmCompatibilityProperties(JvmTargetCompatibilityProperty targetCompatibility, JvmSourceCompatibilityProperty sourceCompatibility) {
         this.targetCompatibility = targetCompatibility;
+        this.sourceCompatibility = sourceCompatibility;
     }
 
     public void set(JavaVersion value) {
-        sourceCompatibility.set(value);
         targetCompatibility.set(value);
+        sourceCompatibility.set(value);
     }
 
     public void finalizeValues() {
-        sourceCompatibility.finalizeValue();
         targetCompatibility.finalizeValue();
+        sourceCompatibility.finalizeValue();
     }
 }

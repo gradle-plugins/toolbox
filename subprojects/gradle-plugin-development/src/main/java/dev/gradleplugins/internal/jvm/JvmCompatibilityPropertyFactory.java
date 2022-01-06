@@ -5,7 +5,7 @@ import org.gradle.api.plugins.JavaPluginExtension;
 
 public class JvmCompatibilityPropertyFactory {
     public static JvmCompatibilityProperties of(JavaPluginExtension java) {
-        return new JvmCompatibilityProperties(ofSourceCompatibility(java), ofTargetCompatibility(java));
+        return new JvmCompatibilityProperties(ofTargetCompatibility(java), ofSourceCompatibility(java));
     }
 
     public static JvmSourceCompatibilityProperty ofSourceCompatibility(JavaPluginExtension java) {
