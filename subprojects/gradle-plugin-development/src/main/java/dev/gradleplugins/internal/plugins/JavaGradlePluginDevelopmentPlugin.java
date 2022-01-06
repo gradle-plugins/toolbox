@@ -20,7 +20,9 @@ import dev.gradleplugins.JavaGradlePluginDevelopmentExtension;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 
+import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
 import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.*;
+import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
 
 public class JavaGradlePluginDevelopmentPlugin implements Plugin<Project> {
     private static final String PLUGIN_ID = "dev.gradleplugins.java-gradle-plugin";
@@ -31,11 +33,12 @@ public class JavaGradlePluginDevelopmentPlugin implements Plugin<Project> {
         assertJavaGradlePluginIsNotPreviouslyApplied(project.getPluginManager(), PLUGIN_ID);
         assertKotlinDslPluginIsNeverApplied(project.getPluginManager(), PLUGIN_ID);
 
+        project.getPluginManager().apply("dev.gradleplugins.base");
         project.getPluginManager().apply(GradlePluginDevelopmentExtensionPlugin.class);
         project.getPluginManager().apply("java-gradle-plugin"); // For plugin development
         removeGradleApiProjectDependency(project);
 
         registerLanguageExtension(project, "java", JavaGradlePluginDevelopmentExtension.class);
-        registerCompatibilityExtension(project);
+        configureExtension(compatibility(gradlePlugin(project)), project);
     }
 }

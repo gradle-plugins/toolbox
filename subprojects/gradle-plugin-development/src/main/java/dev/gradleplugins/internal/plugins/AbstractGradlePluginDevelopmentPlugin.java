@@ -76,29 +76,6 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
         });
     }
 
-    public static void configureDefaultJavaCompatibility(JavaPluginExtension java, VersionNumber minimumGradleVersion) {
-        JavaVersion minimumJavaVersion = minimumJavaVersionFor(minimumGradleVersion);
-
-        if (java.getSourceCompatibility().equals(JavaVersion.VERSION_1_1)) {
-            java.setSourceCompatibility(minimumJavaVersion);
-        }
-
-        if (java.getTargetCompatibility().equals(JavaVersion.VERSION_1_1)) {
-            java.setTargetCompatibility(minimumJavaVersion);
-        }
-    }
-
-    public static GradlePluginDevelopmentCompatibilityExtension registerCompatibilityExtension(Project project) {
-        GradlePluginDevelopmentExtension gradlePlugin = project.getExtensions().getByType(GradlePluginDevelopmentExtension.class);
-        GradlePluginDevelopmentCompatibilityExtension extension = project.getObjects().newInstance(GradlePluginDevelopmentCompatibilityExtension.class);
-
-        configureExtension(extension, project);
-
-        ((ExtensionAware)gradlePlugin).getExtensions().add("compatibility", extension);
-
-        return extension;
-    }
-
     public static <T> GradlePluginDevelopmentExtensionInternal registerLanguageExtension(Project project, String languageName, Class<T> type) {
         GradlePluginDevelopmentExtension gradlePlugin = project.getExtensions().getByType(GradlePluginDevelopmentExtension.class);
         GradlePluginDevelopmentExtensionInternal extension = project.getObjects().newInstance(GradlePluginDevelopmentExtensionInternal.class, project.getExtensions().getByType(JavaPluginExtension.class));
@@ -131,30 +108,6 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
             return it;
         }));
 
-        val java = project.getExtensions().getByType(JavaPluginExtension.class);
-        val defaultSourceCompatibility = java.getSourceCompatibility();
-        val defaultTargetCompatibility = java.getTargetCompatibility();
-
-        // The plugins assume no one will ever use this value
-        java.setSourceCompatibility(JavaVersion.VERSION_1_1);
-        java.setTargetCompatibility(JavaVersion.VERSION_1_1);
-
-        project.afterEvaluate(proj -> {
-            if (extension.getMinimumGradleVersion().isPresent()) {
-                configureDefaultJavaCompatibility(java, VersionNumber.parse(extension.getMinimumGradleVersion().get()));
-            } else {
-                extension.getMinimumGradleVersion().set(project.getGradle().getGradleVersion());
-
-                // Restore default values if needed
-                if (java.getSourceCompatibility().equals(JavaVersion.VERSION_1_1)) {
-                    java.setSourceCompatibility(defaultSourceCompatibility);
-                }
-                if (java.getTargetCompatibility().equals(JavaVersion.VERSION_1_1)) {
-                    java.setTargetCompatibility(defaultTargetCompatibility);
-                }
-            }
-            extension.getMinimumGradleVersion().disallowChanges();
-        });
         val dependencies = GradlePluginDevelopmentDependencyExtensionInternal.of(project.getDependencies());
         dependencies.add(getCompileOnlyApiConfigurationName(), extension.getGradleApiVersion().map(dependencies::gradleApi));
     }
