@@ -20,16 +20,20 @@ public interface GradlePluginDevelopmentTestSuiteDependencies {
 
     Object platform(Object notation);
 
+    @Deprecated
     Object spockFramework();
 
+    @Deprecated
     Object spockFramework(String version);
 
     Object gradleFixtures();
 
     Object gradleTestKit();
 
+    @Deprecated
     Object groovy();
 
+    @Deprecated
     Object groovy(String version);
 
     Object gradleApi(String version);

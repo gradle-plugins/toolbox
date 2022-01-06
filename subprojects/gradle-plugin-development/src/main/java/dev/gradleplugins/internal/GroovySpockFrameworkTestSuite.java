@@ -10,6 +10,7 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin;
 
 import javax.inject.Inject;
 
+@Deprecated
 public abstract class GroovySpockFrameworkTestSuite implements SoftwareComponent {
     private String name;
     private final SourceSet sourceSet;

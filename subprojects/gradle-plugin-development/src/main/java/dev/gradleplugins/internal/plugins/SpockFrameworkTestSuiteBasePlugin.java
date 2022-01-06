@@ -29,6 +29,7 @@ import org.gradle.api.tasks.TaskContainer;
 import static dev.gradleplugins.internal.DefaultDependencyVersions.GROOVY_ALL_VERSION;
 import static dev.gradleplugins.internal.DefaultDependencyVersions.SPOCK_FRAMEWORK_VERSION;
 
+@Deprecated
 public class SpockFrameworkTestSuiteBasePlugin implements Plugin<Project> {
     @Override
     public void apply(Project project) {
