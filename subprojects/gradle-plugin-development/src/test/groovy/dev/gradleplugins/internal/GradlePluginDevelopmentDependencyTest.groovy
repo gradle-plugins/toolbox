@@ -1,5 +1,6 @@
 package dev.gradleplugins.internal
 
+import dev.gradleplugins.GradlePluginDevelopmentDependencyExtension
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ExternalDependency
 import org.gradle.api.artifacts.SelfResolvingDependency
@@ -8,7 +9,7 @@ import spock.lang.Specification
 
 class GradlePluginDevelopmentDependencyTest extends Specification {
     private final Project project = ProjectBuilder.builder().build()
-    private final def dependencies = new GradlePluginDevelopmentDependencyExtensionInternal(project.getDependencies(), project)
+    private final def dependencies = new GradlePluginDevelopmentDependencyExtensionInternal(project.getDependencies(), GradlePluginDevelopmentDependencyExtension.from(project.getDependencies()), project.getConfigurations(), DependencyFactory.forProject(project))
 
     def "can use local Gradle API dependency"() {
         expect:

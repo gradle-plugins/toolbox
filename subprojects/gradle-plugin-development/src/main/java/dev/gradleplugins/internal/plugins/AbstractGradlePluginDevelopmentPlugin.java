@@ -16,29 +16,19 @@
 
 package dev.gradleplugins.internal.plugins;
 
-import dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension;
-import dev.gradleplugins.internal.GradlePluginDevelopmentDependencyExtensionInternal;
+import dev.gradleplugins.GradlePluginDevelopmentRepositoryExtension;
 import dev.gradleplugins.internal.GradlePluginDevelopmentExtensionInternal;
-import dev.gradleplugins.internal.GradlePluginDevelopmentRepositoryExtensionInternal;
-import lombok.val;
 import org.gradle.api.GradleException;
-import org.gradle.api.JavaVersion;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.internal.artifacts.dependencies.SelfResolvingDependencyInternal;
 import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.plugins.PluginManager;
 import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
-import org.gradle.util.GradleVersion;
-import org.gradle.util.VersionNumber;
 
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static dev.gradleplugins.GradleRuntimeCompatibility.minimumJavaVersionFor;
-import static dev.gradleplugins.internal.GradlePluginDevelopmentDependencyExtensionInternal.LOCAL_GRADLE_VERSION;
 
 public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Project> {
 
@@ -76,29 +66,6 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
         });
     }
 
-    public static void configureDefaultJavaCompatibility(JavaPluginExtension java, VersionNumber minimumGradleVersion) {
-        JavaVersion minimumJavaVersion = minimumJavaVersionFor(minimumGradleVersion);
-
-        if (java.getSourceCompatibility().equals(JavaVersion.VERSION_1_1)) {
-            java.setSourceCompatibility(minimumJavaVersion);
-        }
-
-        if (java.getTargetCompatibility().equals(JavaVersion.VERSION_1_1)) {
-            java.setTargetCompatibility(minimumJavaVersion);
-        }
-    }
-
-    public static GradlePluginDevelopmentCompatibilityExtension registerCompatibilityExtension(Project project) {
-        GradlePluginDevelopmentExtension gradlePlugin = project.getExtensions().getByType(GradlePluginDevelopmentExtension.class);
-        GradlePluginDevelopmentCompatibilityExtension extension = project.getObjects().newInstance(GradlePluginDevelopmentCompatibilityExtension.class);
-
-        configureExtension(extension, project);
-
-        ((ExtensionAware)gradlePlugin).getExtensions().add("compatibility", extension);
-
-        return extension;
-    }
-
     public static <T> GradlePluginDevelopmentExtensionInternal registerLanguageExtension(Project project, String languageName, Class<T> type) {
         GradlePluginDevelopmentExtension gradlePlugin = project.getExtensions().getByType(GradlePluginDevelopmentExtension.class);
         GradlePluginDevelopmentExtensionInternal extension = project.getObjects().newInstance(GradlePluginDevelopmentExtensionInternal.class, project.getExtensions().getByType(JavaPluginExtension.class));
@@ -106,63 +73,10 @@ public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Pr
 
         project.afterEvaluate(proj -> {
             if (!extension.isDefaultRepositoriesDisabled()) {
-                GradlePluginDevelopmentRepositoryExtensionInternal.of(project.getRepositories()).gradlePluginDevelopment();
+                GradlePluginDevelopmentRepositoryExtension.from(project.getRepositories()).gradlePluginDevelopment();
             }
         });
 
         return extension;
-    }
-
-    public static void removeGradleApiProjectDependency(Project project) {
-        // Surgical procedure of removing the Gradle API and replacing it with dev.gradleplugins:gradle-api
-        project.getConfigurations().getByName("api").getDependencies().removeIf(it -> {
-            if (it instanceof SelfResolvingDependencyInternal) {
-                return ((SelfResolvingDependencyInternal) it).getTargetComponentId().getDisplayName().equals("Gradle API");
-            }
-            return false;
-        });
-    }
-
-    public static void configureExtension(GradlePluginDevelopmentCompatibilityExtension extension, Project project) {
-        extension.getGradleApiVersion().convention(extension.getMinimumGradleVersion().map(it -> {
-            if (GradleVersion.version(it).isSnapshot()) {
-                return LOCAL_GRADLE_VERSION;
-            }
-            return it;
-        }));
-
-        val java = project.getExtensions().getByType(JavaPluginExtension.class);
-        val defaultSourceCompatibility = java.getSourceCompatibility();
-        val defaultTargetCompatibility = java.getTargetCompatibility();
-
-        // The plugins assume no one will ever use this value
-        java.setSourceCompatibility(JavaVersion.VERSION_1_1);
-        java.setTargetCompatibility(JavaVersion.VERSION_1_1);
-
-        project.afterEvaluate(proj -> {
-            if (extension.getMinimumGradleVersion().isPresent()) {
-                configureDefaultJavaCompatibility(java, VersionNumber.parse(extension.getMinimumGradleVersion().get()));
-            } else {
-                extension.getMinimumGradleVersion().set(project.getGradle().getGradleVersion());
-
-                // Restore default values if needed
-                if (java.getSourceCompatibility().equals(JavaVersion.VERSION_1_1)) {
-                    java.setSourceCompatibility(defaultSourceCompatibility);
-                }
-                if (java.getTargetCompatibility().equals(JavaVersion.VERSION_1_1)) {
-                    java.setTargetCompatibility(defaultTargetCompatibility);
-                }
-            }
-            extension.getMinimumGradleVersion().disallowChanges();
-        });
-        val dependencies = GradlePluginDevelopmentDependencyExtensionInternal.of(project.getDependencies());
-        dependencies.add(getCompileOnlyApiConfigurationName(), extension.getGradleApiVersion().map(dependencies::gradleApi));
-    }
-
-    private static String getCompileOnlyApiConfigurationName() {
-        if (GradleVersion.current().compareTo(GradleVersion.version("6.7")) >= 0) {
-            return "compileOnlyApi";
-        }
-        return "compileOnly";
     }
 }

@@ -2,6 +2,7 @@ package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension;
 import dev.gradleplugins.GradlePluginDevelopmentTestSuite;
+import dev.gradleplugins.GradlePluginDevelopmentTestSuiteFactory;
 import dev.gradleplugins.internal.GradlePluginDevelopmentDependencyExtensionInternal;
 import dev.gradleplugins.internal.GradlePluginDevelopmentTestSuiteInternal;
 import lombok.val;
@@ -28,7 +29,9 @@ public abstract class GradlePluginDevelopmentUnitTestingPlugin implements Plugin
     private void createUnitTestSuite(Project project) {
         val sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
         val sourceSet = sourceSets.maybeCreate(TEST_NAME);
-        val testSuite = project.getObjects().newInstance(GradlePluginDevelopmentTestSuiteInternal.class, TEST_NAME, sourceSet);
+        val factory = GradlePluginDevelopmentTestSuiteFactory.forProject(project);
+        val testSuite = (GradlePluginDevelopmentTestSuiteInternal) factory.create(TEST_NAME);
+        testSuite.getSourceSet().value(sourceSet).disallowChanges();
         testSuite.getTestedSourceSet().convention(project.provider(() -> sourceSets.getByName("main")));
         testSuite.getTestedGradlePlugin().set((GradlePluginDevelopmentCompatibilityExtension) ((ExtensionAware)project.getExtensions().getByType(GradlePluginDevelopmentExtension.class)).getExtensions().getByName("compatibility"));
         testSuite.getTestedGradlePlugin().disallowChanges();
@@ -42,7 +45,7 @@ public abstract class GradlePluginDevelopmentUnitTestingPlugin implements Plugin
 
         // Automatically add Gradle API as a dependency. We assume unit tests are accomplish via ProjectBuilder
         val dependencies = GradlePluginDevelopmentDependencyExtensionInternal.of(project.getDependencies());
-        dependencies.add(testSuite.getSourceSet().getImplementationConfigurationName(), testSuite.getTestedGradlePlugin().get().getMinimumGradleVersion().map(dependencies::gradleApi));
+        dependencies.add(sourceSet.getImplementationConfigurationName(), testSuite.getTestedGradlePlugin().get().getMinimumGradleVersion().map(dependencies::gradleApi));
 
         project.getComponents().add(testSuite);
         project.getExtensions().add(GradlePluginDevelopmentTestSuite.class, TEST_NAME, testSuite);

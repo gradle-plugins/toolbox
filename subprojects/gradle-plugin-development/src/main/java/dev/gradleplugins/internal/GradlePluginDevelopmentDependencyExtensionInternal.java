@@ -1,162 +1,76 @@
 package dev.gradleplugins.internal;
 
 import dev.gradleplugins.GradlePluginDevelopmentDependencyExtension;
-import groovy.lang.Closure;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.gradle.api.Project;
+import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.artifacts.Dependency;
-import org.gradle.api.artifacts.ModuleDependency;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
-import org.gradle.api.logging.Logger;
-import org.gradle.api.logging.Logging;
 import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.provider.Provider;
-import org.gradle.util.GradleVersion;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import javax.inject.Inject;
 
-@RequiredArgsConstructor
 public class GradlePluginDevelopmentDependencyExtensionInternal implements GradlePluginDevelopmentDependencyExtension {
-    private static final Logger LOGGER = Logging.getLogger(GradlePluginDevelopmentDependencyExtensionInternal.class);
-    public static final String LOCAL_GRADLE_VERSION = "local";
-    @Getter(AccessLevel.PROTECTED) private final DependencyHandler dependencies;
-    private final Project project; // for the provider as notation shim
+    private final DependencyHandler dependencies;
+    private final GradlePluginDevelopmentDependencyExtension extension;
+    private final ConfigurationContainer configurations;
+    private final DependencyFactory factory;
+
+    @Inject
+    public GradlePluginDevelopmentDependencyExtensionInternal(DependencyHandler dependencies, GradlePluginDevelopmentDependencyExtension extension, ConfigurationContainer configurations, DependencyFactory factory) {
+        this.dependencies = dependencies;
+        this.extension = extension;
+        this.configurations = configurations;
+        this.factory = factory;
+    }
 
     @Override
     public Dependency gradleApi(String version) {
-        if (LOCAL_GRADLE_VERSION.equals(version)) {
-            return getDependencies().gradleApi();
-        }
-        return getDependencies().create("dev.gradleplugins:gradle-api:" + version);
+        return extension.gradleApi(version);
     }
 
     @Override
     public Dependency gradleTestKit(String version) {
-        if (LOCAL_GRADLE_VERSION.equals(version)) {
-            return getDependencies().gradleTestKit();
-        }
-        return getDependencies().create("dev.gradleplugins:gradle-test-kit:" + version);
+        return extension.gradleTestKit(version);
     }
 
     @Override
     public Dependency gradleFixtures() {
-        ModuleDependency dependency = (ModuleDependency)getDependencies().create("dev.gradleplugins:gradle-fixtures:" + DefaultDependencyVersions.GRADLE_FIXTURES_VERSION);
-        dependency.capabilities(it -> {
-            it.requireCapability("dev.gradleplugins:gradle-fixtures-spock-support");
-        });
-        return dependency;
+        return extension.gradleFixtures();
     }
 
     @Override
     public Dependency gradleRunnerKit() {
-        ModuleDependency dependency = (ModuleDependency)getDependencies().create("dev.gradleplugins:gradle-runner-kit:" + DefaultDependencyVersions.GRADLE_FIXTURES_VERSION);
-        return dependency;
+        return extension.gradleRunnerKit();
     }
 
     public Dependency groovy(String version) {
-        return getDependencies().create("org.codehaus.groovy:groovy-all:" + version);
+        return factory.create("org.codehaus.groovy:groovy-all:" + version);
     }
 
     public Dependency spockFramework(String version) {
-        return getDependencies().create("org.spockframework:spock-core:" + version);
+        return factory.create("org.spockframework:spock-core:" + version);
     }
 
     // Used by SpockFrameworkTestSuiteBasePlugin
     public Dependency spockFramework() {
-        return getDependencies().create("org.spockframework:spock-core");
+        return factory.create("org.spockframework:spock-core");
     }
 
     // Used by SpockFrameworkTestSuiteBasePlugin
     public Dependency spockFrameworkPlatform(String version) {
-        return getDependencies().platform(getDependencies().create("org.spockframework:spock-bom:" + version));
+        return dependencies.platform(factory.create("org.spockframework:spock-bom:" + version));
     }
 
     // Shim for supporting older Gradle versions
-    public void add(Project project, String configuration, Provider<Object> notation) {
-        if (isGradleVersionGreaterOrEqualsTo6Dot5()) {
-            getDependencies().add(configuration, notation);
-        } else {
-            project.afterEvaluate(proj -> getDependencies().add(configuration, notation.get()));
-        }
-    }
-
     public void add(String configuration, Provider<Object> notation) {
-        if (isGradleVersionGreaterOrEqualsTo6Dot5()) {
-            getDependencies().add(configuration, notation);
-        } else {
-            project.afterEvaluate(proj -> getDependencies().add(configuration, notation.get()));
-        }
+        configurations.named(configuration, new AddDependency(notation, factory));
     }
 
     public void add(String configuration, Object notation) {
-        if (isGradleVersionGreaterOrEqualsTo6Dot5() || !(notation instanceof Provider)) {
-            getDependencies().add(configuration, notation);
-        } else {
-            project.afterEvaluate(proj -> getDependencies().add(configuration, ((Provider<Object>)notation).get()));
-        }
-    }
-
-    private static boolean isGradleVersionGreaterOrEqualsTo6Dot5() {
-        return GradleVersion.current().compareTo(GradleVersion.version("6.5")) >= 0;
+        configurations.named(configuration, new AddDependency(notation, factory));
     }
 
     public static GradlePluginDevelopmentDependencyExtensionInternal of(DependencyHandler dependencies) {
         return (GradlePluginDevelopmentDependencyExtensionInternal) ExtensionAware.class.cast(dependencies).getExtensions().getByType(GradlePluginDevelopmentDependencyExtension.class);
-    }
-
-    public void applyTo(DependencyHandler dependencies) {
-        ExtensionAware.class.cast(dependencies).getExtensions().add(GradlePluginDevelopmentDependencyExtension.class, "gradlePluginDevelopment", this);
-        try {
-            Method target = Class.forName("dev.gradleplugins.internal.dsl.groovy.GroovyDslRuntimeExtensions").getMethod("extendWithMethod", Object.class, String.class, Closure.class);
-            target.invoke(null, dependencies, "gradleApi", new GradleApiClosure(dependencies));
-            target.invoke(null, dependencies, "gradleTestKit", new GradleTestKitClosure(dependencies));
-            target.invoke(null, dependencies, "gradleFixtures", new GradleFixturesClosure(dependencies));
-            target.invoke(null, dependencies, "gradleRunnerKit", new GradleRunnerKitClosure(dependencies));
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            LOGGER.info("Unable to extend DependencyHandler with gradleApi(String) and gradleFixtures().");
-        }
-    }
-
-    private class GradleApiClosure extends Closure<Dependency> {
-        public GradleApiClosure(Object owner) {
-            super(owner);
-        }
-
-        public Dependency doCall(String version) {
-            return GradlePluginDevelopmentDependencyExtensionInternal.this.gradleApi(version);
-        }
-    }
-
-    private class GradleTestKitClosure extends Closure<Dependency> {
-        public GradleTestKitClosure(Object owner) {
-            super(owner);
-        }
-
-        public Dependency doCall(String version) {
-            return GradlePluginDevelopmentDependencyExtensionInternal.this.gradleTestKit(version);
-        }
-    }
-
-    private class GradleFixturesClosure extends Closure<Dependency> {
-        public GradleFixturesClosure(Object owner) {
-            super(owner);
-        }
-
-        public Dependency doCall() {
-            return GradlePluginDevelopmentDependencyExtensionInternal.this.gradleFixtures();
-        }
-    }
-
-    private class GradleRunnerKitClosure extends Closure<Dependency> {
-        public GradleRunnerKitClosure(Object owner) {
-            super(owner);
-        }
-
-        public Dependency doCall() {
-            return GradlePluginDevelopmentDependencyExtensionInternal.this.gradleRunnerKit();
-        }
     }
 }

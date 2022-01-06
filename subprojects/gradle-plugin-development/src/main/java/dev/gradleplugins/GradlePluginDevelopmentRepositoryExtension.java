@@ -26,4 +26,14 @@ public interface GradlePluginDevelopmentRepositoryExtension {
      * @return the Gradle Plugin Development repository instance added to the repository handler.
      */
     MavenArtifactRepository gradlePluginDevelopment(Action<? super MavenArtifactRepository> action);
+
+    /**
+     * Returns {@link RepositoryHandler} extension methods.
+     *
+     * @param repositories  the repositories to extends, must not be null
+     * @return the extension methods, never null
+     */
+    static GradlePluginDevelopmentRepositoryExtension from(RepositoryHandler repositories) {
+        return new DefaultGradlePluginDevelopmentRepositoryExtension(repositories);
+    }
 }

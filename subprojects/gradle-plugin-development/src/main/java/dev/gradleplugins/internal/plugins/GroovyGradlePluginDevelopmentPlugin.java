@@ -16,7 +16,6 @@
 
 package dev.gradleplugins.internal.plugins;
 
-import dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension;
 import dev.gradleplugins.GradleRuntimeCompatibility;
 import dev.gradleplugins.GroovyGradlePluginDevelopmentExtension;
 import dev.gradleplugins.internal.DeferredRepositoryFactory;
@@ -26,7 +25,9 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.util.GradleVersion;
 
+import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
 import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.*;
+import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
 
 public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
     private static final String PLUGIN_ID = "dev.gradleplugins.groovy-gradle-plugin";
@@ -37,18 +38,17 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
         assertJavaGradlePluginIsNotPreviouslyApplied(project.getPluginManager(), PLUGIN_ID);
         assertKotlinDslPluginIsNeverApplied(project.getPluginManager(), PLUGIN_ID);
 
-        project.getPluginManager().apply(GradlePluginDevelopmentExtensionPlugin.class);
+        project.getPluginManager().apply("dev.gradleplugins.base");
         // Starting with Gradle 6.4, precompiled Groovy DSL plugins are available
         if (GradleVersion.current().compareTo(GradleVersion.version("6.4")) >= 0) {
             project.getPluginManager().apply("groovy-gradle-plugin"); // For plugin development
         } else {
             project.getPluginManager().apply("java-gradle-plugin"); // For plugin development
         }
-        removeGradleApiProjectDependency(project);
         project.getPluginManager().apply("groovy");
 
         val groovy = registerLanguageExtension(project, "groovy", GroovyGradlePluginDevelopmentExtension.class);
-        val extension = registerCompatibilityExtension(project);
+        val extension = compatibility(gradlePlugin(project));
 
         // Configure the Groovy version and dependency
         groovy.getGroovyVersion().convention(extension.getMinimumGradleVersion().map(GradleRuntimeCompatibility::groovyVersionOf));
