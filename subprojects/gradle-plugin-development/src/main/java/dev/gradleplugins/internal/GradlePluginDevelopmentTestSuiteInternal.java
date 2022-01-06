@@ -75,6 +75,11 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
     public abstract Property<GradlePluginDevelopmentCompatibilityExtension> getTestedGradlePlugin();
 
     @Override
+    public String toString() {
+        return "test suite '" + name + "'";
+    }
+
+    @Override
     public TaskView<Test> getTestTasks() {
         return getObjects().newInstance(TestTaskView.class, testTaskActions);
     }
