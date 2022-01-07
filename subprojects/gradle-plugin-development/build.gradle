@@ -77,8 +77,8 @@ pluginBundle {
         }
         gradlePluginDevelopment {
             displayName = 'Gradle Plugin Development plugin'
-            description = 'Provides additional support for developing Gradle plugin-related projects (settings plugin only).'
-            tags = ['gradle-plugin-development', 'gradle-plugin', 'settings-plugin']
+            description = 'Provides additional support for developing Gradle plugin-related projects.'
+            tags = ['gradle-plugin-development', 'gradle-plugin', 'settings-plugin', 'project-plugin']
         }
         testingBase {
             displayName = 'Gradle Plugin Testing base plugin'
