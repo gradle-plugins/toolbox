@@ -17,7 +17,7 @@ class JavaGradlePluginDevelopmentPluginIntegrationTest {
     }
 
     @Test
-    void appliesBasePlugin() {
-        assertThat(project, hasPlugin("dev.gradleplugins.base"));
+    void appliesGradlePluginBasePlugin() {
+        assertThat(project, hasPlugin("dev.gradleplugins.gradle-plugin-base"));
     }
 }

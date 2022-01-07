@@ -15,7 +15,7 @@ public class GradlePluginDevelopmentExtensionBasePluginIntegrationTest {
 
     @BeforeEach
     void setup() {
-        project.getPluginManager().apply("dev.gradleplugins.base");
+        project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-base");
         project.getPluginManager().apply("java-gradle-plugin");
         subject = project.getExtensions().getByType(GradlePluginDevelopmentExtension.class);
     }

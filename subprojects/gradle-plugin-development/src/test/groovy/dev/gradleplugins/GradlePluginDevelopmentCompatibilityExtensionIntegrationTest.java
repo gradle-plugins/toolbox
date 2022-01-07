@@ -17,7 +17,7 @@ class GradlePluginDevelopmentCompatibilityExtensionIntegrationTest {
 
     @BeforeEach
     void setup() {
-        project.getPluginManager().apply("dev.gradleplugins.base");
+        project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-base");
         project.getPluginManager().apply("java-gradle-plugin");
         subject = compatibility(gradlePlugin(project));
     }
