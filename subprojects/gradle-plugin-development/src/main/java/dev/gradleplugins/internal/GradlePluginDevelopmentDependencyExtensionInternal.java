@@ -6,10 +6,12 @@ import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
 import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.provider.Provider;
+import org.gradle.api.reflect.HasPublicType;
+import org.gradle.api.reflect.TypeOf;
 
 import javax.inject.Inject;
 
-public class GradlePluginDevelopmentDependencyExtensionInternal implements GradlePluginDevelopmentDependencyExtension {
+public class GradlePluginDevelopmentDependencyExtensionInternal implements GradlePluginDevelopmentDependencyExtension, HasPublicType {
     private final DependencyHandler dependencies;
     private final GradlePluginDevelopmentDependencyExtension extension;
     private final ConfigurationContainer configurations;
@@ -72,5 +74,10 @@ public class GradlePluginDevelopmentDependencyExtensionInternal implements Gradl
 
     public static GradlePluginDevelopmentDependencyExtensionInternal of(DependencyHandler dependencies) {
         return (GradlePluginDevelopmentDependencyExtensionInternal) ExtensionAware.class.cast(dependencies).getExtensions().getByType(GradlePluginDevelopmentDependencyExtension.class);
+    }
+
+    @Override
+    public TypeOf<?> getPublicType() {
+        return TypeOf.typeOf(GradlePluginDevelopmentDependencyExtension.class);
     }
 }

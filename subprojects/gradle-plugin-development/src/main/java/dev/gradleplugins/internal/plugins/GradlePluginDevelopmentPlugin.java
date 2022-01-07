@@ -7,6 +7,7 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.initialization.Settings;
 import org.gradle.api.internal.plugins.DslObject;
+import org.gradle.api.invocation.Gradle;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.tasks.GroovySourceSet;
@@ -23,10 +24,17 @@ public abstract class GradlePluginDevelopmentPlugin implements Plugin<Object> {
 
     @Override
     public void apply(Object target) {
-        if (!Settings.class.isInstance(target)) {
-            throw new IllegalArgumentException("Please apply 'dev.gradleplugins.gradle-plugin-development' plugin inside the settings.gradle[.kts] script.");
+        if (target instanceof Project) {
+            doApply((Project) target);
+        } else if (target instanceof Settings) {
+            doApply((Settings)target);
+        } else {
+            throw new IllegalArgumentException("Please apply 'dev.gradleplugins.gradle-plugin-development' plugin inside the settings.gradle[.kts] or build.gradle[.kts] script.");
         }
-        doApply((Settings)target);
+    }
+
+    private void doApply(Project project) {
+        project.getPluginManager().apply(GradlePluginDevelopmentExtensionPlugin.class);
     }
 
     private void doApply(Settings settings) {
