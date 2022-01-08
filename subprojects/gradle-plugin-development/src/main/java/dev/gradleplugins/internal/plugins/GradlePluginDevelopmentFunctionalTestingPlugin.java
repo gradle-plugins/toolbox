@@ -1,18 +1,18 @@
 package dev.gradleplugins.internal.plugins;
 
-import dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension;
 import dev.gradleplugins.GradlePluginDevelopmentTestSuite;
 import dev.gradleplugins.GradlePluginDevelopmentTestSuiteFactory;
 import dev.gradleplugins.internal.GradlePluginDevelopmentTestSuiteInternal;
 import lombok.val;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
-import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 
 import java.util.HashSet;
+
+import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
+import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
 
 public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements Plugin<Project> {
     private static final String FUNCTIONAL_TEST_NAME = "functionalTest";
@@ -32,17 +32,24 @@ public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements 
         val functionalTestSuite = (GradlePluginDevelopmentTestSuiteInternal) factory.create(FUNCTIONAL_TEST_NAME);
         functionalTestSuite.getSourceSet().value(sourceSet).disallowChanges();
         functionalTestSuite.getTestedSourceSet().convention(project.provider(() -> sourceSets.getByName("main")));
-        functionalTestSuite.getTestedGradlePlugin().set((GradlePluginDevelopmentCompatibilityExtension) ((ExtensionAware)project.getExtensions().getByType(GradlePluginDevelopmentExtension.class)).getExtensions().getByName("compatibility"));
+        functionalTestSuite.getTestedGradlePlugin().set(compatibility(gradlePlugin(project)));
         functionalTestSuite.getTestedGradlePlugin().disallowChanges();
 
+        project.getPluginManager().withPlugin("dev.gradleplugins.gradle-plugin-unit-test", ignored -> {
+            functionalTestSuite.getTestTasks().configureEach(task -> task.shouldRunAfter(test(project).getTestTasks().getElements()));
+        });
+
         // Configure functionalTest for GradlePluginDevelopmentExtension
-        val gradlePlugin = project.getExtensions().getByType(GradlePluginDevelopmentExtension.class);
         val testSourceSets = new HashSet<SourceSet>();
-        testSourceSets.addAll(gradlePlugin.getTestSourceSets());
+        testSourceSets.addAll(gradlePlugin(project).getTestSourceSets());
         testSourceSets.add(sourceSet);
-        gradlePlugin.testSourceSets(testSourceSets.toArray(new SourceSet[0]));
+        gradlePlugin(project).testSourceSets(testSourceSets.toArray(new SourceSet[0]));
 
         project.getComponents().add(functionalTestSuite);
         project.getExtensions().add(GradlePluginDevelopmentTestSuite.class, FUNCTIONAL_TEST_NAME, functionalTestSuite);
+    }
+
+    private static GradlePluginDevelopmentTestSuite test(Project project) {
+        return (GradlePluginDevelopmentTestSuite) project.getExtensions().getByName("test");
     }
 }

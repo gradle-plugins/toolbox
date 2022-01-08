@@ -13,6 +13,7 @@ import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.plugins.PluginManager;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
+import org.gradle.api.provider.SetProperty;
 import org.gradle.api.reflect.HasPublicType;
 import org.gradle.api.reflect.TypeOf;
 import org.gradle.api.tasks.SourceSet;
@@ -34,6 +35,7 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
     private final String name;
     @Getter private final List<Action<? super Test>> testTaskActions = new ArrayList<>();
     private final Action<GradlePluginDevelopmentTestSuiteInternal> finalizeAction;
+    private final TestTaskView testTasks;
 
     @Inject
     protected abstract ObjectFactory getObjects();
@@ -52,7 +54,8 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
             });
         });
         this.testTaskActions.add(new RegisterTestingStrategyPropertyExtensionRule(objects));
-        this.finalizeAction = Actions.composite(new TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule(), new CreateTestTasksFromTestingStrategiesRule(tasks, objects));
+        this.testTasks = getObjects().newInstance(TestTaskView.class, testTaskActions);
+        this.finalizeAction = Actions.composite(new TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule(), new CreateTestTasksFromTestingStrategiesRule(tasks, objects, testTasks.getElements()));
         getSourceSet().finalizeValueOnRead();
     }
 
@@ -80,10 +83,10 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
 
     @Override
     public TaskView<Test> getTestTasks() {
-        return getObjects().newInstance(TestTaskView.class, testTaskActions);
+        return testTasks;
     }
 
-    protected static /*final*/ class TestTaskView implements TaskView<Test> {
+    protected static /*final*/ abstract class TestTaskView implements TaskView<Test> {
         private final List<Action<? super Test>> testTaskActions;
 
         @Inject
@@ -95,6 +98,9 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         public void configureEach(Action<? super Test> action) {
             testTaskActions.add(action);
         }
+
+        @Override
+        public abstract SetProperty<Test> getElements();
     }
 
     @Override
