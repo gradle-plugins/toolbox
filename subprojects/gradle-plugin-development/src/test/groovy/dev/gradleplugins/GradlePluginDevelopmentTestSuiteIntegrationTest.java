@@ -5,11 +5,12 @@ import org.gradle.testfixtures.ProjectBuilder;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
+import static dev.gradleplugins.GradlePluginDevelopmentTestSuiteFactory.forProject;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 class GradlePluginDevelopmentTestSuiteIntegrationTest implements GradlePluginDevelopmentTestSuiteTester {
     private final Project project = ProjectBuilder.builder().build();
-    private final GradlePluginDevelopmentTestSuiteFactory factory = GradlePluginDevelopmentTestSuiteFactory.forProject(project);
+    private final GradlePluginDevelopmentTestSuiteFactory factory = forProject(project);
     private final GradlePluginDevelopmentTestSuite subject = factory.create("gote");
 
     @Override
