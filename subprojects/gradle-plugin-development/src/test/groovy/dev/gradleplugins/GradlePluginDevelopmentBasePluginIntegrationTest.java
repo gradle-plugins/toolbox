@@ -4,7 +4,6 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.ExternalDependency;
 import org.gradle.api.artifacts.SelfResolvingDependency;
 import org.gradle.testfixtures.ProjectBuilder;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +12,6 @@ import static dev.gradleplugins.ProjectMatchers.*;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assume.assumeNotNull;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 class GradlePluginDevelopmentBasePluginIntegrationTest {
@@ -21,7 +19,7 @@ class GradlePluginDevelopmentBasePluginIntegrationTest {
 
     @BeforeEach
     void appliesSubjectPlugin() {
-        project.getPluginManager().apply("dev.gradleplugins.base");
+        project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-base");
         project.getPluginManager().apply("java-gradle-plugin");
         compatibility(gradlePlugin(project)).getMinimumGradleVersion().set("6.5");
     }

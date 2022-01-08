@@ -3,6 +3,7 @@ package dev.gradleplugins;
 import org.gradle.api.Named;
 import org.gradle.api.NamedDomainObjectCollectionSchema;
 import org.gradle.api.artifacts.Dependency;
+import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.plugins.ExtensionsSchema;
 import org.gradle.api.plugins.PluginAware;
@@ -34,6 +35,8 @@ public final class ProjectMatchers {
                     return ((Named) actual).getName();
                 } else if (actual instanceof NamedDomainObjectCollectionSchema.NamedDomainObjectSchema) {
                     return ((NamedDomainObjectCollectionSchema.NamedDomainObjectSchema) actual).getName();
+                } else if (actual instanceof ArtifactRepository) {
+                    return ((ArtifactRepository) actual).getName();
                 }
                 throw new UnsupportedOperationException();
             }

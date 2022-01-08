@@ -15,8 +15,8 @@ version = '1.5.1'
 
 gradlePlugin {
     plugins {
-        basePlugin {
-            id = 'dev.gradleplugins.base'
+        gradlePluginBase {
+            id = 'dev.gradleplugins.gradle-plugin-base'
             implementationClass = 'dev.gradleplugins.internal.plugins.GradlePluginDevelopmentBasePlugin'
         }
         javaGradlePlugin {
@@ -60,7 +60,7 @@ pluginBundle {
     tags = ['gradle-plugin-development', 'gradle-plugin']
 
     plugins {
-        basePlugin {
+        gradlePluginBase {
             displayName = 'Gradle Plugin Development base plugin'
             description = 'Provides base support for developing Gradle plugin-related projects.'
             tags = ['gradle-plugin-development', 'gradle-plugin']
@@ -77,8 +77,8 @@ pluginBundle {
         }
         gradlePluginDevelopment {
             displayName = 'Gradle Plugin Development plugin'
-            description = 'Provides additional support for developing Gradle plugin-related projects (settings plugin only).'
-            tags = ['gradle-plugin-development', 'gradle-plugin', 'settings-plugin']
+            description = 'Provides additional support for developing Gradle plugin-related projects.'
+            tags = ['gradle-plugin-development', 'gradle-plugin', 'settings-plugin', 'project-plugin']
         }
         testingBase {
             displayName = 'Gradle Plugin Testing base plugin'

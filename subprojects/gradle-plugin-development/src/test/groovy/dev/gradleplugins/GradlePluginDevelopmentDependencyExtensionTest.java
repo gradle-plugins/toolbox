@@ -8,6 +8,8 @@ import org.gradle.api.internal.artifacts.dependencies.SelfResolvingDependencyInt
 import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.Test;
 
+import static dev.gradleplugins.ProjectMatchers.publicType;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class GradlePluginDevelopmentDependencyExtensionTest {
@@ -77,5 +79,10 @@ class GradlePluginDevelopmentDependencyExtensionTest {
         assertEquals("dev.gradleplugins", dependency.getGroup());
         assertEquals("gradle-fixtures", dependency.getName());
         assertNotNull(dependency.getVersion());
+    }
+
+    @Test
+    void hasPublicType() {
+        assertThat(subject, publicType(GradlePluginDevelopmentDependencyExtension.class));
     }
 }
