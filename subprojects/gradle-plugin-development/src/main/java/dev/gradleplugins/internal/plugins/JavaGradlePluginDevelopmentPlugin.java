@@ -32,6 +32,7 @@ public class JavaGradlePluginDevelopmentPlugin implements Plugin<Project> {
         assertKotlinDslPluginIsNeverApplied(project.getPluginManager(), PLUGIN_ID);
 
         project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-base");
+        project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-testing-base");
         project.getPluginManager().apply("java-gradle-plugin"); // For plugin development
 
         registerLanguageExtension(project, "java", JavaGradlePluginDevelopmentExtension.class);
