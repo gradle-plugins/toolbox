@@ -14,6 +14,9 @@ import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 
 import java.util.HashSet;
 
+import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
+import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
+
 public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements Plugin<Project> {
     private static final String FUNCTIONAL_TEST_NAME = "functionalTest";
 
@@ -32,15 +35,14 @@ public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements 
         val functionalTestSuite = (GradlePluginDevelopmentTestSuiteInternal) factory.create(FUNCTIONAL_TEST_NAME);
         functionalTestSuite.getSourceSet().value(sourceSet).disallowChanges();
         functionalTestSuite.getTestedSourceSet().convention(project.provider(() -> sourceSets.getByName("main")));
-        functionalTestSuite.getTestedGradlePlugin().set((GradlePluginDevelopmentCompatibilityExtension) ((ExtensionAware)project.getExtensions().getByType(GradlePluginDevelopmentExtension.class)).getExtensions().getByName("compatibility"));
+        functionalTestSuite.getTestedGradlePlugin().set(compatibility(gradlePlugin(project)));
         functionalTestSuite.getTestedGradlePlugin().disallowChanges();
 
         // Configure functionalTest for GradlePluginDevelopmentExtension
-        val gradlePlugin = project.getExtensions().getByType(GradlePluginDevelopmentExtension.class);
         val testSourceSets = new HashSet<SourceSet>();
-        testSourceSets.addAll(gradlePlugin.getTestSourceSets());
+        testSourceSets.addAll(gradlePlugin(project).getTestSourceSets());
         testSourceSets.add(sourceSet);
-        gradlePlugin.testSourceSets(testSourceSets.toArray(new SourceSet[0]));
+        gradlePlugin(project).testSourceSets(testSourceSets.toArray(new SourceSet[0]));
 
         project.getComponents().add(functionalTestSuite);
         project.getExtensions().add(GradlePluginDevelopmentTestSuite.class, FUNCTIONAL_TEST_NAME, functionalTestSuite);

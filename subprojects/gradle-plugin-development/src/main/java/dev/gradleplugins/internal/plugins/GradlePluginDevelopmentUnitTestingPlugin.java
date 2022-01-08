@@ -1,6 +1,5 @@
 package dev.gradleplugins.internal.plugins;
 
-import dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension;
 import dev.gradleplugins.GradlePluginDevelopmentTestSuite;
 import dev.gradleplugins.GradlePluginDevelopmentTestSuiteFactory;
 import dev.gradleplugins.internal.GradlePluginDevelopmentDependencyExtensionInternal;
@@ -8,12 +7,13 @@ import dev.gradleplugins.internal.GradlePluginDevelopmentTestSuiteInternal;
 import lombok.val;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
-import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 
 import java.util.HashSet;
+
+import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
+import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
 
 public abstract class GradlePluginDevelopmentUnitTestingPlugin implements Plugin<Project> {
     private static final String TEST_NAME = "test";
@@ -33,15 +33,14 @@ public abstract class GradlePluginDevelopmentUnitTestingPlugin implements Plugin
         val testSuite = (GradlePluginDevelopmentTestSuiteInternal) factory.create(TEST_NAME);
         testSuite.getSourceSet().value(sourceSet).disallowChanges();
         testSuite.getTestedSourceSet().convention(project.provider(() -> sourceSets.getByName("main")));
-        testSuite.getTestedGradlePlugin().set((GradlePluginDevelopmentCompatibilityExtension) ((ExtensionAware)project.getExtensions().getByType(GradlePluginDevelopmentExtension.class)).getExtensions().getByName("compatibility"));
+        testSuite.getTestedGradlePlugin().set(compatibility(gradlePlugin(project)));
         testSuite.getTestedGradlePlugin().disallowChanges();
 
         // Configure test for GradlePluginDevelopmentExtension (ensure it is not included)
-        val gradlePlugin = project.getExtensions().getByType(GradlePluginDevelopmentExtension.class);
         val testSourceSets = new HashSet<SourceSet>();
-        testSourceSets.addAll(gradlePlugin.getTestSourceSets());
+        testSourceSets.addAll(gradlePlugin(project).getTestSourceSets());
         testSourceSets.remove(sourceSet);
-        gradlePlugin.testSourceSets(testSourceSets.toArray(new SourceSet[0]));
+        gradlePlugin(project).testSourceSets(testSourceSets.toArray(new SourceSet[0]));
 
         // Automatically add Gradle API as a dependency. We assume unit tests are accomplish via ProjectBuilder
         val dependencies = GradlePluginDevelopmentDependencyExtensionInternal.of(project.getDependencies());
