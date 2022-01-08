@@ -5,6 +5,7 @@ import dev.gradleplugins.GradleVersionCoverageTestingStrategy;
 import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.Action;
 import org.gradle.api.model.ObjectFactory;
+import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.testing.Test;
@@ -19,10 +20,12 @@ import static java.util.Collections.emptyList;
 final class CreateTestTasksFromTestingStrategiesRule implements Action<GradlePluginDevelopmentTestSuiteInternal> {
     private final TaskContainer tasks;
     private final ObjectFactory objects;
+    private final SetProperty<Test> testElements;
 
-    public CreateTestTasksFromTestingStrategiesRule(TaskContainer tasks, ObjectFactory objects) {
+    public CreateTestTasksFromTestingStrategiesRule(TaskContainer tasks, ObjectFactory objects, SetProperty<Test> testElements) {
         this.tasks = tasks;
         this.objects = objects;
+        this.testElements = testElements;
     }
 
     @Override
@@ -88,6 +91,10 @@ final class CreateTestTasksFromTestingStrategiesRule implements Action<GradlePlu
             it.setTestClassesDirs(objects.fileCollection().from(testSuite.getSourceSet().map(t -> (Object) t.getOutput().getClassesDirs()).orElse(emptyList())));
             it.setClasspath(objects.fileCollection().from(testSuite.getSourceSet().map(t -> (Object) t.getRuntimeClasspath()).orElse(emptyList())));
         });
+
+        // Register test task to TaskView
+        testElements.add(result);
+
         return result;
     }
 }

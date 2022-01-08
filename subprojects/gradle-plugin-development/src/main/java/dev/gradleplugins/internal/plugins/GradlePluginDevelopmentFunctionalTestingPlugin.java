@@ -1,16 +1,13 @@
 package dev.gradleplugins.internal.plugins;
 
-import dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension;
 import dev.gradleplugins.GradlePluginDevelopmentTestSuite;
 import dev.gradleplugins.GradlePluginDevelopmentTestSuiteFactory;
 import dev.gradleplugins.internal.GradlePluginDevelopmentTestSuiteInternal;
 import lombok.val;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
-import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 
 import java.util.HashSet;
 
@@ -38,6 +35,10 @@ public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements 
         functionalTestSuite.getTestedGradlePlugin().set(compatibility(gradlePlugin(project)));
         functionalTestSuite.getTestedGradlePlugin().disallowChanges();
 
+        project.getPluginManager().withPlugin("dev.gradleplugins.gradle-plugin-unit-test", ignored -> {
+            functionalTestSuite.getTestTasks().configureEach(task -> task.shouldRunAfter(test(project).getTestTasks().getElements()));
+        });
+
         // Configure functionalTest for GradlePluginDevelopmentExtension
         val testSourceSets = new HashSet<SourceSet>();
         testSourceSets.addAll(gradlePlugin(project).getTestSourceSets());
@@ -46,5 +47,9 @@ public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements 
 
         project.getComponents().add(functionalTestSuite);
         project.getExtensions().add(GradlePluginDevelopmentTestSuite.class, FUNCTIONAL_TEST_NAME, functionalTestSuite);
+    }
+
+    private static GradlePluginDevelopmentTestSuite test(Project project) {
+        return (GradlePluginDevelopmentTestSuite) project.getExtensions().getByName("test");
     }
 }
