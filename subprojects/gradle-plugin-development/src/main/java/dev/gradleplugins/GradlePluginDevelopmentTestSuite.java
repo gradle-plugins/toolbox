@@ -41,4 +41,11 @@ public interface GradlePluginDevelopmentTestSuite extends Named {
     GradlePluginDevelopmentTestSuiteDependencies getDependencies();
 
     void dependencies(Action<? super GradlePluginDevelopmentTestSuiteDependencies> action);
+
+    /**
+     * Finalize this component.
+     * Upon finalizing, the test suite will calculate its final testing strategies and create all of its test tasks.
+     * Once the component is finalized, users cannot change any of component properties.
+     */
+    void finalizeComponent();
 }

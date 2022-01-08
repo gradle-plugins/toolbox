@@ -55,8 +55,9 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         });
         this.testTaskActions.add(new RegisterTestingStrategyPropertyExtensionRule(objects));
         this.testTasks = getObjects().newInstance(TestTaskView.class, testTaskActions);
-        this.finalizeAction = Actions.composite(new TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule(), new CreateTestTasksFromTestingStrategiesRule(tasks, objects, testTasks.getElements()), new AttachTestTasksToCheckTaskIfPresent(pluginManager, tasks));
+        this.finalizeAction = Actions.composite(new TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule(), new CreateTestTasksFromTestingStrategiesRule(tasks, objects, testTasks.getElements()), new AttachTestTasksToCheckTaskIfPresent(pluginManager, tasks), new FinalizeTestSuiteProperties());
         getSourceSet().finalizeValueOnRead();
+        getTestingStrategies().finalizeValueOnRead();
     }
 
     @Override

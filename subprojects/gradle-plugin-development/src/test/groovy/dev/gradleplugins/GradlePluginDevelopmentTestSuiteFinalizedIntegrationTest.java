@@ -3,39 +3,42 @@ package dev.gradleplugins;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.testfixtures.ProjectBuilder;
-import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static dev.gradleplugins.GradlePluginDevelopmentTestSuiteFactory.forProject;
 import static java.util.Collections.singleton;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
-class GradlePluginDevelopmentTestSuiteIntegrationTest implements GradlePluginDevelopmentTestSuiteTester {
+class GradlePluginDevelopmentTestSuiteFinalizedIntegrationTest {
     private final Project project = ProjectBuilder.builder().build();
     private final GradlePluginDevelopmentTestSuiteFactory factory = forProject(project);
-    private final GradlePluginDevelopmentTestSuite subject = factory.create("gote");
+    private final GradlePluginDevelopmentTestSuite subject = factory.create("leek");
 
-    @Override
-    public GradlePluginDevelopmentTestSuite subject() {
-        return subject;
+    @BeforeEach
+    void finalizeTestSuite() {
+        subject.finalizeComponent();
     }
 
     @Test
-    void finalizeSourceSetPropertyOnRead() {
-        subject.getSourceSet().value(mock(SourceSet.class)).get();
+    void canFinalizeTestSuiteMultipleTime() {
+        assertDoesNotThrow(subject::finalizeComponent);
+    }
+
+    @Test
+    void disallowChangesToTestSuiteSourceSetProperty() {
         assertThrows(RuntimeException.class, () -> subject.getSourceSet().set(mock(SourceSet.class)));
     }
 
     @Test
-    void finalizeTestingStrategiesPropertyOnRead() {
-        subject.getTestingStrategies().value(singleton(mock(GradlePluginTestingStrategy.class))).get();
+    void disallowChangesToTestingStrategiesProperty() {
         assertThrows(RuntimeException.class, () -> subject.getTestingStrategies().set(singleton(mock(GradlePluginTestingStrategy.class))));
     }
 
     @Test
-    void hasToString() {
-        assertThat(subject(), Matchers.hasToString("test suite 'gote'"));
+    void disallowChangesToTestedSourceSetProperty() {
+        assertThrows(RuntimeException.class, () -> subject.getTestedSourceSet().set(mock(SourceSet.class)));
     }
 }
