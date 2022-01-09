@@ -1,12 +1,8 @@
 package dev.gradleplugins
 
-
 import dev.gradleplugins.runnerkit.BuildResult
-import org.hamcrest.Matchers
 
-import static org.hamcrest.Matchers.containsInRelativeOrder
-import static org.hamcrest.Matchers.hasItem
-import static org.hamcrest.Matchers.not
+import static org.hamcrest.Matchers.*
 import static spock.util.matcher.HamcrestSupport.that
 
 abstract class AbstractGradlePluginDevelopmentTestingOrderFunctionalTest extends AbstractGradlePluginDevelopmentFunctionalSpec {
