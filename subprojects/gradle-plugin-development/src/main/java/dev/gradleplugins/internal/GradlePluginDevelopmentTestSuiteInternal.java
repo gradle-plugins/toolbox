@@ -107,6 +107,7 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
     @Override
     public void finalizeComponent() {
         finalizeAction.execute(this);
+        getSourceSet().finalizeValue();
     }
 
     @Override

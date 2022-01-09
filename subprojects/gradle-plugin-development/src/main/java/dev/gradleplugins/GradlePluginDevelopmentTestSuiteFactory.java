@@ -21,6 +21,6 @@ public interface GradlePluginDevelopmentTestSuiteFactory {
      * @return a test suite factory, never null
      */
     static GradlePluginDevelopmentTestSuiteFactory forProject(Project project) {
-        return new DefaultGradlePluginDevelopmentTestSuiteFactory(project.getObjects());
+        return new DefaultGradlePluginDevelopmentTestSuiteFactory(project);
     }
 }

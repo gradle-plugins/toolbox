@@ -10,6 +10,7 @@ import org.gradle.api.plugins.PluginAware;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.reflect.HasPublicType;
 import org.gradle.api.reflect.TypeOf;
+import org.gradle.api.tasks.SourceSet;
 import org.hamcrest.Description;
 import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
@@ -37,6 +38,8 @@ public final class ProjectMatchers {
                     return ((NamedDomainObjectCollectionSchema.NamedDomainObjectSchema) actual).getName();
                 } else if (actual instanceof ArtifactRepository) {
                     return ((ArtifactRepository) actual).getName();
+                } else if (actual instanceof SourceSet) {
+                    return ((SourceSet) actual).getName();
                 }
                 throw new UnsupportedOperationException();
             }

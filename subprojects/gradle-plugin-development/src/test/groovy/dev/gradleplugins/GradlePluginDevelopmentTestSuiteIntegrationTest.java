@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import static dev.gradleplugins.GradlePluginDevelopmentTestSuiteFactory.forProject;
 import static java.util.Collections.singleton;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
@@ -32,6 +33,12 @@ class GradlePluginDevelopmentTestSuiteIntegrationTest implements GradlePluginDev
     void finalizeTestingStrategiesPropertyOnRead() {
         subject.getTestingStrategies().value(singleton(mock(GradlePluginTestingStrategy.class))).get();
         assertThrows(RuntimeException.class, () -> subject.getTestingStrategies().set(singleton(mock(GradlePluginTestingStrategy.class))));
+    }
+
+    @Test
+    void throwsExceptionOnSourceSetPropertyQueryWhenJavaBasePluginNotApplied() {
+        Throwable ex = assertThrows(RuntimeException.class, () -> subject.getSourceSet().get());
+        assertEquals("Please apply 'java-base' plugin.", ex.getMessage());
     }
 
     @Test
