@@ -10,6 +10,7 @@ import org.gradle.api.tasks.SourceSet;
 import java.util.HashSet;
 
 import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
+import static dev.gradleplugins.internal.plugins.GradlePluginDevelopmentUnitTestingPlugin.test;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
 
 public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements Plugin<Project> {
@@ -35,15 +36,14 @@ public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements 
             testSourceSets.add(functionalTest(project).getSourceSet().get());
             gradlePlugin(project).testSourceSets(testSourceSets.toArray(new SourceSet[0]));
         });
+        project.getPluginManager().withPlugin("dev.gradleplugins.gradle-plugin-unit-test", ignored -> {
+            functionalTest(project).getTestTasks().configureEach(task -> task.shouldRunAfter(test(project).getTestTasks().getElements()));
+        });
     }
 
     private void createFunctionalTestSuite(Project project) {
         val functionalTestSuite = (GradlePluginDevelopmentTestSuiteInternal) functionalTest(project);
         functionalTestSuite.getTestedGradlePlugin().set(compatibility(gradlePlugin(project)));
         functionalTestSuite.getTestedGradlePlugin().disallowChanges();
-
-        project.getPluginManager().withPlugin("dev.gradleplugins.gradle-plugin-unit-test", ignored -> {
-            functionalTestSuite.getTestTasks().configureEach(task -> task.shouldRunAfter(GradlePluginDevelopmentUnitTestingPlugin.test(project).getTestTasks().getElements()));
-        });
     }
 }

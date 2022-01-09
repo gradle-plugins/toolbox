@@ -120,4 +120,13 @@ public final class ProjectMatchers {
             }
         };
     }
+
+    public static Matcher<Task> shouldRunAfter(Matcher<? super Iterable<? extends Task>> matcher) {
+        return new FeatureMatcher<Task, Iterable<? extends Task>>(matcher, "", "") {
+            @Override
+            protected Iterable<? extends Task> featureValueOf(Task actual) {
+                return actual.getShouldRunAfter().getDependencies(null);
+            }
+        };
+    }
 }
