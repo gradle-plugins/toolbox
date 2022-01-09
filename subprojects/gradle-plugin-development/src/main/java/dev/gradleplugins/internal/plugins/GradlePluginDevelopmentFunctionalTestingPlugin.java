@@ -19,7 +19,7 @@ public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements 
 
     @Override
     public void apply(Project project) {
-        project.getPluginManager().apply(GradlePluginDevelopmentTestingBasePlugin.class);
+        project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-testing-base");
 
         project.getPluginManager().withPlugin("dev.gradleplugins.java-gradle-plugin", appliedPlugin -> createFunctionalTestSuite(project));
         project.getPluginManager().withPlugin("dev.gradleplugins.groovy-gradle-plugin", appliedPlugin -> createFunctionalTestSuite(project));
