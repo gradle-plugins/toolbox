@@ -7,7 +7,6 @@ import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static dev.gradleplugins.FinalizableComponentTestUtils.finalizeComponent;
 import static dev.gradleplugins.ProjectMatchers.*;
 import static dev.gradleplugins.internal.util.TestingStrategyPropertyUtils.testingStrategy;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -24,7 +23,7 @@ class GradlePluginDevelopmentTestSuiteTestingStrategyPropertyOnTestTaskIntegrati
     void setup() {
         project.getPluginManager().apply("java-base");
         subject.getTestingStrategies().addAll(subject.getStrategies().coverageForGradleVersion("6.5"), subject.getStrategies().coverageForGradleVersion("6.6"), subject.getStrategies().coverageForGradleVersion("6.9"));
-        finalizeComponent(subject);
+        subject.finalizeComponent();
     }
 
     @Test
