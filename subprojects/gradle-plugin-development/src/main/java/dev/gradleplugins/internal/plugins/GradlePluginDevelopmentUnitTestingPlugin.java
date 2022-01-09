@@ -29,18 +29,19 @@ public abstract class GradlePluginDevelopmentUnitTestingPlugin implements Plugin
 
         project.getPluginManager().withPlugin("dev.gradleplugins.java-gradle-plugin", appliedPlugin -> createUnitTestSuite(project));
         project.getPluginManager().withPlugin("dev.gradleplugins.groovy-gradle-plugin", appliedPlugin -> createUnitTestSuite(project));
+        project.getPluginManager().withPlugin("java-gradle-plugin", ignored -> {
+            // Configure test for GradlePluginDevelopmentExtension (ensure it is not included)
+            val testSourceSets = new HashSet<SourceSet>();
+            testSourceSets.addAll(gradlePlugin(project).getTestSourceSets());
+            testSourceSets.remove(test(project).getSourceSet().get());
+            gradlePlugin(project).testSourceSets(testSourceSets.toArray(new SourceSet[0]));
+        });
     }
 
     private void createUnitTestSuite(Project project) {
         val testSuite = (GradlePluginDevelopmentTestSuiteInternal) test(project);
         testSuite.getTestedGradlePlugin().set(compatibility(gradlePlugin(project)));
         testSuite.getTestedGradlePlugin().disallowChanges();
-
-        // Configure test for GradlePluginDevelopmentExtension (ensure it is not included)
-        val testSourceSets = new HashSet<SourceSet>();
-        testSourceSets.addAll(gradlePlugin(project).getTestSourceSets());
-        testSourceSets.remove(testSuite.getSourceSet().get());
-        gradlePlugin(project).testSourceSets(testSourceSets.toArray(new SourceSet[0]));
 
         // Automatically add Gradle API as a dependency. We assume unit tests are accomplish via ProjectBuilder
         val dependencies = GradlePluginDevelopmentDependencyExtensionInternal.of(project.getDependencies());

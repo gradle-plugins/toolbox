@@ -8,8 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import static dev.gradleplugins.GradlePluginDevelopmentTestSuiteFactory.forProject;
 import static java.util.Collections.singleton;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
 class GradlePluginDevelopmentTestSuiteFinalizedIntegrationTest {
@@ -30,16 +29,19 @@ class GradlePluginDevelopmentTestSuiteFinalizedIntegrationTest {
 
     @Test
     void disallowChangesToTestSuiteSourceSetProperty() {
-        assertThrows(RuntimeException.class, () -> subject.getSourceSet().set(mock(SourceSet.class)));
+        final Throwable ex = assertThrows(RuntimeException.class, () -> subject.getSourceSet().set(mock(SourceSet.class)));
+        assertEquals("The value for test suite 'leek' property 'sourceSet' is final and cannot be changed any further.", ex.getMessage());
     }
 
     @Test
     void disallowChangesToTestingStrategiesProperty() {
-        assertThrows(RuntimeException.class, () -> subject.getTestingStrategies().set(singleton(mock(GradlePluginTestingStrategy.class))));
+        final Throwable ex = assertThrows(RuntimeException.class, () -> subject.getTestingStrategies().set(singleton(mock(GradlePluginTestingStrategy.class))));
+        assertEquals("The value for test suite 'leek' property 'testingStrategies' is final and cannot be changed any further.", ex.getMessage());
     }
 
     @Test
     void disallowChangesToTestedSourceSetProperty() {
-        assertThrows(RuntimeException.class, () -> subject.getTestedSourceSet().set(mock(SourceSet.class)));
+        final Throwable ex = assertThrows(RuntimeException.class, () -> subject.getTestedSourceSet().set(mock(SourceSet.class)));
+        assertEquals("The value for test suite 'leek' property 'testedSourceSet' cannot be changed any further.", ex.getMessage());
     }
 }

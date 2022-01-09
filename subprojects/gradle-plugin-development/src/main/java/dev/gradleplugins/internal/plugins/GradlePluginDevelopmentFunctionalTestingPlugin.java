@@ -28,6 +28,13 @@ public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements 
 
         project.getPluginManager().withPlugin("dev.gradleplugins.java-gradle-plugin", appliedPlugin -> createFunctionalTestSuite(project));
         project.getPluginManager().withPlugin("dev.gradleplugins.groovy-gradle-plugin", appliedPlugin -> createFunctionalTestSuite(project));
+        project.getPluginManager().withPlugin("java-gradle-plugin", ignored -> {
+            // Configure functionalTest for GradlePluginDevelopmentExtension
+            val testSourceSets = new HashSet<SourceSet>();
+            testSourceSets.addAll(gradlePlugin(project).getTestSourceSets());
+            testSourceSets.add(functionalTest(project).getSourceSet().get());
+            gradlePlugin(project).testSourceSets(testSourceSets.toArray(new SourceSet[0]));
+        });
     }
 
     private void createFunctionalTestSuite(Project project) {
@@ -38,11 +45,5 @@ public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements 
         project.getPluginManager().withPlugin("dev.gradleplugins.gradle-plugin-unit-test", ignored -> {
             functionalTestSuite.getTestTasks().configureEach(task -> task.shouldRunAfter(GradlePluginDevelopmentUnitTestingPlugin.test(project).getTestTasks().getElements()));
         });
-
-        // Configure functionalTest for GradlePluginDevelopmentExtension
-        val testSourceSets = new HashSet<SourceSet>();
-        testSourceSets.addAll(gradlePlugin(project).getTestSourceSets());
-        testSourceSets.add(functionalTestSuite.getSourceSet().get());
-        gradlePlugin(project).testSourceSets(testSourceSets.toArray(new SourceSet[0]));
     }
 }
