@@ -6,12 +6,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.Action;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
+import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.ModuleDependency;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
 import org.gradle.api.component.SoftwareComponent;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.plugins.PluginManager;
-import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.provider.ProviderFactory;
 import org.gradle.api.provider.SetProperty;
@@ -22,6 +22,7 @@ import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.testing.Test;
 import org.gradle.internal.Actions;
 import org.gradle.plugin.devel.tasks.PluginUnderTestMetadata;
+import org.gradle.util.GradleVersion;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -48,10 +49,10 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
     protected abstract TaskContainer getTasks();
 
     @Inject
-    public GradlePluginDevelopmentTestSuiteInternal(String name, TaskContainer tasks, ObjectFactory objects, PluginManager pluginManager, ProviderFactory providers) {
-        this.strategyFactory = new GradlePluginTestingStrategyFactoryInternal(getTestedGradlePlugin().flatMap(GradlePluginDevelopmentCompatibilityExtension::getMinimumGradleVersion));
+    public GradlePluginDevelopmentTestSuiteInternal(String name, TaskContainer tasks, ObjectFactory objects, PluginManager pluginManager, ProviderFactory providers, Provider<String> minimumGradleVersion) {
+        this.strategyFactory = new GradlePluginTestingStrategyFactoryInternal(minimumGradleVersion);
         this.name = name;
-        this.dependencies = getObjects().newInstance(Dependencies.class, name, getSourceSet(), pluginManager, getTestedGradlePlugin().flatMap(GradlePluginDevelopmentCompatibilityExtension::getMinimumGradleVersion).map(GradleRuntimeCompatibility::groovyVersionOf));
+        this.dependencies = getObjects().newInstance(Dependencies.class, name, getSourceSet(), pluginManager, minimumGradleVersion.orElse(GradleVersion.current().getVersion()).map(GradleRuntimeCompatibility::groovyVersionOf));
         StreamSupport.stream(getTasks().getCollectionSchema().getElements().spliterator(), false).filter(it -> it.getName().equals("pluginUnderTestMetadata")).findFirst().ifPresent(ignored -> {
             getTasks().named("pluginUnderTestMetadata", PluginUnderTestMetadata.class, task -> {
                 task.getPluginClasspath().from(dependencies.pluginUnderTestMetadata);
@@ -78,8 +79,6 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
     public GradlePluginTestingStrategyFactory getStrategies() {
         return strategyFactory;
     }
-
-    public abstract Property<GradlePluginDevelopmentCompatibilityExtension> getTestedGradlePlugin();
 
     public abstract SetProperty<Test> getTestTaskCollection();
 

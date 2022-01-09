@@ -108,15 +108,22 @@ public final class ProjectMatchers {
         };
     }
 
-    public static Matcher<Dependency> coordinate(String coordinate) {
-        return new FeatureMatcher<Dependency, String>(equalTo(coordinate), "", "") {
+    public static Matcher<Object> coordinate(String coordinate) {
+        return new FeatureMatcher<Object, String>(equalTo(coordinate), "", "") {
             @Override
-            protected String featureValueOf(Dependency actual) {
-                final StringBuilder builder = new StringBuilder();
-                builder.append(actual.getGroup());
-                builder.append(":").append(actual.getName());
-                builder.append(":").append(actual.getVersion());
-                return builder.toString();
+            protected String featureValueOf(Object actual) {
+                Dependency dependency = null;
+                if (actual instanceof Provider) {
+                    actual = ((Provider<?>) actual).get();
+                }
+                if (actual instanceof Dependency) {
+                    final StringBuilder builder = new StringBuilder();
+                    builder.append(((Dependency) actual).getGroup());
+                    builder.append(":").append(((Dependency) actual).getName());
+                    builder.append(":").append(((Dependency) actual).getVersion());
+                    return builder.toString();
+                }
+                throw new UnsupportedOperationException();
             }
         };
     }

@@ -1,7 +1,6 @@
 package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.GradlePluginDevelopmentTestSuite;
-import dev.gradleplugins.internal.GradlePluginDevelopmentTestSuiteInternal;
 import lombok.val;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -9,7 +8,6 @@ import org.gradle.api.tasks.SourceSet;
 
 import java.util.HashSet;
 
-import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
 import static dev.gradleplugins.internal.plugins.GradlePluginDevelopmentUnitTestingPlugin.test;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
 
@@ -27,8 +25,6 @@ public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements 
         project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-testing-base");
         FUNCTIONAL_TEST_RULE.execute(project);
 
-        project.getPluginManager().withPlugin("dev.gradleplugins.java-gradle-plugin", appliedPlugin -> createFunctionalTestSuite(project));
-        project.getPluginManager().withPlugin("dev.gradleplugins.groovy-gradle-plugin", appliedPlugin -> createFunctionalTestSuite(project));
         project.getPluginManager().withPlugin("java-gradle-plugin", ignored -> {
             // Configure functionalTest for GradlePluginDevelopmentExtension
             val testSourceSets = new HashSet<SourceSet>();
@@ -39,11 +35,5 @@ public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements 
         project.getPluginManager().withPlugin("dev.gradleplugins.gradle-plugin-unit-test", ignored -> {
             functionalTest(project).getTestTasks().configureEach(task -> task.shouldRunAfter(test(project).getTestTasks().getElements()));
         });
-    }
-
-    private void createFunctionalTestSuite(Project project) {
-        val functionalTestSuite = (GradlePluginDevelopmentTestSuiteInternal) functionalTest(project);
-        functionalTestSuite.getTestedGradlePlugin().set(compatibility(gradlePlugin(project)));
-        functionalTestSuite.getTestedGradlePlugin().disallowChanges();
     }
 }
