@@ -27,6 +27,7 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.stream.StreamSupport;
 
 import static dev.gradleplugins.internal.DefaultDependencyVersions.SPOCK_FRAMEWORK_VERSION;
@@ -57,7 +58,7 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
             });
         });
         this.testTaskActions.add(new RegisterTestingStrategyPropertyExtensionRule(objects));
-        this.testTasks = getObjects().newInstance(TestTaskView.class, testTaskActions, getTestTaskCollection());
+        this.testTasks = getObjects().newInstance(TestTaskView.class, testTaskActions, providers.provider(new FinalizeComponentCallable<>()).orElse(getTestTaskCollection()));
         this.finalizeAction = Actions.composite(new TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule(), new CreateTestTasksFromTestingStrategiesRule(tasks, objects, getTestTaskCollection()), new AttachTestTasksToCheckTaskIfPresent(pluginManager, tasks), new FinalizeTestSuiteProperties());
         getSourceSet().finalizeValueOnRead();
         getTestingStrategies().finalizeValueOnRead();
@@ -232,6 +233,14 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         @Override
         public Object gradleApi(String version) {
             return GradlePluginDevelopmentDependencyExtensionInternal.of(getDependencies()).gradleApi(version);
+        }
+    }
+
+    private final class FinalizeComponentCallable<T> implements Callable<T> {
+        @Override
+        public T call() throws Exception {
+            finalizeComponent();
+            return null;
         }
     }
 }
