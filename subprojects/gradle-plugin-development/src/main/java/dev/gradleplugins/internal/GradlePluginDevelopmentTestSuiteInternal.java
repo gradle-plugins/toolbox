@@ -36,6 +36,7 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
     @Getter private final List<Action<? super Test>> testTaskActions = new ArrayList<>();
     private final Action<GradlePluginDevelopmentTestSuiteInternal> finalizeAction;
     private final TestTaskView testTasks;
+    private boolean finalized = false;
 
     @Inject
     protected abstract ObjectFactory getObjects();
@@ -106,8 +107,11 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
 
     @Override
     public void finalizeComponent() {
-        finalizeAction.execute(this);
-        getSourceSet().finalizeValue();
+        if (!finalized) {
+            finalized = true;
+            finalizeAction.execute(this);
+            getSourceSet().finalizeValue();
+        }
     }
 
     @Override
