@@ -58,9 +58,4 @@ public interface GradlePluginDevelopmentTestSuiteTester {
     default void hasPublicType() {
         assertThat(subject(), publicType(GradlePluginDevelopmentTestSuite.class));
     }
-
-    @Test
-    default void canFinalizeComponent() {
-        assertDoesNotThrow(subject()::finalizeComponent);
-    }
 }
