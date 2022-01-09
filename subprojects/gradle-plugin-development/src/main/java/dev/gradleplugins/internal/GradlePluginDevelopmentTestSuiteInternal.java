@@ -13,6 +13,7 @@ import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.plugins.PluginManager;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
+import org.gradle.api.provider.ProviderFactory;
 import org.gradle.api.provider.SetProperty;
 import org.gradle.api.reflect.HasPublicType;
 import org.gradle.api.reflect.TypeOf;
@@ -25,6 +26,7 @@ import org.gradle.plugin.devel.tasks.PluginUnderTestMetadata;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.StreamSupport;
 
 import static dev.gradleplugins.internal.DefaultDependencyVersions.SPOCK_FRAMEWORK_VERSION;
@@ -45,7 +47,7 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
     protected abstract TaskContainer getTasks();
 
     @Inject
-    public GradlePluginDevelopmentTestSuiteInternal(String name, TaskContainer tasks, ObjectFactory objects, PluginManager pluginManager) {
+    public GradlePluginDevelopmentTestSuiteInternal(String name, TaskContainer tasks, ObjectFactory objects, PluginManager pluginManager, ProviderFactory providers) {
         this.strategyFactory = new GradlePluginTestingStrategyFactoryInternal(getTestedGradlePlugin().flatMap(GradlePluginDevelopmentCompatibilityExtension::getMinimumGradleVersion));
         this.name = name;
         this.dependencies = getObjects().newInstance(Dependencies.class, name, getSourceSet(), pluginManager, getTestedGradlePlugin().flatMap(GradlePluginDevelopmentCompatibilityExtension::getMinimumGradleVersion).map(GradleRuntimeCompatibility::groovyVersionOf));
@@ -55,8 +57,8 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
             });
         });
         this.testTaskActions.add(new RegisterTestingStrategyPropertyExtensionRule(objects));
-        this.testTasks = getObjects().newInstance(TestTaskView.class, testTaskActions);
-        this.finalizeAction = Actions.composite(new TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule(), new CreateTestTasksFromTestingStrategiesRule(tasks, objects, testTasks.getElements()), new AttachTestTasksToCheckTaskIfPresent(pluginManager, tasks), new FinalizeTestSuiteProperties());
+        this.testTasks = getObjects().newInstance(TestTaskView.class, testTaskActions, getTestTaskCollection());
+        this.finalizeAction = Actions.composite(new TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule(), new CreateTestTasksFromTestingStrategiesRule(tasks, objects, getTestTaskCollection()), new AttachTestTasksToCheckTaskIfPresent(pluginManager, tasks), new FinalizeTestSuiteProperties());
         getSourceSet().finalizeValueOnRead();
         getTestingStrategies().finalizeValueOnRead();
     }
@@ -78,6 +80,8 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
 
     public abstract Property<GradlePluginDevelopmentCompatibilityExtension> getTestedGradlePlugin();
 
+    public abstract SetProperty<Test> getTestTaskCollection();
+
     @Override
     public String toString() {
         return "test suite '" + name + "'";
@@ -90,10 +94,12 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
 
     protected static /*final*/ abstract class TestTaskView implements TaskView<Test> {
         private final List<Action<? super Test>> testTaskActions;
+        private final Provider<Set<Test>> elementsProvider;
 
         @Inject
-        public TestTaskView(List<Action<? super Test>> testTaskActions) {
+        public TestTaskView(List<Action<? super Test>> testTaskActions, Provider<Set<Test>> elementsProvider) {
             this.testTaskActions = testTaskActions;
+            this.elementsProvider = elementsProvider;
         }
 
         @Override
@@ -102,7 +108,9 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         }
 
         @Override
-        public abstract SetProperty<Test> getElements();
+        public Provider<Set<Test>> getElements() {
+            return elementsProvider;
+        }
     }
 
     @Override
