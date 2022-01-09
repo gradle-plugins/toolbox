@@ -65,10 +65,28 @@ public final class ProjectMatchers {
     }
 
     public static <T> Matcher<Provider<? extends T>> providerOf(T instance) {
-        return new FeatureMatcher<Provider<? extends T>, T>(equalTo(instance), "", "") {
+        return providerOf(equalTo(instance));
+    }
+
+    public static <T> Matcher<Provider<? extends T>> providerOf(Matcher<? super T> matcher) {
+        return new FeatureMatcher<Provider<? extends T>, T>(matcher, "", "") {
             @Override
             protected T featureValueOf(Provider<? extends T> actual) {
                 return actual.get();
+            }
+        };
+    }
+
+    public static <T> Matcher<Provider<? extends T>> absentProvider() {
+        return new TypeSafeMatcher<Provider<? extends T>>() {
+            @Override
+            protected boolean matchesSafely(Provider<? extends T> item) {
+                return !item.isPresent();
+            }
+
+            @Override
+            public void describeTo(Description description) {
+
             }
         };
     }

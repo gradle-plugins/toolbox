@@ -4,6 +4,7 @@ import dev.gradleplugins.internal.GradlePluginDevelopmentTestSuiteInternal;
 import lombok.val;
 import org.gradle.api.Project;
 
+import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.sourceSets;
 
 final class DefaultGradlePluginDevelopmentTestSuiteFactory implements GradlePluginDevelopmentTestSuiteFactory {
@@ -22,6 +23,12 @@ final class DefaultGradlePluginDevelopmentTestSuiteFactory implements GradlePlug
             } else {
                 throw new RuntimeException("Please apply 'java-base' plugin.");
             }
+        }));
+        result.getTestedSourceSet().convention(project.provider(() -> {
+            if (project.getPluginManager().hasPlugin("java-gradle-plugin")) {
+                return gradlePlugin(project).getPluginSourceSet();
+            }
+            return null;
         }));
         return result;
     }

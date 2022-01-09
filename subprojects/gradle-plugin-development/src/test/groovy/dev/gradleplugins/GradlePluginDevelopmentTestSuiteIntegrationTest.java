@@ -7,6 +7,7 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 import static dev.gradleplugins.GradlePluginDevelopmentTestSuiteFactory.forProject;
+import static dev.gradleplugins.ProjectMatchers.absentProvider;
 import static java.util.Collections.singleton;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,6 +40,11 @@ class GradlePluginDevelopmentTestSuiteIntegrationTest implements GradlePluginDev
     void throwsExceptionOnSourceSetPropertyQueryWhenJavaBasePluginNotApplied() {
         Throwable ex = assertThrows(RuntimeException.class, () -> subject.getSourceSet().get());
         assertEquals("Please apply 'java-base' plugin.", ex.getMessage());
+    }
+
+    @Test
+    void hasNoTestedSourceSetConvention() {
+        assertThat(subject.getTestedSourceSet().value((SourceSet) null), absentProvider());
     }
 
     @Test
