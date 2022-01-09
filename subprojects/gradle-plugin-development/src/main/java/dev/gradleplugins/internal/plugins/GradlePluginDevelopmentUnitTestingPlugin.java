@@ -20,6 +20,7 @@ public abstract class GradlePluginDevelopmentUnitTestingPlugin implements Plugin
 
     @Override
     public void apply(Project project) {
+        project.getPluginManager().apply("java-base");
         project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-testing-base");
 
         project.getPluginManager().withPlugin("dev.gradleplugins.java-gradle-plugin", appliedPlugin -> createUnitTestSuite(project));
