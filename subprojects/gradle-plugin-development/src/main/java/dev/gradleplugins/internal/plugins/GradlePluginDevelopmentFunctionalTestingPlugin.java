@@ -7,12 +7,12 @@ import lombok.val;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.SourceSet;
-import org.gradle.api.tasks.SourceSetContainer;
 
 import java.util.HashSet;
 
 import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
+import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.sourceSets;
 
 public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements Plugin<Project> {
     private static final String FUNCTIONAL_TEST_NAME = "functionalTest";
@@ -26,12 +26,11 @@ public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements 
     }
 
     private void createFunctionalTestSuite(Project project) {
-        val sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
-        val sourceSet = sourceSets.maybeCreate(FUNCTIONAL_TEST_NAME);
+        val sourceSet = sourceSets(project).maybeCreate(FUNCTIONAL_TEST_NAME);
         val factory = GradlePluginDevelopmentTestSuiteFactory.forProject(project);
         val functionalTestSuite = (GradlePluginDevelopmentTestSuiteInternal) factory.create(FUNCTIONAL_TEST_NAME);
         functionalTestSuite.getSourceSet().value(sourceSet).disallowChanges();
-        functionalTestSuite.getTestedSourceSet().convention(project.provider(() -> sourceSets.getByName("main")));
+        functionalTestSuite.getTestedSourceSet().convention(project.provider(() -> sourceSets(project).getByName("main")));
         functionalTestSuite.getTestedGradlePlugin().set(compatibility(gradlePlugin(project)));
         functionalTestSuite.getTestedGradlePlugin().disallowChanges();
 

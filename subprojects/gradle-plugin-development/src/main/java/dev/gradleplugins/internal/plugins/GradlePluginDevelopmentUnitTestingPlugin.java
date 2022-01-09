@@ -8,12 +8,12 @@ import lombok.val;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.SourceSet;
-import org.gradle.api.tasks.SourceSetContainer;
 
 import java.util.HashSet;
 
 import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
+import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.sourceSets;
 
 public abstract class GradlePluginDevelopmentUnitTestingPlugin implements Plugin<Project> {
     private static final String TEST_NAME = "test";
@@ -27,12 +27,11 @@ public abstract class GradlePluginDevelopmentUnitTestingPlugin implements Plugin
     }
 
     private void createUnitTestSuite(Project project) {
-        val sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
-        val sourceSet = sourceSets.maybeCreate(TEST_NAME);
+        val sourceSet = sourceSets(project).maybeCreate(TEST_NAME);
         val factory = GradlePluginDevelopmentTestSuiteFactory.forProject(project);
         val testSuite = (GradlePluginDevelopmentTestSuiteInternal) factory.create(TEST_NAME);
         testSuite.getSourceSet().value(sourceSet).disallowChanges();
-        testSuite.getTestedSourceSet().convention(project.provider(() -> sourceSets.getByName("main")));
+        testSuite.getTestedSourceSet().convention(project.provider(() -> sourceSets(project).getByName("main")));
         testSuite.getTestedGradlePlugin().set(compatibility(gradlePlugin(project)));
         testSuite.getTestedGradlePlugin().disallowChanges();
 
