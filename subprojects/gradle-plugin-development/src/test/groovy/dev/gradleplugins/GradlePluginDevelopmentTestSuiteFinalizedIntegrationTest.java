@@ -19,6 +19,7 @@ class GradlePluginDevelopmentTestSuiteFinalizedIntegrationTest {
 
     @BeforeEach
     void finalizeTestSuite() {
+        subject.getSourceSet().set(mock(SourceSet.class));
         subject.finalizeComponent();
     }
 
