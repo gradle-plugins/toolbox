@@ -6,6 +6,7 @@ import java.util.Objects;
 
 public final class JvmTargetCompatibilityProperty implements JvmCompatibilityProperty {
     private final JvmCompatibilityProperty delegate;
+    private boolean finalized = false;
 
     public JvmTargetCompatibilityProperty(JvmCompatibilityProperty delegate) {
         this.delegate = delegate;
@@ -19,11 +20,17 @@ public final class JvmTargetCompatibilityProperty implements JvmCompatibilityPro
     @Override
     public void set(JavaVersion value) {
         Objects.requireNonNull(value);
+        if (finalized) {
+            throw new IllegalStateException("The value for property 'targetCompatibility' is final and cannot be changed any further.");
+        }
         delegate.set(value);
     }
 
     @Override
     public void finalizeValue() {
-        delegate.finalizeValue();
+        if (!finalized) {
+            delegate.finalizeValue();
+            finalized = true;
+        }
     }
 }
