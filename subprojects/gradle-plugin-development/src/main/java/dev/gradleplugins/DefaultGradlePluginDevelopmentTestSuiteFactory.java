@@ -1,5 +1,6 @@
 package dev.gradleplugins;
 
+import dev.gradleplugins.internal.FinalizableComponent;
 import dev.gradleplugins.internal.GradlePluginDevelopmentTestSuiteInternal;
 import lombok.val;
 import org.gradle.api.Project;
@@ -47,6 +48,7 @@ final class DefaultGradlePluginDevelopmentTestSuiteFactory implements GradlePlug
     private static Provider<String> ofDevelMinimumGradleVersionIfAvailable(Project project) {
         return project.provider(() -> {
             if (project.getPluginManager().hasPlugin("java-gradle-plugin") && project.getPluginManager().hasPlugin("dev.gradleplugins.gradle-plugin-base")) {
+                ((FinalizableComponent) compatibility(gradlePlugin(project))).finalizeComponent();
                 return compatibility(gradlePlugin(project)).getMinimumGradleVersion();
             } else {
                 return Providers.<String>notDefined(); // no minimum Gradle version...

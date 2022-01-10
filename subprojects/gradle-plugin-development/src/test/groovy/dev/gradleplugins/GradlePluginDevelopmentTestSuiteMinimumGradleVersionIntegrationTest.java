@@ -1,7 +1,9 @@
 package dev.gradleplugins;
 
+import dev.gradleplugins.internal.FinalizableComponent;
 import org.gradle.api.Project;
 import org.gradle.testfixtures.ProjectBuilder;
+import org.gradle.util.GradleVersion;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -9,11 +11,11 @@ import org.junit.jupiter.api.Test;
 import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
 import static dev.gradleplugins.GradlePluginDevelopmentTestSuiteFactory.forProject;
 import static dev.gradleplugins.ProjectMatchers.coordinate;
+import static dev.gradleplugins.ProjectMatchers.providerOf;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class GradlePluginDevelopmentTestSuiteMinimumGradleVersionIntegrationTest {
     private final Project project = ProjectBuilder.builder().build();
@@ -34,6 +36,27 @@ class GradlePluginDevelopmentTestSuiteMinimumGradleVersionIntegrationTest {
     @Test
     void returnsGroovyDependencyForCurrentGradleVersion() {
         assertThat(subject.getDependencies().groovy(), coordinate("org.codehaus.groovy:groovy-all:2.5.8"));
+    }
+
+    @Nested
+    class FinalizeTestedDevelComponentTest {
+        @BeforeEach
+        void appliesCoreDevelComponentPlugins() {
+            project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-base");
+            project.getPluginManager().apply("java-gradle-plugin");
+        }
+
+        @Test
+        void calculatesDefaultCompatibilityMinimumGradleVersionOnDevelWhenTestingStrategyQueried() {
+            assertThat(subject.getStrategies().getCoverageForMinimumVersion().getVersion(), equalTo(GradleVersion.current().getVersion()));
+            assertThat(compatibility(gradlePlugin(project)).getMinimumGradleVersion(), providerOf(GradleVersion.current().getVersion()));
+        }
+
+        @Test
+        void finalizesCompatibilityExtensionWhenTestingStrategyQueried() {
+            subject.getStrategies().getCoverageForMinimumVersion().getVersion();
+            assertTrue(((FinalizableComponent) compatibility(gradlePlugin(project))).isFinalized());
+        }
     }
 
     @Nested
