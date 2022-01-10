@@ -24,7 +24,8 @@ public abstract class GradlePluginDevelopmentUnitTestingPlugin implements Plugin
 
     @Override
     public void apply(Project project) {
-        project.getPluginManager().apply("java-base");
+        // See https://github.com/gradle-plugins/toolbox/issues/65 for more information
+        project.getPluginManager().apply("java"); // Should be java-base
         project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-testing-base");
         TEST_RULE.execute(project);
 
