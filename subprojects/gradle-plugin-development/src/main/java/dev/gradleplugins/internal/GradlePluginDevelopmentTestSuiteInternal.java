@@ -51,10 +51,10 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         this.strategyFactory = new GradlePluginTestingStrategyFactoryInternal(minimumGradleVersion);
         this.name = name;
         this.dependencies = getObjects().newInstance(Dependencies.class, getSourceSet(), pluginManager, minimumGradleVersion.orElse(GradleVersion.current().getVersion()).map(GradleRuntimeCompatibility::groovyVersionOf));
-        StreamSupport.stream(getTasks().getCollectionSchema().getElements().spliterator(), false).filter(it -> it.getName().equals("pluginUnderTestMetadata")).findFirst().ifPresent(ignored -> {
-            getTasks().named("pluginUnderTestMetadata", PluginUnderTestMetadata.class, task -> {
+        getTasks().withType(PluginUnderTestMetadata.class).configureEach(task -> {
+            if (task.getName().equals("pluginUnderTestMetadata")) {
                 task.getPluginClasspath().from((Callable<Object>) dependencies::pluginUnderTestMetadata);
-            });
+            }
         });
         this.testTaskActions.add(new RegisterTestingStrategyPropertyExtensionRule(objects));
         this.testTasks = getObjects().newInstance(TestTaskView.class, testTaskActions, providers.provider(new FinalizeComponentCallable<>()).orElse(getTestTaskCollection()));
