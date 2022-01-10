@@ -3,7 +3,6 @@ package dev.gradleplugins.internal;
 import dev.gradleplugins.GradlePluginTestingStrategyFactory;
 import dev.gradleplugins.GradleVersionCoverageTestingStrategy;
 import lombok.val;
-import org.gradle.api.Transformer;
 import org.gradle.api.provider.Provider;
 import org.gradle.util.VersionNumber;
 
@@ -11,11 +10,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public final class GradlePluginTestingStrategyFactoryInternal implements GradlePluginTestingStrategyFactory {
+    private static final ReleasedVersionDistributions GRADLE_DISTRIBUTIONS = new ReleasedVersionDistributions();
     private final ReleasedVersionDistributions releasedVersions;
     private final Provider<String> minimumVersion;
 
     public GradlePluginTestingStrategyFactoryInternal(Provider<String> minimumVersion) {
-        this(minimumVersion, new ReleasedVersionDistributions());
+        this(minimumVersion, GRADLE_DISTRIBUTIONS);
     }
 
     public GradlePluginTestingStrategyFactoryInternal(Provider<String> minimumVersion, ReleasedVersionDistributions releasedVersions) {

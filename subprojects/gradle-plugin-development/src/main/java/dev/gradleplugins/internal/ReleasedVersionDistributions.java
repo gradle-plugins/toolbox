@@ -12,6 +12,9 @@ import java.net.URL;
 import java.util.List;
 
 public class ReleasedVersionDistributions {
+    private GradleRelease mostRecentSnapshot;
+    private GradleRelease mostRecentRelease;
+    private List<GradleRelease> allVersions;
     private final GradleVersionsService versions;
 
     public ReleasedVersionDistributions() {
@@ -23,27 +26,36 @@ public class ReleasedVersionDistributions {
     }
 
     public GradleRelease getMostRecentSnapshot() {
-        try (Reader reader = new InputStreamReader(versions.nightly())) {
-            return new Gson().fromJson(reader, GradleRelease.class);
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to get the last snapshot version", e);
+        if (mostRecentSnapshot == null) {
+            try (Reader reader = new InputStreamReader(versions.nightly())) {
+                mostRecentSnapshot = new Gson().fromJson(reader, GradleRelease.class);
+            } catch (IOException e) {
+                throw new RuntimeException("Unable to get the last snapshot version", e);
+            }
         }
+        return mostRecentSnapshot;
     }
 
     public GradleRelease getMostRecentRelease() {
-        try (Reader reader = new InputStreamReader(versions.current())) {
-            return new Gson().fromJson(reader, GradleRelease.class);
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to get the last version", e);
+        if (mostRecentRelease == null) {
+            try (Reader reader = new InputStreamReader(versions.current())) {
+                mostRecentRelease = new Gson().fromJson(reader, GradleRelease.class);
+            } catch (IOException e) {
+                throw new RuntimeException("Unable to get the last version", e);
+            }
         }
+        return mostRecentRelease;
     }
 
     public List<GradleRelease> getAllVersions() {
-        try (Reader reader = new InputStreamReader(versions.all())) {
-            return new Gson().fromJson(reader, new TypeToken<List<GradleRelease>>() {}.getType());
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to get the last version", e);
+        if (allVersions == null) {
+            try (Reader reader = new InputStreamReader(versions.all())) {
+                allVersions = new Gson().fromJson(reader, new TypeToken<List<GradleRelease>>() {}.getType());
+            } catch (IOException e) {
+                throw new RuntimeException("Unable to get the last version", e);
+            }
         }
+        return allVersions;
     }
 
     @Value
