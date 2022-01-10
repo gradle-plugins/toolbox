@@ -20,6 +20,11 @@ class GradlePluginDevelopmentTestingBasePluginIntegrationTest {
     }
 
     @Test
+    void appliesBasePlugin() {
+        assertThat(project, hasPlugin("dev.gradleplugins.gradle-plugin-development"));
+    }
+
+    @Test
     void registersTestingExtensionOnGradleDevelExtension() {
         project.getPluginManager().apply("java-gradle-plugin");
         assertThat(project.getExtensions().getByType(GradlePluginDevelopmentExtension.class),

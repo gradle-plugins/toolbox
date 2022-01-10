@@ -11,6 +11,7 @@ abstract class GradlePluginDevelopmentTestingBasePlugin implements Plugin<Projec
 
     @Override
     public void apply(Project project) {
+        project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-development");
         project.getPluginManager().withPlugin("java-gradle-plugin", new RegisterTestingExtensionOnGradleDevelExtensionRule(project));
         project.afterEvaluate(new FinalizeComponents());
     }
