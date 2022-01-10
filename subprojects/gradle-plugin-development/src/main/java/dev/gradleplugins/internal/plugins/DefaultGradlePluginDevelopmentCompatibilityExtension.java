@@ -51,6 +51,7 @@ abstract /*final*/ class DefaultGradlePluginDevelopmentCompatibilityExtension im
                 getMinimumGradleVersion().set(GradleVersion.current().getVersion());
             }
             getMinimumGradleVersion().disallowChanges();
+            getGradleApiVersion().disallowChanges();
             compatibilities.finalizeValues();
         }
     }
