@@ -121,6 +121,11 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
     }
 
     @Override
+    public boolean isFinalized() {
+        return finalized;
+    }
+
+    @Override
     public Dependencies getDependencies() {
         return dependencies;
     }

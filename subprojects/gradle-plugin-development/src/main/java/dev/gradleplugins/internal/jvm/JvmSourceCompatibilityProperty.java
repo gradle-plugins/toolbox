@@ -6,6 +6,7 @@ import java.util.Objects;
 
 public final class JvmSourceCompatibilityProperty implements JvmCompatibilityProperty {
     private final JvmCompatibilityProperty delegate;
+    private boolean finalized = false;
 
     public JvmSourceCompatibilityProperty(JvmCompatibilityProperty delegate) {
         this.delegate = delegate;

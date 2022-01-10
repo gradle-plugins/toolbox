@@ -19,6 +19,7 @@ import static org.gradle.util.VersionNumber.parse;
 @SuppressWarnings("UnstableApiUsage")
 abstract /*final*/ class DefaultGradlePluginDevelopmentCompatibilityExtension implements GradlePluginDevelopmentCompatibilityExtension, HasPublicType, FinalizableComponent {
     private final JvmCompatibilityProperties compatibilities;
+    private boolean finalized = false;
 
     @Inject
     public DefaultGradlePluginDevelopmentCompatibilityExtension(JavaPluginExtension java) {
@@ -42,12 +43,20 @@ abstract /*final*/ class DefaultGradlePluginDevelopmentCompatibilityExtension im
 
     @Override
     public void finalizeComponent() {
-        if (getMinimumGradleVersion().isPresent()) {
-            compatibilities.set(minimumJavaVersionFor(parse(getMinimumGradleVersion().get())));
-        } else {
-            getMinimumGradleVersion().set(GradleVersion.current().getVersion());
+        if (!finalized) {
+            finalized = true;
+            if (getMinimumGradleVersion().isPresent()) {
+                compatibilities.set(minimumJavaVersionFor(parse(getMinimumGradleVersion().get())));
+            } else {
+                getMinimumGradleVersion().set(GradleVersion.current().getVersion());
+            }
+            getMinimumGradleVersion().disallowChanges();
+            compatibilities.finalizeValues();
         }
-        getMinimumGradleVersion().disallowChanges();
-        compatibilities.finalizeValues();
+    }
+
+    @Override
+    public boolean isFinalized() {
+        return finalized;
     }
 }
