@@ -2,6 +2,8 @@ package dev.gradleplugins;
 
 import org.gradle.api.Project;
 
+import java.util.Objects;
+
 /**
  * Factory to create {@link GradlePluginDevelopmentTestSuite} instances.
  */
@@ -21,6 +23,7 @@ public interface GradlePluginDevelopmentTestSuiteFactory {
      * @return a test suite factory, never null
      */
     static GradlePluginDevelopmentTestSuiteFactory forProject(Project project) {
-        return new DefaultGradlePluginDevelopmentTestSuiteFactory(project.getObjects());
+        Objects.requireNonNull(project);
+        return new DefaultGradlePluginDevelopmentTestSuiteFactory(project);
     }
 }

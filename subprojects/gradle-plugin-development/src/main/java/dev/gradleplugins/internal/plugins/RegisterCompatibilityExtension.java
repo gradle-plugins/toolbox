@@ -1,7 +1,5 @@
 package dev.gradleplugins.internal.plugins;
 
-import dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension;
-import dev.gradleplugins.internal.FinalizableComponent;
 import lombok.val;
 import org.gradle.api.Action;
 import org.gradle.api.Project;

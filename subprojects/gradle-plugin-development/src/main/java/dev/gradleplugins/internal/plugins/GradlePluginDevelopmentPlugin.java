@@ -7,17 +7,17 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.initialization.Settings;
 import org.gradle.api.internal.plugins.DslObject;
-import org.gradle.api.invocation.Gradle;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.tasks.GroovySourceSet;
 import org.gradle.api.tasks.SourceSet;
-import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.internal.exceptions.DefaultMultiCauseException;
 
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+
+import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.sourceSets;
 
 public abstract class GradlePluginDevelopmentPlugin implements Plugin<Object> {
     private static final Logger LOGGER = Logging.getLogger(GradlePluginDevelopmentPlugin.class);
@@ -111,7 +111,7 @@ public abstract class GradlePluginDevelopmentPlugin implements Plugin<Object> {
     }
 
     private static boolean hasGroovySources(Project project) {
-        SourceSet sourceSet = project.getExtensions().getByType(SourceSetContainer.class).getByName("main");
+        SourceSet sourceSet = sourceSets(project).getByName("main");
         GroovySourceSet groovySourceSet = new DslObject(sourceSet).getConvention().findPlugin(GroovySourceSet.class);
         if (groovySourceSet == null) {
             return false;
@@ -120,7 +120,7 @@ public abstract class GradlePluginDevelopmentPlugin implements Plugin<Object> {
     }
 
     private static boolean hasJavaSources(Project project) {
-        SourceSet sourceSet = project.getExtensions().getByType(SourceSetContainer.class).getByName("main");
+        SourceSet sourceSet = sourceSets(project).getByName("main");
         return sourceSet.getAllJava().getSrcDirs().stream().anyMatch(File::exists);
     }
 

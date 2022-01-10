@@ -2,6 +2,7 @@ package dev.gradleplugins;
 
 import org.gradle.api.Named;
 import org.gradle.api.NamedDomainObjectCollectionSchema;
+import org.gradle.api.Task;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.plugins.ExtensionAware;
@@ -10,6 +11,7 @@ import org.gradle.api.plugins.PluginAware;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.reflect.HasPublicType;
 import org.gradle.api.reflect.TypeOf;
+import org.gradle.api.tasks.SourceSet;
 import org.hamcrest.Description;
 import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
@@ -37,6 +39,10 @@ public final class ProjectMatchers {
                     return ((NamedDomainObjectCollectionSchema.NamedDomainObjectSchema) actual).getName();
                 } else if (actual instanceof ArtifactRepository) {
                     return ((ArtifactRepository) actual).getName();
+                } else if (actual instanceof SourceSet) {
+                    return ((SourceSet) actual).getName();
+                } else if (actual instanceof Task) {
+                    return ((Task) actual).getName();
                 }
                 throw new UnsupportedOperationException();
             }
@@ -62,10 +68,28 @@ public final class ProjectMatchers {
     }
 
     public static <T> Matcher<Provider<? extends T>> providerOf(T instance) {
-        return new FeatureMatcher<Provider<? extends T>, T>(equalTo(instance), "", "") {
+        return providerOf(equalTo(instance));
+    }
+
+    public static <T> Matcher<Provider<? extends T>> providerOf(Matcher<? super T> matcher) {
+        return new FeatureMatcher<Provider<? extends T>, T>(matcher, "", "") {
             @Override
             protected T featureValueOf(Provider<? extends T> actual) {
                 return actual.get();
+            }
+        };
+    }
+
+    public static <T> Matcher<Provider<? extends T>> absentProvider() {
+        return new TypeSafeMatcher<Provider<? extends T>>() {
+            @Override
+            protected boolean matchesSafely(Provider<? extends T> item) {
+                return !item.isPresent();
+            }
+
+            @Override
+            public void describeTo(Description description) {
+
             }
         };
     }
@@ -84,15 +108,31 @@ public final class ProjectMatchers {
         };
     }
 
-    public static Matcher<Dependency> coordinate(String coordinate) {
-        return new FeatureMatcher<Dependency, String>(equalTo(coordinate), "", "") {
+    public static Matcher<Object> coordinate(String coordinate) {
+        return new FeatureMatcher<Object, String>(equalTo(coordinate), "", "") {
             @Override
-            protected String featureValueOf(Dependency actual) {
-                final StringBuilder builder = new StringBuilder();
-                builder.append(actual.getGroup());
-                builder.append(":").append(actual.getName());
-                builder.append(":").append(actual.getVersion());
-                return builder.toString();
+            protected String featureValueOf(Object actual) {
+                Dependency dependency = null;
+                if (actual instanceof Provider) {
+                    actual = ((Provider<?>) actual).get();
+                }
+                if (actual instanceof Dependency) {
+                    final StringBuilder builder = new StringBuilder();
+                    builder.append(((Dependency) actual).getGroup());
+                    builder.append(":").append(((Dependency) actual).getName());
+                    builder.append(":").append(((Dependency) actual).getVersion());
+                    return builder.toString();
+                }
+                throw new UnsupportedOperationException();
+            }
+        };
+    }
+
+    public static Matcher<Task> shouldRunAfter(Matcher<? super Iterable<? extends Task>> matcher) {
+        return new FeatureMatcher<Task, Iterable<? extends Task>>(matcher, "", "") {
+            @Override
+            protected Iterable<? extends Task> featureValueOf(Task actual) {
+                return actual.getShouldRunAfter().getDependencies(null);
             }
         };
     }
