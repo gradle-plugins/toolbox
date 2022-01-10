@@ -2,11 +2,9 @@ package dev.gradleplugins.internal;
 
 import dev.gradleplugins.*;
 import lombok.Getter;
-import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.Action;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
-import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.ModuleDependency;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
 import org.gradle.api.component.SoftwareComponent;
@@ -52,10 +50,10 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
     public GradlePluginDevelopmentTestSuiteInternal(String name, TaskContainer tasks, ObjectFactory objects, PluginManager pluginManager, ProviderFactory providers, Provider<String> minimumGradleVersion) {
         this.strategyFactory = new GradlePluginTestingStrategyFactoryInternal(minimumGradleVersion);
         this.name = name;
-        this.dependencies = getObjects().newInstance(Dependencies.class, name, getSourceSet(), pluginManager, minimumGradleVersion.orElse(GradleVersion.current().getVersion()).map(GradleRuntimeCompatibility::groovyVersionOf));
+        this.dependencies = getObjects().newInstance(Dependencies.class, getSourceSet(), pluginManager, minimumGradleVersion.orElse(GradleVersion.current().getVersion()).map(GradleRuntimeCompatibility::groovyVersionOf));
         StreamSupport.stream(getTasks().getCollectionSchema().getElements().spliterator(), false).filter(it -> it.getName().equals("pluginUnderTestMetadata")).findFirst().ifPresent(ignored -> {
             getTasks().named("pluginUnderTestMetadata", PluginUnderTestMetadata.class, task -> {
-                task.getPluginClasspath().from(dependencies.pluginUnderTestMetadata);
+                task.getPluginClasspath().from((Callable<Object>) dependencies::pluginUnderTestMetadata);
             });
         });
         this.testTaskActions.add(new RegisterTestingStrategyPropertyExtensionRule(objects));
@@ -136,7 +134,6 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         private final Provider<SourceSet> sourceSetProvider;
         private final PluginManager pluginManager;
         private final Provider<String> defaultGroovyVersion;
-        private final Configuration pluginUnderTestMetadata;
 
         @Inject
         protected abstract ConfigurationContainer getConfigurations();
@@ -148,12 +145,15 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
             return sourceSetProvider.get();
         }
 
+        private Configuration pluginUnderTestMetadata() {
+            return getConfigurations().maybeCreate(sourceSet().getName() + "PluginUnderTestMetadata");
+        }
+
         @Inject
-        public Dependencies(String name, Provider<SourceSet> sourceSetProvider, PluginManager pluginManager, Provider<String> defaultGroovyVersion) {
+        public Dependencies(Provider<SourceSet> sourceSetProvider, PluginManager pluginManager, Provider<String> defaultGroovyVersion) {
             this.sourceSetProvider = sourceSetProvider;
             this.pluginManager = pluginManager;
             this.defaultGroovyVersion = defaultGroovyVersion;
-            this.pluginUnderTestMetadata = getConfigurations().create(name + StringUtils.capitalize("pluginUnderTestMetadata"));
         }
 
         @Override
@@ -185,7 +185,7 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
 
         @Override
         public void pluginUnderTestMetadata(Object notation) {
-            getDependencies().add(pluginUnderTestMetadata.getName(), notation);
+            getDependencies().add(pluginUnderTestMetadata().getName(), notation);
         }
 
         @Override

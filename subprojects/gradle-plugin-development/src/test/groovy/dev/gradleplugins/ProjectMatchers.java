@@ -3,6 +3,7 @@ package dev.gradleplugins;
 import org.gradle.api.Named;
 import org.gradle.api.NamedDomainObjectCollectionSchema;
 import org.gradle.api.Task;
+import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.plugins.ExtensionAware;
@@ -43,6 +44,8 @@ public final class ProjectMatchers {
                     return ((SourceSet) actual).getName();
                 } else if (actual instanceof Task) {
                     return ((Task) actual).getName();
+                } else if (actual instanceof Configuration) {
+                    return ((Configuration) actual).getName();
                 }
                 throw new UnsupportedOperationException();
             }

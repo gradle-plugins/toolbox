@@ -49,4 +49,9 @@ class GradlePluginDevelopmentTestSuiteJavaBasePluginAppliedIntegrationTest {
         assertThat(subject.getSourceSet().get(), named("lope"));
         assertThat(sourceSets(project), not(hasItem(named("loke"))));
     }
+
+    @Test
+    void doesNotCreateDefaultSourceSetOnTestSuiteCreation() {
+        assertThat(sourceSets(project), not(hasItem(named("loke"))));
+    }
 }
