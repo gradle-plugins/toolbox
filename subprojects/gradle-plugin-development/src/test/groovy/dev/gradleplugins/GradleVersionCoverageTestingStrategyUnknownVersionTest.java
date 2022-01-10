@@ -51,7 +51,7 @@ class GradleVersionCoverageTestingStrategyUnknownVersionTest {
 
     @Test
     void throwsExceptionWhenCoverageForLatestMinorOfEachMajorWithUnknownMinimumVersion() {
-        final Throwable ex = assertThrows(IllegalArgumentException.class, () -> factory.getCoverageForLatestGlobalAvailableVersionOfEachMajorVersion().get());
+        final Throwable ex = assertThrows(IllegalArgumentException.class, () -> factory.getCoverageForLatestGlobalAvailableVersionOfEachSupportedMajorVersions().get());
         assertEquals("Unknown minimum Gradle version '2.5' for testing strategy.", ex.getMessage());
     }
 }

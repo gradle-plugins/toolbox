@@ -29,7 +29,7 @@ class GradlePluginTestingStrategyFactoryNoMinimumVersionTest {
 
     @Test
     void returnsAbsentProviderOnLatestGlobalAvailableVersionOfEachMajorVersion() {
-        assertThat(subject.getCoverageForLatestGlobalAvailableVersionOfEachMajorVersion(), absentProvider());
+        assertThat(subject.getCoverageForLatestGlobalAvailableVersionOfEachSupportedMajorVersions(), absentProvider());
     }
 
     @Test

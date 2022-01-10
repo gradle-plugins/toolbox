@@ -7,7 +7,6 @@ import org.gradle.api.provider.ProviderFactory;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.jupiter.api.Test;
 
@@ -36,7 +35,7 @@ class GradleVersionCoverageTestingStrategyLatestGlobalAvailableOfEachMajorVersio
             .version(globalAvailable("7.1"))
             .version(current(globalAvailable("7.2")))
             .build()));
-    private final Provider<Set<GradleVersionCoverageTestingStrategy>> subject = factory.getCoverageForLatestGlobalAvailableVersionOfEachMajorVersion();
+    private final Provider<Set<GradleVersionCoverageTestingStrategy>> subject = factory.getCoverageForLatestGlobalAvailableVersionOfEachSupportedMajorVersions();
 
     @Test
     void doesNotContainsLatestMinorOfMajorVersionPriorToMinimumVersion() {

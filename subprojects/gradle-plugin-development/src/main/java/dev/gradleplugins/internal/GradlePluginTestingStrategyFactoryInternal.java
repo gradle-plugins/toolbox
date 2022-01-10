@@ -34,7 +34,7 @@ public final class GradlePluginTestingStrategyFactoryInternal implements GradleP
     }
 
     @Override
-    public Provider<Set<GradleVersionCoverageTestingStrategy>> getCoverageForLatestGlobalAvailableVersionOfEachMajorVersion() {
+    public Provider<Set<GradleVersionCoverageTestingStrategy>> getCoverageForLatestGlobalAvailableVersionOfEachSupportedMajorVersions() {
         return minimumVersion.map(version -> {
             assertKnownMinimumVersion(version);
             val minimumMajorVersion = VersionNumber.parse(version).getMajor();

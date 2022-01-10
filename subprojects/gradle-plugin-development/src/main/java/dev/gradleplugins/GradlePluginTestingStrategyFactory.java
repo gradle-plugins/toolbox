@@ -29,7 +29,7 @@ public interface GradlePluginTestingStrategyFactory {
      *
      * @return a set of {@link GradlePluginTestingStrategy} instance for the latest Gradle GA version of each major version above minimum supported version, never null
      */
-    Provider<Set<GradleVersionCoverageTestingStrategy>> getCoverageForLatestGlobalAvailableVersionOfEachMajorVersion();
+    Provider<Set<GradleVersionCoverageTestingStrategy>> getCoverageForLatestGlobalAvailableVersionOfEachSupportedMajorVersions();
 
     /**
      * Returns a testing strategy which will cover the latest Gradle released version.
