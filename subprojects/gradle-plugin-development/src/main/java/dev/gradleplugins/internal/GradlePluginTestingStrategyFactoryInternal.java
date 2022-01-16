@@ -80,6 +80,12 @@ public final class GradlePluginTestingStrategyFactoryInternal implements GradleP
     }
 
     private abstract class AbstractGradleVersionCoverageTestingStrategy implements GradlePluginTestingStrategyInternal, GradleVersionCoverageTestingStrategy {
+        private final String name;
+
+        AbstractGradleVersionCoverageTestingStrategy(String name) {
+            this.name = name;
+        }
+
         @Override
         public boolean isLatestGlobalAvailable() {
             return releasedVersions.getMostRecentRelease().getVersion().equals(getVersion());
@@ -88,6 +94,11 @@ public final class GradlePluginTestingStrategyFactoryInternal implements GradleP
         @Override
         public boolean isLatestNightly() {
             return getVersion().contains("-") && releasedVersions.getMostRecentSnapshot().getVersion().equals(getVersion());
+        }
+
+        @Override
+        public String getName() {
+            return name;
         }
 
         @Override
@@ -113,9 +124,8 @@ public final class GradlePluginTestingStrategyFactoryInternal implements GradleP
     }
 
     private final class MinimumGradleVersionCoverageTestingStrategy extends AbstractGradleVersionCoverageTestingStrategy {
-        @Override
-        public String getName() {
-            return MINIMUM_GRADLE;
+        MinimumGradleVersionCoverageTestingStrategy() {
+            super(MINIMUM_GRADLE);
         }
 
         @Override
@@ -127,9 +137,8 @@ public final class GradlePluginTestingStrategyFactoryInternal implements GradleP
     }
 
     private final class LatestNightlyGradleVersionCoverageTestingStrategy extends AbstractGradleVersionCoverageTestingStrategy {
-        @Override
-        public String getName() {
-            return LATEST_NIGHTLY;
+        LatestNightlyGradleVersionCoverageTestingStrategy() {
+            super(LATEST_NIGHTLY);
         }
 
         @Override
@@ -140,14 +149,13 @@ public final class GradlePluginTestingStrategyFactoryInternal implements GradleP
 
     private final class LatestGlobalAvailableGradleVersionCoverageTestingStrategy extends AbstractGradleVersionCoverageTestingStrategy {
 
-        @Override
-        public String getVersion() {
-            return releasedVersions.getMostRecentRelease().getVersion();
+        LatestGlobalAvailableGradleVersionCoverageTestingStrategy() {
+            super(LATEST_GLOBAL_AVAILABLE);
         }
 
         @Override
-        public String getName() {
-            return LATEST_GLOBAL_AVAILABLE;
+        public String getVersion() {
+            return releasedVersions.getMostRecentRelease().getVersion();
         }
     }
 
@@ -155,16 +163,12 @@ public final class GradlePluginTestingStrategyFactoryInternal implements GradleP
         private final String version;
 
         private AdhocGradleVersionCoverageTestingStrategy(String version) {
+            super(version);
             this.version = version;
         }
 
         @Override
         public String getVersion() {
-            return version;
-        }
-
-        @Override
-        public String getName() {
             return version;
         }
     }
