@@ -7,6 +7,7 @@ import org.gradle.api.provider.Provider;
 import org.gradle.util.VersionNumber;
 
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public final class GradlePluginTestingStrategyFactoryInternal implements GradlePluginTestingStrategyFactory {
@@ -81,9 +82,11 @@ public final class GradlePluginTestingStrategyFactoryInternal implements GradleP
 
     private abstract class AbstractGradleVersionCoverageTestingStrategy implements GradlePluginTestingStrategyInternal, GradleVersionCoverageTestingStrategy {
         private final String name;
+        private final Supplier<String> versionSupplier;
 
-        AbstractGradleVersionCoverageTestingStrategy(String name) {
+        AbstractGradleVersionCoverageTestingStrategy(String name, Supplier<String> versionSupplier) {
             this.name = name;
+            this.versionSupplier = versionSupplier;
         }
 
         @Override
@@ -99,6 +102,11 @@ public final class GradlePluginTestingStrategyFactoryInternal implements GradleP
         @Override
         public String getName() {
             return name;
+        }
+
+        @Override
+        public String getVersion() {
+            return versionSupplier.get();
         }
 
         @Override
@@ -125,51 +133,30 @@ public final class GradlePluginTestingStrategyFactoryInternal implements GradleP
 
     private final class MinimumGradleVersionCoverageTestingStrategy extends AbstractGradleVersionCoverageTestingStrategy {
         MinimumGradleVersionCoverageTestingStrategy() {
-            super(MINIMUM_GRADLE);
-        }
-
-        @Override
-        public String getVersion() {
-            val result = minimumVersion.get();
-            assertKnownMinimumVersion(result);
-            return result;
+            super(MINIMUM_GRADLE, () -> {
+                val result = minimumVersion.get();
+                assertKnownMinimumVersion(result);
+                return result;
+            });
         }
     }
 
     private final class LatestNightlyGradleVersionCoverageTestingStrategy extends AbstractGradleVersionCoverageTestingStrategy {
         LatestNightlyGradleVersionCoverageTestingStrategy() {
-            super(LATEST_NIGHTLY);
-        }
-
-        @Override
-        public String getVersion() {
-            return releasedVersions.getMostRecentSnapshot().getVersion();
+            super(LATEST_NIGHTLY, () -> releasedVersions.getMostRecentSnapshot().getVersion());
         }
     }
 
     private final class LatestGlobalAvailableGradleVersionCoverageTestingStrategy extends AbstractGradleVersionCoverageTestingStrategy {
 
         LatestGlobalAvailableGradleVersionCoverageTestingStrategy() {
-            super(LATEST_GLOBAL_AVAILABLE);
-        }
-
-        @Override
-        public String getVersion() {
-            return releasedVersions.getMostRecentRelease().getVersion();
+            super(LATEST_GLOBAL_AVAILABLE, () -> releasedVersions.getMostRecentRelease().getVersion());
         }
     }
 
     private final class AdhocGradleVersionCoverageTestingStrategy extends AbstractGradleVersionCoverageTestingStrategy {
-        private final String version;
-
         private AdhocGradleVersionCoverageTestingStrategy(String version) {
-            super(version);
-            this.version = version;
-        }
-
-        @Override
-        public String getVersion() {
-            return version;
+            super(version, () -> version);
         }
     }
 }
