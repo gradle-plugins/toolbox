@@ -1,9 +1,8 @@
 package dev.gradleplugins.internal;
 
 import dev.gradleplugins.GradlePluginTestingStrategy;
-import org.gradle.api.Named;
 
-public interface GradlePluginTestingStrategyInternal extends GradlePluginTestingStrategy, Named {
+public interface GradlePluginTestingStrategyInternal extends GradlePluginTestingStrategy {
     String MINIMUM_GRADLE = "minimumGradle";
     String LATEST_NIGHTLY = "latestNightly";
     String LATEST_GLOBAL_AVAILABLE = "latestGlobalAvailable";
