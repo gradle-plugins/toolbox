@@ -136,16 +136,6 @@ public final class GradlePluginTestingStrategyFactoryInternal implements GradleP
         public String getVersion() {
             return releasedVersions.getMostRecentSnapshot().getVersion();
         }
-
-        @Override
-        public boolean isLatestGlobalAvailable() {
-            return false;
-        }
-
-        @Override
-        public boolean isLatestNightly() {
-            return true;
-        }
     }
 
     private final class LatestGlobalAvailableGradleVersionCoverageTestingStrategy extends AbstractGradleVersionCoverageTestingStrategy {
@@ -153,16 +143,6 @@ public final class GradlePluginTestingStrategyFactoryInternal implements GradleP
         @Override
         public String getVersion() {
             return releasedVersions.getMostRecentRelease().getVersion();
-        }
-
-        @Override
-        public boolean isLatestGlobalAvailable() {
-            return true;
-        }
-
-        @Override
-        public boolean isLatestNightly() {
-            return false;
         }
 
         @Override
