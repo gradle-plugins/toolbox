@@ -45,4 +45,16 @@ public interface GradlePluginTestingStrategyFactory {
      * @return a {@link GradlePluginTestingStrategy} instance for the specified Gradle version, never null
      */
     GradleVersionCoverageTestingStrategy coverageForGradleVersion(String version);
+
+    /**
+     * Returns a testing strategy composed of multiple distinct testing strategies.
+     * A testing strategy is deemed distinct if it isn't equal to any other strategy as well as not the same type.
+     * For example, composing a testing strategy of multiple Gradle version coverage is illegal.
+     *
+     * @param firstStrategy  the first strategy of the composition, must not be null
+     * @param secondStrategy  the second strategy of the composition, must not be null
+     * @param otherStrategies  the other strategies of the composition, must not be null
+     * @return a composite testing strategy, never null
+     */
+    CompositeGradlePluginTestingStrategy composite(GradlePluginTestingStrategy firstStrategy, GradlePluginTestingStrategy secondStrategy, GradlePluginTestingStrategy... otherStrategies);
 }

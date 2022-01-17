@@ -1,5 +1,6 @@
 package dev.gradleplugins.internal;
 
+import dev.gradleplugins.CompositeGradlePluginTestingStrategy;
 import dev.gradleplugins.GradlePluginTestingStrategy;
 import dev.gradleplugins.GradleVersionCoverageTestingStrategy;
 import org.apache.commons.lang3.StringUtils;
@@ -13,6 +14,9 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin;
 import org.gradle.util.GUtil;
 
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static dev.gradleplugins.internal.util.TestingStrategyPropertyUtils.testingStrategy;
 import static java.util.Collections.emptyList;
@@ -38,12 +42,12 @@ final class CreateTestTasksFromTestingStrategiesRule implements Action<GradlePlu
         } else if (strategies.size() == 1) {
             TaskProvider<Test> testTask = createTestTask(testSuite);
             testTask.configure(applyTestActions(testSuite));
-            testTask.configure(configureTestingStrategy(testSuite, (GradlePluginTestingStrategyInternal) strategies.iterator().next()));
+            testTask.configure(configureTestingStrategy(testSuite, strategies.iterator().next()));
         } else {
             for (GradlePluginTestingStrategy strategy : strategies) {
-                TaskProvider<Test> testTask = createTestTask(testSuite, ((GradlePluginTestingStrategyInternal)strategy).getName());
+                TaskProvider<Test> testTask = createTestTask(testSuite, strategy.getName());
                 testTask.configure(applyTestActions(testSuite));
-                testTask.configure(configureTestingStrategy(testSuite, (GradlePluginTestingStrategyInternal) strategy));
+                testTask.configure(configureTestingStrategy(testSuite, strategy));
             }
         }
     }
@@ -56,15 +60,36 @@ final class CreateTestTasksFromTestingStrategiesRule implements Action<GradlePlu
         };
     }
 
-    private Action<Test> configureTestingStrategy(GradlePluginDevelopmentTestSuiteInternal testSuite, GradlePluginTestingStrategyInternal strategy) {
+    private Action<Test> configureTestingStrategy(GradlePluginDevelopmentTestSuiteInternal testSuite, GradlePluginTestingStrategy strategy) {
         return task -> {
-            if (!(strategy instanceof GradleVersionCoverageTestingStrategy)) {
-                throw new RuntimeException("Unknown testing strategy");
-            }
-            String version = ((GradleVersionCoverageTestingStrategy) strategy).getVersion();
-            task.systemProperty("dev.gradleplugins.defaultGradleVersion", version);
+            Stream.of(strategy)
+                    .flatMap(this::unpackCompositeTestingStrategy)
+                    .flatMap(this::onlyCoverageTestingStrategy)
+                    .map(GradleVersionCoverageTestingStrategy::getVersion)
+                    .findFirst()
+                    .ifPresent(setDefaultGradleVersionSystemProperty(task));
             testingStrategy(task).set(strategy);
         };
+    }
+
+    private static Consumer<String> setDefaultGradleVersionSystemProperty(Test task) {
+        return version -> task.systemProperty("dev.gradleplugins.defaultGradleVersion", version);
+    }
+
+    private Stream<GradleVersionCoverageTestingStrategy> onlyCoverageTestingStrategy(GradlePluginTestingStrategy strategy) {
+        if (strategy instanceof GradleVersionCoverageTestingStrategy) {
+            return Stream.of((GradleVersionCoverageTestingStrategy) strategy);
+        } else {
+            return Stream.empty();
+        }
+    }
+
+    private Stream<GradlePluginTestingStrategy> unpackCompositeTestingStrategy(GradlePluginTestingStrategy strategy) {
+        if (strategy instanceof CompositeGradlePluginTestingStrategy) {
+            return StreamSupport.stream(((CompositeGradlePluginTestingStrategy) strategy).spliterator(), false);
+        } else {
+            return Stream.of(strategy);
+        }
     }
 
     private TaskProvider<Test> createTestTask(GradlePluginDevelopmentTestSuiteInternal testSuite) {

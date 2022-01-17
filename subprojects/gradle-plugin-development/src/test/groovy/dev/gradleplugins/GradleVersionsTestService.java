@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -36,6 +37,10 @@ public final class GradleVersionsTestService implements GradleVersionsService {
     @Override
     public InputStream all() throws IOException {
         return new ByteArrayInputStream(new Gson().toJson(releases).getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static GradleVersionsTestService empty() {
+        return new GradleVersionsTestService(Collections.emptyList());
     }
 
     public static Builder builder() {

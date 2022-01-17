@@ -29,6 +29,7 @@ final class DefaultGradlePluginDevelopmentRepositoryExtension implements GradleP
 
                 // Groovy 3+ transitive dependencies
                 content.includeModule("com.github.javaparser", "javaparser-core");
+                content.includeModule("com.github.javaparser", "javaparser-parent");
                 content.includeModule("org.junit", "junit-bom");
             });
             action.execute(repository);

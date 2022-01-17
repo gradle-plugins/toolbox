@@ -1,13 +1,23 @@
 package dev.gradleplugins.internal;
 
+import dev.gradleplugins.CompositeGradlePluginTestingStrategy;
+import dev.gradleplugins.GradlePluginTestingStrategy;
 import dev.gradleplugins.GradlePluginTestingStrategyFactory;
 import dev.gradleplugins.GradleVersionCoverageTestingStrategy;
+import lombok.EqualsAndHashCode;
 import lombok.val;
+import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.provider.Provider;
 import org.gradle.util.VersionNumber;
 
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+import static dev.gradleplugins.internal.GradlePluginTestingStrategyInternal.*;
 
 public final class GradlePluginTestingStrategyFactoryInternal implements GradlePluginTestingStrategyFactory {
     private static final ReleasedVersionDistributions GRADLE_DISTRIBUTIONS = new ReleasedVersionDistributions();
@@ -25,12 +35,16 @@ public final class GradlePluginTestingStrategyFactoryInternal implements GradleP
 
     @Override
     public GradleVersionCoverageTestingStrategy getCoverageForMinimumVersion() {
-        return new MinimumGradleVersionCoverageTestingStrategy();
+        return new DefaultGradleVersionCoverageTestingStrategy(MINIMUM_GRADLE, () -> {
+            val result = minimumVersion.get();
+            assertKnownMinimumVersion(result);
+            return result;
+        });
     }
 
     @Override
     public GradleVersionCoverageTestingStrategy getCoverageForLatestNightlyVersion() {
-        return new LatestNightlyGradleVersionCoverageTestingStrategy();
+        return new DefaultGradleVersionCoverageTestingStrategy(LATEST_NIGHTLY, () -> releasedVersions.getMostRecentSnapshot().getVersion());
     }
 
     @Override
@@ -58,7 +72,7 @@ public final class GradlePluginTestingStrategyFactoryInternal implements GradleP
 
     @Override
     public GradleVersionCoverageTestingStrategy getCoverageForLatestGlobalAvailableVersion() {
-        return new LatestGlobalAvailableGradleVersionCoverageTestingStrategy();
+        return new DefaultGradleVersionCoverageTestingStrategy(LATEST_GLOBAL_AVAILABLE, () -> releasedVersions.getMostRecentRelease().getVersion());
     }
 
     @Override
@@ -66,7 +80,44 @@ public final class GradlePluginTestingStrategyFactoryInternal implements GradleP
         if (!isKnownVersion(version)) {
             throw new IllegalArgumentException(String.format("Unknown Gradle version '%s' for adhoc testing strategy.", version));
         }
-        return new AdhocGradleVersionCoverageTestingStrategy(version);
+        return new DefaultGradleVersionCoverageTestingStrategy(version, () -> version);
+    }
+
+    @Override
+    public CompositeGradlePluginTestingStrategy composite(GradlePluginTestingStrategy firstStrategy, GradlePluginTestingStrategy secondStrategy, GradlePluginTestingStrategy... otherStrategies) {
+        List<GradlePluginTestingStrategy> strategies = Stream.concat(Stream.of(firstStrategy, secondStrategy), Arrays.stream(otherStrategies))
+                .peek(Objects::requireNonNull)
+                .peek(assertNoCompositeStrategies())
+                .peek(assertNoDuplicatedStrategies())
+                .peek(assertNoDuplicatedStrategyTypes())
+                .collect(Collectors.toList());
+        return new DefaultCompositeGradlePluginTestingStrategy(strategies);
+    }
+
+    private static Consumer<GradlePluginTestingStrategy> assertNoCompositeStrategies() {
+        return strategy -> {
+            if (strategy instanceof CompositeGradlePluginTestingStrategy) {
+                throw new IllegalArgumentException("Unable to compose testing strategy from composite testing strategies.");
+            }
+        };
+    }
+
+    private static Consumer<GradlePluginTestingStrategy> assertNoDuplicatedStrategies() {
+        Set<GradlePluginTestingStrategy> strategyHashes = new HashSet<>();
+        return strategy -> {
+            if (!strategyHashes.add(strategy)) {
+                throw new IllegalArgumentException(String.format("Unable to compose testing strategy with multiple %s instances.", strategy.toString()));
+            }
+        };
+    }
+
+    private static Consumer<GradlePluginTestingStrategy> assertNoDuplicatedStrategyTypes() {
+        Set<Class<?>> strategyTypes = new HashSet<>();
+        return strategy -> {
+            if (!strategyTypes.add(strategy.getClass())) {
+                throw new IllegalArgumentException(String.format("Unable to compose testing strategy with multiple %s type.", strategy.getClass().getSimpleName()));
+            }
+        };
     }
 
     private boolean isKnownVersion(String version) {
@@ -79,7 +130,15 @@ public final class GradlePluginTestingStrategyFactoryInternal implements GradleP
         }
     }
 
-    private abstract class AbstractGradleVersionCoverageTestingStrategy implements GradlePluginTestingStrategyInternal, GradleVersionCoverageTestingStrategy {
+    private final class DefaultGradleVersionCoverageTestingStrategy implements GradlePluginTestingStrategyInternal, GradleVersionCoverageTestingStrategy {
+        private final String name;
+        private final Supplier<String> versionSupplier;
+
+        DefaultGradleVersionCoverageTestingStrategy(String name, Supplier<String> versionSupplier) {
+            this.name = name;
+            this.versionSupplier = versionSupplier;
+        }
+
         @Override
         public boolean isLatestGlobalAvailable() {
             return releasedVersions.getMostRecentRelease().getVersion().equals(getVersion());
@@ -91,13 +150,23 @@ public final class GradlePluginTestingStrategyFactoryInternal implements GradleP
         }
 
         @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String getVersion() {
+            return versionSupplier.get();
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (this == o) {
                 return true;
-            } else if (!(o instanceof AbstractGradleVersionCoverageTestingStrategy)) {
+            } else if (!(o instanceof DefaultGradleVersionCoverageTestingStrategy)) {
                 return false;
             }
-            AbstractGradleVersionCoverageTestingStrategy that = (AbstractGradleVersionCoverageTestingStrategy) o;
+            DefaultGradleVersionCoverageTestingStrategy that = (DefaultGradleVersionCoverageTestingStrategy) o;
             return Objects.equals(getVersion(), that.getVersion());// && Objects.equals(getName(), that.getName());
         }
 
@@ -112,80 +181,31 @@ public final class GradlePluginTestingStrategyFactoryInternal implements GradleP
         }
     }
 
-    private final class MinimumGradleVersionCoverageTestingStrategy extends AbstractGradleVersionCoverageTestingStrategy {
-        @Override
-        public String getName() {
-            return MINIMUM_GRADLE;
+    @EqualsAndHashCode
+    private static final class DefaultCompositeGradlePluginTestingStrategy implements CompositeGradlePluginTestingStrategy {
+        private final Iterable<GradlePluginTestingStrategy> strategies;
+        @EqualsAndHashCode.Exclude private final String name;
+
+        private DefaultCompositeGradlePluginTestingStrategy(Iterable<GradlePluginTestingStrategy> strategies) {
+            this.strategies = strategies;
+            this.name = StringUtils.uncapitalize(StreamSupport.stream(strategies.spliterator(), false).map(it -> {
+                return StringUtils.capitalize(it.getName());
+            }).collect(Collectors.joining()));
         }
 
         @Override
-        public String getVersion() {
-            val result = minimumVersion.get();
-            assertKnownMinimumVersion(result);
-            return result;
-        }
-    }
-
-    private final class LatestNightlyGradleVersionCoverageTestingStrategy extends AbstractGradleVersionCoverageTestingStrategy {
-        @Override
-        public String getName() {
-            return LATEST_NIGHTLY;
-        }
-
-        @Override
-        public String getVersion() {
-            return releasedVersions.getMostRecentSnapshot().getVersion();
-        }
-
-        @Override
-        public boolean isLatestGlobalAvailable() {
-            return false;
-        }
-
-        @Override
-        public boolean isLatestNightly() {
-            return true;
-        }
-    }
-
-    private final class LatestGlobalAvailableGradleVersionCoverageTestingStrategy extends AbstractGradleVersionCoverageTestingStrategy {
-
-        @Override
-        public String getVersion() {
-            return releasedVersions.getMostRecentRelease().getVersion();
-        }
-
-        @Override
-        public boolean isLatestGlobalAvailable() {
-            return true;
-        }
-
-        @Override
-        public boolean isLatestNightly() {
-            return false;
+        public Iterator<GradlePluginTestingStrategy> iterator() {
+            return strategies.iterator();
         }
 
         @Override
         public String getName() {
-            return LATEST_GLOBAL_AVAILABLE;
-        }
-    }
-
-    private final class AdhocGradleVersionCoverageTestingStrategy extends AbstractGradleVersionCoverageTestingStrategy {
-        private final String version;
-
-        private AdhocGradleVersionCoverageTestingStrategy(String version) {
-            this.version = version;
+            return name;
         }
 
         @Override
-        public String getVersion() {
-            return version;
-        }
-
-        @Override
-        public String getName() {
-            return version;
+        public String toString() {
+            return "strategy composed of <" + StreamSupport.stream(strategies.spliterator(), false).map(Object::toString).collect(Collectors.joining(", ")) + ">";
         }
     }
 }
