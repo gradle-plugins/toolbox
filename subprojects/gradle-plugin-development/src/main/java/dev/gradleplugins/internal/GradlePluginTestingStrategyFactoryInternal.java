@@ -1,14 +1,21 @@
 package dev.gradleplugins.internal;
 
+import dev.gradleplugins.CompositeGradlePluginTestingStrategy;
+import dev.gradleplugins.GradlePluginTestingStrategy;
 import dev.gradleplugins.GradlePluginTestingStrategyFactory;
 import dev.gradleplugins.GradleVersionCoverageTestingStrategy;
+import lombok.EqualsAndHashCode;
 import lombok.val;
+import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.provider.Provider;
 import org.gradle.util.VersionNumber;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static dev.gradleplugins.internal.GradlePluginTestingStrategyInternal.*;
 
@@ -76,6 +83,43 @@ public final class GradlePluginTestingStrategyFactoryInternal implements GradleP
         return new DefaultGradleVersionCoverageTestingStrategy(version, () -> version);
     }
 
+    @Override
+    public CompositeGradlePluginTestingStrategy composite(GradlePluginTestingStrategy firstStrategy, GradlePluginTestingStrategy secondStrategy, GradlePluginTestingStrategy... otherStrategies) {
+        List<GradlePluginTestingStrategy> strategies = Stream.concat(Stream.of(firstStrategy, secondStrategy), Arrays.stream(otherStrategies))
+                .peek(Objects::requireNonNull)
+                .peek(assertNoCompositeStrategies())
+                .peek(assertNoDuplicatedStrategies())
+                .peek(assertNoDuplicatedStrategyTypes())
+                .collect(Collectors.toList());
+        return new DefaultCompositeGradlePluginTestingStrategy(strategies);
+    }
+
+    private static Consumer<GradlePluginTestingStrategy> assertNoCompositeStrategies() {
+        return strategy -> {
+            if (strategy instanceof CompositeGradlePluginTestingStrategy) {
+                throw new IllegalArgumentException("Unable to compose testing strategy from composite testing strategies.");
+            }
+        };
+    }
+
+    private static Consumer<GradlePluginTestingStrategy> assertNoDuplicatedStrategies() {
+        Set<GradlePluginTestingStrategy> strategyHashes = new HashSet<>();
+        return strategy -> {
+            if (!strategyHashes.add(strategy)) {
+                throw new IllegalArgumentException(String.format("Unable to compose testing strategy with multiple %s instances.", strategy.toString()));
+            }
+        };
+    }
+
+    private static Consumer<GradlePluginTestingStrategy> assertNoDuplicatedStrategyTypes() {
+        Set<Class<?>> strategyTypes = new HashSet<>();
+        return strategy -> {
+            if (!strategyTypes.add(strategy.getClass())) {
+                throw new IllegalArgumentException(String.format("Unable to compose testing strategy with multiple %s type.", strategy.getClass().getSimpleName()));
+            }
+        };
+    }
+
     private boolean isKnownVersion(String version) {
         return releasedVersions.getAllVersions().stream().anyMatch(it -> it.getVersion().equals(version));
     }
@@ -137,4 +181,31 @@ public final class GradlePluginTestingStrategyFactoryInternal implements GradleP
         }
     }
 
+    @EqualsAndHashCode
+    private static final class DefaultCompositeGradlePluginTestingStrategy implements CompositeGradlePluginTestingStrategy {
+        private final Iterable<GradlePluginTestingStrategy> strategies;
+        @EqualsAndHashCode.Exclude private final String name;
+
+        private DefaultCompositeGradlePluginTestingStrategy(Iterable<GradlePluginTestingStrategy> strategies) {
+            this.strategies = strategies;
+            this.name = StringUtils.uncapitalize(StreamSupport.stream(strategies.spliterator(), false).map(it -> {
+                return StringUtils.capitalize(it.getName());
+            }).collect(Collectors.joining()));
+        }
+
+        @Override
+        public Iterator<GradlePluginTestingStrategy> iterator() {
+            return strategies.iterator();
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String toString() {
+            return "strategy composed of <" + StreamSupport.stream(strategies.spliterator(), false).map(Object::toString).collect(Collectors.joining(", ")) + ">";
+        }
+    }
 }
