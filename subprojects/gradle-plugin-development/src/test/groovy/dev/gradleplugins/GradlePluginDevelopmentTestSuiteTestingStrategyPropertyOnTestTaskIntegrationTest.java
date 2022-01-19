@@ -1,5 +1,6 @@
 package dev.gradleplugins;
 
+import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.provider.Property;
 import org.gradle.api.reflect.TypeOf;
@@ -8,13 +9,20 @@ import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 import static dev.gradleplugins.ProjectMatchers.*;
 import static dev.gradleplugins.internal.util.TestingStrategyPropertyUtils.testingStrategy;
+import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasItem;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class GradlePluginDevelopmentTestSuiteTestingStrategyPropertyOnTestTaskIntegrationTest {
     private static final TypeOf<Property<GradlePluginTestingStrategy>> PROPERTY_TYPE = new TypeOf<Property<GradlePluginTestingStrategy>>() {};
@@ -62,5 +70,31 @@ class GradlePluginDevelopmentTestSuiteTestingStrategyPropertyOnTestTaskIntegrati
                 return testingStrategy(actual).getOrNull();
             }
         };
+    }
+
+    @Test
+    void canReadTestingStrategyFromConfigureEachActionWithMultipleStrategies() {
+        MockAction<org.gradle.api.tasks.testing.Test> action = new MockAction<>(task -> assertThat(testingStrategy(task), presentProvider()));
+        subject.getTestTasks().configureEach(action);
+        assertDoesNotThrow(() -> subject.getTestTasks().getElements().get());
+        assertEquals(3, action.getCalledCount());
+    }
+
+    @Test
+    void canReadTestingStrategyFromConfigureEachActionWithSingleStrategy() {
+        subject.getTestingStrategies().set(singletonList(subject.getStrategies().coverageForGradleVersion("6.7")));
+        MockAction<org.gradle.api.tasks.testing.Test> action = new MockAction<>(task -> assertThat(testingStrategy(task), presentProvider()));
+        subject.getTestTasks().configureEach(action);
+        assertDoesNotThrow(() -> subject.getTestTasks().getElements().get());
+        assertEquals(1, action.getCalledCount());
+    }
+
+    @Test
+    void hasAbsentTestingStrategyFromConfigureEachActionWithoutStrategies() {
+        subject.getTestingStrategies().empty();
+        MockAction<org.gradle.api.tasks.testing.Test> action = new MockAction<>(task -> assertThat(testingStrategy(task), absentProvider()));
+        subject.getTestTasks().configureEach(action);
+        assertDoesNotThrow(() -> subject.getTestTasks().getElements().get());
+        assertEquals(1, action.getCalledCount());
     }
 }

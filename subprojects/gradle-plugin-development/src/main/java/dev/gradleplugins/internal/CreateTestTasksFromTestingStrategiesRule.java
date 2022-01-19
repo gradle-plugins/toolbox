@@ -38,16 +38,19 @@ final class CreateTestTasksFromTestingStrategiesRule implements Action<GradlePlu
         Set<GradlePluginTestingStrategy> strategies = testSuite.getTestingStrategies().get();
         if (strategies.isEmpty()) {
             TaskProvider<Test> testTask = createTestTask(testSuite);
+            testTask.configure(new RegisterTestingStrategyPropertyExtensionRule(objects));
             testTask.configure(applyTestActions(testSuite));
         } else if (strategies.size() == 1) {
             TaskProvider<Test> testTask = createTestTask(testSuite);
-            testTask.configure(applyTestActions(testSuite));
+            testTask.configure(new RegisterTestingStrategyPropertyExtensionRule(objects));
             testTask.configure(configureTestingStrategy(testSuite, strategies.iterator().next()));
+            testTask.configure(applyTestActions(testSuite));
         } else {
             for (GradlePluginTestingStrategy strategy : strategies) {
                 TaskProvider<Test> testTask = createTestTask(testSuite, strategy.getName());
-                testTask.configure(applyTestActions(testSuite));
+                testTask.configure(new RegisterTestingStrategyPropertyExtensionRule(objects));
                 testTask.configure(configureTestingStrategy(testSuite, strategy));
+                testTask.configure(applyTestActions(testSuite));
             }
         }
     }
