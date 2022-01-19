@@ -4,11 +4,14 @@ import org.gradle.api.Project;
 import org.gradle.api.provider.Property;
 import org.gradle.api.reflect.TypeOf;
 import org.gradle.testfixtures.ProjectBuilder;
+import org.hamcrest.FeatureMatcher;
+import org.hamcrest.Matcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static dev.gradleplugins.ProjectMatchers.*;
 import static dev.gradleplugins.internal.util.TestingStrategyPropertyUtils.testingStrategy;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasItem;
@@ -23,26 +26,41 @@ class GradlePluginDevelopmentTestSuiteTestingStrategyPropertyOnTestTaskIntegrati
     void setup() {
         project.getPluginManager().apply("java-base");
         subject.getTestingStrategies().addAll(subject.getStrategies().coverageForGradleVersion("6.5"), subject.getStrategies().coverageForGradleVersion("6.6"), subject.getStrategies().coverageForGradleVersion("6.9"));
-        subject.finalizeComponent();
     }
 
     @Test
     void hasTestingStrategyPropertyExtensionOnEachTestSuiteTestTask() {
-        assertThat(project.getTasks().getByName("boat6.5"),
-                extensions(hasItem(allOf(named("testingStrategy"), publicType(PROPERTY_TYPE)))));
-        assertThat(project.getTasks().getByName("boat6.6"),
-                extensions(hasItem(allOf(named("testingStrategy"), publicType(PROPERTY_TYPE)))));
-        assertThat(project.getTasks().getByName("boat6.9"),
-                extensions(hasItem(allOf(named("testingStrategy"), publicType(PROPERTY_TYPE)))));
+        assertThat(subject.getTestTasks().getElements(),
+                providerOf(hasItem(allOf(named("boat6.5"), hasTestingStrategyProperty()))));
+        assertThat(subject.getTestTasks().getElements(),
+                providerOf(hasItem(allOf(named("boat6.6"), hasTestingStrategyProperty()))));
+        assertThat(subject.getTestTasks().getElements(),
+                providerOf(hasItem(allOf(named("boat6.9"), hasTestingStrategyProperty()))));
+    }
+
+    private static <T> Matcher<T> hasTestingStrategyProperty() {
+        return extensions(hasItem(allOf(named("testingStrategy"), publicType(PROPERTY_TYPE))));
     }
 
     @Test
     void hasCorrespondingTestingStrategyPropertyValue() {
-        assertThat(testingStrategy(project.getTasks().getByName("boat6.5")),
-                providerOf(subject.getStrategies().coverageForGradleVersion("6.5")));
-        assertThat(testingStrategy(project.getTasks().getByName("boat6.6")),
-                providerOf(subject.getStrategies().coverageForGradleVersion("6.6")));
-        assertThat(testingStrategy(project.getTasks().getByName("boat6.9")),
-                providerOf(subject.getStrategies().coverageForGradleVersion("6.9")));
+        assertThat(subject.getTestTasks().getElements(),
+                providerOf(hasItem(allOf(named("boat6.5"),
+                        testingStrategyOf(subject.getStrategies().coverageForGradleVersion("6.5"))))));
+        assertThat(subject.getTestTasks().getElements(),
+                providerOf(hasItem(allOf(named("boat6.6"),
+                        testingStrategyOf(subject.getStrategies().coverageForGradleVersion("6.6"))))));
+        assertThat(subject.getTestTasks().getElements(),
+                providerOf(hasItem(allOf(named("boat6.9"),
+                        testingStrategyOf(subject.getStrategies().coverageForGradleVersion("6.9"))))));
+    }
+
+    private static Matcher<org.gradle.api.tasks.testing.Test> testingStrategyOf(GradlePluginTestingStrategy instance) {
+        return new FeatureMatcher<org.gradle.api.tasks.testing.Test, GradlePluginTestingStrategy>(equalTo(instance), "", "") {
+            @Override
+            protected GradlePluginTestingStrategy featureValueOf(org.gradle.api.tasks.testing.Test actual) {
+                return testingStrategy(actual).getOrNull();
+            }
+        };
     }
 }
