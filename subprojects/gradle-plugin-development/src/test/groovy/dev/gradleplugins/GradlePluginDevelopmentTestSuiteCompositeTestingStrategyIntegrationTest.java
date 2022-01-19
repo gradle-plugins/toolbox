@@ -31,7 +31,6 @@ class GradlePluginDevelopmentTestSuiteCompositeTestingStrategyIntegrationTest {
         project.getPluginManager().apply("java-base");
         subject.getTestingStrategies().add(firstStrategy);
         subject.getTestingStrategies().add(secondStrategy);
-        subject.finalizeComponent();
     }
 
     @Test

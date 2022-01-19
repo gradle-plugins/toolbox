@@ -23,5 +23,7 @@ class JavaGradlePluginWellBehavePluginTest extends WellBehavedPluginTest {
 
 
     private static final Set<String> PUBLISH_PLUGIN_REALIZED_TASKS = [':login', ':publishPlugins', ':publishPluginJar', ':publishPluginJavaDocsJar', ':javadoc', ':jar']
-    Set<String> realizedTaskPaths = PUBLISH_PLUGIN_REALIZED_TASKS + [':help']
+    Set<String> getRealizedTaskPaths() {
+        return PUBLISH_PLUGIN_REALIZED_TASKS + super.getRealizedTaskPaths()
+    }
 }

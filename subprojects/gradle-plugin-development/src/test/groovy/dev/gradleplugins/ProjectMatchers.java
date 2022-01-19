@@ -97,6 +97,20 @@ public final class ProjectMatchers {
         };
     }
 
+    public static <T> Matcher<Provider<? extends T>> presentProvider() {
+        return new TypeSafeMatcher<Provider<? extends T>>() {
+            @Override
+            protected boolean matchesSafely(Provider<? extends T> item) {
+                return item.isPresent();
+            }
+
+            @Override
+            public void describeTo(Description description) {
+
+            }
+        };
+    }
+
     public static Matcher<PluginAware> hasPlugin(String pluginId) {
         return new TypeSafeMatcher<PluginAware>() {
             @Override

@@ -298,6 +298,7 @@ class DirectoryTest extends AbstractTestFileTest {
         !Files.isSymbolicLink(file.toPath())
     }
 
+    @Ignore
     def "can assert a directory is empty"() {
         def file = getExistingFileUnderTest()
 

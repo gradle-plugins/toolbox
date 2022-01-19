@@ -16,6 +16,10 @@
 
 package dev.gradleplugins.integtests.fixtures
 
+import org.gradle.util.GradleVersion
+
+import java.util.function.Supplier
+
 abstract class WellBehavedPluginTest extends AbstractGradleSpecification {
     // TODO: Maybe we can infer this value off the environment.
     //   If we do, we should also provide an good error message telling the user what they should do if we don't infer the plugin id correctly.
@@ -74,6 +78,11 @@ abstract class WellBehavedPluginTest extends AbstractGradleSpecification {
     }
 
     Set<String> getRealizedTaskPaths() {
-        return [':help']
+        GradleVersion distributionUnderTest = Optional.ofNullable(System.getProperty('dev.gradleplugins.defaultGradleVersion', null)).map({ GradleVersion.version(it) }).orElseGet({ GradleVersion.current() })
+        if (GradleVersion.version('7.3') > distributionUnderTest) {
+            return [':help']
+        } else {
+            return [':help', ':clean'] // see https://github.com/gradle/gradle/issues/18214
+        }
     }
 }
