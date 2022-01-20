@@ -77,7 +77,15 @@ public interface GradlePluginTestingStrategy extends Named {
         }
 
         /**
-         * Returns a specification that try to match any testing strategy with the specified predicate.
+         * Returns a specification that matches any testing strategy against the specified predicate.
+         * In the case of a {@link CompositeGradlePluginTestingStrategy composite testing strategy}, the specification will first test the whole composite against the predicate followed by a successive test of each composed testing strategy.
+         *
+         * <code>
+         * def strategy = test.strategies.composite(jdk9, gradle7)
+         * assert matches({ it == jdk9 }).isSatisfiedBy(strategy)
+         * assert matches({ it == jdk9 }).and(matches({it == gradle7 })).isSatisfiedBy(strategy)
+         * assert !matches({ it == jdk11 }).isSatisfiedBy(strategy)
+         * </code>
          *
          * @param predicate  a predicate to match any testing strategy, must not be null
          * @param <T>  testing strategy type to satisfy
