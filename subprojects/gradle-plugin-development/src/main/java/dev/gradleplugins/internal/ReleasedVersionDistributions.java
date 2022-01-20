@@ -3,6 +3,7 @@ package dev.gradleplugins.internal;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.Value;
+import org.gradle.api.resources.TextResourceFactory;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -11,6 +12,7 @@ import java.net.URL;
 import java.util.List;
 
 public class ReleasedVersionDistributions {
+    public static final ReleasedVersionDistributions GRADLE_DISTRIBUTIONS = new ReleasedVersionDistributions();
     private GradleRelease mostRecentSnapshot;
     private GradleRelease mostRecentRelease;
     private List<GradleRelease> allVersions;
@@ -18,6 +20,10 @@ public class ReleasedVersionDistributions {
 
     public ReleasedVersionDistributions() {
         this(new HostedGradleVersionsService());
+    }
+
+    public ReleasedVersionDistributions(TextResourceFactory textResourceFactory) {
+        this(new TextResourceHostedGradleVersionsService(textResourceFactory));
     }
 
     public ReleasedVersionDistributions(GradleVersionsService versions) {
@@ -79,6 +85,29 @@ public class ReleasedVersionDistributions {
         @Override
         public Reader all() throws IOException {
             return new InputStreamReader(new URL("https://services.gradle.org/versions/all").openConnection().getInputStream());
+        }
+    }
+
+    private static final class TextResourceHostedGradleVersionsService implements GradleVersionsService {
+        private final TextResourceFactory textResourceFactory;
+
+        public TextResourceHostedGradleVersionsService(TextResourceFactory textResourceFactory) {
+            this.textResourceFactory = textResourceFactory;
+        }
+
+        @Override
+        public Reader nightly() throws IOException {
+            return textResourceFactory.fromUri("https://services.gradle.org/versions/nightly").asReader();
+        }
+
+        @Override
+        public Reader current() throws IOException {
+            return textResourceFactory.fromUri("https://services.gradle.org/versions/current").asReader();
+        }
+
+        @Override
+        public Reader all() throws IOException {
+            return textResourceFactory.fromUri("https://services.gradle.org/versions/all").asReader();
         }
     }
 }

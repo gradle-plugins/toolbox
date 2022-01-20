@@ -40,8 +40,8 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
     private boolean finalized = false;
 
     @Inject
-    public GradlePluginDevelopmentTestSuiteInternal(String name, TaskContainer tasks, ObjectFactory objects, PluginManager pluginManager, ProviderFactory providers, Provider<String> minimumGradleVersion) {
-        this.strategyFactory = new GradlePluginTestingStrategyFactoryInternal(minimumGradleVersion);
+    public GradlePluginDevelopmentTestSuiteInternal(String name, TaskContainer tasks, ObjectFactory objects, PluginManager pluginManager, ProviderFactory providers, Provider<String> minimumGradleVersion, ReleasedVersionDistributions releasedVersions) {
+        this.strategyFactory = new GradlePluginTestingStrategyFactoryInternal(minimumGradleVersion, releasedVersions);
         this.name = name;
         this.dependencies = objects.newInstance(Dependencies.class, getSourceSet(), pluginManager, minimumGradleVersion.orElse(GradleVersion.current().getVersion()).map(GradleRuntimeCompatibility::groovyVersionOf));
         tasks.withType(PluginUnderTestMetadata.class).configureEach(task -> {

@@ -2,6 +2,7 @@ package dev.gradleplugins;
 
 import dev.gradleplugins.internal.FinalizableComponent;
 import dev.gradleplugins.internal.GradlePluginDevelopmentTestSuiteInternal;
+import dev.gradleplugins.internal.ReleasedVersionDistributions;
 import lombok.val;
 import org.gradle.api.Project;
 import org.gradle.api.Transformer;
@@ -22,7 +23,7 @@ final class DefaultGradlePluginDevelopmentTestSuiteFactory implements GradlePlug
 
     @Override
     public GradlePluginDevelopmentTestSuite create(String name) {
-        val result = project.getObjects().newInstance(GradlePluginDevelopmentTestSuiteInternal.class, name, minimumGradleVersion(project));
+        val result = project.getObjects().newInstance(GradlePluginDevelopmentTestSuiteInternal.class, name, minimumGradleVersion(project), gradleDistributions());
         result.getSourceSet().convention(project.provider(() -> {
             if (project.getPluginManager().hasPlugin("java-base")) {
                 return sourceSets(project).maybeCreate(name);
@@ -37,6 +38,14 @@ final class DefaultGradlePluginDevelopmentTestSuiteFactory implements GradlePlug
             return null;
         }));
         return result;
+    }
+
+    private ReleasedVersionDistributions gradleDistributions() {
+        if (System.getProperties().containsKey("dev.gradleplugins.internal.use-text-resource")) {
+            return new ReleasedVersionDistributions(project.getResources().getText());
+        } else {
+            return ReleasedVersionDistributions.GRADLE_DISTRIBUTIONS;
+        }
     }
 
     private static Provider<String> minimumGradleVersion(Project project) {
