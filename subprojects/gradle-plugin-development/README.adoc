@@ -1,4 +1,4 @@
-:jbake-version: 1.6.2
+:jbake-version: 1.6.3
 = Gradle Plugin Development Plugins
 
 The Gradle plugin development plugins are a set of plugins accelerating Gradle plugin development.
