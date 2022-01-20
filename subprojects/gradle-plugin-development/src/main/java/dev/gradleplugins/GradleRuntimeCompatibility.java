@@ -9,8 +9,8 @@ import java.util.Optional;
 
 /**
  * Query Gradle runtime compatibility information for specific Gradle version.
- * It support the Groovy and Kotlin version packaged for each Gradle version.
- * It also support the minimum Java version supported by each Gradle version.
+ * It supports the Groovy and Kotlin version packaged for each Gradle version.
+ * It also supports the minimum Java version supported by each Gradle version.
  */
 public class GradleRuntimeCompatibility {
     private static final Logger LOGGER = Logging.getLogger(GradleRuntimeCompatibility.class);
