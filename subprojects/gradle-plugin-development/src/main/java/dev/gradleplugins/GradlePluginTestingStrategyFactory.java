@@ -1,7 +1,6 @@
 package dev.gradleplugins;
 
 import org.gradle.api.provider.Provider;
-import org.gradle.util.GradleVersion;
 
 import java.util.Set;
 
