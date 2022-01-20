@@ -1,6 +1,5 @@
 package dev.gradleplugins;
 
-import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.provider.Property;
 import org.gradle.api.reflect.TypeOf;
@@ -9,13 +8,9 @@ import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
-import java.util.Arrays;
-import java.util.Collections;
-
+import static dev.gradleplugins.GradlePluginTestingStrategy.testingStrategy;
 import static dev.gradleplugins.ProjectMatchers.*;
-import static dev.gradleplugins.internal.util.TestingStrategyPropertyUtils.testingStrategy;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;

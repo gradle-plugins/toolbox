@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static dev.gradleplugins.internal.util.TestingStrategyPropertyUtils.testingStrategy;
+import static dev.gradleplugins.internal.RegisterTestingStrategyPropertyExtensionRule.testingStrategyProperty;
 import static java.util.Collections.emptyList;
 
 final class CreateTestTasksFromTestingStrategiesRule implements Action<GradlePluginDevelopmentTestSuiteInternal> {
@@ -71,7 +71,7 @@ final class CreateTestTasksFromTestingStrategiesRule implements Action<GradlePlu
                     .map(GradleVersionCoverageTestingStrategy::getVersion)
                     .findFirst()
                     .ifPresent(setDefaultGradleVersionSystemProperty(task));
-            testingStrategy(task).set(strategy);
+            testingStrategyProperty(task).set(strategy);
         };
     }
 

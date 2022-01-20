@@ -10,10 +10,10 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static dev.gradleplugins.GradlePluginDevelopmentTestSuiteFactory.forProject;
+import static dev.gradleplugins.GradlePluginTestingStrategy.testingStrategy;
 import static dev.gradleplugins.GradlePluginTestingStrategyTestUtils.aStrategy;
 import static dev.gradleplugins.GradlePluginTestingStrategyTestUtils.anotherStrategy;
 import static dev.gradleplugins.ProjectMatchers.providerOf;
-import static dev.gradleplugins.internal.util.TestingStrategyPropertyUtils.testingStrategy;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.hamcrest.MatcherAssert.assertThat;
