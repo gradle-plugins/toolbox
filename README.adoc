@@ -5,7 +5,7 @@
 Painless Gradle plugins development.
 The Gradle toolbox is a suite of high-quality Gradle plugins improving the developer experience of writing Gradle plugins.
 It bridges the gaps in the development process offered by the Gradle team.
-The Nokee team developed the toolbox plugins and offer them for free to everyone.
+The https://nokee.dev/[Nokee team] developed the toolbox plugins and offer them for free to everyone.
 
 *For more information, visit the link:https://nokee.dev/docs/nightly/manual/gradle-plugin-development.html[official project documentation]*
 
