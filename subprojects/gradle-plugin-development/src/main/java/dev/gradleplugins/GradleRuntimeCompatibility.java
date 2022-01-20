@@ -12,7 +12,7 @@ import java.util.Optional;
  * It supports the Groovy and Kotlin version packaged for each Gradle version.
  * It also supports the minimum Java version supported by each Gradle version.
  */
-public class GradleRuntimeCompatibility {
+public final class GradleRuntimeCompatibility {
     private static final Logger LOGGER = Logging.getLogger(GradleRuntimeCompatibility.class);
     /**
      * Returns the Groovy version packaged with the specified Gradle version.
