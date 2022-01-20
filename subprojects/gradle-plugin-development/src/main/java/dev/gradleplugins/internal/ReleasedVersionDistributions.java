@@ -5,7 +5,6 @@ import com.google.gson.reflect.TypeToken;
 import lombok.Value;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
@@ -27,7 +26,7 @@ public class ReleasedVersionDistributions {
 
     public GradleRelease getMostRecentSnapshot() {
         if (mostRecentSnapshot == null) {
-            try (Reader reader = new InputStreamReader(versions.nightly())) {
+            try (Reader reader = versions.nightly()) {
                 mostRecentSnapshot = new Gson().fromJson(reader, GradleRelease.class);
             } catch (IOException e) {
                 throw new RuntimeException("Unable to get the last snapshot version", e);
@@ -38,7 +37,7 @@ public class ReleasedVersionDistributions {
 
     public GradleRelease getMostRecentRelease() {
         if (mostRecentRelease == null) {
-            try (Reader reader = new InputStreamReader(versions.current())) {
+            try (Reader reader = versions.current()) {
                 mostRecentRelease = new Gson().fromJson(reader, GradleRelease.class);
             } catch (IOException e) {
                 throw new RuntimeException("Unable to get the last version", e);
@@ -49,7 +48,7 @@ public class ReleasedVersionDistributions {
 
     public List<GradleRelease> getAllVersions() {
         if (allVersions == null) {
-            try (Reader reader = new InputStreamReader(versions.all())) {
+            try (Reader reader = versions.all()) {
                 allVersions = new Gson().fromJson(reader, new TypeToken<List<GradleRelease>>() {}.getType());
             } catch (IOException e) {
                 throw new RuntimeException("Unable to get the last version", e);
@@ -68,18 +67,18 @@ public class ReleasedVersionDistributions {
 
     private static final class HostedGradleVersionsService implements GradleVersionsService {
         @Override
-        public InputStream nightly() throws IOException {
-            return new URL("https://services.gradle.org/versions/nightly").openConnection().getInputStream();
+        public Reader nightly() throws IOException {
+            return new InputStreamReader(new URL("https://services.gradle.org/versions/nightly").openConnection().getInputStream());
         }
 
         @Override
-        public InputStream current() throws IOException {
-            return new URL("https://services.gradle.org/versions/current").openConnection().getInputStream();
+        public Reader current() throws IOException {
+            return new InputStreamReader(new URL("https://services.gradle.org/versions/current").openConnection().getInputStream());
         }
 
         @Override
-        public InputStream all() throws IOException {
-            return new URL("https://services.gradle.org/versions/all").openConnection().getInputStream();
+        public Reader all() throws IOException {
+            return new InputStreamReader(new URL("https://services.gradle.org/versions/all").openConnection().getInputStream());
         }
     }
 }

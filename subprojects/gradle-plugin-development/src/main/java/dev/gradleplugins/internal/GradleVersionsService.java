@@ -1,10 +1,10 @@
 package dev.gradleplugins.internal;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.Reader;
 
 public interface GradleVersionsService {
-    InputStream nightly() throws IOException;
-    InputStream current() throws IOException;
-    InputStream all() throws IOException;
+    Reader nightly() throws IOException;
+    Reader current() throws IOException;
+    Reader all() throws IOException;
 }
