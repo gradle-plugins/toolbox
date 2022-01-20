@@ -18,9 +18,9 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static dev.gradleplugins.internal.GradlePluginTestingStrategyInternal.*;
+import static dev.gradleplugins.internal.ReleasedVersionDistributions.GRADLE_DISTRIBUTIONS;
 
 public final class GradlePluginTestingStrategyFactoryInternal implements GradlePluginTestingStrategyFactory {
-    private static final ReleasedVersionDistributions GRADLE_DISTRIBUTIONS = new ReleasedVersionDistributions();
     private final ReleasedVersionDistributions releasedVersions;
     private final Provider<String> minimumVersion;
 
