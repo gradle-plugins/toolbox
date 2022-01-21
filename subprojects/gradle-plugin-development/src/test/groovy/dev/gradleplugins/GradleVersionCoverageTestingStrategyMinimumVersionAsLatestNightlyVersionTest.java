@@ -32,6 +32,6 @@ class GradleVersionCoverageTestingStrategyMinimumVersionAsLatestNightlyVersionTe
 
     @Test
     void equalsToLatestNightlyVersion() {
-        assertEquals(factory.getCoverageForLatestNightlyVersion(), factory.getCoverageForMinimumVersion());
+        assertEquals(factory.getCoverageForLatestNightlyVersion().getVersion(), factory.getCoverageForMinimumVersion().getVersion());
     }
 }

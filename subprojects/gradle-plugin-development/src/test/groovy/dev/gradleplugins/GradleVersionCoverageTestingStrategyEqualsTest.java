@@ -55,11 +55,11 @@ class GradleVersionCoverageTestingStrategyEqualsTest {
 
     @Test
     void latestGlobalAvailableIsEqualToExactGradleVersion() {
-        assertEquals(factory.coverageForGradleVersion(latestGlobalAvailable.getVersion()), factory.getCoverageForLatestGlobalAvailableVersion());
+        assertEquals(factory.coverageForGradleVersion(latestGlobalAvailable.getVersion()).getVersion(), factory.getCoverageForLatestGlobalAvailableVersion().getVersion());
     }
 
     @Test
     void latestNightlyIsEqualToExactGradleVersion() {
-        assertEquals(factory.coverageForGradleVersion(latestSnapshot.getVersion()), factory.getCoverageForLatestNightlyVersion());
+        assertEquals(factory.coverageForGradleVersion(latestSnapshot.getVersion()).getVersion(), factory.getCoverageForLatestNightlyVersion().getVersion());
     }
 }
