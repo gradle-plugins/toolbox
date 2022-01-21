@@ -36,6 +36,10 @@ include('gradle-plugin-development')
 project(':gradle-plugin-development').projectDir = file('subprojects/gradle-plugin-development')
 project(':gradle-plugin-development').buildFileName = 'build.gradle'
 
+include('gradle-plugin-development-test-fixtures')
+project(':gradle-plugin-development-test-fixtures').projectDir = file('subprojects/gradle-plugin-development-test-fixtures')
+project(':gradle-plugin-development-test-fixtures').buildFileName = 'build.gradle'
+
 // Gradle runners
 include('gradle-runner-kit')
 project(':gradle-runner-kit').projectDir = file('subprojects/gradle-runner-kit')
