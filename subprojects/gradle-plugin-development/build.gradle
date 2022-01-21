@@ -4,6 +4,7 @@ plugins {
     id 'org.jetbrains.kotlin.jvm' version "1.3.72"
     id 'dev.fukgradleplugins.toolbox-publish'
     id 'com.gradle.plugin-publish' version '0.13.0'
+    id 'toolboxbuild.jvm-base'
 }
 apply plugin: 'dev.gradleplugins.java-gradle-plugin'
 apply plugin: 'dev.gradleplugins.gradle-plugin-unit-test'
@@ -45,10 +46,6 @@ gradlePlugin {
     }
     compatibility {
         minimumGradleVersion = project.minimumGradleVersion
-    }
-    java {
-        withSourcesJar()
-        withJavadocJar()
     }
 }
 

@@ -1,7 +1,7 @@
 import static dev.gradleplugins.GradleRuntimeCompatibility.*
 
 plugins {
-    id 'java-library'
+    id 'toolboxbuild.java-library'
     id 'groovy' // for Spock framework
     id 'dev.fukgradleplugins.toolbox-publish'
     id 'dev.fukgradleplugins.functional-test-repository'
@@ -19,10 +19,6 @@ sourceSets {
 }
 
 java {
-    sourceCompatibility = minimumJavaVersionFor(minimumGradleVersion)
-    targetCompatibility = minimumJavaVersionFor(minimumGradleVersion)
-    withSourcesJar()
-    withJavadocJar()
     registerFeature('spockSupport') {
         usingSourceSet(sourceSets.spockSupport)
         withSourcesJar()

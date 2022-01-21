@@ -1,20 +1,13 @@
 import static dev.gradleplugins.GradleRuntimeCompatibility.*
 
 plugins {
-    id 'java-library'
+    id 'toolboxbuild.java-library'
     id 'groovy'
     id 'dev.fukgradleplugins.toolbox-publish'
 }
 
 description = 'Gradle plugin development plugins test fixtures.'
 version = '1.6.4'
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-    withSourcesJar()
-    withJavadocJar()
-}
 
 dependencies {
     compileOnly gradleApi(minimumGradleVersion)

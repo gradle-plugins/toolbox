@@ -1,19 +1,11 @@
 plugins {
-    id 'java-library'
+    id 'toolboxbuild.java-library'
+    id 'toolboxbuild.jvm-base'
     id 'dev.fukgradleplugins.toolbox-publish'
     id 'dev.fukgradleplugins.functional-test-repository'
 }
 
 description = 'Gradle fixtures'
-
-import static dev.gradleplugins.GradleRuntimeCompatibility.*
-
-java {
-    sourceCompatibility = minimumJavaVersionFor(minimumGradleVersion)
-    targetCompatibility = minimumJavaVersionFor(minimumGradleVersion)
-    withSourcesJar()
-    withJavadocJar()
-}
 
 dependencies {
     api 'org.eclipse.jgit:org.eclipse.jgit:5.8.0.202006091008-r'

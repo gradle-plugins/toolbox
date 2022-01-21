@@ -1,18 +1,11 @@
 plugins {
-    id 'java-library'
+    id 'toolboxbuild.java-library'
     id 'groovy-base'
     id 'dev.fukgradleplugins.toolbox-publish'
     id 'dev.fukgradleplugins.functional-test-repository'
 }
 
 description = 'Gradle runner kit API.'
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-    withSourcesJar()
-    withJavadocJar()
-}
 
 repositories {
     maven { url = 'https://repo.nokee.dev/snapshot' }

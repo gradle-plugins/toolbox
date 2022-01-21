@@ -1,5 +1,5 @@
 plugins {
-    id 'java-library'
+    id 'toolboxbuild.java-library'
     id 'groovy-base'
     id 'java-test-fixtures'
     id 'dev.fukgradleplugins.toolbox-publish'
@@ -7,15 +7,6 @@ plugins {
 }
 
 description = 'Gradle fixtures'
-
-import static dev.gradleplugins.GradleRuntimeCompatibility.*
-
-java {
-    sourceCompatibility = minimumJavaVersionFor(minimumGradleVersion)
-    targetCompatibility = minimumJavaVersionFor(minimumGradleVersion)
-    withSourcesJar()
-    withJavadocJar()
-}
 
 dependencies {
     implementation 'com.google.guava:guava:28.2-jre'

@@ -1,0 +1,8 @@
+pluginManager.withPlugin('java') {
+    pluginManager.withPlugin('maven-publish') {
+        java {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
+}

@@ -1,20 +1,11 @@
 plugins {
-    id 'java-library'
+    id 'toolboxbuild.java-library'
     id 'groovy-base'
     id 'dev.fukgradleplugins.toolbox-publish'
     id 'dev.fukgradleplugins.functional-test-repository'
 }
 
 description = 'Gradle fixtures'
-
-import static dev.gradleplugins.GradleRuntimeCompatibility.*
-
-java {
-    sourceCompatibility = minimumJavaVersionFor(minimumGradleVersion)
-    targetCompatibility = minimumJavaVersionFor(minimumGradleVersion)
-    withSourcesJar()
-    withJavadocJar()
-}
 
 dependencies {
     compileOnly "org.projectlombok:lombok:${lombokVersion}"

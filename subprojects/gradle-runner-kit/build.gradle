@@ -1,5 +1,5 @@
 plugins {
-    id 'java-library'
+    id 'toolboxbuild.java-library'
     id 'groovy-base'
     id 'java-test-fixtures'
     id 'dev.fukgradleplugins.toolbox-publish'
@@ -7,13 +7,6 @@ plugins {
 }
 
 description = 'Gradle runner kit.'
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-    withSourcesJar()
-    withJavadocJar()
-}
 
 repositories {
     gradlePluginDevelopment()
