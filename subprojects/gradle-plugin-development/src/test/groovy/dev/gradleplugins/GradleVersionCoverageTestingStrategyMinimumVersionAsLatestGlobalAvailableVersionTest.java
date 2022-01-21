@@ -28,6 +28,6 @@ class GradleVersionCoverageTestingStrategyMinimumVersionAsLatestGlobalAvailableV
 
     @Test
     void equalsToLatestGlobalAvailableVersion() {
-        assertEquals(factory.getCoverageForLatestGlobalAvailableVersion(), factory.getCoverageForMinimumVersion());
+        assertEquals(factory.getCoverageForLatestGlobalAvailableVersion().getVersion(), factory.getCoverageForMinimumVersion().getVersion());
     }
 }

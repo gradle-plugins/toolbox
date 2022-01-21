@@ -26,20 +26,20 @@ class GradleVersionCoverageTestingStrategyUnknownVersionTest {
             .build()));
 
     @Test
-    void throwsExceptionWhenCoverageVersionIsUnknownGlobalAvailable() {
-        final Throwable ex = assertThrows(IllegalArgumentException.class, () -> factory.coverageForGradleVersion("5.4"));
+    void throwsExceptionWhenCoverageVersionResolvedIsUnknownGlobalAvailable() {
+        final Throwable ex = assertThrows(IllegalArgumentException.class, () -> factory.coverageForGradleVersion("5.4").getVersion());
         assertEquals("Unknown Gradle version '5.4' for adhoc testing strategy.", ex.getMessage());
     }
 
     @Test
-    void throwsExceptionWhenCoverageVersionIsUnknownReleaseCandidate() {
-        final Throwable ex = assertThrows(IllegalArgumentException.class, () -> factory.coverageForGradleVersion("5.6-rc-1"));
+    void throwsExceptionWhenCoverageVersionResolvedIsUnknownReleaseCandidate() {
+        final Throwable ex = assertThrows(IllegalArgumentException.class, () -> factory.coverageForGradleVersion("5.6-rc-1").getVersion());
         assertEquals("Unknown Gradle version '5.6-rc-1' for adhoc testing strategy.", ex.getMessage());
     }
 
     @Test
-    void throwsExceptionWhenCoverageVersionIsUnknownSnapshot() {
-        final Throwable ex = assertThrows(IllegalArgumentException.class, () -> factory.coverageForGradleVersion("3.2-20220109234542-0000"));
+    void throwsExceptionWhenCoverageVersionResolvedIsUnknownSnapshot() {
+        final Throwable ex = assertThrows(IllegalArgumentException.class, () -> factory.coverageForGradleVersion("3.2-20220109234542-0000").getVersion());
         assertEquals("Unknown Gradle version '3.2-20220109234542-0000' for adhoc testing strategy.", ex.getMessage());
     }
 
