@@ -65,11 +65,3 @@ def generatePluginUnderTestMetadataUnderTestTask = tasks.register('generatePlugi
 tasks.named('processTestResources', ProcessResources) { task ->
     task.from(generatePluginUnderTestMetadataUnderTestTask.map { it.outputFile })
 }
-
-publishing {
-    publications {
-        library(MavenPublication) {
-            from components.java
-        }
-    }
-}

@@ -26,11 +26,3 @@ dependencies {
     testFixturesApi 'org.hamcrest:hamcrest:2.2'
     testFixturesImplementation testFixtures(project(':gradle-fixtures-file-system'))
 }
-
-publishing {
-    publications {
-        library(MavenPublication) {
-            from components.java
-        }
-    }
-}

@@ -7,3 +7,13 @@ java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 }
+
+pluginManager.withPlugin('maven-publish') {
+    publishing {
+        publications {
+            library(MavenPublication) {
+                from components.java
+            }
+        }
+    }
+}

@@ -20,11 +20,3 @@ dependencies {
     }
     implementation "org.codehaus.groovy:groovy-all:${groovyVersionOf(minimumGradleVersion)}"
 }
-
-publishing {
-    publications {
-        library(MavenPublication) {
-            from components.java
-        }
-    }
-}

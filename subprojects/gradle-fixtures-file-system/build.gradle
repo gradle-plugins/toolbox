@@ -17,11 +17,3 @@ dependencies {
     testImplementation 'net.bytebuddy:byte-buddy:1.10.14'
     testImplementation 'org.objenesis:objenesis:3.1'
 }
-
-publishing {
-    publications {
-        library(MavenPublication) {
-            from components.java
-        }
-    }
-}

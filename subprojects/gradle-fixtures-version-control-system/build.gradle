@@ -14,11 +14,3 @@ dependencies {
     implementation 'commons-io:commons-io:2.6'
     implementation 'org.apache.commons:commons-lang3:3.9'
 }
-
-publishing {
-    publications {
-        library(MavenPublication) {
-            from components.java
-        }
-    }
-}

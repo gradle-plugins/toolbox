@@ -21,11 +21,3 @@ dependencies {
     testImplementation platform('org.spockframework:spock-bom:1.2-groovy-2.5')
     testImplementation 'org.spockframework:spock-core'
 }
-
-publishing {
-    publications {
-        library(MavenPublication) {
-            from components.java
-        }
-    }
-}

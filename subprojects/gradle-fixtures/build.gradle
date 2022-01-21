@@ -79,11 +79,3 @@ dependencies {
 tasks.named('test', Test) {
     systemProperty('dev.gradleplugins.cwd', projectDir.absolutePath)
 }
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from(components.java)
-        }
-    }
-}

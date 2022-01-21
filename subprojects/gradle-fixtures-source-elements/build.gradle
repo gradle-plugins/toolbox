@@ -16,11 +16,3 @@ dependencies {
     implementation 'commons-io:commons-io:2.6'
     implementation 'com.google.guava:guava:28.2-jre'
 }
-
-publishing {
-    publications {
-        library(MavenPublication) {
-            from components.java
-        }
-    }
-}

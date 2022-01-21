@@ -62,10 +62,3 @@ tasks.processTestFixturesResources {
 
 tasks.named('javadoc') { enabled = false }
 
-publishing {
-    publications {
-        library(MavenPublication) {
-            from components.java
-        }
-    }
-}
