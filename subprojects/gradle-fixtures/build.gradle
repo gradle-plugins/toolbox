@@ -4,7 +4,7 @@ plugins {
     id 'toolboxbuild.java-library'
     id 'groovy' // for Spock framework
     id 'toolboxbuild.publish'
-    id 'dev.fukgradleplugins.functional-test-repository'
+    id 'toolboxbuild.functional-test-repository'
     id 'java-test-fixtures'
 }
 

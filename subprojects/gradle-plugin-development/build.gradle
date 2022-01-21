@@ -109,7 +109,7 @@ test {
 functionalTest {
     testTasks.configureEach {
         dependsOn({ allprojects
-                .findAll { it.pluginManager.hasPlugin('dev.fukgradleplugins.functional-test-repository') }
+                .findAll { it.pluginManager.hasPlugin('toolboxbuild.functional-test-repository') }
                 .collect { it.tasks.named('publishAllPublicationsToLocalRepositoryRepository') }
         })
         it.systemProperty('localRepository', layout.buildDirectory.dir('repository').get().asFile)

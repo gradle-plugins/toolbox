@@ -2,7 +2,7 @@ plugins {
     id 'toolboxbuild.java-library'
     id 'groovy-base'
     id 'toolboxbuild.publish'
-    id 'dev.fukgradleplugins.functional-test-repository'
+    id 'toolboxbuild.functional-test-repository'
 }
 
 description = 'Gradle runner kit API.'
