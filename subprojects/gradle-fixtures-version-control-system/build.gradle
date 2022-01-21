@@ -1,7 +1,7 @@
 plugins {
     id 'toolboxbuild.java-library'
     id 'toolboxbuild.jvm-base'
-    id 'dev.fukgradleplugins.toolbox-publish'
+    id 'toolboxbuild.publish'
     id 'dev.fukgradleplugins.functional-test-repository'
 }
 

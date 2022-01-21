@@ -3,7 +3,7 @@ import static dev.gradleplugins.GradleRuntimeCompatibility.*
 plugins {
     id 'toolboxbuild.java-library'
     id 'groovy'
-    id 'dev.fukgradleplugins.toolbox-publish'
+    id 'toolboxbuild.publish'
 }
 
 description = 'Gradle plugin development plugins test fixtures.'

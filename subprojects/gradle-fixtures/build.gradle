@@ -3,7 +3,7 @@ import static dev.gradleplugins.GradleRuntimeCompatibility.*
 plugins {
     id 'toolboxbuild.java-library'
     id 'groovy' // for Spock framework
-    id 'dev.fukgradleplugins.toolbox-publish'
+    id 'toolboxbuild.publish'
     id 'dev.fukgradleplugins.functional-test-repository'
     id 'java-test-fixtures'
 }
