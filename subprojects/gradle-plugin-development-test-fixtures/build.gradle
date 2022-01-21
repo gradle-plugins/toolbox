@@ -9,10 +9,6 @@ plugins {
 description = 'Gradle plugin development plugins test fixtures.'
 version = '1.6.4'
 
-repositories {
-    mavenCentral()
-}
-
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8

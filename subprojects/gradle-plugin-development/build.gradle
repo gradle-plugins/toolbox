@@ -97,10 +97,6 @@ pluginBundle {
     }
 }
 
-repositories {
-    mavenCentral()
-}
-
 test {
     dependencies {
         implementation spockFramework()

@@ -16,7 +16,6 @@ java {
 }
 
 repositories {
-    mavenCentral()
     gradlePluginDevelopment()
     maven { url = 'https://repo.nokee.dev/snapshot' }
 }
