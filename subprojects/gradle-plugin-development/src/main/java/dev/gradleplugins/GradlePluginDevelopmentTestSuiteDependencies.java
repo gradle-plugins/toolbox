@@ -29,7 +29,6 @@ public interface GradlePluginDevelopmentTestSuiteDependencies {
     @Deprecated
     Object gradleFixtures();
 
-    @Deprecated
     Object gradleTestKit();
 
     Object gradleTestKit(String version);
