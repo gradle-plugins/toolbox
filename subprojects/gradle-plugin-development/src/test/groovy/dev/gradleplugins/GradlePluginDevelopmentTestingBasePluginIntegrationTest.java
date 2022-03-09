@@ -21,6 +21,11 @@ class GradlePluginDevelopmentTestingBasePluginIntegrationTest {
 
     @Test
     void appliesBasePlugin() {
+        assertThat(project, hasPlugin("dev.gradleplugins.gradle-plugin-base"));
+    }
+
+    @Test
+    void appliesDevelPlugin() {
         assertThat(project, hasPlugin("dev.gradleplugins.gradle-plugin-development"));
     }
 
