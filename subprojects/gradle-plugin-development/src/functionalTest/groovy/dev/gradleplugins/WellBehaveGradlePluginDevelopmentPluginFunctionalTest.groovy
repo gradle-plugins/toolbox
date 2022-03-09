@@ -115,7 +115,7 @@ abstract class WellBehaveGradlePluginDevelopmentPluginFunctionalTest extends Abs
     }
 
     protected List<String> getAllTasksToBuild() {
-        return [':compileJava', ':pluginDescriptors', ':processResources', ':classes', ':jar', ':assemble', ':pluginUnderTestMetadata', ':validatePlugins', ':check', ':build'] + testTasks
+        return [':compileJava', ':pluginDescriptors', ':processResources', ':classes', ':jar', ':assemble', ':validatePlugins', ':check', ':build'] + testTasks
     }
 
     protected List<String> getTestTasks() {
