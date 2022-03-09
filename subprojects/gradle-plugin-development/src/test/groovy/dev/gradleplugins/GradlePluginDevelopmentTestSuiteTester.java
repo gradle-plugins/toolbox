@@ -58,4 +58,9 @@ public interface GradlePluginDevelopmentTestSuiteTester {
     default void hasPublicType() {
         assertThat(subject(), publicType(GradlePluginDevelopmentTestSuite.class));
     }
+
+    @Test
+    default void hasDisplayName() {
+        assertThat(subject().getDisplayName(), not(blankOrNullString()));
+    }
 }

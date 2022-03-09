@@ -17,7 +17,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
-class GradlePluginDevelopmentTestSuitePluginUnderTestMetadataIntegrationTest {
+class GradlePluginDevelopmentTestSuitePluginUnderTestMetadataConfigurationIntegrationTest {
     private final Project project = ProjectBuilder.builder().build();
     private final GradlePluginDevelopmentTestSuiteFactory factory = forProject(project);
     private final GradlePluginDevelopmentTestSuite subject = factory.create("loki");

@@ -37,6 +37,13 @@ public interface GradlePluginDevelopmentTestSuite extends Named, ExtensionAware 
      */
     GradlePluginTestingStrategyFactory getStrategies();
 
+    /**
+     * Returns a human-readable name for this test suite.
+     *
+     * @return a human-readable name, never null
+     */
+    String getDisplayName();
+
     TaskView<Test> getTestTasks();
 
     GradlePluginDevelopmentTestSuiteDependencies getDependencies();

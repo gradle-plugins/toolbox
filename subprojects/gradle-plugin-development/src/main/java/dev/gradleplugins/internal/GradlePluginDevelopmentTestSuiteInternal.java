@@ -20,6 +20,7 @@ import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.testing.Test;
 import org.gradle.internal.Actions;
 import org.gradle.plugin.devel.tasks.PluginUnderTestMetadata;
+import org.gradle.util.GUtil;
 import org.gradle.util.GradleVersion;
 
 import javax.inject.Inject;
@@ -37,12 +38,14 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
     @Getter private final List<Action<? super Test>> testTaskActions = new ArrayList<>();
     private final Action<GradlePluginDevelopmentTestSuiteInternal> finalizeAction;
     private final TestTaskView testTasks;
+    private final String displayName;
     private boolean finalized = false;
 
     @Inject
     public GradlePluginDevelopmentTestSuiteInternal(String name, TaskContainer tasks, ObjectFactory objects, PluginManager pluginManager, ProviderFactory providers, Provider<String> minimumGradleVersion, ReleasedVersionDistributions releasedVersions) {
         this.strategyFactory = new GradlePluginTestingStrategyFactoryInternal(minimumGradleVersion, releasedVersions);
         this.name = name;
+        this.displayName = GUtil.toWords(name) + "s";
         this.dependencies = objects.newInstance(Dependencies.class, getSourceSet(), pluginManager, minimumGradleVersion.orElse(GradleVersion.current().getVersion()).map(GradleRuntimeCompatibility::groovyVersionOf));
         tasks.withType(PluginUnderTestMetadata.class).configureEach(task -> {
             if (task.getName().equals("pluginUnderTestMetadata")) {
@@ -80,6 +83,11 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
     @Override
     public TaskView<Test> getTestTasks() {
         return testTasks;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return displayName;
     }
 
     protected static /*final*/ abstract class TestTaskView implements TaskView<Test> {
