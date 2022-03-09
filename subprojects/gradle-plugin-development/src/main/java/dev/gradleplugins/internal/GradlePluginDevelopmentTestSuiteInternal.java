@@ -36,7 +36,7 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
     private final Dependencies dependencies;
     private final String name;
     @Getter private final List<Action<? super Test>> testTaskActions = new ArrayList<>();
-    private final Action<GradlePluginDevelopmentTestSuiteInternal> finalizeAction;
+    private final List<Action<? super GradlePluginDevelopmentTestSuite>> finalizeActions = new ArrayList<>();
     private final TestTaskView testTasks;
     private final String displayName;
     private boolean finalized = false;
@@ -53,7 +53,10 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
             }
         });
         this.testTasks = objects.newInstance(TestTaskView.class, testTaskActions, providers.provider(new FinalizeComponentCallable<>()).orElse(getTestTaskCollection()));
-        this.finalizeAction = Actions.composite(new TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule(), new CreateTestTasksFromTestingStrategiesRule(tasks, objects, getTestTaskCollection()), new AttachTestTasksToCheckTaskIfPresent(pluginManager, tasks), new FinalizeTestSuiteProperties());
+        this.finalizeActions.add(new TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule());
+        this.finalizeActions.add(new CreateTestTasksFromTestingStrategiesRule(tasks, objects, getTestTaskCollection()));
+        this.finalizeActions.add(new AttachTestTasksToCheckTaskIfPresent(pluginManager, tasks));
+        this.finalizeActions.add(new FinalizeTestSuiteProperties());
         getSourceSet().finalizeValueOnRead();
         getTestingStrategies().finalizeValueOnRead();
     }
@@ -115,7 +118,7 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
     public void finalizeComponent() {
         if (!finalized) {
             finalized = true;
-            finalizeAction.execute(this);
+            finalizeActions.forEach(it -> it.execute(this));
             getSourceSet().finalizeValue();
         }
     }
@@ -123,6 +126,10 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
     @Override
     public boolean isFinalized() {
         return finalized;
+    }
+
+    public void whenFinalized(Action<? super GradlePluginDevelopmentTestSuite> action) {
+        finalizeActions.add(action);
     }
 
     @Override

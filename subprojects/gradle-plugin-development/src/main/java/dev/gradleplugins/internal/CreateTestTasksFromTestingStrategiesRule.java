@@ -1,6 +1,7 @@
 package dev.gradleplugins.internal;
 
 import dev.gradleplugins.CompositeGradlePluginTestingStrategy;
+import dev.gradleplugins.GradlePluginDevelopmentTestSuite;
 import dev.gradleplugins.GradlePluginTestingStrategy;
 import dev.gradleplugins.GradleVersionCoverageTestingStrategy;
 import org.apache.commons.lang3.StringUtils;
@@ -21,7 +22,7 @@ import java.util.stream.StreamSupport;
 import static dev.gradleplugins.internal.RegisterTestingStrategyPropertyExtensionRule.testingStrategyProperty;
 import static java.util.Collections.emptyList;
 
-final class CreateTestTasksFromTestingStrategiesRule implements Action<GradlePluginDevelopmentTestSuiteInternal> {
+final class CreateTestTasksFromTestingStrategiesRule implements Action<GradlePluginDevelopmentTestSuite> {
     private final TaskContainer tasks;
     private final ObjectFactory objects;
     private final SetProperty<Test> testElements;
@@ -33,7 +34,7 @@ final class CreateTestTasksFromTestingStrategiesRule implements Action<GradlePlu
     }
 
     @Override
-    public void execute(GradlePluginDevelopmentTestSuiteInternal testSuite) {
+    public void execute(GradlePluginDevelopmentTestSuite testSuite) {
         testSuite.getTestingStrategies().disallowChanges();
         Set<GradlePluginTestingStrategy> strategies = testSuite.getTestingStrategies().get();
         if (strategies.isEmpty()) {
@@ -55,15 +56,15 @@ final class CreateTestTasksFromTestingStrategiesRule implements Action<GradlePlu
         }
     }
 
-    private Action<Test> applyTestActions(GradlePluginDevelopmentTestSuiteInternal testSuite) {
+    private Action<Test> applyTestActions(GradlePluginDevelopmentTestSuite testSuite) {
         return task -> {
-            for (Action<? super Test> action : testSuite.getTestTaskActions()) {
+            for (Action<? super Test> action : ((GradlePluginDevelopmentTestSuiteInternal) testSuite).getTestTaskActions()) {
                 action.execute(task);
             }
         };
     }
 
-    private Action<Test> configureTestingStrategy(GradlePluginDevelopmentTestSuiteInternal testSuite, GradlePluginTestingStrategy strategy) {
+    private Action<Test> configureTestingStrategy(GradlePluginDevelopmentTestSuite testSuite, GradlePluginTestingStrategy strategy) {
         return task -> {
             Stream.of(strategy)
                     .flatMap(this::unpackCompositeTestingStrategy)
@@ -95,11 +96,11 @@ final class CreateTestTasksFromTestingStrategiesRule implements Action<GradlePlu
         }
     }
 
-    private TaskProvider<Test> createTestTask(GradlePluginDevelopmentTestSuiteInternal testSuite) {
+    private TaskProvider<Test> createTestTask(GradlePluginDevelopmentTestSuite testSuite) {
         return createTestTask(testSuite, "");
     }
 
-    private TaskProvider<Test> createTestTask(GradlePluginDevelopmentTestSuiteInternal testSuite, String variant) {
+    private TaskProvider<Test> createTestTask(GradlePluginDevelopmentTestSuite testSuite, String variant) {
         String taskName = testSuite.getName() + StringUtils.capitalize(variant);
 
         TaskProvider<Test> result = null;

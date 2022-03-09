@@ -1,11 +1,12 @@
 package dev.gradleplugins.internal;
 
+import dev.gradleplugins.GradlePluginDevelopmentTestSuite;
 import org.gradle.api.Action;
 import org.gradle.api.tasks.SourceSet;
 
-final class TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule implements Action<GradlePluginDevelopmentTestSuiteInternal> {
+final class TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule implements Action<GradlePluginDevelopmentTestSuite> {
     @Override
-    public void execute(GradlePluginDevelopmentTestSuiteInternal testSuite) {
+    public void execute(GradlePluginDevelopmentTestSuite testSuite) {
         testSuite.getTestedSourceSet().disallowChanges();
         if (testSuite.getTestedSourceSet().isPresent()) {
             SourceSet sourceSet = testSuite.getSourceSet().get();
