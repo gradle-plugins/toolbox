@@ -6,6 +6,7 @@ import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.BeforeEach;
 
 import static dev.gradleplugins.GradlePluginDevelopmentTestSuiteFactory.forProject;
+import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.sourceSets;
 import static org.mockito.Mockito.mock;
 
 class GradlePluginDevelopmentTestSuiteFinalizeComponentIntegrationTest implements GradlePluginDevelopmentTestSuiteFinalizedIntegrationTester {
@@ -20,7 +21,8 @@ class GradlePluginDevelopmentTestSuiteFinalizeComponentIntegrationTest implement
 
     @BeforeEach
     void finalizeTestSuite() {
-        subject.getSourceSet().set(mock(SourceSet.class));
+        project.getPluginManager().apply("java-base");
+        subject.getSourceSet().set(sourceSets(project).create("leek"));
         subject.finalizeComponent();
     }
 }
