@@ -175,7 +175,6 @@ abstract class AbstractGradlePluginDevelopmentTestingStrategyFunctionalTest exte
                         implementation platform('org.spockframework:spock-bom:2.0-groovy-2.5')
                     }
                     implementation 'org.spockframework:spock-core'
-                    implementation gradleTestKit()
                 }
 
                 // Because spock framework 2.0 use JUnit 5
