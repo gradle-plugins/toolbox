@@ -1,6 +1,10 @@
 package dev.gradleplugins.internal;
 
-import dev.gradleplugins.*;
+import dev.gradleplugins.GradlePluginDevelopmentTestSuite;
+import dev.gradleplugins.GradlePluginDevelopmentTestSuiteDependencies;
+import dev.gradleplugins.GradlePluginTestingStrategyFactory;
+import dev.gradleplugins.GradleRuntimeCompatibility;
+import dev.gradleplugins.TaskView;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.Action;
@@ -21,7 +25,6 @@ import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.testing.Test;
-import org.gradle.internal.Actions;
 import org.gradle.plugin.devel.tasks.PluginUnderTestMetadata;
 import org.gradle.util.GUtil;
 import org.gradle.util.GradleVersion;
@@ -252,6 +255,11 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         @Override
         public Object gradleTestKit() {
             return getDependencies().gradleTestKit();
+        }
+
+        @Override
+        public Object gradleTestKit(String version) {
+            return GradlePluginDevelopmentDependencyExtensionInternal.of(getDependencies()).gradleTestKit(version);
         }
 
         @Override

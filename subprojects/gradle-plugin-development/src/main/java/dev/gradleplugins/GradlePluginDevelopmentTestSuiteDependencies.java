@@ -28,7 +28,10 @@ public interface GradlePluginDevelopmentTestSuiteDependencies {
 
     Object gradleFixtures();
 
+    @Deprecated
     Object gradleTestKit();
+
+    Object gradleTestKit(String version);
 
     @Deprecated
     Object groovy();

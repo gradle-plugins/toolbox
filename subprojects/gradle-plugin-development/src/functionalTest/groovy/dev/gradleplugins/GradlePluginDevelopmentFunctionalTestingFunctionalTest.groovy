@@ -5,6 +5,7 @@ import dev.gradleplugins.fixtures.sample.JavaBasicGradlePlugin
 import dev.gradleplugins.fixtures.sources.SourceElement
 import dev.gradleplugins.fixtures.test.DefaultTestExecutionResult
 import dev.gradleplugins.integtests.fixtures.ArchiveTestFixture
+import org.gradle.api.internal.artifacts.dependencies.SelfResolvingDependencyInternal
 import org.gradle.util.GradleVersion
 import org.hamcrest.CoreMatchers
 
@@ -30,6 +31,22 @@ abstract class AbstractGradlePluginDevelopmentFunctionalTestingFunctionalTest ex
         and:
         jar("build/libs/gradle-plugin.jar").hasDescendants('com/example/BasicPlugin.class',"META-INF/gradle-plugins/${componentUnderTest.pluginId}.properties")
         jar("build/libs/gradle-plugin.jar").assertFileContent("META-INF/gradle-plugins/${componentUnderTest.pluginId}.properties", CoreMatchers.startsWith('implementation-class=com.example.BasicPlugin'))
+    }
+
+    def "has no self-resolving Gradle TestKit dependency"() {
+        given:
+        makeSingleProject()
+        componentUnderTest.writeToProject(testDirectory)
+        buildFile << """
+            tasks.register('verify') {
+                doLast {
+                    assert !configurations.functionalTestImplementation.dependencies.any { it instanceof ${SelfResolvingDependencyInternal.canonicalName} ? it.targetComponentId.displayName == 'Gradle TestKit' : false }
+                }
+            }
+        """
+
+        expect:
+        succeeds('verify')
     }
 
     protected DefaultTestExecutionResult getTestResult() {
@@ -84,7 +101,6 @@ abstract class AbstractGradlePluginDevelopmentFunctionalTestingFunctionalTest ex
                         implementation platform('org.spockframework:spock-bom:2.0-groovy-2.5')
                     }
                     implementation 'org.spockframework:spock-core'
-                    implementation gradleTestKit()
                 }
 
                 // Because spock framework 2.0 use JUnit 5

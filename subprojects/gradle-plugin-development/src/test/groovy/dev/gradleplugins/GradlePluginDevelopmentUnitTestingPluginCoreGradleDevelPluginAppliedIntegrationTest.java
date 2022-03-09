@@ -33,7 +33,7 @@ class GradlePluginDevelopmentUnitTestingPluginCoreGradleDevelPluginAppliedIntegr
     }
 
     @Test
-    void includesSourceSetInDevelTestSourceSets() {
+    void doesNotIncludesSourceSetInDevelTestSourceSets() {
         assertThat(gradlePlugin(project).getTestSourceSets(), not(hasItem(named("test"))));
     }
 

@@ -5,6 +5,7 @@ import dev.gradleplugins.fixtures.sample.JavaBasicGradlePlugin
 import dev.gradleplugins.fixtures.sources.SourceElement
 import dev.gradleplugins.fixtures.test.DefaultTestExecutionResult
 import dev.gradleplugins.integtests.fixtures.ArchiveTestFixture
+import org.gradle.api.internal.artifacts.dependencies.SelfResolvingDependencyInternal
 import org.hamcrest.CoreMatchers
 
 abstract class AbstractGradlePluginDevelopmentUnitTestingFunctionalTest extends AbstractGradlePluginDevelopmentFunctionalSpec implements ArchiveTestFixture {
@@ -27,6 +28,22 @@ abstract class AbstractGradlePluginDevelopmentUnitTestingFunctionalTest extends 
         and:
         jar("build/libs/gradle-plugin.jar").hasDescendants('com/example/BasicPlugin.class',"META-INF/gradle-plugins/${componentUnderTest.pluginId}.properties")
         jar("build/libs/gradle-plugin.jar").assertFileContent("META-INF/gradle-plugins/${componentUnderTest.pluginId}.properties", CoreMatchers.startsWith('implementation-class=com.example.BasicPlugin'))
+    }
+
+    def "has no self-resolving Gradle TestKit dependency"() {
+        given:
+        makeSingleProject()
+        componentUnderTest.writeToProject(testDirectory)
+        buildFile << """
+            tasks.register('verify') {
+                doLast {
+                    assert !configurations.testImplementation.dependencies.any { it instanceof ${SelfResolvingDependencyInternal.canonicalName} ? it.targetComponentId.displayName == 'Gradle TestKit' : false }
+                }
+            }
+        """
+
+        expect:
+        succeeds('verify')
     }
 
     protected DefaultTestExecutionResult getTestResult() {

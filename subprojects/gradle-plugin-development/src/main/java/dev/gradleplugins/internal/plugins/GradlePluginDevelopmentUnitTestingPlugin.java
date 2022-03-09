@@ -7,9 +7,6 @@ import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.AppliedPlugin;
-import org.gradle.api.tasks.SourceSet;
-
-import java.util.HashSet;
 
 import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
@@ -30,12 +27,6 @@ public abstract class GradlePluginDevelopmentUnitTestingPlugin implements Plugin
         TEST_RULE.execute(project);
 
         project.getPluginManager().withPlugin("java-gradle-plugin", ignored -> {
-            // Configure test for GradlePluginDevelopmentExtension (ensure it is not included)
-            val testSourceSets = new HashSet<SourceSet>();
-            testSourceSets.addAll(gradlePlugin(project).getTestSourceSets());
-            testSourceSets.remove(test(project).getSourceSet().get());
-            gradlePlugin(project).testSourceSets(testSourceSets.toArray(new SourceSet[0]));
-
             project.getPluginManager().withPlugin("dev.gradleplugins.gradle-plugin-base", useGradleApiImplementationDependency(project));
         });
     }
