@@ -47,4 +47,9 @@ class GradlePluginDevelopmentBasePluginIntegrationTest {
         assertThat(project.getConfigurations().getByName("compileOnly").getDependencies(),
                 hasItem(allOf(isA(ExternalDependency.class), coordinate("dev.gradleplugins:gradle-api:6.5"))));
     }
+
+    @Test
+    void removesAllTestSourceSetsToAvoidSelfResolvingGradleTestKitDependency() {
+        assertThat(gradlePlugin(project).getTestSourceSets(), emptyIterable());
+    }
 }
