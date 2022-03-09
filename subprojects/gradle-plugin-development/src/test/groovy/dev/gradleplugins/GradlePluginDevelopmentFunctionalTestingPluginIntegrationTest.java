@@ -47,7 +47,7 @@ class GradlePluginDevelopmentFunctionalTestingPluginIntegrationTest {
         @Test
         void disallowChangesToSourceSetProperty() {
             final Throwable ex = assertThrows(RuntimeException.class, () -> subject().getSourceSet().set((SourceSet) null));
-            assertEquals("The value for test suite 'functionalTest' property 'sourceSet' cannot be changed any further.", ex.getMessage());
+            assertEquals("The value for test suite 'functionalTest' property 'sourceSet' is final and cannot be changed any further.", ex.getMessage());
         }
     }
 }
