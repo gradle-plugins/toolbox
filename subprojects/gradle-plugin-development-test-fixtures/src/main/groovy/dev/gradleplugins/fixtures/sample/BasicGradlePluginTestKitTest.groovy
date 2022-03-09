@@ -61,6 +61,7 @@ class BasicPluginFunctionalTest extends Specification {
             .forwardOutput()
             .withProjectDir(testProjectDir.toFile())
             .withArguments('help')
+            .withGradleVersion('7.4')
             .build()
 
         then:
