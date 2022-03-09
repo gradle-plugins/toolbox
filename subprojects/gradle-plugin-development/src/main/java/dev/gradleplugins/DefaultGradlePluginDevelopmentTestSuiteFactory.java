@@ -2,6 +2,7 @@ package dev.gradleplugins;
 
 import dev.gradleplugins.internal.FinalizableComponent;
 import dev.gradleplugins.internal.GradlePluginDevelopmentTestSuiteInternal;
+import dev.gradleplugins.internal.ConfigurePluginUnderTestMetadataTask;
 import dev.gradleplugins.internal.ReleasedVersionDistributions;
 import lombok.val;
 import org.gradle.api.Project;
@@ -30,6 +31,8 @@ final class DefaultGradlePluginDevelopmentTestSuiteFactory implements GradlePlug
     @Override
     public GradlePluginDevelopmentTestSuite create(String name) {
         val result = project.getObjects().newInstance(GradlePluginDevelopmentTestSuiteInternal.class, name, minimumGradleVersion(project), gradleDistributions());
+        // Register as finalized action because it adds configuration which early finalize source set property
+        result.whenFinalized(new ConfigurePluginUnderTestMetadataTask(project));
         result.getSourceSet().convention(project.provider(() -> {
             if (project.getPluginManager().hasPlugin("java-base")) {
                 return sourceSets(project).maybeCreate(name);

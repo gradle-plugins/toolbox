@@ -63,4 +63,9 @@ public interface GradlePluginDevelopmentTestSuiteTester {
     default void hasDisplayName() {
         assertThat(subject().getDisplayName(), not(blankOrNullString()));
     }
+
+    @Test
+    default void hasPluginUnderTestMetadataTask() {
+        assertNotNull(subject().getPluginUnderTestMetadataTask());
+    }
 }

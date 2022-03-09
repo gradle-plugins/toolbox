@@ -2,6 +2,7 @@ package dev.gradleplugins.internal;
 
 import dev.gradleplugins.*;
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.Action;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
@@ -17,6 +18,7 @@ import org.gradle.api.reflect.HasPublicType;
 import org.gradle.api.reflect.TypeOf;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskContainer;
+import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.testing.Test;
 import org.gradle.internal.Actions;
 import org.gradle.plugin.devel.tasks.PluginUnderTestMetadata;
@@ -30,14 +32,19 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 import static dev.gradleplugins.internal.DefaultDependencyVersions.SPOCK_FRAMEWORK_VERSION;
+import static java.lang.String.format;
 
 public abstract class GradlePluginDevelopmentTestSuiteInternal implements GradlePluginDevelopmentTestSuite, SoftwareComponent, HasPublicType, FinalizableComponent {
+    private static final String PLUGIN_UNDER_TEST_METADATA_TASK_NAME_PREFIX = "pluginUnderTestMetadata";
+    private static final String PLUGIN_DEVELOPMENT_GROUP = "Plugin development";
+    private static final String PLUGIN_UNDER_TEST_METADATA_TASK_DESCRIPTION_FORMAT = "Generates the metadata for plugin %s.";
     private final GradlePluginTestingStrategyFactory strategyFactory;
     private final Dependencies dependencies;
     private final String name;
     @Getter private final List<Action<? super Test>> testTaskActions = new ArrayList<>();
     private final List<Action<? super GradlePluginDevelopmentTestSuite>> finalizeActions = new ArrayList<>();
     private final TestTaskView testTasks;
+    private final TaskProvider<PluginUnderTestMetadata> pluginUnderTestMetadataTask;
     private final String displayName;
     private boolean finalized = false;
 
@@ -47,11 +54,7 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         this.name = name;
         this.displayName = GUtil.toWords(name) + "s";
         this.dependencies = objects.newInstance(Dependencies.class, getSourceSet(), pluginManager, minimumGradleVersion.orElse(GradleVersion.current().getVersion()).map(GradleRuntimeCompatibility::groovyVersionOf));
-        tasks.withType(PluginUnderTestMetadata.class).configureEach(task -> {
-            if (task.getName().equals("pluginUnderTestMetadata")) {
-                task.getPluginClasspath().from((Callable<Object>) dependencies::pluginUnderTestMetadata);
-            }
-        });
+        this.pluginUnderTestMetadataTask = registerPluginUnderTestMetadataTask(tasks, pluginUnderTestMetadataTaskName(name), displayName);
         this.testTasks = objects.newInstance(TestTaskView.class, testTaskActions, providers.provider(new FinalizeComponentCallable<>()).orElse(getTestTaskCollection()));
         this.finalizeActions.add(new TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule());
         this.finalizeActions.add(new CreateTestTasksFromTestingStrategiesRule(tasks, objects, getTestTaskCollection()));
@@ -59,6 +62,17 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         this.finalizeActions.add(new FinalizeTestSuiteProperties());
         getSourceSet().finalizeValueOnRead();
         getTestingStrategies().finalizeValueOnRead();
+    }
+
+    private static TaskProvider<PluginUnderTestMetadata> registerPluginUnderTestMetadataTask(TaskContainer tasks, String taskName, String displayName) {
+        return tasks.register(taskName, PluginUnderTestMetadata.class, task -> {
+            task.setGroup(PLUGIN_DEVELOPMENT_GROUP);
+            task.setDescription(format(PLUGIN_UNDER_TEST_METADATA_TASK_DESCRIPTION_FORMAT, displayName));
+        });
+    }
+
+    private static String pluginUnderTestMetadataTaskName(String testSuiteName) {
+        return PLUGIN_UNDER_TEST_METADATA_TASK_NAME_PREFIX + StringUtils.capitalize(testSuiteName);
     }
 
     @Override
@@ -86,6 +100,11 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
     @Override
     public TaskView<Test> getTestTasks() {
         return testTasks;
+    }
+
+    @Override
+    public TaskProvider<PluginUnderTestMetadata> getPluginUnderTestMetadataTask() {
+        return pluginUnderTestMetadataTask;
     }
 
     @Override

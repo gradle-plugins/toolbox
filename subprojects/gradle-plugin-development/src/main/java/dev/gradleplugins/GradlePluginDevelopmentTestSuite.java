@@ -6,7 +6,9 @@ import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.SourceSet;
+import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.testing.Test;
+import org.gradle.plugin.devel.tasks.PluginUnderTestMetadata;
 
 public interface GradlePluginDevelopmentTestSuite extends Named, ExtensionAware {
     /**
@@ -36,6 +38,15 @@ public interface GradlePluginDevelopmentTestSuite extends Named, ExtensionAware 
      * @return a {@link GradlePluginTestingStrategyFactory} instance, never null.
      */
     GradlePluginTestingStrategyFactory getStrategies();
+
+    /**
+     * Returns plugin under test metadata generator task for this test suite.
+     *
+     * Use {@link GradlePluginDevelopmentTestSuiteDependencies#pluginUnderTestMetadata(Object)} to add plugin classpath.
+     *
+     * @return generator task for {@literal plugin-under-test-metadata.properties} file, never null
+     */
+    TaskProvider<PluginUnderTestMetadata> getPluginUnderTestMetadataTask();
 
     /**
      * Returns a human-readable name for this test suite.
