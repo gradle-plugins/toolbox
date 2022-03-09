@@ -4,6 +4,7 @@ import dev.gradleplugins.*;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.Action;
+import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.artifacts.ModuleDependency;
@@ -49,11 +50,11 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
     private boolean finalized = false;
 
     @Inject
-    public GradlePluginDevelopmentTestSuiteInternal(String name, TaskContainer tasks, ObjectFactory objects, PluginManager pluginManager, ProviderFactory providers, Provider<String> minimumGradleVersion, ReleasedVersionDistributions releasedVersions) {
+    public GradlePluginDevelopmentTestSuiteInternal(String name, Project project, TaskContainer tasks, ObjectFactory objects, PluginManager pluginManager, ProviderFactory providers, Provider<String> minimumGradleVersion, ReleasedVersionDistributions releasedVersions) {
         this.strategyFactory = new GradlePluginTestingStrategyFactoryInternal(minimumGradleVersion, releasedVersions);
         this.name = name;
         this.displayName = GUtil.toWords(name) + "s";
-        this.dependencies = objects.newInstance(Dependencies.class, getSourceSet(), pluginManager, minimumGradleVersion.orElse(GradleVersion.current().getVersion()).map(GradleRuntimeCompatibility::groovyVersionOf));
+        this.dependencies = objects.newInstance(Dependencies.class, DependencyFactory.forProject(project), getSourceSet(), pluginManager, minimumGradleVersion.orElse(GradleVersion.current().getVersion()).map(GradleRuntimeCompatibility::groovyVersionOf));
         this.pluginUnderTestMetadataTask = registerPluginUnderTestMetadataTask(tasks, pluginUnderTestMetadataTaskName(name), displayName);
         this.testTasks = objects.newInstance(TestTaskView.class, testTaskActions, providers.provider(new FinalizeComponentCallable<>()).orElse(getTestTaskCollection()));
         this.finalizeActions.add(new TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule());
@@ -162,9 +163,11 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
     }
 
     protected abstract static class Dependencies implements GradlePluginDevelopmentTestSuiteDependencies {
+        private final ConfigurationContainer configurations;
         private final Provider<SourceSet> sourceSetProvider;
         private final PluginManager pluginManager;
         private final Provider<String> defaultGroovyVersion;
+        private final DependencyFactory factory;
 
         @Inject
         protected abstract ConfigurationContainer getConfigurations();
@@ -181,41 +184,42 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         }
 
         @Inject
-        public Dependencies(Provider<SourceSet> sourceSetProvider, PluginManager pluginManager, Provider<String> defaultGroovyVersion) {
+        public Dependencies(ConfigurationContainer configurations, DependencyFactory factory, Provider<SourceSet> sourceSetProvider, PluginManager pluginManager, Provider<String> defaultGroovyVersion) {
+            this.configurations = configurations;
             this.sourceSetProvider = sourceSetProvider;
             this.pluginManager = pluginManager;
             this.defaultGroovyVersion = defaultGroovyVersion;
+            this.factory = factory;
         }
 
         @Override
         public void implementation(Object notation) {
-            GradlePluginDevelopmentDependencyExtensionInternal.of(getDependencies()).add(sourceSet().getImplementationConfigurationName(), notation);
+            configurations.named(sourceSet().getImplementationConfigurationName()).configure(new AddDependency(notation, factory));
         }
 
         @Override
         public void implementation(Object notation, Action<? super ModuleDependency> action) {
-            ModuleDependency dependency = (ModuleDependency) getDependencies().create(notation);
-            action.execute(dependency);
-            getDependencies().add(sourceSet().getImplementationConfigurationName(), dependency);
+            configurations.named(sourceSet().getImplementationConfigurationName()).configure(new AddDependency(notation, action, factory));
         }
 
         @Override
         public void compileOnly(Object notation) {
-            GradlePluginDevelopmentDependencyExtensionInternal.of(getDependencies()).add(sourceSet().getCompileOnlyConfigurationName(), notation);
+            configurations.named(sourceSet().getCompileOnlyConfigurationName()).configure(new AddDependency(notation, factory));
         }
 
         @Override
         public void runtimeOnly(Object notation) {
-            GradlePluginDevelopmentDependencyExtensionInternal.of(getDependencies()).add(sourceSet().getRuntimeOnlyConfigurationName(), notation);
+            configurations.named(sourceSet().getRuntimeOnlyConfigurationName()).configure(new AddDependency(notation, factory));
         }
 
         @Override
         public void annotationProcessor(Object notation) {
-            getDependencies().add(sourceSet().getAnnotationProcessorConfigurationName(), notation);
+            configurations.named(sourceSet().getAnnotationProcessorConfigurationName()).configure(new AddDependency(notation, factory));
         }
 
         @Override
         public void pluginUnderTestMetadata(Object notation) {
+            configurations.named(pluginUnderTestMetadata().getName()).configure(new AddDependency(notation, factory));
             getDependencies().add(pluginUnderTestMetadata().getName(), notation);
         }
 

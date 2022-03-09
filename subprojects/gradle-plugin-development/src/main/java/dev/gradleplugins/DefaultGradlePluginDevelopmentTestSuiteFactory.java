@@ -30,7 +30,7 @@ final class DefaultGradlePluginDevelopmentTestSuiteFactory implements GradlePlug
 
     @Override
     public GradlePluginDevelopmentTestSuite create(String name) {
-        val result = project.getObjects().newInstance(GradlePluginDevelopmentTestSuiteInternal.class, name, minimumGradleVersion(project), gradleDistributions());
+        val result = project.getObjects().newInstance(GradlePluginDevelopmentTestSuiteInternal.class, name, project, minimumGradleVersion(project), gradleDistributions());
         // Register as finalized action because it adds configuration which early finalize source set property
         result.whenFinalized(new ConfigurePluginUnderTestMetadataTask(project));
         result.getSourceSet().convention(project.provider(() -> {
