@@ -26,6 +26,7 @@ public interface GradlePluginDevelopmentTestSuiteDependencies {
     @Deprecated
     Object spockFramework(String version);
 
+    @Deprecated
     Object gradleFixtures();
 
     @Deprecated
