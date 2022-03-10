@@ -17,14 +17,12 @@
 package dev.gradleplugins.fixtures.sample
 
 import dev.gradleplugins.fixtures.sources.SourceFile
-import org.gradle.api.Plugin
-import org.gradle.api.Project
 
 class JavaBasicGradlePlugin extends GradlePluginElement {
     final String pluginId = "com.example.hello"
     final List<SourceFile> files = Collections.singletonList(sourceFile('java', 'com/example/BasicPlugin.java', """package com.example;
-import ${Plugin.canonicalName};
-import ${Project.canonicalName};
+import org.gradle.api.Plugin;
+import org.gradle.api.Project;
 
 public class BasicPlugin implements Plugin<Project> {
     public void apply(Project project) {

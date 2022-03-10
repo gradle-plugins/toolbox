@@ -17,14 +17,12 @@
 package dev.gradleplugins.fixtures.sample
 
 import dev.gradleplugins.fixtures.sources.SourceFile
-import org.gradle.api.Plugin
-import org.gradle.api.Project
 
 class GroovyBasicGradlePlugin extends GradlePluginElement {
     final String pluginId = "com.example.hello"
     final List<SourceFile> files = Collections.singletonList(sourceFile('groovy', 'com/example/BasicPlugin.groovy', """package com.example
-import ${Plugin.canonicalName}
-import ${Project.canonicalName}
+import org.gradle.api.Plugin
+import org.gradle.api.Project
 
 class BasicPlugin implements Plugin<Project> {
     void apply(Project project) {
