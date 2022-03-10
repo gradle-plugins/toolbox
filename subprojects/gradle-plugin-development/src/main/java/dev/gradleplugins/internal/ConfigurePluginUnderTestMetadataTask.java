@@ -3,12 +3,16 @@ package dev.gradleplugins.internal;
 import dev.gradleplugins.GradlePluginDevelopmentTestSuite;
 import lombok.val;
 import org.gradle.api.Action;
+import org.gradle.api.NamedDomainObjectProvider;
 import org.gradle.api.Project;
 import org.gradle.api.Transformer;
+import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.tasks.ClasspathNormalizer;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.internal.component.local.model.OpaqueComponentIdentifier;
 import org.gradle.plugin.devel.tasks.PluginUnderTestMetadata;
+
+import java.util.Collections;
 
 import static org.gradle.api.internal.artifacts.dsl.dependencies.DependencyFactory.ClassPathNotation;
 
@@ -21,9 +25,11 @@ public final class ConfigurePluginUnderTestMetadataTask implements Action<Gradle
 
     @Override
     public void execute(GradlePluginDevelopmentTestSuite testSuite) {
+        final NamedDomainObjectProvider<Configuration> pluginUnderTestMetadata = testSuite.getDependencies().getPluginUnderTestMetadata();
         testSuite.getPluginUnderTestMetadataTask().configure(task -> {
             task.getOutputDirectory().convention(project.getLayout().getBuildDirectory().dir(task.getName()));
-            task.getPluginClasspath().from(testSuite.getTestedSourceSet().map(asPluginClasspath(project)));
+            task.getPluginClasspath().from(testSuite.getTestedSourceSet().map(asPluginClasspath(project)).orElse(Collections.emptyList()));
+            task.getPluginClasspath().from(pluginUnderTestMetadata);
         });
 
         ignorePluginUnderTestMetadataFile(project);

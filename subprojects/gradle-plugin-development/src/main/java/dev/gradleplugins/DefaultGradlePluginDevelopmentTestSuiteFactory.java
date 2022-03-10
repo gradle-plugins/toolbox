@@ -1,8 +1,8 @@
 package dev.gradleplugins;
 
+import dev.gradleplugins.internal.ConfigurePluginUnderTestMetadataTask;
 import dev.gradleplugins.internal.FinalizableComponent;
 import dev.gradleplugins.internal.GradlePluginDevelopmentTestSuiteInternal;
-import dev.gradleplugins.internal.ConfigurePluginUnderTestMetadataTask;
 import dev.gradleplugins.internal.ReleasedVersionDistributions;
 import lombok.val;
 import org.gradle.api.Project;

@@ -60,4 +60,10 @@ class GradlePluginDevelopmentTestSuitePluginUnderTestMetadataTaskIntegrationTest
         assertThat(project.getConfigurations().getByName("etreTestRuntimeOnly").getDependencies(),
                 hasItem(isA(SelfResolvingDependency.class)));
     }
+
+    @Test
+    void includesPluginUnderTestMetadataConfigurationDependencies() {
+        testSuite.getDependencies().pluginUnderTestMetadata(project.files("my/own/dep.jar"));
+        assertThat(subject.getPluginClasspath(), contains(aFile(withAbsolutePath(endsWith("/my/own/dep.jar")))));
+    }
 }

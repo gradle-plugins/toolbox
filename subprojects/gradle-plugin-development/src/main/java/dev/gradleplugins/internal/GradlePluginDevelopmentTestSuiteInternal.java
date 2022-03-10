@@ -8,6 +8,7 @@ import dev.gradleplugins.TaskView;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.Action;
+import org.gradle.api.NamedDomainObjectProvider;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 
 import static dev.gradleplugins.internal.DefaultDependencyVersions.SPOCK_FRAMEWORK_VERSION;
 import static java.lang.String.format;
@@ -57,7 +59,7 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         this.strategyFactory = new GradlePluginTestingStrategyFactoryInternal(minimumGradleVersion, releasedVersions);
         this.name = name;
         this.displayName = GUtil.toWords(name) + "s";
-        this.dependencies = objects.newInstance(Dependencies.class, DependencyFactory.forProject(project), getSourceSet(), pluginManager, minimumGradleVersion.orElse(GradleVersion.current().getVersion()).map(GradleRuntimeCompatibility::groovyVersionOf));
+        this.dependencies = objects.newInstance(Dependencies.class, project, minimumGradleVersion.orElse(GradleVersion.current().getVersion()).map(GradleRuntimeCompatibility::groovyVersionOf), this);
         this.pluginUnderTestMetadataTask = registerPluginUnderTestMetadataTask(tasks, pluginUnderTestMetadataTaskName(name), displayName);
         this.testTasks = objects.newInstance(TestTaskView.class, testTaskActions, providers.provider(new FinalizeComponentCallable<>()).orElse(getTestTaskCollection()));
         this.finalizeActions.add(new TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule());
@@ -171,6 +173,7 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         private final PluginManager pluginManager;
         private final Provider<String> defaultGroovyVersion;
         private final DependencyFactory factory;
+        private final Supplier<NamedDomainObjectProvider<Configuration>> pluginUnderTestMetadataSupplier;
 
         @Inject
         protected abstract ConfigurationContainer getConfigurations();
@@ -182,17 +185,18 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
             return sourceSetProvider.get();
         }
 
-        private Configuration pluginUnderTestMetadata() {
-            return getConfigurations().maybeCreate(sourceSet().getName() + "PluginUnderTestMetadata");
+        private NamedDomainObjectProvider<Configuration> pluginUnderTestMetadata() {
+            return pluginUnderTestMetadataSupplier.get();
         }
 
         @Inject
-        public Dependencies(ConfigurationContainer configurations, DependencyFactory factory, Provider<SourceSet> sourceSetProvider, PluginManager pluginManager, Provider<String> defaultGroovyVersion) {
-            this.configurations = configurations;
-            this.sourceSetProvider = sourceSetProvider;
-            this.pluginManager = pluginManager;
+        public Dependencies(Project project, Provider<String> defaultGroovyVersion, GradlePluginDevelopmentTestSuite testSuite) {
+            this.configurations = project.getConfigurations();
+            this.sourceSetProvider = testSuite.getSourceSet();
+            this.pluginManager = project.getPluginManager();
             this.defaultGroovyVersion = defaultGroovyVersion;
-            this.factory = factory;
+            this.factory = DependencyFactory.forProject(project);
+            this.pluginUnderTestMetadataSupplier = new PluginUnderTestMetadataConfigurationSupplier(project, testSuite);
         }
 
         @Override
@@ -222,8 +226,12 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
 
         @Override
         public void pluginUnderTestMetadata(Object notation) {
-            configurations.named(pluginUnderTestMetadata().getName()).configure(new AddDependency(notation, factory));
-            getDependencies().add(pluginUnderTestMetadata().getName(), notation);
+            pluginUnderTestMetadata().configure(new AddDependency(notation, factory));
+        }
+
+        @Override
+        public NamedDomainObjectProvider<Configuration> getPluginUnderTestMetadata() {
+            return pluginUnderTestMetadata();
         }
 
         @Override

@@ -1,6 +1,8 @@
 package dev.gradleplugins;
 
 import org.gradle.api.Action;
+import org.gradle.api.NamedDomainObjectProvider;
+import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ModuleDependency;
 
 public interface GradlePluginDevelopmentTestSuiteDependencies {
@@ -15,6 +17,8 @@ public interface GradlePluginDevelopmentTestSuiteDependencies {
     void annotationProcessor(Object notation);
 
     void pluginUnderTestMetadata(Object notation);
+
+    NamedDomainObjectProvider<Configuration> getPluginUnderTestMetadata();
 
     Object testFixtures(Object notation);
 
