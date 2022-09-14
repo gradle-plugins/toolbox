@@ -84,6 +84,8 @@ final class GradleExecutorGradleWrapperImpl extends AbstractGradleExecutor {
             }
             try {
                 process.waitFor();
+                stdoutStream.flush();
+                stderrStream.flush();
                 return new GradleExecutionResultProcessImpl(process.exitValue(), output.toString());
             } catch (InterruptedException e) {
                 // forcefully interrupt the threads so they naturally exit
