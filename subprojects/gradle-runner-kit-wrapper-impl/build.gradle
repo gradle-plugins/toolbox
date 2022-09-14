@@ -8,25 +8,10 @@ plugins {
 
 description = 'Gradle runner kit implementation for Gradle wrapper executor.'
 
-repositories {
-    maven { url = 'https://repo.nokee.dev/snapshot' }
-}
-
-// Caveman dependency shading
-def shadedConfiguration = configurations.create('shaded') { transitive = false }
-configurations.compileOnly.extendsFrom(shadedConfiguration)
-configurations.testImplementation.extendsFrom(shadedConfiguration)
-tasks.named('jar', Jar) { task ->
-    task.from({ shadedConfiguration.files.collect { zipTree(it) } })
-}
-
 dependencies {
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
-    //region Until we release coreExec as part of Grava
-    shaded "dev.nokee:coreExec:${nokeeCoreExecVersion}"
-    shaded "dev.nokee:coreUtils:${nokeeCoreExecVersion}"
     def commonsExecVersion = '1.3'
     def guavaVersion = '28.2-jre'
     def commonsLangVersion = '3.9'

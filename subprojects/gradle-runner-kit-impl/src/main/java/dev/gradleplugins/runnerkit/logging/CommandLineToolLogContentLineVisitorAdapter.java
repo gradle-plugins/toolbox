@@ -2,9 +2,9 @@ package dev.gradleplugins.runnerkit.logging;
 
 import dev.gradleplugins.runnerkit.ActionableTaskCount;
 import dev.gradleplugins.runnerkit.BuildOutcome;
+import dev.gradleplugins.runnerkit.CommandLineToolLogContent;
 import dev.gradleplugins.runnerkit.TaskOutcomeUtils;
 import dev.gradleplugins.runnerkit.TaskPath;
-import dev.nokee.core.exec.CommandLineToolLogContent;
 import lombok.val;
 
 import java.util.function.Consumer;

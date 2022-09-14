@@ -1,6 +1,5 @@
 package dev.gradleplugins.runnerkit;
 
-import dev.nokee.core.exec.CommandLineToolLogContent;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.val;

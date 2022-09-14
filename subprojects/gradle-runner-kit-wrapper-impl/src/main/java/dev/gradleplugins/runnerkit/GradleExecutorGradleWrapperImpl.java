@@ -5,23 +5,27 @@ import dev.gradleplugins.runnerkit.distributions.WrapperAwareGradleDistribution;
 import dev.gradleplugins.runnerkit.providers.GradleExecutionCommandLineProvider;
 import dev.gradleplugins.runnerkit.providers.GradleExecutionEnvironmentVariableProvider;
 import dev.gradleplugins.runnerkit.providers.GradleExecutionProvider;
-import dev.nokee.core.exec.*;
 import lombok.val;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.TeeOutputStream;
 import org.apache.commons.lang3.SystemUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static dev.nokee.core.exec.CommandLineToolInvocationEnvironmentVariables.from;
-import static dev.nokee.core.exec.CommandLineToolInvocationEnvironmentVariables.inherit;
 import static java.util.Arrays.asList;
 
 final class GradleExecutorGradleWrapperImpl extends AbstractGradleExecutor {
@@ -56,21 +60,58 @@ final class GradleExecutorGradleWrapperImpl extends AbstractGradleExecutor {
             throw new UncheckedIOException(e);
         }
 
-        CommandLine command = null;
+        final ProcessBuilder builder = new ProcessBuilder();
         if (SystemUtils.IS_OS_WINDOWS) {
-            command = CommandLine.of(asList("cmd", "/c", "gradlew.bat"), allArguments(parameters));
+            builder.command().addAll(asList("cmd", "/c", "gradlew.bat"));
+            builder.command().addAll(allArguments(parameters));
         } else {
-            command = CommandLine.of("./gradlew", allArguments(parameters));
+            builder.command().add("./gradlew");
+            builder.command().addAll(allArguments(parameters));
         }
-        val result = command.newInvocation()
-                .withEnvironmentVariables(environmentVariables(parameters))
-                .workingDirectory(parameters.getWorkingDirectory().get())
-                .redirectStandardOutput(CommandLineToolInvocationStandardOutputRedirect.forwardTo(parameters.getStandardOutput().get()))
-                .redirectErrorOutput(CommandLineToolInvocationErrorOutputRedirect.forwardTo(parameters.getStandardError().get()))
-                .buildAndSubmit(new ProcessBuilderEngine())
-                .waitFor();
+        builder.environment().putAll(environmentVariables(parameters));
+        builder.directory(parameters.getWorkingDirectory().get());
+        try {
+            final Process process = builder.start();
+            val output = new ByteArrayOutputStream();
+            val stdoutStream = new TeeOutputStream(output, parameters.getStandardOutput().get());
+            val stderrStream = new TeeOutputStream(output, parameters.getStandardError().get());
+            val outputThreads = new Thread[] {
+                    new Thread(copy(process.getInputStream(), stdoutStream)),
+                    new Thread(copy(process.getErrorStream(), stderrStream))
+            };
+            for (Thread thread : outputThreads) {
+                thread.start();
+            }
+            try {
+                process.waitFor();
+                return new GradleExecutionResultProcessImpl(process.exitValue(), output.toString());
+            } catch (InterruptedException e) {
+                // forcefully interrupt the threads so they naturally exit
+                //   we don't try to join the thread here because we were already interrupted
+                for (Thread thread : outputThreads) {
+                    thread.interrupt();
+                }
+                throw new RuntimeException(e);
+            } finally {
+                // tries to join the threads, they should naturally exit after the process finish
+                //   given the process's output stream should close.
+                for (Thread thread : outputThreads) {
+                    thread.join();
+                }
+            }
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-        return new GradleExecutionResultNokeeExecImpl(result);
+    private static Runnable copy(InputStream inStream, OutputStream outStream) {
+        return () -> {
+            try {
+                IOUtils.copy(inStream, outStream);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        };
     }
 
     private static List<String> allArguments(GradleExecutionContext parameters) {
@@ -84,11 +125,13 @@ final class GradleExecutorGradleWrapperImpl extends AbstractGradleExecutor {
         return ((GradleExecutionCommandLineProvider) parameter).getAsArguments().stream();
     }
 
-    private static CommandLineToolInvocationEnvironmentVariables environmentVariables(GradleExecutionContext parameters) {
-        return parameters.getEnvironmentVariables()
-                .map(CommandLineToolInvocationEnvironmentVariables::from)
-                .orElse(inherit())
-                .plus(from(((GradleExecutionEnvironmentVariableProvider)parameters.getJavaHome()).getAsEnvironmentVariables()))
-                .plus(from(Collections.singletonMap("GRADLE_USER_HOME", parameters.getGradleUserHomeDirectory().get())));
+    private static Map<String, String> environmentVariables(GradleExecutionContext parameters) {
+        val result = new HashMap<String, String>();
+        parameters.getEnvironmentVariables().orElse(Collections.emptyMap()).forEach((key, value) -> {
+            result.put(key, value.toString());
+        });
+        result.putAll(((GradleExecutionEnvironmentVariableProvider) parameters.getJavaHome()).getAsEnvironmentVariables());
+        result.put("GRADLE_USER_HOME", parameters.getGradleUserHomeDirectory().get().getAbsolutePath());
+        return result;
     }
 }

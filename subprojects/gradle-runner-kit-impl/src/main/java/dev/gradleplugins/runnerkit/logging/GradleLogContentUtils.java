@@ -4,7 +4,7 @@ import dev.gradleplugins.runnerkit.ActionableTaskCount;
 import dev.gradleplugins.runnerkit.BuildFailures;
 import dev.gradleplugins.runnerkit.BuildResult;
 import dev.gradleplugins.runnerkit.BuildResultImpl;
-import dev.nokee.core.exec.CommandLineToolLogContent;
+import dev.gradleplugins.runnerkit.CommandLineToolLogContent;
 import lombok.val;
 
 import java.util.function.Consumer;

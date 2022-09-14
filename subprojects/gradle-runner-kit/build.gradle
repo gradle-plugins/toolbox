@@ -10,7 +10,6 @@ description = 'Gradle runner kit.'
 
 repositories {
     gradlePluginDevelopment()
-    maven { url = 'https://repo.nokee.dev/snapshot' }
 }
 
 dependencies {

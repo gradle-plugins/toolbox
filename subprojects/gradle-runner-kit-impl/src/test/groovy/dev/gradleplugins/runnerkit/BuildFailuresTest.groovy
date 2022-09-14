@@ -6,7 +6,7 @@ import spock.lang.Unroll
 
 import static dev.gradleplugins.runnerkit.BuildFailure.describedBy
 import static dev.gradleplugins.runnerkit.BuildFailures.from
-import static dev.nokee.core.exec.CommandLineToolLogContent.of
+import static dev.gradleplugins.runnerkit.CommandLineToolLogContent.of
 
 @Subject(BuildFailures)
 class BuildFailuresTest extends Specification {

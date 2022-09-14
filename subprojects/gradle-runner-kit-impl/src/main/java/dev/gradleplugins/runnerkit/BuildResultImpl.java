@@ -1,17 +1,18 @@
 package dev.gradleplugins.runnerkit;
 
-import dev.gradleplugins.runnerkit.logging.*;
-import dev.nokee.core.exec.CommandLineToolLogContent;
 import lombok.EqualsAndHashCode;
 import lombok.val;
 
 import javax.annotation.Nullable;
-import java.util.*;
-import java.util.function.*;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BinaryOperator;
+import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 
 import static dev.gradleplugins.runnerkit.TaskOutcomeUtils.isSkipped;
-import static dev.gradleplugins.runnerkit.logging.GradleLogContentUtils.*;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.stream.Collectors.toList;

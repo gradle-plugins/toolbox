@@ -10,25 +10,12 @@ description = 'Gradle runner kit implementation.'
 
 repositories {
     gradlePluginDevelopment()
-    maven { url = 'https://repo.nokee.dev/snapshot' }
 }
-
-// Caveman dependency shading
-def shadedConfiguration = configurations.create('shaded') { transitive = false }
-configurations.compileOnly.extendsFrom(shadedConfiguration)
-configurations.testImplementation.extendsFrom(shadedConfiguration)
-tasks.named('jar', Jar) { task ->
-    task.from({ shadedConfiguration.files.collect { zipTree(it) } })
-}
-
 
 dependencies {
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
-    //region Until we release coreExec as part of Grava
-    shaded "dev.nokee:coreExec:${nokeeCoreExecVersion}"
-    shaded "dev.nokee:coreUtils:${nokeeCoreExecVersion}"
     def commonsExecVersion = '1.3'
     def guavaVersion = '28.2-jre'
     def commonsLangVersion = '3.9'
@@ -37,7 +24,7 @@ dependencies {
     implementation "com.google.guava:guava:${guavaVersion}"
     implementation "commons-io:commons-io:${commonsIoVersion}"
     implementation "org.apache.commons:commons-lang3:${commonsLangVersion}"
-    //endregion
+    implementation 'net.rubygrapefruit:ansi-control-sequence-util:0.3'
 
     implementation project(':gradle-runner-kit-api')
     implementation project(':gradle-fixtures-file-system')
@@ -51,7 +38,6 @@ dependencies {
     testImplementation testFixtures(project(':gradle-fixtures-file-system'))
     testImplementation 'org.apache.commons:commons-lang3:3.9'
     testImplementation testFixtures(project(':gradle-runner-kit'))
-    testImplementation 'dev.nokee:coreExec:0.5.0-5eeb42cb'
 }
 
 def generatePluginUnderTestMetadataUnderTestTask = tasks.register('generatePluginUnderTestMetadataUnderTest') { task ->

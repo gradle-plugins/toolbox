@@ -1,14 +1,16 @@
 package dev.gradleplugins.runnerkit.providers;
 
 import dev.gradleplugins.fixtures.file.FilePreconditions;
-import dev.gradleplugins.runnerkit.*;
+import dev.gradleplugins.runnerkit.CommandLineToolLogContent;
+import dev.gradleplugins.runnerkit.GradleDistribution;
+import dev.gradleplugins.runnerkit.GradleExecutionContext;
+import dev.gradleplugins.runnerkit.GradleExecutor;
+import dev.gradleplugins.runnerkit.GradleRunner;
+import dev.gradleplugins.runnerkit.InvalidRunnerConfigurationException;
 import dev.gradleplugins.runnerkit.distributions.DownloadableGradleDistribution;
 import dev.gradleplugins.runnerkit.distributions.LocalGradleDistribution;
 import dev.gradleplugins.runnerkit.distributions.VersionAwareGradleDistribution;
 import dev.gradleplugins.runnerkit.distributions.WrapperAwareGradleDistribution;
-import dev.nokee.core.exec.CommandLine;
-import dev.nokee.core.exec.CommandLineToolLogContent;
-import lombok.Getter;
 import lombok.Value;
 import lombok.val;
 import org.gradle.internal.classloader.ClasspathUtil;
@@ -16,7 +18,11 @@ import org.gradle.internal.installation.CurrentGradleInstallation;
 import org.gradle.internal.installation.GradleInstallation;
 import org.gradle.util.GradleVersion;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.util.Optional;
 import java.util.Properties;
@@ -24,8 +30,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-
-import static dev.gradleplugins.fixtures.file.FileSystemUtils.file;
 
 public final class GradleDistributionProvider extends AbstractGradleExecutionProvider<GradleDistribution> {
     public static GradleDistributionProvider fromGradleRunner() {
