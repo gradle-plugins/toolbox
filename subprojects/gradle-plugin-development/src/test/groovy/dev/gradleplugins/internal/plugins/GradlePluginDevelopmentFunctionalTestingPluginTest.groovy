@@ -6,6 +6,8 @@ import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import static java.util.Objects.toString
+
 abstract class AbstractGradlePluginDevelopmentFunctionalTestingPluginTest extends Specification {
     def project = ProjectBuilder.builder().build()
 
@@ -80,7 +82,7 @@ abstract class AbstractGradlePluginDevelopmentFunctionalTestingPluginTest extend
         project.evaluate()
 
         then:
-        project.tasks.functionalTest.systemProperties['dev.gradleplugins.defaultGradleVersion'] == expectedVersion
+        toString(project.tasks.functionalTest.systemProperties['dev.gradleplugins.defaultGradleVersion'], null) == expectedVersion
 
         where:
         coverage                                    | expectedVersion

@@ -14,6 +14,8 @@ import org.gradle.api.tasks.testing.Test;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
 import org.gradle.util.GUtil;
 
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -69,15 +71,41 @@ final class CreateTestTasksFromTestingStrategiesRule implements Action<GradlePlu
             Stream.of(strategy)
                     .flatMap(this::unpackCompositeTestingStrategy)
                     .flatMap(this::onlyCoverageTestingStrategy)
-                    .map(GradleVersionCoverageTestingStrategy::getVersion)
                     .findFirst()
                     .ifPresent(setDefaultGradleVersionSystemProperty(task));
             testingStrategyProperty(task).set(strategy);
         };
     }
 
-    private static Consumer<String> setDefaultGradleVersionSystemProperty(Test task) {
-        return version -> task.systemProperty("dev.gradleplugins.defaultGradleVersion", version);
+    private static Consumer<GradleVersionCoverageTestingStrategy> setDefaultGradleVersionSystemProperty(Test task) {
+        return version -> task.systemProperty("dev.gradleplugins.defaultGradleVersion", new DefaultGradleVersionUnderTest(version));
+    }
+
+    private static class DefaultGradleVersionUnderTest implements Serializable {
+        private final GradleVersionCoverageTestingStrategy strategy;
+        private String value;
+
+        private DefaultGradleVersionUnderTest(GradleVersionCoverageTestingStrategy strategy) {
+            this.strategy = strategy;
+        }
+
+        private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+            if (value == null) {
+                value = strategy.getVersion();
+            }
+            out.writeUTF(value);
+        }
+        private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+            value = in.readUTF();
+        }
+
+        @Override
+        public String toString() {
+            if (value == null) {
+                value = strategy.getVersion();
+            }
+            return value;
+        }
     }
 
     private Stream<GradleVersionCoverageTestingStrategy> onlyCoverageTestingStrategy(GradlePluginTestingStrategy strategy) {
