@@ -35,7 +35,7 @@ public final class GradlePluginTestingStrategyFactoryInternal implements GradleP
 
     @Override
     public GradleVersionCoverageTestingStrategy getCoverageForMinimumVersion() {
-        return new DefaultGradleVersionCoverageTestingStrategy(MINIMUM_GRADLE, () -> minimumVersion.get(), () -> {
+        return new DefaultGradleVersionCoverageTestingStrategy(MINIMUM_GRADLE, new MinimumVersionSupplier(minimumVersion), () -> {
             val result = minimumVersion.get();
             assertKnownMinimumVersion(result);
             return result;
@@ -44,7 +44,7 @@ public final class GradlePluginTestingStrategyFactoryInternal implements GradleP
 
     @Override
     public GradleVersionCoverageTestingStrategy getCoverageForLatestNightlyVersion() {
-        return new DefaultGradleVersionCoverageTestingStrategy(LATEST_NIGHTLY, () -> "latest-nightly", () -> releasedVersions.getMostRecentSnapshot().getVersion());
+        return new DefaultGradleVersionCoverageTestingStrategy(LATEST_NIGHTLY, new FixedVersionSupplier("latest-nightly"), () -> releasedVersions.getMostRecentSnapshot().getVersion());
     }
 
     @Override
@@ -72,12 +72,12 @@ public final class GradlePluginTestingStrategyFactoryInternal implements GradleP
 
     @Override
     public GradleVersionCoverageTestingStrategy getCoverageForLatestGlobalAvailableVersion() {
-        return new DefaultGradleVersionCoverageTestingStrategy(LATEST_GLOBAL_AVAILABLE, () -> "latest-released", () -> releasedVersions.getMostRecentRelease().getVersion());
+        return new DefaultGradleVersionCoverageTestingStrategy(LATEST_GLOBAL_AVAILABLE, new FixedVersionSupplier("latest-released"), () -> releasedVersions.getMostRecentRelease().getVersion());
     }
 
     @Override
     public GradleVersionCoverageTestingStrategy coverageForGradleVersion(String version) {
-        return new DefaultGradleVersionCoverageTestingStrategy(version, () -> version, () -> {
+        return new DefaultGradleVersionCoverageTestingStrategy(version, new FixedVersionSupplier(version), () -> {
             if (!isKnownVersion(version)) {
                 throw new IllegalArgumentException(String.format("Unknown Gradle version '%s' for adhoc testing strategy.", version));
             }
@@ -132,6 +132,34 @@ public final class GradlePluginTestingStrategyFactoryInternal implements GradleP
         }
     }
 
+    @EqualsAndHashCode
+    private static final class MinimumVersionSupplier implements Supplier<String> {
+        @EqualsAndHashCode.Exclude private final Provider<String> value;
+
+        private MinimumVersionSupplier(Provider<String> value) {
+            this.value = value;
+        }
+
+        @Override
+        public String get() {
+            return value.get();
+        }
+    }
+
+    @EqualsAndHashCode
+    private static final class FixedVersionSupplier implements Supplier<String> {
+        private final String value;
+
+        private FixedVersionSupplier(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String get() {
+            return value;
+        }
+    }
+
     private final class DefaultGradleVersionCoverageTestingStrategy implements GradlePluginTestingStrategyInternal, GradleVersionCoverageTestingStrategy {
         private final String name;
         private final Supplier<String> rawVersionSupplier;
@@ -171,12 +199,12 @@ public final class GradlePluginTestingStrategyFactoryInternal implements GradleP
                 return false;
             }
             DefaultGradleVersionCoverageTestingStrategy that = (DefaultGradleVersionCoverageTestingStrategy) o;
-            return Objects.equals(rawVersionSupplier.get(), that.rawVersionSupplier.get());
+            return Objects.equals(rawVersionSupplier, that.rawVersionSupplier);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(rawVersionSupplier.get(), getName());
+            return Objects.hash(rawVersionSupplier, getName());
         }
 
         @Override
