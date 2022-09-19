@@ -130,9 +130,6 @@ public final class ProjectMatchers {
             @Override
             protected String featureValueOf(Object actual) {
                 Dependency dependency = null;
-                if (actual instanceof Provider) {
-                    actual = ((Provider<?>) actual).get();
-                }
                 if (actual instanceof Dependency) {
                     final StringBuilder builder = new StringBuilder();
                     builder.append(((Dependency) actual).getGroup());

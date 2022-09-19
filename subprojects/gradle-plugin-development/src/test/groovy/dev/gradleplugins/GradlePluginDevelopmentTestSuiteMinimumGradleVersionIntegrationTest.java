@@ -35,7 +35,7 @@ class GradlePluginDevelopmentTestSuiteMinimumGradleVersionIntegrationTest {
 
     @Test
     void returnsGroovyDependencyForCurrentGradleVersion() {
-        assertThat(subject.getDependencies().groovy(), coordinate("org.codehaus.groovy:groovy-all:2.5.8"));
+        assertThat(subject.getDependencies().groovy(), providerOf(coordinate("org.codehaus.groovy:groovy-all:2.5.8")));
     }
 
     @Nested
@@ -75,7 +75,7 @@ class GradlePluginDevelopmentTestSuiteMinimumGradleVersionIntegrationTest {
 
         @Test
         void returnsGroovyDependencyForMinimumGradleVersion() {
-            assertThat(subject.getDependencies().groovy(), coordinate("org.codehaus.groovy:groovy-all:2.4.12"));
+            assertThat(subject.getDependencies().groovy(), providerOf(coordinate("org.codehaus.groovy:groovy-all:2.4.12")));
         }
     }
 }

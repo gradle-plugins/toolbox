@@ -271,8 +271,8 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         }
 
         @Override
-        public Object groovy() {
-            return defaultGroovyVersion.map(GradlePluginDevelopmentDependencyExtensionInternal.of(getDependencies())::groovy);
+        public Provider<Object> groovy() {
+            return defaultGroovyVersion.map(this::groovy);
         }
 
         @Override
