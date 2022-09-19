@@ -12,6 +12,10 @@ import org.gradle.api.tasks.SourceSetContainer;
 public final class SourceSetUtils {
     private SourceSetUtils() {}
 
+    public static boolean isMain(SourceSet self) {
+        return self.getName().equals("main");
+    }
+
     public static void sourceSets(Project project, Action<? super SourceSetContainer> action) {
         project.getExtensions().configure("sourceSets", action);
     }
