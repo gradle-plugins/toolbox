@@ -4,8 +4,11 @@ import org.gradle.api.Named;
 import org.gradle.api.NamedDomainObjectCollectionSchema;
 import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.ConfigurationPublications;
 import org.gradle.api.artifacts.Dependency;
+import org.gradle.api.artifacts.ModuleDependency;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
+import org.gradle.api.capabilities.Capability;
 import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.plugins.ExtensionsSchema;
 import org.gradle.api.plugins.PluginAware;
@@ -22,7 +25,7 @@ import static org.hamcrest.Matchers.equalTo;
 
 public final class ProjectMatchers {
     public static <T> Matcher<T> extensions(Matcher<? super Iterable<ExtensionsSchema.ExtensionSchema>> matcher) {
-        return new FeatureMatcher<T, Iterable<ExtensionsSchema.ExtensionSchema>>(matcher, "", "") {
+        return new FeatureMatcher<T, Iterable<ExtensionsSchema.ExtensionSchema>>(matcher, "a extension aware object", "extension aware object") {
             @Override
             protected Iterable<ExtensionsSchema.ExtensionSchema> featureValueOf(T actual) {
                 return ((ExtensionAware) actual).getExtensions().getExtensionsSchema().getElements();
@@ -125,10 +128,10 @@ public final class ProjectMatchers {
         };
     }
 
-    public static Matcher<Object> coordinate(String coordinate) {
-        return new FeatureMatcher<Object, String>(equalTo(coordinate), "", "") {
+    public static <T> Matcher<T> coordinate(String coordinate) {
+        return new FeatureMatcher<T, String>(equalTo(coordinate), "", "") {
             @Override
-            protected String featureValueOf(Object actual) {
+            protected String featureValueOf(T actual) {
                 Dependency dependency = null;
                 if (actual instanceof Dependency) {
                     final StringBuilder builder = new StringBuilder();
@@ -136,6 +139,28 @@ public final class ProjectMatchers {
                     builder.append(":").append(((Dependency) actual).getName());
                     builder.append(":").append(((Dependency) actual).getVersion());
                     return builder.toString();
+                } else if (actual instanceof Capability) {
+                    final StringBuilder builder = new StringBuilder();
+                    builder.append(((Capability) actual).getGroup());
+                    builder.append(":").append(((Capability) actual).getName());
+                    builder.append(":").append(((Capability) actual).getVersion());
+                    return builder.toString();
+                }
+                throw new UnsupportedOperationException();
+            }
+        };
+    }
+
+    public static <T> Matcher<T> capabilities(Matcher<? super Iterable<Capability>> matcher) {
+        return new FeatureMatcher<T, Iterable<Capability>>(matcher, "", "") {
+            @Override
+            protected Iterable<Capability> featureValueOf(T actual) {
+                if (actual instanceof Dependency) {
+                    return ((ModuleDependency) actual).getRequestedCapabilities();
+                } else  if (actual instanceof ConfigurationPublications) {
+                    @SuppressWarnings("unchecked")
+                    final Iterable<Capability> result = (Iterable<Capability>) ((ConfigurationPublications) actual).getCapabilities();
+                    return result;
                 }
                 throw new UnsupportedOperationException();
             }
