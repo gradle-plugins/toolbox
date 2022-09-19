@@ -17,6 +17,9 @@
 package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.JavaGradlePluginDevelopmentExtension;
+import dev.gradleplugins.internal.rules.ConfigureJvmCompatibilityRule;
+import dev.gradleplugins.internal.rules.FinalizeJvmCompatibilityExtensionRule;
+import dev.gradleplugins.internal.rules.JvmCompatibilityExtension;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 
@@ -31,10 +34,15 @@ public class JavaGradlePluginDevelopmentPlugin implements Plugin<Project> {
         assertJavaGradlePluginIsNotPreviouslyApplied(project.getPluginManager(), PLUGIN_ID);
         assertKotlinDslPluginIsNeverApplied(project.getPluginManager(), PLUGIN_ID);
 
+        project.afterEvaluate(new FinalizeJvmCompatibilityExtensionRule());
         project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-base");
         project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-testing-base");
         project.getPluginManager().apply("java-gradle-plugin"); // For plugin development
 
-        registerLanguageExtension(project, "java", JavaGradlePluginDevelopmentExtension.class);
+        registerLanguageExtension(project, "java", LanguageExtensionInternal.class);
+
+        new ConfigureJvmCompatibilityRule().execute(project);
     }
+
+    public interface LanguageExtensionInternal extends JavaGradlePluginDevelopmentExtension, JvmCompatibilityExtension {}
 }

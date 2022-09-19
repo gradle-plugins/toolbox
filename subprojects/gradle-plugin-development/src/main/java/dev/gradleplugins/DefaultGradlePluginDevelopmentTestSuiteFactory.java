@@ -1,7 +1,6 @@
 package dev.gradleplugins;
 
 import dev.gradleplugins.internal.ConfigurePluginUnderTestMetadataTask;
-import dev.gradleplugins.internal.FinalizableComponent;
 import dev.gradleplugins.internal.GradlePluginDevelopmentTestSuiteInternal;
 import dev.gradleplugins.internal.ReleasedVersionDistributions;
 import lombok.val;
@@ -19,6 +18,7 @@ import java.util.Objects;
 
 import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
+import static dev.gradleplugins.internal.util.ProviderUtils.finalizeValueOnRead;
 import static dev.gradleplugins.internal.util.SourceSetUtils.sourceSets;
 
 final class DefaultGradlePluginDevelopmentTestSuiteFactory implements GradlePluginDevelopmentTestSuiteFactory {
@@ -86,8 +86,7 @@ final class DefaultGradlePluginDevelopmentTestSuiteFactory implements GradlePlug
     private static Provider<String> ofDevelMinimumGradleVersionIfAvailable(Project project) {
         return project.provider(() -> {
             if (project.getPluginManager().hasPlugin("java-gradle-plugin") && project.getPluginManager().hasPlugin("dev.gradleplugins.gradle-plugin-base")) {
-                ((FinalizableComponent) compatibility(gradlePlugin(project))).finalizeComponent();
-                return compatibility(gradlePlugin(project)).getMinimumGradleVersion();
+                return finalizeValueOnRead(compatibility(gradlePlugin(project)).getMinimumGradleVersion());
             } else {
                 return Providers.<String>notDefined(); // no minimum Gradle version...
             }

@@ -20,6 +20,9 @@ import dev.gradleplugins.GradleRuntimeCompatibility;
 import dev.gradleplugins.GroovyGradlePluginDevelopmentExtension;
 import dev.gradleplugins.internal.DeferredRepositoryFactory;
 import dev.gradleplugins.internal.GradlePluginDevelopmentDependencyExtensionInternal;
+import dev.gradleplugins.internal.rules.ConfigureJvmCompatibilityRule;
+import dev.gradleplugins.internal.rules.FinalizeJvmCompatibilityExtensionRule;
+import dev.gradleplugins.internal.rules.JvmCompatibilityExtension;
 import lombok.val;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -38,6 +41,7 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
         assertJavaGradlePluginIsNotPreviouslyApplied(project.getPluginManager(), PLUGIN_ID);
         assertKotlinDslPluginIsNeverApplied(project.getPluginManager(), PLUGIN_ID);
 
+        project.afterEvaluate(new FinalizeJvmCompatibilityExtensionRule());
         project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-base");
         project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-testing-base");
         // Starting with Gradle 6.4, precompiled Groovy DSL plugins are available
@@ -48,8 +52,10 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
         }
         project.getPluginManager().apply("groovy");
 
-        val groovy = registerLanguageExtension(project, "groovy", GroovyGradlePluginDevelopmentExtension.class);
+        val groovy = registerLanguageExtension(project, "groovy", LanguageExtensionInternal.class);
         val extension = compatibility(gradlePlugin(project));
+
+        new ConfigureJvmCompatibilityRule().execute(project);
 
         // Configure the Groovy version and dependency
         groovy.getGroovyVersion().convention(extension.getMinimumGradleVersion().map(GradleRuntimeCompatibility::groovyVersionOf));
@@ -66,4 +72,6 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
         //   We could also check that no plugin id on `gradlePlugin` container points to a Java source
         //   We could do the same for Kotlin code
     }
+
+    public interface LanguageExtensionInternal extends GroovyGradlePluginDevelopmentExtension, JvmCompatibilityExtension {}
 }

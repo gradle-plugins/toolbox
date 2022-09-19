@@ -3,6 +3,7 @@ package dev.gradleplugins;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.ExternalDependency;
 import org.gradle.api.artifacts.SelfResolvingDependency;
+import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,7 @@ class GradlePluginDevelopmentBasePluginIntegrationTest {
 
     @Test
     void addsExternalGradleApiDependencyForMinimumGradleVersionToCompileOnlyApiIfAvailable() {
+        ((ProjectInternal) project).evaluate();
         assumeTrue(project.getConfigurations().findByName("compileOnlyApi") != null);
         assertThat(project.getConfigurations().getByName("compileOnlyApi").getDependencies(),
                 hasItem(allOf(isA(ExternalDependency.class), coordinate("dev.gradleplugins:gradle-api:6.5"))));
@@ -43,6 +45,7 @@ class GradlePluginDevelopmentBasePluginIntegrationTest {
 
     @Test
     void addsExternalGradleApiDependencyForMinimumGradleVersionToCompileOnlyIfCompileOnlyApiIsNotAvailable() {
+        ((ProjectInternal) project).evaluate();
         assumeTrue(project.getConfigurations().findByName("compileOnlyApi") == null);
         assertThat(project.getConfigurations().getByName("compileOnly").getDependencies(),
                 hasItem(allOf(isA(ExternalDependency.class), coordinate("dev.gradleplugins:gradle-api:6.5"))));
