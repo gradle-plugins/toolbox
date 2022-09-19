@@ -4,7 +4,6 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.attributes.Usage;
 import org.gradle.api.tasks.SourceSet;
-import org.gradle.plugin.devel.tasks.PluginUnderTestMetadata;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -13,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import static dev.gradleplugins.GradlePluginDevelopmentTestSuiteFactory.forProject;
 import static dev.gradleplugins.ProjectMatchers.coordinate;
 import static dev.gradleplugins.ProjectMatchers.named;
-import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.sourceSets;
+import static dev.gradleplugins.internal.util.SourceSetUtils.sourceSets;
 import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -33,7 +32,7 @@ class GradlePluginDevelopmentTestSuitePluginUnderTestMetadataConfigurationIntegr
     void configureSourceSet() {
         project.setGroup("com.example");
         project.getPluginManager().apply("java-base");
-        subject.getSourceSet().set(sourceSets(project).create("koli"));
+        subject.getSourceSet().set(sourceSets(project).map(it -> it.maybeCreate("koli")));
     }
 
     @Test

@@ -19,7 +19,7 @@ import java.util.Objects;
 
 import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
-import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.sourceSets;
+import static dev.gradleplugins.internal.util.SourceSetUtils.sourceSets;
 
 final class DefaultGradlePluginDevelopmentTestSuiteFactory implements GradlePluginDevelopmentTestSuiteFactory {
     private final Project project;
@@ -33,13 +33,9 @@ final class DefaultGradlePluginDevelopmentTestSuiteFactory implements GradlePlug
         val result = project.getObjects().newInstance(GradlePluginDevelopmentTestSuiteInternal.class, name, project, minimumGradleVersion(project), gradleDistributions());
         // Register as finalized action because it adds configuration which early finalize source set property
         result.whenFinalized(new ConfigurePluginUnderTestMetadataTask(project));
-        result.getSourceSet().convention(project.provider(() -> {
-            if (project.getPluginManager().hasPlugin("java-base")) {
-                return sourceSets(project).maybeCreate(name);
-            } else {
-                throw new RuntimeException("Please apply 'java-base' plugin.");
-            }
-        }));
+        result.getSourceSet().convention(sourceSets(project).map(it -> it.maybeCreate(name)).orElse(project.provider(() -> {
+            throw new RuntimeException("Please apply 'java-base' plugin.");
+        })));
         result.getTestedSourceSet().convention(project.provider(() -> {
             if (project.getPluginManager().hasPlugin("java-gradle-plugin")) {
                 return gradlePlugin(project).getPluginSourceSet();

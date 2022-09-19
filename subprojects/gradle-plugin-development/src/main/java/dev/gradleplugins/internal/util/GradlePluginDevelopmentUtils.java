@@ -2,7 +2,6 @@ package dev.gradleplugins.internal.util;
 
 import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaPluginExtension;
-import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 
 public final class GradlePluginDevelopmentUtils {
@@ -12,9 +11,5 @@ public final class GradlePluginDevelopmentUtils {
 
     public static JavaPluginExtension java(Project project) {
         return project.getExtensions().getByType(JavaPluginExtension.class);
-    }
-
-    public static SourceSetContainer sourceSets(Project project) {
-        return project.getExtensions().getByType(SourceSetContainer.class);
     }
 }

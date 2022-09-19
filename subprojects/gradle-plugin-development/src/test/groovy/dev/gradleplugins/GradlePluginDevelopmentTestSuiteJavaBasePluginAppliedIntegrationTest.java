@@ -8,7 +8,8 @@ import org.junit.jupiter.api.Test;
 
 import static dev.gradleplugins.GradlePluginDevelopmentTestSuiteFactory.forProject;
 import static dev.gradleplugins.ProjectMatchers.named;
-import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.sourceSets;
+import static dev.gradleplugins.ProjectMatchers.providerOf;
+import static dev.gradleplugins.internal.util.SourceSetUtils.sourceSets;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
@@ -26,32 +27,32 @@ class GradlePluginDevelopmentTestSuiteJavaBasePluginAppliedIntegrationTest {
     @Test
     void createsDefaultSourceSetOnFinalize() {
         subject.finalizeComponent();
-        assertThat(sourceSets(project), hasItem(named("loke")));
+        assertThat(sourceSets(project), providerOf(hasItem(named("loke"))));
     }
 
     @Test
     void createsDefaultSourceSetOnSourceSetPropertyQueryOfConvention() {
         subject.getSourceSet().set((SourceSet) null);
         assertThat(subject.getSourceSet().get(), named("loke"));
-        assertThat(sourceSets(project), hasItem(named("loke")));
+        assertThat(sourceSets(project), providerOf(hasItem(named("loke"))));
     }
 
     @Test
     void doesNotCreateDefaultSourceSetOnFinalizeWhenSourceSetPropertyOverridden() {
-        subject.getSourceSet().set(sourceSets(project).create("kiel"));
+        subject.getSourceSet().set(sourceSets(project).map(it -> it.maybeCreate("kiel")));
         subject.finalizeComponent();
-        assertThat(sourceSets(project), not(hasItem(named("loke"))));
+        assertThat(sourceSets(project), providerOf(not(hasItem(named("loke")))));
     }
 
     @Test
     void doesNotCreateDefaultSourceSetOnSourceSetPropertyQueryWhenSourceSetPropertyOverridden() {
-        subject.getSourceSet().set(sourceSets(project).create("lope"));
+        subject.getSourceSet().set(sourceSets(project).map(it -> it.maybeCreate("lope")));
         assertThat(subject.getSourceSet().get(), named("lope"));
-        assertThat(sourceSets(project), not(hasItem(named("loke"))));
+        assertThat(sourceSets(project), providerOf(not(hasItem(named("loke")))));
     }
 
     @Test
     void doesNotCreateDefaultSourceSetOnTestSuiteCreation() {
-        assertThat(sourceSets(project), not(hasItem(named("loke"))));
+        assertThat(sourceSets(project), providerOf(not(hasItem(named("loke")))));
     }
 }
