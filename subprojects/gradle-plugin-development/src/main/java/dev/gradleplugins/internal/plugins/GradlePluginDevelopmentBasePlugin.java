@@ -1,10 +1,13 @@
 package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.internal.rules.AddGradleApiDependencyToCompileOnlyApiConfigurationUsingCompatibilityInformationIfPresentRule;
+import dev.gradleplugins.internal.rules.VersionedSourceSet_AddGradleApiDependencyToCompileOnlyConfigurationOfEachVersionedSourceSetRule;
+import dev.gradleplugins.internal.rules.VersionedSourceSet_AddVersionedComponentDependencyToPluginSourceSetAsImplementationDependencyRule;
 import dev.gradleplugins.internal.rules.ConfigureGradleApiVersionConventionBasedOnMinimumGradleVersionRule;
 import dev.gradleplugins.internal.rules.ConfigureMinimumGradleVersionConventionWithCurrentGradleVersionRule;
 import dev.gradleplugins.internal.rules.FinalizeCompatibilityExtensionRule;
 import dev.gradleplugins.internal.rules.RegisterCompatibilityExtensionGradlePluginDevelopmentExtensionRule;
+import dev.gradleplugins.internal.rules.VersionedSourceSet_RegisterJvmFeatureForEachVersionedSourceSetRule;
 import dev.gradleplugins.internal.rules.RemoveGradleApiSelfResolvingDependencyFromMainApiConfigurationRule;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -22,14 +25,17 @@ abstract /*final*/ class GradlePluginDevelopmentBasePlugin implements Plugin<Pro
         project.getPluginManager().apply(GradlePluginDevelopmentExtensionPlugin.class);
         project.getPluginManager().withPlugin("java-gradle-plugin", withoutParameter(() -> {
             new RegisterCompatibilityExtensionGradlePluginDevelopmentExtensionRule().execute(project);
+            new VersionedSourceSet_RegisterJvmFeatureForEachVersionedSourceSetRule().execute(project);
 
             new RemoveGradleApiSelfResolvingDependencyFromMainApiConfigurationRule().execute(project);
             new ConfigureGradleApiVersionConventionBasedOnMinimumGradleVersionRule().execute(project);
+            new VersionedSourceSet_AddGradleApiDependencyToCompileOnlyConfigurationOfEachVersionedSourceSetRule().execute(project);
 
             project.afterEvaluate(withoutParameter(() -> {
                 new AddGradleApiDependencyToCompileOnlyApiConfigurationUsingCompatibilityInformationIfPresentRule().execute(project);
                 new ConfigureMinimumGradleVersionConventionWithCurrentGradleVersionRule().execute(project);
                 new FinalizeCompatibilityExtensionRule().execute(project);
+                new VersionedSourceSet_AddVersionedComponentDependencyToPluginSourceSetAsImplementationDependencyRule().execute(project);
             }));
         }));
         project.getPluginManager().withPlugin("java-gradle-plugin", new RemoveTestSourceSets(project));
