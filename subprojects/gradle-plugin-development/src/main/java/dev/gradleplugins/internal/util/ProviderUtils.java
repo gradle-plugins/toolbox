@@ -1,9 +1,12 @@
 package dev.gradleplugins.internal.util;
 
+import org.gradle.api.Transformer;
 import org.gradle.api.provider.HasConfigurableValue;
 import org.gradle.api.provider.Provider;
 
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public final class ProviderUtils {
     private ProviderUtils() {}
@@ -31,5 +34,9 @@ public final class ProviderUtils {
         if (value != null) {
             action.accept(value);
         }
+    }
+
+    public static <OUT, IN, ITERABLE extends Iterable<? extends IN>> Transformer<Iterable<OUT>, ITERABLE> transformEach(Transformer<? extends OUT, ? super IN> transformer) {
+        return it -> StreamSupport.stream(it.spliterator(), false).map(transformer::transform).collect(Collectors.toList());
     }
 }
