@@ -6,6 +6,7 @@ import dev.gradleplugins.internal.rules.VersionedSourceSet_AddGradleApiDependenc
 import dev.gradleplugins.internal.rules.VersionedSourceSet_AddVersionedComponentDependencyToPluginSourceSetAsImplementationDependencyRule;
 import dev.gradleplugins.internal.rules.ConfigureGradleApiVersionConventionBasedOnMinimumGradleVersionRule;
 import dev.gradleplugins.internal.rules.ConfigureMinimumGradleVersionConventionWithCurrentGradleVersionRule;
+import dev.gradleplugins.internal.rules.VersionedSourceSet_DependsOnApiSourceSetIfAvailableRule;
 import dev.gradleplugins.internal.rules.ApiSourceSet_RegisterApiSourceSetAsJavaFeatureWhenAvailableRule;
 import dev.gradleplugins.internal.rules.ApiSourceSet_LockApiSourceSetPropertyOnGradleExtensionPluginDevelopmentExtensionRule;
 import dev.gradleplugins.internal.rules.FinalizeCompatibilityExtensionRule;
@@ -36,6 +37,7 @@ abstract /*final*/ class GradlePluginDevelopmentBasePlugin implements Plugin<Pro
             new RemoveGradleApiSelfResolvingDependencyFromMainApiConfigurationRule().execute(project);
             new ConfigureGradleApiVersionConventionBasedOnMinimumGradleVersionRule().execute(project);
             new VersionedSourceSet_AddGradleApiDependencyToCompileOnlyConfigurationOfEachVersionedSourceSetRule().execute(project);
+            new VersionedSourceSet_DependsOnApiSourceSetIfAvailableRule().execute(project);
 
             project.afterEvaluate(withoutParameter(() -> {
                 new ApiSourceSet_LockApiSourceSetPropertyOnGradleExtensionPluginDevelopmentExtensionRule().execute(project);
