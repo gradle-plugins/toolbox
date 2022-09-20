@@ -21,6 +21,11 @@ final class VersionedSourceSetUtils {
     }
 
     // TODO: Move somewhere else
+    public static String apiClassifier() {
+        return "api";
+    }
+
+    // TODO: Move somewhere else
     public static Transformer<Dependency, String> asDependency(Project project) {
         return capabilityName -> {
             final ProjectDependency dependency = (ProjectDependency) project.getDependencies().create(project);
