@@ -17,7 +17,11 @@ import static dev.gradleplugins.ProjectMatchers.providerOf;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasToString;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.iterableWithSize;
 
 class GradlePluginDevelopmentTestSuiteCompositeTestingStrategyIntegrationTest {
     private final Project project = ProjectBuilder.builder().build();
@@ -45,7 +49,7 @@ class GradlePluginDevelopmentTestSuiteCompositeTestingStrategyIntegrationTest {
 
     @Test
     void detectsComposedCoverageVersionOnEachTestTasks() {
-        assertThat(subject.getTestTasks().getElements().map(transformEach(this::asSystemProperties)), providerOf(contains(hasEntry("dev.gradleplugins.defaultGradleVersion", "6.7"), hasEntry("dev.gradleplugins.defaultGradleVersion", "7.0"))));
+        assertThat(subject.getTestTasks().getElements().map(transformEach(this::asSystemProperties)), providerOf(contains(hasEntry(is("dev.gradleplugins.defaultGradleVersion"), hasToString("6.7")), hasEntry(is("dev.gradleplugins.defaultGradleVersion"), hasToString("7.0")))));
     }
 
     private static <OUT, IN> Transformer<Iterable<OUT>, Iterable<IN>> transformEach(Function<? super IN, ? extends OUT> mapper) {

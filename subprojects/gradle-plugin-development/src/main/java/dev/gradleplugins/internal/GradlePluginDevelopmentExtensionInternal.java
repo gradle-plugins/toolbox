@@ -1,7 +1,7 @@
 package dev.gradleplugins.internal;
 
-import dev.gradleplugins.GroovyGradlePluginDevelopmentExtension;
-import dev.gradleplugins.JavaGradlePluginDevelopmentExtension;
+import dev.gradleplugins.internal.plugins.GroovyGradlePluginDevelopmentPlugin;
+import dev.gradleplugins.internal.plugins.JavaGradlePluginDevelopmentPlugin;
 import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
@@ -17,8 +17,6 @@ import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.plugins.internal.JavaConfigurationVariantMapping;
-import org.gradle.api.provider.Property;
-import org.gradle.api.provider.ProviderFactory;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.javadoc.Groovydoc;
@@ -28,7 +26,7 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
-public abstract class GradlePluginDevelopmentExtensionInternal implements GroovyGradlePluginDevelopmentExtension, JavaGradlePluginDevelopmentExtension {
+public abstract class GradlePluginDevelopmentExtensionInternal implements GroovyGradlePluginDevelopmentPlugin.LanguageExtensionInternal, JavaGradlePluginDevelopmentPlugin.LanguageExtensionInternal {
     private final JavaPluginExtension java;
     private boolean defaultRepositoriesDisabled = System.getProperty("dev.gradleplugins.default-repositories", "enabled").equals("disabled");
 

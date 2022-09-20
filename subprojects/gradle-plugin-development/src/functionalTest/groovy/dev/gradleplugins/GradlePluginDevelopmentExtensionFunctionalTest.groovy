@@ -145,7 +145,7 @@ abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends Ab
         expect:
         fails('help')
         failure.assertHasDescription("A problem occurred configuring root project 'gradle-plugin'.")
-        failure.assertHasCause("The value for property 'minimumGradleVersion' cannot be changed any further.")
+        failure.assertHasCause("The value for extension 'compatibility' property 'minimumGradleVersion' cannot be changed any further.")
     }
 
     def "can generate Javadoc Jar"() {

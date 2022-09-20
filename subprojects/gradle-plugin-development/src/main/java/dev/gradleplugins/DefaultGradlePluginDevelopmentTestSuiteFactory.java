@@ -1,7 +1,6 @@
 package dev.gradleplugins;
 
 import dev.gradleplugins.internal.ConfigurePluginUnderTestMetadataTask;
-import dev.gradleplugins.internal.FinalizableComponent;
 import dev.gradleplugins.internal.GradlePluginDevelopmentTestSuiteInternal;
 import dev.gradleplugins.internal.ReleasedVersionDistributions;
 import lombok.val;
@@ -19,7 +18,8 @@ import java.util.Objects;
 
 import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
-import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.sourceSets;
+import static dev.gradleplugins.internal.util.ProviderUtils.finalizeValueOnRead;
+import static dev.gradleplugins.internal.util.SourceSetUtils.sourceSets;
 
 final class DefaultGradlePluginDevelopmentTestSuiteFactory implements GradlePluginDevelopmentTestSuiteFactory {
     private final Project project;
@@ -33,13 +33,9 @@ final class DefaultGradlePluginDevelopmentTestSuiteFactory implements GradlePlug
         val result = project.getObjects().newInstance(GradlePluginDevelopmentTestSuiteInternal.class, name, project, minimumGradleVersion(project), gradleDistributions());
         // Register as finalized action because it adds configuration which early finalize source set property
         result.whenFinalized(new ConfigurePluginUnderTestMetadataTask(project));
-        result.getSourceSet().convention(project.provider(() -> {
-            if (project.getPluginManager().hasPlugin("java-base")) {
-                return sourceSets(project).maybeCreate(name);
-            } else {
-                throw new RuntimeException("Please apply 'java-base' plugin.");
-            }
-        }));
+        result.getSourceSet().convention(sourceSets(project).map(it -> it.maybeCreate(name)).orElse(project.provider(() -> {
+            throw new RuntimeException("Please apply 'java-base' plugin.");
+        })));
         result.getTestedSourceSet().convention(project.provider(() -> {
             if (project.getPluginManager().hasPlugin("java-gradle-plugin")) {
                 return gradlePlugin(project).getPluginSourceSet();
@@ -90,8 +86,7 @@ final class DefaultGradlePluginDevelopmentTestSuiteFactory implements GradlePlug
     private static Provider<String> ofDevelMinimumGradleVersionIfAvailable(Project project) {
         return project.provider(() -> {
             if (project.getPluginManager().hasPlugin("java-gradle-plugin") && project.getPluginManager().hasPlugin("dev.gradleplugins.gradle-plugin-base")) {
-                ((FinalizableComponent) compatibility(gradlePlugin(project))).finalizeComponent();
-                return compatibility(gradlePlugin(project)).getMinimumGradleVersion();
+                return finalizeValueOnRead(compatibility(gradlePlugin(project)).getMinimumGradleVersion());
             } else {
                 return Providers.<String>notDefined(); // no minimum Gradle version...
             }

@@ -4,6 +4,7 @@ import org.gradle.api.Action;
 import org.gradle.api.NamedDomainObjectProvider;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ModuleDependency;
+import org.gradle.api.provider.Provider;
 
 public interface GradlePluginDevelopmentTestSuiteDependencies {
     void implementation(Object notation);
@@ -38,7 +39,7 @@ public interface GradlePluginDevelopmentTestSuiteDependencies {
     Object gradleTestKit(String version);
 
     @Deprecated
-    Object groovy();
+    Provider<Object> groovy();
 
     @Deprecated
     Object groovy(String version);

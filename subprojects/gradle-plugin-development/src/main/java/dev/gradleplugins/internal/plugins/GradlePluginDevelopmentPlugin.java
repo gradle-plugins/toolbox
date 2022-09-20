@@ -17,7 +17,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
-import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.sourceSets;
+import static dev.gradleplugins.internal.util.SourceSetUtils.sourceSets;
 
 public abstract class GradlePluginDevelopmentPlugin implements Plugin<Object> {
     private static final Logger LOGGER = Logging.getLogger(GradlePluginDevelopmentPlugin.class);
@@ -111,7 +111,7 @@ public abstract class GradlePluginDevelopmentPlugin implements Plugin<Object> {
     }
 
     private static boolean hasGroovySources(Project project) {
-        SourceSet sourceSet = sourceSets(project).getByName("main");
+        SourceSet sourceSet = sourceSets(project).map(it -> it.getByName("main")).get();
         GroovySourceSet groovySourceSet = new DslObject(sourceSet).getConvention().findPlugin(GroovySourceSet.class);
         if (groovySourceSet == null) {
             return false;
@@ -120,7 +120,7 @@ public abstract class GradlePluginDevelopmentPlugin implements Plugin<Object> {
     }
 
     private static boolean hasJavaSources(Project project) {
-        SourceSet sourceSet = sourceSets(project).getByName("main");
+        SourceSet sourceSet = sourceSets(project).map(it -> it.getByName("main")).get();
         return sourceSet.getAllJava().getSrcDirs().stream().anyMatch(File::exists);
     }
 

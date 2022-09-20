@@ -1,6 +1,7 @@
 package dev.gradleplugins.internal;
 
 import dev.gradleplugins.GradlePluginDevelopmentDependencyExtension;
+import org.gradle.api.Project;
 import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
@@ -74,6 +75,10 @@ public class GradlePluginDevelopmentDependencyExtensionInternal implements Gradl
 
     public static GradlePluginDevelopmentDependencyExtensionInternal of(DependencyHandler dependencies) {
         return (GradlePluginDevelopmentDependencyExtensionInternal) ExtensionAware.class.cast(dependencies).getExtensions().getByType(GradlePluginDevelopmentDependencyExtension.class);
+    }
+
+    public static GradlePluginDevelopmentDependencyExtensionInternal forProject(Project project) {
+        return new GradlePluginDevelopmentDependencyExtensionInternal(project.getDependencies(), GradlePluginDevelopmentDependencyExtension.from(project.getDependencies()), project.getConfigurations(), DependencyFactory.forProject(project));
     }
 
     @Override

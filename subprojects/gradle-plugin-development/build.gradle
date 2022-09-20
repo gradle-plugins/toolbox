@@ -11,7 +11,7 @@ apply plugin: 'dev.gradleplugins.gradle-plugin-unit-test'
 apply plugin: 'dev.gradleplugins.gradle-plugin-functional-test'
 
 description = 'Gradle plugin development plugins.'
-version = '1.6.8'
+version = '1.6.9'
 
 gradlePlugin {
     plugins {
@@ -102,6 +102,7 @@ test {
         runtimeOnly "org.junit.vintage:junit-vintage-engine:5.8.2"
         implementation "org.hamcrest:hamcrest:2.2"
         implementation "org.mockito:mockito-core:4.2.0"
+        implementation "org.mockito:mockito-junit-jupiter:4.2.0"
     }
     testTasks.configureEach { useJUnitPlatform() }
 }

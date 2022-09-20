@@ -6,7 +6,9 @@ import org.gradle.api.provider.ProviderFactory;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.Test;
 
-import static dev.gradleplugins.GradleReleases.*;
+import static dev.gradleplugins.GradleReleases.current;
+import static dev.gradleplugins.GradleReleases.globalAvailable;
+import static dev.gradleplugins.GradleReleases.snapshotFor;
 import static dev.gradleplugins.GradleVersionsTestService.builder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -29,8 +31,8 @@ class GradleVersionCoverageTestingStrategyEqualsTest {
     }
 
     @Test
-    void minimumVersionIsEqualToExactGradleVersion() {
-        assertEquals(factory.coverageForGradleVersion("7.1"), factory.getCoverageForMinimumVersion());
+    void minimumVersionIsNotEqualToExactGradleVersion() {
+        assertNotEquals(factory.coverageForGradleVersion("7.1"), factory.getCoverageForMinimumVersion());
     }
 
     @Test

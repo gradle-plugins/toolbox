@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import static dev.gradleplugins.ProjectMatchers.named;
 import static dev.gradleplugins.ProjectMatchers.providerOf;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
-import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.sourceSets;
+import static dev.gradleplugins.internal.util.SourceSetUtils.sourceSets;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public interface GradlePluginDevelopmentTestSuiteCoreGradleDevelPluginAppliedIntegrationTester {
@@ -27,7 +27,7 @@ public interface GradlePluginDevelopmentTestSuiteCoreGradleDevelPluginAppliedInt
 
     @Test
     default void usesDevelPluginSourceSetAsTestedSourceSetConvention() {
-        gradlePlugin(project()).pluginSourceSet(sourceSets(project()).create("anotherMain"));
+        gradlePlugin(project()).pluginSourceSet(sourceSets(project()).map(it -> it.maybeCreate("anotherMain")).get());
         assertThat(subject().getTestedSourceSet().value((SourceSet) null), providerOf(named("anotherMain")));
     }
 }

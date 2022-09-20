@@ -1,7 +1,8 @@
 package dev.gradleplugins;
 
-import dev.gradleplugins.internal.FinalizableComponent;
+import dev.gradleplugins.internal.util.GradleTestUtils;
 import org.gradle.api.Project;
+import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.gradle.util.GradleVersion;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,7 +16,8 @@ import static dev.gradleplugins.ProjectMatchers.providerOf;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class GradlePluginDevelopmentTestSuiteMinimumGradleVersionIntegrationTest {
     private final Project project = ProjectBuilder.builder().build();
@@ -35,7 +37,7 @@ class GradlePluginDevelopmentTestSuiteMinimumGradleVersionIntegrationTest {
 
     @Test
     void returnsGroovyDependencyForCurrentGradleVersion() {
-        assertThat(subject.getDependencies().groovy(), coordinate("org.codehaus.groovy:groovy-all:2.5.8"));
+        assertThat(subject.getDependencies().groovy(), providerOf(coordinate("org.codehaus.groovy:groovy-all:2.5.8")));
     }
 
     @Nested
@@ -44,18 +46,14 @@ class GradlePluginDevelopmentTestSuiteMinimumGradleVersionIntegrationTest {
         void appliesCoreDevelComponentPlugins() {
             project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-base");
             project.getPluginManager().apply("java-gradle-plugin");
+            GradleTestUtils.setCurrentGradleVersion(GradleVersion.version("6.2.1"));
+            ((ProjectInternal) project).evaluate();
         }
 
         @Test
         void calculatesDefaultCompatibilityMinimumGradleVersionOnDevelWhenTestingStrategyQueried() {
             assertThat(subject.getStrategies().getCoverageForMinimumVersion().getVersion(), equalTo(GradleVersion.current().getVersion()));
             assertThat(compatibility(gradlePlugin(project)).getMinimumGradleVersion(), providerOf(GradleVersion.current().getVersion()));
-        }
-
-        @Test
-        void finalizesCompatibilityExtensionWhenTestingStrategyQueried() {
-            subject.getStrategies().getCoverageForMinimumVersion().getVersion();
-            assertTrue(((FinalizableComponent) compatibility(gradlePlugin(project))).isFinalized());
         }
     }
 
@@ -75,7 +73,7 @@ class GradlePluginDevelopmentTestSuiteMinimumGradleVersionIntegrationTest {
 
         @Test
         void returnsGroovyDependencyForMinimumGradleVersion() {
-            assertThat(subject.getDependencies().groovy(), coordinate("org.codehaus.groovy:groovy-all:2.4.12"));
+            assertThat(subject.getDependencies().groovy(), providerOf(coordinate("org.codehaus.groovy:groovy-all:2.4.12")));
         }
     }
 }
