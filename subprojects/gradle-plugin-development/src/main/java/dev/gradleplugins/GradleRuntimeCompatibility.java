@@ -108,10 +108,12 @@ public final class GradleRuntimeCompatibility {
             case "7.3":
             case "7.4":
                 return "3.0.9";
-            default:
-                LOGGER.warn(String.format("Unknown Groovy version for Gradle '%s', please open an issue on https://github.com/gradle-plugins/toolbox. Assuming value of the latest known version.", gradleVersion.toString()));
             case "7.5":
                 return "3.0.10";
+            default:
+                LOGGER.warn(String.format("Unknown Groovy version for Gradle '%s', please open an issue on https://github.com/gradle-plugins/toolbox. Assuming value of the latest known version.", gradleVersion.toString()));
+            case "7.6":
+                return "3.0.13";
         }
     }
 
@@ -254,10 +256,12 @@ public final class GradleRuntimeCompatibility {
             case "7.3":
             case "7.4":
                 return Optional.of("1.5.31");
-            default:
-                LOGGER.warn(String.format("Unknown Kotlin version for Gradle '%s', please open an issue on https://github.com/gradle-plugins/toolbox. Assuming value of the latest known version.", gradleVersion.toString()));
             case "7.5":
                 return Optional.of("1.6.21");
+            default:
+                LOGGER.warn(String.format("Unknown Kotlin version for Gradle '%s', please open an issue on https://github.com/gradle-plugins/toolbox. Assuming value of the latest known version.", gradleVersion.toString()));
+            case "7.6":
+                return Optional.of("1.7.10");
         }
     }
 }
