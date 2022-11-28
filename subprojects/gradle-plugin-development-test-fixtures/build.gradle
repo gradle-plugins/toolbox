@@ -7,7 +7,7 @@ plugins {
 }
 
 description = 'Gradle plugin development plugins test fixtures.'
-version = '1.6.8'
+version = '1.6.9'
 
 dependencies {
     compileOnly gradleApi(minimumGradleVersion)
