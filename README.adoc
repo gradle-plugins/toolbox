@@ -1,4 +1,4 @@
-:jbake-version: 1.6.9
+:jbake-version: 1.6.10
 // TODO: Add test for the version above
 = Gradle Plugin Development Toolbox
 
