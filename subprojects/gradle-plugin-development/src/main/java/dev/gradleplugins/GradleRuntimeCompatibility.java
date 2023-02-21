@@ -338,4 +338,32 @@ public final class GradleRuntimeCompatibility {
                 return gradleVersion.toString();
         }
     }
+
+    /**
+     * Returns the last minor released Gradle version for the specified major Gradle version.
+     * For example, passing Gradle version {@literal 7.3} would return {@literal 7.6}, the last minor release of {@literal 7.x}.
+     * The function will return the last patched version as well.
+     *
+     * @param gradleVersion  the Gradle version to find the last minor release for, must not be null
+     * @return the latest minor version for the specified version, never null
+     */
+    public static String lastMinorReleaseOf(String gradleVersion) {
+        return lastMinorReleaseOf(VersionNumber.parse(gradleVersion));
+    }
+
+    private static String lastMinorReleaseOf(VersionNumber gradleVersion) {
+        switch (gradleVersion.getMajor()) {
+            case 0: return "0.9.2";
+            case 1: return "1.14";
+            case 2: return "2.14.1";
+            case 3: return "3.5.1";
+            case 4: return "4.10.3";
+            case 5: return "5.6.4";
+            case 6: return "6.9.3";
+            case 7: return "7.6";
+            case 8: return "8.0.1";
+            default:
+                throw new IllegalArgumentException(String.format("Unknown Gradle version, please open an issue on https://github.com/gradle-plugins/toolbox.", gradleVersion));
+        }
+    }
 }
