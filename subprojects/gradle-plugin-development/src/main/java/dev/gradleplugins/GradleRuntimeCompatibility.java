@@ -3,6 +3,7 @@ package dev.gradleplugins;
 import org.gradle.api.JavaVersion;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
+import org.gradle.util.GradleVersion;
 
 import java.util.Optional;
 
@@ -280,6 +281,61 @@ public final class GradleRuntimeCompatibility {
                 LOGGER.warn(String.format("Unknown Kotlin version for Gradle '%s', please open an issue on https://github.com/gradle-plugins/toolbox. Assuming value of the latest known version.", gradleVersion.toString()));
             case "8.0":
                 return Optional.of("1.8.10");
+        }
+    }
+
+    /**
+     * Returns the last patched Gradle version for the specified Gradle version.
+     * For example, passing Gradle version {@literal 6.2} would return {@literal 6.2.2}, the last patched version of {@literal 6.2.x}.
+     *
+     * @param gradleVersion  the Gradle version to find the last patched version, must not be null.
+     * @return the latest patched version for the specified version, never null
+     */
+    public static String lastPatchedVersionOf(String gradleVersion) {
+        return lastPatchedVersionOf(VersionNumber.parse(gradleVersion));
+    }
+
+    private static String lastPatchedVersionOf(VersionNumber gradleVersion) {
+        switch (String.format("%d.%d", gradleVersion.getMajor(), gradleVersion.getMinor())) {
+            case "0.9": return "0.9.2";
+            case "2.2": return "2.2.1";
+            case "2.14": return "2.14.1";
+            case "3.2": return "3.2.1";
+            case "3.4": return "3.4.1";
+            case "3.5": return "3.5.1";
+            case "4.0": return "4.0.2";
+            case "4.2": return "4.2.1";
+            case "4.3": return "4.3.1";
+            case "4.4": return "4.4.1";
+            case "4.5": return "4.5.1";
+            case "4.8": return "4.8.1";
+            case "4.10": return "4.10.3";
+            case "5.1": return "5.1.1";
+            case "5.2": return "5.2.1";
+            case "5.3": return "5.3.1";
+            case "5.4": return "5.4.1";
+            case "5.5": return "5.5.1";
+            case "5.6": return "5.6.4";
+            case "6.0": return "6.0.1";
+            case "6.1": return "6.1.1";
+            case "6.2": return "6.2.2";
+            case "6.4": return "6.4.1";
+            case "6.5": return "6.5.1";
+            case "6.6": return "6.6.1";
+            case "6.7": return "6.7.1";
+            case "6.8": return "6.8.3";
+            case "6.9": return "6.9.3";
+            case "7.0": return "7.0.2";
+            case "7.1": return "7.1.1";
+            case "7.3": return "7.3.3";
+            case "7.4": return "7.4.2";
+            case "7.5": return "7.5.1";
+            case "8.0": return "8.0.1";
+            default:
+                if (gradleVersion.getPatch() == 0) {
+                    return String.format("%d.%d%s", gradleVersion.getMajor(), gradleVersion.getMinor(), gradleVersion.getQualifier() == null ? "" : "-" + gradleVersion.getQualifier());
+                }
+                return gradleVersion.toString();
         }
     }
 }
