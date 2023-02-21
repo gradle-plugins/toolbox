@@ -3,7 +3,6 @@ package dev.gradleplugins;
 import org.gradle.api.JavaVersion;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
-import org.gradle.util.VersionNumber;
 
 import java.util.Optional;
 
@@ -30,7 +29,12 @@ public final class GradleRuntimeCompatibility {
      * @param gradleVersion a specific Gradle version
      * @return the Groovy version of the specified Gradle version, never null.
      */
-    public static String groovyVersionOf(VersionNumber gradleVersion) {
+    @Deprecated
+    public static String groovyVersionOf(org.gradle.util.VersionNumber gradleVersion) {
+        return groovyVersionOf(VersionNumber.parse(gradleVersion.toString()));
+    }
+
+    private static String groovyVersionOf(VersionNumber gradleVersion) {
         // Use `find ~/.gradle/wrapper -name "groovy-all-*"` once the distribution was downloaded locally
         switch (String.format("%d.%d", gradleVersion.getMajor(), gradleVersion.getMinor())) {
             case "1.12":
@@ -134,7 +138,12 @@ public final class GradleRuntimeCompatibility {
      * @param gradleVersion a specific Gradle version
      * @return the minimum Java version for the specified Gradle version, never null.
      */
-    public static JavaVersion minimumJavaVersionFor(VersionNumber gradleVersion) {
+    @Deprecated
+    public static JavaVersion minimumJavaVersionFor(org.gradle.util.VersionNumber gradleVersion) {
+        return minimumJavaVersionFor(VersionNumber.parse(gradleVersion.toString()));
+    }
+
+    private static JavaVersion minimumJavaVersionFor(VersionNumber gradleVersion) {
         switch (gradleVersion.getMajor()) {
             case 0:
                 throw new UnsupportedOperationException("Minimum Java version for Gradle version below 1.0 is unavailable, please open an issue on https://github.com/gradle-plugins/toolbox.");
@@ -173,7 +182,12 @@ public final class GradleRuntimeCompatibility {
      * @param gradleVersion a specific Gradle version
      * @return the Kotlin version for the specified Gradle version, never null.
      */
-    public static Optional<String> kotlinVersionOf(VersionNumber gradleVersion) {
+    @Deprecated
+    public static Optional<String> kotlinVersionOf(org.gradle.util.VersionNumber gradleVersion) {
+        return kotlinVersionOf(VersionNumber.parse(gradleVersion.toString()));
+    }
+
+    private static Optional<String> kotlinVersionOf(VersionNumber gradleVersion) {
         // Use `find ~/.gradle/wrapper -name "kotlin-stdlib-*"` once the distribution was downloaded locally
         switch (String.format("%d.%d", gradleVersion.getMajor(), gradleVersion.getMinor())) {
             case "2.0":
