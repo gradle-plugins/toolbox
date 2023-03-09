@@ -124,6 +124,8 @@ public final class GradleRuntimeCompatibility {
             case "8.2":
             case "8.3":
             case "8.4":
+            case "8.5":
+            case "8.6":
                 return "3.0.17";
         }
     }
@@ -289,10 +291,13 @@ public final class GradleRuntimeCompatibility {
                 return Optional.of("1.8.20");
             case "8.3":
                 return Optional.of("1.9.0");
-            default:
-                LOGGER.warn(String.format("Unknown Kotlin version for Gradle '%s', please open an issue on https://github.com/gradle-plugins/toolbox. Assuming value of the latest known version.", gradleVersion.toString()));
             case "8.4":
                 return Optional.of("1.9.10");
+            default:
+                LOGGER.warn(String.format("Unknown Kotlin version for Gradle '%s', please open an issue on https://github.com/gradle-plugins/toolbox. Assuming value of the latest known version.", gradleVersion.toString()));
+            case "8.5":
+            case "8.6":
+                return Optional.of("1.9.20");
         }
     }
 
@@ -336,13 +341,16 @@ public final class GradleRuntimeCompatibility {
             case "6.6": return "6.6.1";
             case "6.7": return "6.7.1";
             case "6.8": return "6.8.3";
-            case "6.9": return "6.9.3";
+            case "6.9": return "6.9.4";
             case "7.0": return "7.0.2";
             case "7.1": return "7.1.1";
             case "7.3": return "7.3.3";
             case "7.4": return "7.4.2";
             case "7.5": return "7.5.1";
-            case "8.0": return "8.0.1";
+            case "7.6": return "7.6.4";
+            case "8.0": return "8.0.2";
+            case "8.1": return "8.1.1";
+            case "8.2": return "8.2.1";
             default:
                 if (gradleVersion.getPatch() == 0) {
                     return String.format("%d.%d%s", gradleVersion.getMajor(), gradleVersion.getMinor(), gradleVersion.getQualifier() == null ? "" : "-" + gradleVersion.getQualifier());
@@ -371,9 +379,9 @@ public final class GradleRuntimeCompatibility {
             case 3: return "3.5.1";
             case 4: return "4.10.3";
             case 5: return "5.6.4";
-            case 6: return "6.9.3";
-            case 7: return "7.6";
-            case 8: return "8.0.1";
+            case 6: return "6.9.4";
+            case 7: return "7.6.4";
+            case 8: return "8.6";
             default:
                 throw new IllegalArgumentException(String.format("Unknown Gradle version, please open an issue on https://github.com/gradle-plugins/toolbox.", gradleVersion));
         }
