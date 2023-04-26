@@ -3,7 +3,6 @@ package dev.gradleplugins;
 import org.gradle.api.JavaVersion;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
-import org.gradle.util.GradleVersion;
 
 import java.util.Optional;
 
@@ -335,6 +334,7 @@ public final class GradleRuntimeCompatibility {
             case "7.5": return "7.5.1";
             case "7.6": return "7.6.1";
             case "8.0": return "8.0.2";
+            case "8.1": return "8.1.1";
             default:
                 if (gradleVersion.getPatch() == 0) {
                     return String.format("%d.%d%s", gradleVersion.getMajor(), gradleVersion.getMinor(), gradleVersion.getQualifier() == null ? "" : "-" + gradleVersion.getQualifier());
@@ -365,7 +365,7 @@ public final class GradleRuntimeCompatibility {
             case 5: return "5.6.4";
             case 6: return "6.9.4";
             case 7: return "7.6.1";
-            case 8: return "8.1";
+            case 8: return "8.1.1";
             default:
                 throw new IllegalArgumentException(String.format("Unknown Gradle version, please open an issue on https://github.com/gradle-plugins/toolbox.", gradleVersion));
         }
