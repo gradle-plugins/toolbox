@@ -117,10 +117,12 @@ public final class GradleRuntimeCompatibility {
             case "7.6":
             case "8.0":
                 return "3.0.13";
-            default:
-                LOGGER.warn(String.format("Unknown Groovy version for Gradle '%s', please open an issue on https://github.com/gradle-plugins/toolbox. Assuming value of the latest known version.", gradleVersion.toString()));
             case "8.1":
                 return "3.0.15";
+            default:
+                LOGGER.warn(String.format("Unknown Groovy version for Gradle '%s', please open an issue on https://github.com/gradle-plugins/toolbox. Assuming value of the latest known version.", gradleVersion.toString()));
+            case "8.2":
+                return "3.0.17";
         }
     }
 
@@ -278,11 +280,13 @@ public final class GradleRuntimeCompatibility {
                 return Optional.of("1.6.21");
             case "7.6":
                 return Optional.of("1.7.10");
-            default:
-                LOGGER.warn(String.format("Unknown Kotlin version for Gradle '%s', please open an issue on https://github.com/gradle-plugins/toolbox. Assuming value of the latest known version.", gradleVersion.toString()));
             case "8.0":
             case "8.1":
                 return Optional.of("1.8.10");
+            default:
+                LOGGER.warn(String.format("Unknown Kotlin version for Gradle '%s', please open an issue on https://github.com/gradle-plugins/toolbox. Assuming value of the latest known version.", gradleVersion.toString()));
+            case "8.2":
+                return Optional.of("1.8.20");
         }
     }
 
@@ -365,7 +369,7 @@ public final class GradleRuntimeCompatibility {
             case 5: return "5.6.4";
             case 6: return "6.9.4";
             case 7: return "7.6.1";
-            case 8: return "8.1.1";
+            case 8: return "8.2";
             default:
                 throw new IllegalArgumentException(String.format("Unknown Gradle version, please open an issue on https://github.com/gradle-plugins/toolbox.", gradleVersion));
         }
