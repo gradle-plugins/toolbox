@@ -120,7 +120,12 @@ functionalTest {
         implementation gradleTestKit()
         implementation groovy()
         implementation project(':gradle-plugin-development-test-fixtures')
+
+        implementation "org.junit.jupiter:junit-jupiter:latest.release"
+        runtimeOnly "org.junit.vintage:junit-vintage-engine:latest.release"
+        implementation "org.hamcrest:hamcrest:2.2"
     }
+    testTasks.configureEach { useJUnitPlatform() }
 }
 
 dependencies {
