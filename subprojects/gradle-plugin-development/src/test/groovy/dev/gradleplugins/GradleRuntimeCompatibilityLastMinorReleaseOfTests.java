@@ -131,15 +131,16 @@ class GradleRuntimeCompatibilityLastMinorReleaseOfTests {
             "7.5.1,     7.6.2",
             "6.9.3,     6.9.4",
             "7.6,       7.6.2",
-            "8.0,       8.2",
-            "8.0.1,     8.2",
+            "8.0,       8.2.1",
+            "8.0.1,     8.2.1",
             "6.9.4,     6.9.4",
             "7.6.1,     7.6.2",
-            "8.0.2,     8.2",
-            "8.1,       8.2",
-            "8.1.1,     8.2",
+            "8.0.2,     8.2.1",
+            "8.1,       8.2.1",
+            "8.1.1,     8.2.1",
             "7.6.2,     7.6.2",
-            "8.2,       8.2"
+            "8.2,       8.2.1",
+            "8.2.1,     8.2.1",
     })
     void checkLastMinorReleasedGradleVersion(String validGradleVersion, String expectedLastMinorGradleVersion) {
         assertThat(lastMinorReleaseOf(validGradleVersion), equalTo(expectedLastMinorGradleVersion));
