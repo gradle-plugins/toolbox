@@ -5,6 +5,7 @@ import org.gradle.BuildAdapter;
 import org.gradle.BuildResult;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.file.SourceDirectorySet;
 import org.gradle.api.initialization.Settings;
 import org.gradle.api.internal.plugins.DslObject;
 import org.gradle.api.logging.Logger;
@@ -13,9 +14,11 @@ import org.gradle.api.tasks.GroovySourceSet;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.internal.exceptions.DefaultMultiCauseException;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.sourceSets;
 
@@ -112,11 +115,24 @@ public abstract class GradlePluginDevelopmentPlugin implements Plugin<Object> {
 
     private static boolean hasGroovySources(Project project) {
         SourceSet sourceSet = sourceSets(project).getByName("main");
-        GroovySourceSet groovySourceSet = new DslObject(sourceSet).getConvention().findPlugin(GroovySourceSet.class);
+        SourceDirectorySet groovySourceSet = (SourceDirectorySet) sourceSet.getExtensions().findByName("groovy");
+        if (groovySourceSet == null) {
+            groovySourceSet = safeDereference(new DslObject(sourceSet).getConvention().findPlugin(GroovySourceSet.class), GroovySourceSet::getAllGroovy);
+        }
+
         if (groovySourceSet == null) {
             return false;
         }
-        return groovySourceSet.getAllGroovy().getSrcDirs().stream().anyMatch(File::exists);
+        return groovySourceSet.getSrcDirs().stream().anyMatch(File::exists);
+    }
+
+    @Nullable
+    private static <OUT, IN> OUT safeDereference(@Nullable IN reference, Function<? super IN, ? extends OUT> dereferenceFunction) {
+        if (reference == null) {
+            return null;
+        } else {
+            return dereferenceFunction.apply(reference);
+        }
     }
 
     private static boolean hasJavaSources(Project project) {
