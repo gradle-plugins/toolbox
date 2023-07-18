@@ -1,5 +1,6 @@
 package dev.gradleplugins.internal;
 
+import dev.gradleplugins.GradlePluginDevelopmentDependencyExtension;
 import dev.gradleplugins.GradlePluginDevelopmentTestSuite;
 import dev.gradleplugins.GradlePluginDevelopmentTestSuiteDependencies;
 import dev.gradleplugins.GradlePluginTestingStrategyFactory;
@@ -252,12 +253,12 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         @Override
         public Object spockFramework(String version) {
             pluginManager.apply("groovy-base"); // Spock framework imply Groovy implementation language
-            return GradlePluginDevelopmentDependencyExtensionInternal.of(getDependencies()).spockFramework(version);
+            return getDependencies().create("org.spockframework:spock-core:" + version);
         }
 
         @Override
         public Object gradleFixtures() {
-            return GradlePluginDevelopmentDependencyExtensionInternal.of(getDependencies()).gradleFixtures();
+            return GradlePluginDevelopmentDependencyExtension.from(getDependencies()).gradleFixtures();
         }
 
         @Override
@@ -267,22 +268,22 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
 
         @Override
         public Object gradleTestKit(String version) {
-            return GradlePluginDevelopmentDependencyExtensionInternal.of(getDependencies()).gradleTestKit(version);
+            return GradlePluginDevelopmentDependencyExtension.from(getDependencies()).gradleTestKit(version);
         }
 
         @Override
         public Object groovy() {
-            return defaultGroovyVersion.map(GradlePluginDevelopmentDependencyExtensionInternal.of(getDependencies())::groovy);
+            return defaultGroovyVersion.map(this::groovy);
         }
 
         @Override
         public Object groovy(String version) {
-            return GradlePluginDevelopmentDependencyExtensionInternal.of(getDependencies()).groovy(version);
+            return getDependencies().create("org.codehaus.groovy:groovy-all:" + version);
         }
 
         @Override
         public Object gradleApi(String version) {
-            return GradlePluginDevelopmentDependencyExtensionInternal.of(getDependencies()).gradleApi(version);
+            return GradlePluginDevelopmentDependencyExtension.from(getDependencies()).gradleApi(version);
         }
     }
 

@@ -1,77 +1,69 @@
 package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.GradlePluginDevelopmentDependencyExtension;
-import dev.gradleplugins.internal.DependencyFactory;
-import dev.gradleplugins.internal.GradlePluginDevelopmentDependencyExtensionInternal;
-import groovy.lang.Closure;
+import dev.gradleplugins.internal.DefaultDependencyVersions;
+import dev.gradleplugins.internal.runtime.dsl.DefaultGradleExtensionMixInService;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Dependency;
+import org.gradle.api.artifacts.ModuleDependency;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
-import org.gradle.api.logging.Logger;
-import org.gradle.api.logging.Logging;
-import org.gradle.api.plugins.ExtensionAware;
+import org.gradle.api.reflect.HasPublicType;
+import org.gradle.api.reflect.TypeOf;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
-import static dev.gradleplugins.GradlePluginDevelopmentDependencyExtension.from;
+import java.util.Objects;
 
 final class RegisterGradlePluginDevelopmentDependencyExtensionRule implements Action<Project> {
-    private static final Logger LOGGER = Logging.getLogger(RegisterGradlePluginDevelopmentDependencyExtensionRule.class);
-
     @Override
     public void execute(Project project) {
-        final DependencyHandler dependencies = project.getDependencies();
-        dependencies.getExtensions().add("gradlePluginDevelopment", new GradlePluginDevelopmentDependencyExtensionInternal(dependencies, from(project.getDependencies()), project.getConfigurations(), DependencyFactory.forProject(project)));
-        try {
-            Method target = Class.forName("dev.gradleplugins.internal.dsl.groovy.GroovyDslRuntimeExtensions").getMethod("extendWithMethod", Object.class, String.class, Closure.class);
-            target.invoke(null, dependencies, "gradleApi", new GradleApiClosure(dependencies));
-            target.invoke(null, dependencies, "gradleTestKit", new GradleTestKitClosure(dependencies));
-            target.invoke(null, dependencies, "gradleFixtures", new GradleFixturesClosure(dependencies));
-            target.invoke(null, dependencies, "gradleRunnerKit", new GradleRunnerKitClosure(dependencies));
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            LOGGER.info("Unable to extend DependencyHandler with gradleApi(String) and gradleFixtures().");
-        }
+        new DefaultGradleExtensionMixInService(project.getObjects())
+                .forExtension(GradlePluginDevelopmentDependencyExtension.class)
+                .useInstance(new DefaultGradlePluginDevelopmentDependencyExtension(project.getDependencies()))
+                .build()
+                .mixInto(project.getDependencies());
     }
 
-    private static class GradleApiClosure extends Closure<Dependency> {
-        public GradleApiClosure(DependencyHandler handler) {
-            super(handler);
+    private static final class DefaultGradlePluginDevelopmentDependencyExtension implements GradlePluginDevelopmentDependencyExtension, HasPublicType {
+        private static final String LOCAL_GRADLE_VERSION = "local";
+        private final DependencyHandler dependencies;
+
+        DefaultGradlePluginDevelopmentDependencyExtension(DependencyHandler dependencies) {
+            this.dependencies = dependencies;
         }
 
-        public Dependency doCall(String version) {
-            return ((ExtensionAware) getOwner()).getExtensions().getByType(GradlePluginDevelopmentDependencyExtension.class).gradleApi(version);
-        }
-    }
-
-    private static class GradleTestKitClosure extends Closure<Dependency> {
-        public GradleTestKitClosure(DependencyHandler handler) {
-            super(handler);
+        @Override
+        public Dependency gradleApi(String version) {
+            if (LOCAL_GRADLE_VERSION.equals(version)) {
+                return dependencies.gradleApi();
+            }
+            return dependencies.create("dev.gradleplugins:gradle-api:" + Objects.requireNonNull(version));
         }
 
-        public Dependency doCall(String version) {
-            return ((ExtensionAware) getOwner()).getExtensions().getByType(GradlePluginDevelopmentDependencyExtension.class).gradleTestKit(version);
-        }
-    }
-
-    private static class GradleFixturesClosure extends Closure<Dependency> {
-        public GradleFixturesClosure(DependencyHandler handler) {
-            super(handler);
+        @Override
+        public Dependency gradleTestKit(String version) {
+            if (LOCAL_GRADLE_VERSION.equals(version)) {
+                return dependencies.gradleTestKit();
+            }
+            return dependencies.create("dev.gradleplugins:gradle-test-kit:" + Objects.requireNonNull(version));
         }
 
-        public Dependency doCall() {
-            return ((ExtensionAware) getOwner()).getExtensions().getByType(GradlePluginDevelopmentDependencyExtension.class).gradleFixtures();
+        @Override
+        public Dependency gradleFixtures() {
+            ModuleDependency dependency = (ModuleDependency)dependencies.create("dev.gradleplugins:gradle-fixtures:" + DefaultDependencyVersions.GRADLE_FIXTURES_VERSION);
+            dependency.capabilities(it -> {
+                it.requireCapability("dev.gradleplugins:gradle-fixtures-spock-support");
+            });
+            return dependency;
         }
-    }
 
-    private static class GradleRunnerKitClosure extends Closure<Dependency> {
-        public GradleRunnerKitClosure(DependencyHandler handler) {
-            super(handler);
+        @Override
+        public Dependency gradleRunnerKit() {
+            return dependencies.create("dev.gradleplugins:gradle-runner-kit:" + DefaultDependencyVersions.GRADLE_FIXTURES_VERSION);
         }
 
-        public Dependency doCall() {
-            return ((ExtensionAware) getOwner()).getExtensions().getByType(GradlePluginDevelopmentDependencyExtension.class).gradleRunnerKit();
+        @Override
+        public TypeOf<?> getPublicType() {
+            return TypeOf.typeOf(GradlePluginDevelopmentDependencyExtension.class);
         }
     }
 }

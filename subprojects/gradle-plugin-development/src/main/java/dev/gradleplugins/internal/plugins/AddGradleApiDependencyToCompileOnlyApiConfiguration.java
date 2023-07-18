@@ -1,6 +1,8 @@
 package dev.gradleplugins.internal.plugins;
 
-import dev.gradleplugins.internal.GradlePluginDevelopmentDependencyExtensionInternal;
+import dev.gradleplugins.GradlePluginDevelopmentDependencyExtension;
+import dev.gradleplugins.internal.AddDependency;
+import dev.gradleplugins.internal.DependencyFactory;
 import lombok.val;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
@@ -19,8 +21,8 @@ public final class AddGradleApiDependencyToCompileOnlyApiConfiguration implement
 
     @Override
     public void execute(AppliedPlugin ignored) {
-        val dependencies = GradlePluginDevelopmentDependencyExtensionInternal.of(project.getDependencies());
-        dependencies.add(getCompileOnlyApiConfigurationName(), compatibility(gradlePlugin(project)).getGradleApiVersion().map(dependencies::gradleApi));
+        val factory = DependencyFactory.forProject(project);
+        project.getConfigurations().named(getCompileOnlyApiConfigurationName(), new AddDependency(compatibility(gradlePlugin(project)).getGradleApiVersion().map(GradlePluginDevelopmentDependencyExtension.from(project.getDependencies())::gradleApi), factory));
     }
 
     private static String getCompileOnlyApiConfigurationName() {

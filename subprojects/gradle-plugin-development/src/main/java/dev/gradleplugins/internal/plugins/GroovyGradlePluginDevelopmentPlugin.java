@@ -18,15 +18,19 @@ package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.GradleRuntimeCompatibility;
 import dev.gradleplugins.GroovyGradlePluginDevelopmentExtension;
+import dev.gradleplugins.internal.AddDependency;
 import dev.gradleplugins.internal.DeferredRepositoryFactory;
-import dev.gradleplugins.internal.GradlePluginDevelopmentDependencyExtensionInternal;
+import dev.gradleplugins.internal.DependencyFactory;
 import lombok.val;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.util.GradleVersion;
 
 import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
-import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.*;
+import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.assertJavaGradlePluginIsNotPreviouslyApplied;
+import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.assertKotlinDslPluginIsNeverApplied;
+import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.assertOtherGradlePluginDevelopmentPluginsAreNeverApplied;
+import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.registerLanguageExtension;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
 
 public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
@@ -53,8 +57,9 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
 
         // Configure the Groovy version and dependency
         groovy.getGroovyVersion().convention(extension.getMinimumGradleVersion().map(GradleRuntimeCompatibility::groovyVersionOf));
-        val dependencies = GradlePluginDevelopmentDependencyExtensionInternal.of(project.getDependencies());
-        dependencies.add("compileOnly", groovy.getGroovyVersion().map(dependencies::groovy));
+        val factory = DependencyFactory.forProject(project);
+        // TODO: We should add dependency only to the pluginSourceSet
+        project.getConfigurations().named("compileOnly", new AddDependency(groovy.getGroovyVersion().map(version -> "org.codehaus.groovy:groovy-all:" + version), factory));
 
         // TODO: We should warn that a repository is required instead of trying to add a groovy only repository
         DeferredRepositoryFactory repositoryFactory = project.getObjects().newInstance(DeferredRepositoryFactory.class, project);

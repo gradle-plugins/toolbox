@@ -1,12 +1,16 @@
 package dev.gradleplugins;
 
+import dev.gradleplugins.internal.runtime.dsl.DslMethod;
+import dev.gradleplugins.internal.runtime.dsl.DslTarget;
 import org.gradle.api.Action;
 import org.gradle.api.artifacts.dsl.RepositoryHandler;
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
+import org.gradle.api.plugins.ExtensionAware;
 
 /**
  * Extension methods for {@link RepositoryHandler}.
  */
+@DslTarget(RepositoryHandler.class)
 public interface GradlePluginDevelopmentRepositoryExtension {
     /**
      * Adds the Gradle Plugin Development repository containing the Gradle API and fixtures.
@@ -15,6 +19,7 @@ public interface GradlePluginDevelopmentRepositoryExtension {
      *
      * @return the Gradle Plugin Development repository instance added to the repository handler.
      */
+    @DslMethod
     MavenArtifactRepository gradlePluginDevelopment();
 
     /**
@@ -25,6 +30,7 @@ public interface GradlePluginDevelopmentRepositoryExtension {
      * @param action  the configure action for the repository
      * @return the Gradle Plugin Development repository instance added to the repository handler.
      */
+    @DslMethod
     MavenArtifactRepository gradlePluginDevelopment(Action<? super MavenArtifactRepository> action);
 
     /**
@@ -34,6 +40,6 @@ public interface GradlePluginDevelopmentRepositoryExtension {
      * @return the extension methods, never null
      */
     static GradlePluginDevelopmentRepositoryExtension from(RepositoryHandler repositories) {
-        return new DefaultGradlePluginDevelopmentRepositoryExtension(repositories);
+        return ((ExtensionAware) repositories).getExtensions().getByType(GradlePluginDevelopmentRepositoryExtension.class);
     }
 }

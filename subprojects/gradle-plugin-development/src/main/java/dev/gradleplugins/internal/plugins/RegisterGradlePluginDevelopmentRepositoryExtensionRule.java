@@ -1,42 +1,59 @@
 package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.GradlePluginDevelopmentRepositoryExtension;
-import groovy.lang.Closure;
+import dev.gradleplugins.internal.runtime.dsl.DefaultGradleExtensionMixInService;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
-import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.dsl.RepositoryHandler;
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
-import org.gradle.api.logging.Logger;
-import org.gradle.api.logging.Logging;
 import org.gradle.api.plugins.ExtensionAware;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
-import static dev.gradleplugins.GradlePluginDevelopmentRepositoryExtension.from;
+import org.gradle.api.reflect.HasPublicType;
+import org.gradle.api.reflect.TypeOf;
+import org.gradle.internal.Actions;
 
 final class RegisterGradlePluginDevelopmentRepositoryExtensionRule implements Action<Project> {
-    private static final Logger LOGGER = Logging.getLogger(RegisterGradlePluginDevelopmentRepositoryExtensionRule.class);
-
     public void execute(Project project) {
         RepositoryHandler repositories = project.getRepositories();
-        ((ExtensionAware) repositories).getExtensions().add("gradlePluginDevelopment", from(repositories));
-        try {
-            Method target = Class.forName("dev.gradleplugins.internal.dsl.groovy.GroovyDslRuntimeExtensions").getMethod("extendWithMethod", Object.class, String.class, Closure.class);
-            target.invoke(null, repositories, "gradlePluginDevelopment", new GradlePluginDevelopmentClosure(repositories));
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            LOGGER.info("Unable to extend RepositoryHandler with gradlePluginDevelopment().");
-        }
+
+        new DefaultGradleExtensionMixInService(project.getObjects())
+                .forExtension(GradlePluginDevelopmentRepositoryExtension.class)
+                .useInstance(new DefaultGradlePluginDevelopmentRepositoryExtension(repositories))
+                .build()
+                .mixInto((ExtensionAware) repositories);
     }
 
-    private static class GradlePluginDevelopmentClosure extends Closure<Dependency> {
-        public GradlePluginDevelopmentClosure(RepositoryHandler repositories) {
-            super(repositories);
+    private static final class DefaultGradlePluginDevelopmentRepositoryExtension implements GradlePluginDevelopmentRepositoryExtension, HasPublicType {
+        private final RepositoryHandler repositories;
+
+        DefaultGradlePluginDevelopmentRepositoryExtension(RepositoryHandler repositories) {
+            this.repositories = repositories;
         }
 
-        public MavenArtifactRepository doCall() {
-            return ((ExtensionAware) getOwner()).getExtensions().getByType(GradlePluginDevelopmentRepositoryExtension.class).gradlePluginDevelopment();
+        @Override
+        public MavenArtifactRepository gradlePluginDevelopment() {
+            return gradlePluginDevelopment(Actions.doNothing());
+        }
+
+        @Override
+        public MavenArtifactRepository gradlePluginDevelopment(Action<? super MavenArtifactRepository> action) {
+            return repositories.mavenCentral(repository -> {
+                repository.setName("Gradle Plugin Development");
+                repository.mavenContent(content -> {
+                    content.includeGroup("dev.gradleplugins");
+                    content.includeModule("org.codehaus.groovy", "groovy");
+
+                    // Groovy 3+ transitive dependencies
+                    content.includeModule("com.github.javaparser", "javaparser-core");
+                    content.includeModule("com.github.javaparser", "javaparser-parent");
+                    content.includeModule("org.junit", "junit-bom");
+                });
+                action.execute(repository);
+            });
+        }
+
+        @Override
+        public TypeOf<?> getPublicType() {
+            return TypeOf.typeOf(GradlePluginDevelopmentRepositoryExtension.class);
         }
     }
 }
