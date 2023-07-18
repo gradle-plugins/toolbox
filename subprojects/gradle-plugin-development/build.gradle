@@ -98,8 +98,8 @@ test {
     dependencies {
         implementation spockFramework()
         implementation groovy()
-        implementation "org.junit.jupiter:junit-jupiter:5.8.2"
-        runtimeOnly "org.junit.vintage:junit-vintage-engine:5.8.2"
+        implementation "org.junit.jupiter:junit-jupiter:5.9.3"
+        runtimeOnly "org.junit.vintage:junit-vintage-engine:5.9.3"
         implementation "org.hamcrest:hamcrest:2.2"
         implementation "org.mockito:mockito-core:4.2.0"
     }
@@ -121,8 +121,8 @@ functionalTest {
         implementation groovy()
         implementation project(':gradle-plugin-development-test-fixtures')
 
-        implementation "org.junit.jupiter:junit-jupiter:latest.release"
-        runtimeOnly "org.junit.vintage:junit-vintage-engine:latest.release"
+        implementation "org.junit.jupiter:junit-jupiter:5.9.3"
+        runtimeOnly "org.junit.vintage:junit-vintage-engine:5.9.3"
         implementation "org.hamcrest:hamcrest:2.2"
     }
     testTasks.configureEach { useJUnitPlatform() }
