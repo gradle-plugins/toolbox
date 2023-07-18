@@ -17,17 +17,20 @@
 package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.JavaGradlePluginDevelopmentExtension;
+import dev.gradleplugins.internal.rules.OtherGradlePluginDevelopmentPluginsIncompatibilityRule;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 
-import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.*;
+import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.assertJavaGradlePluginIsNotPreviouslyApplied;
+import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.assertKotlinDslPluginIsNeverApplied;
+import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.registerLanguageExtension;
 
 public class JavaGradlePluginDevelopmentPlugin implements Plugin<Project> {
     private static final String PLUGIN_ID = "dev.gradleplugins.java-gradle-plugin";
 
     @Override
     public void apply(Project project) {
-        assertOtherGradlePluginDevelopmentPluginsAreNeverApplied(project.getPluginManager(), PLUGIN_ID);
+        new OtherGradlePluginDevelopmentPluginsIncompatibilityRule(PLUGIN_ID).execute(project);
         assertJavaGradlePluginIsNotPreviouslyApplied(project.getPluginManager(), PLUGIN_ID);
         assertKotlinDslPluginIsNeverApplied(project.getPluginManager(), PLUGIN_ID);
 

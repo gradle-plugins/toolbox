@@ -19,40 +19,13 @@ package dev.gradleplugins.internal.plugins;
 import dev.gradleplugins.GradlePluginDevelopmentRepositoryExtension;
 import dev.gradleplugins.internal.GradlePluginDevelopmentExtensionInternal;
 import org.gradle.api.GradleException;
-import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.plugins.PluginManager;
 import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-public abstract class AbstractGradlePluginDevelopmentPlugin implements Plugin<Project> {
-
-    @Override
-    public void apply(Project project) {
-        assertOtherGradlePluginDevelopmentPluginsAreNeverApplied(project.getPluginManager(), getPluginId());
-        assertJavaGradlePluginIsNotPreviouslyApplied(project.getPluginManager(), getPluginId());
-        assertKotlinDslPluginIsNeverApplied(project.getPluginManager(), getPluginId());
-        doApply(project);
-    }
-
-    protected abstract void doApply(Project project);
-    protected abstract String getPluginId();
-
-    public static void assertOtherGradlePluginDevelopmentPluginsAreNeverApplied(PluginManager pluginManager, String currentPluginId) {
-        getOtherGradlePluginDevelopmentPlugins(currentPluginId).stream().filter(pluginManager::hasPlugin).findAny().ifPresent(id -> {
-            throw new GradleException("The '" + currentPluginId + "' cannot be applied with '" + id + "', please apply just one of them.");
-        });
-    }
-
-    private static List<String> getOtherGradlePluginDevelopmentPlugins(String pluginId) {
-        return Stream.of("dev.gradleplugins.java-gradle-plugin", "dev.gradleplugins.groovy-gradle-plugin", "dev.gradleplugins.kotlin-gradle-plugin").filter(it -> !it.equals(pluginId)).collect(Collectors.toList());
-    }
-
+public abstract class AbstractGradlePluginDevelopmentPlugin {
     public static void assertJavaGradlePluginIsNotPreviouslyApplied(PluginManager pluginManager, String currentPluginId) {
         // The kotlin-dsl plugin gets special treatment in Gradle and gets moved to the front of the plugin list to apply. The kotlin-dsl internally apply the java-gradle-plugin plugin as well. Because of this, we are going to ignore the specific case of the kotlin-dsl applied and have a separate assertion.
         if (pluginManager.hasPlugin("java-gradle-plugin") && !pluginManager.hasPlugin("org.gradle.kotlin.kotlin-dsl")) {

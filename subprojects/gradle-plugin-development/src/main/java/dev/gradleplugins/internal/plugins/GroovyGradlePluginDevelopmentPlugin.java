@@ -21,6 +21,7 @@ import dev.gradleplugins.GroovyGradlePluginDevelopmentExtension;
 import dev.gradleplugins.internal.AddDependency;
 import dev.gradleplugins.internal.DeferredRepositoryFactory;
 import dev.gradleplugins.internal.DependencyFactory;
+import dev.gradleplugins.internal.rules.OtherGradlePluginDevelopmentPluginsIncompatibilityRule;
 import lombok.val;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -29,7 +30,6 @@ import org.gradle.util.GradleVersion;
 import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
 import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.assertJavaGradlePluginIsNotPreviouslyApplied;
 import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.assertKotlinDslPluginIsNeverApplied;
-import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.assertOtherGradlePluginDevelopmentPluginsAreNeverApplied;
 import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.registerLanguageExtension;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
 
@@ -38,7 +38,7 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
 
     @Override
     public void apply(Project project) {
-        assertOtherGradlePluginDevelopmentPluginsAreNeverApplied(project.getPluginManager(), PLUGIN_ID);
+        new OtherGradlePluginDevelopmentPluginsIncompatibilityRule(PLUGIN_ID).execute(project);
         assertJavaGradlePluginIsNotPreviouslyApplied(project.getPluginManager(), PLUGIN_ID);
         assertKotlinDslPluginIsNeverApplied(project.getPluginManager(), PLUGIN_ID);
 
