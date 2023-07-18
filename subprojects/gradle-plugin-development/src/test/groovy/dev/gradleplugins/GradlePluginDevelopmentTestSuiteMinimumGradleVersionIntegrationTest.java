@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
 import static dev.gradleplugins.GradlePluginDevelopmentTestSuiteFactory.forProject;
+import static dev.gradleplugins.ProjectMatchers.absentProvider;
 import static dev.gradleplugins.ProjectMatchers.coordinate;
 import static dev.gradleplugins.ProjectMatchers.providerOf;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
@@ -49,13 +50,13 @@ class GradlePluginDevelopmentTestSuiteMinimumGradleVersionIntegrationTest {
         @Test
         void calculatesDefaultCompatibilityMinimumGradleVersionOnDevelWhenTestingStrategyQueried() {
             assertThat(subject.getStrategies().getCoverageForMinimumVersion().getVersion(), equalTo(GradleVersion.current().getVersion()));
-            assertThat(compatibility(gradlePlugin(project)).getMinimumGradleVersion(), providerOf(GradleVersion.current().getVersion()));
+            assertThat(compatibility(gradlePlugin(project)).getMinimumGradleVersion(), absentProvider());
         }
 
         @Test
         void finalizesCompatibilityExtensionWhenTestingStrategyQueried() {
             subject.getStrategies().getCoverageForMinimumVersion().getVersion();
-            assertTrue(((FinalizableComponent) compatibility(gradlePlugin(project))).isFinalized());
+            assertThrows(RuntimeException.class, () -> compatibility(gradlePlugin(project)).getMinimumGradleVersion().set("n/a"));
         }
     }
 

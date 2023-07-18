@@ -13,6 +13,7 @@ import org.gradle.api.provider.Provider;
 import org.gradle.api.resources.TextResourceFactory;
 import org.gradle.api.services.BuildService;
 import org.gradle.api.services.BuildServiceParameters;
+import org.gradle.util.GradleVersion;
 
 import javax.inject.Inject;
 import java.util.Objects;
@@ -90,8 +91,7 @@ final class DefaultGradlePluginDevelopmentTestSuiteFactory implements GradlePlug
     private static Provider<String> ofDevelMinimumGradleVersionIfAvailable(Project project) {
         return project.provider(() -> {
             if (project.getPluginManager().hasPlugin("java-gradle-plugin") && project.getPluginManager().hasPlugin("dev.gradleplugins.gradle-plugin-base")) {
-                ((FinalizableComponent) compatibility(gradlePlugin(project))).finalizeComponent();
-                return compatibility(gradlePlugin(project)).getMinimumGradleVersion();
+                return compatibility(gradlePlugin(project)).getMinimumGradleVersion().orElse(GradleVersion.current().getVersion());
             } else {
                 return Providers.<String>notDefined(); // no minimum Gradle version...
             }

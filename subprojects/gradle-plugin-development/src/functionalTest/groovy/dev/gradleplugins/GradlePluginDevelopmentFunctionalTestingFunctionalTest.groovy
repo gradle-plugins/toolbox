@@ -8,6 +8,7 @@ import dev.gradleplugins.integtests.fixtures.ArchiveTestFixture
 import org.gradle.api.internal.artifacts.dependencies.SelfResolvingDependencyInternal
 import org.gradle.util.GradleVersion
 import org.hamcrest.CoreMatchers
+import spock.lang.Ignore
 
 abstract class AbstractGradlePluginDevelopmentFunctionalTestingFunctionalTest extends AbstractGradlePluginDevelopmentFunctionalSpec implements ArchiveTestFixture {
     // TODO: Assert the right version of the fixture is pulled
@@ -33,6 +34,7 @@ abstract class AbstractGradlePluginDevelopmentFunctionalTestingFunctionalTest ex
         jar("build/libs/gradle-plugin.jar").assertFileContent("META-INF/gradle-plugins/${componentUnderTest.pluginId}.properties", CoreMatchers.startsWith('implementation-class=com.example.BasicPlugin'))
     }
 
+    @Ignore // Without configuration, we are now reverting to normal vanilla Gradle setup
     def "has no self-resolving Gradle TestKit dependency"() {
         given:
         makeSingleProject()
