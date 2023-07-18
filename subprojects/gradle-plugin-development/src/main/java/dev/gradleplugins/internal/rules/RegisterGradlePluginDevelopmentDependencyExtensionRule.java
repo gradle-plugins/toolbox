@@ -1,4 +1,4 @@
-package dev.gradleplugins.internal.plugins;
+package dev.gradleplugins.internal.rules;
 
 import dev.gradleplugins.GradlePluginDevelopmentDependencyExtension;
 import dev.gradleplugins.internal.DefaultDependencyVersions;
@@ -13,7 +13,7 @@ import org.gradle.api.reflect.TypeOf;
 
 import java.util.Objects;
 
-final class RegisterGradlePluginDevelopmentDependencyExtensionRule implements Action<Project> {
+public final class RegisterGradlePluginDevelopmentDependencyExtensionRule implements Action<Project> {
     @Override
     public void execute(Project project) {
         new DefaultGradleExtensionMixInService(project.getObjects())

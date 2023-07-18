@@ -1,5 +1,7 @@
 package dev.gradleplugins.internal.plugins;
 
+import dev.gradleplugins.internal.rules.RegisterGradlePluginDevelopmentDependencyExtensionRule;
+import dev.gradleplugins.internal.rules.RegisterGradlePluginDevelopmentRepositoryExtensionRule;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 

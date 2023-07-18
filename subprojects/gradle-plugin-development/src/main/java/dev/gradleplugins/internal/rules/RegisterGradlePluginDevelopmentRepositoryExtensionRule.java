@@ -1,4 +1,4 @@
-package dev.gradleplugins.internal.plugins;
+package dev.gradleplugins.internal.rules;
 
 import dev.gradleplugins.GradlePluginDevelopmentRepositoryExtension;
 import dev.gradleplugins.internal.runtime.dsl.DefaultGradleExtensionMixInService;
@@ -11,7 +11,7 @@ import org.gradle.api.reflect.HasPublicType;
 import org.gradle.api.reflect.TypeOf;
 import org.gradle.internal.Actions;
 
-final class RegisterGradlePluginDevelopmentRepositoryExtensionRule implements Action<Project> {
+public final class RegisterGradlePluginDevelopmentRepositoryExtensionRule implements Action<Project> {
     public void execute(Project project) {
         RepositoryHandler repositories = project.getRepositories();
 
