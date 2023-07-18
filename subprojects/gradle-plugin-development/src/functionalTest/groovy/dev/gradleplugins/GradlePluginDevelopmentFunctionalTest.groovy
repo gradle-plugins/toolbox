@@ -91,7 +91,7 @@ class GradlePluginDevelopmentFunctionalTest extends AbstractGradleSpecification 
                 gradlePluginDevelopment()
             }
 
-            mainClassName = 'com.example.Main'
+            ${mainClassName('com.example.Main')}
         """
         new JavaBasicGradlePlugin().withFunctionalTest().writeToProject(testDirectory)
 
@@ -137,7 +137,7 @@ class GradlePluginDevelopmentFunctionalTest extends AbstractGradleSpecification 
                 implementation gradleApi('6.2.1') // Runtime elements expose org.codehaus.groovy:groovy-all
             }
 
-            mainClassName = 'com.example.Main'
+            ${mainClassName('com.example.Main')}
         """
         new JavaBasicGradlePlugin().withFunctionalTest().writeToProject(testDirectory)
 
@@ -391,5 +391,17 @@ public class Bar {}
         failure.assertHasDescription("A problem occurred evaluating root project 'root'.")
         failure.assertHasCause("Some exception")
         failure.assertNotOutput("java.lang.NullPointerException (no error message)")
+    }
+
+    private static String mainClassName(String mainClass) {
+        return """
+            if (GradleVersion.version('8.0') > GradleVersion.current()) {
+                mainClassName = '${mainClass}'
+            } else {
+                application {
+                    mainClass = '${mainClass}'
+                }
+            }
+        """
     }
 }
