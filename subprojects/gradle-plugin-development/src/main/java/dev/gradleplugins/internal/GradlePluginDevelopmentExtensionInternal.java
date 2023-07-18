@@ -95,8 +95,8 @@ public abstract class GradlePluginDevelopmentExtensionInternal implements Groovy
             }
         }
 
-        TaskProvider<Task> jar = getTasks().named(jarTaskName);
-        variant.getOutgoing().artifact(new LazyPublishArtifact(jar));
+        TaskProvider<Jar> jar = getTasks().named(jarTaskName, Jar.class);
+        variant.getOutgoing().artifact(new JarBasedPublishArtifact(jar));
         AdhocComponentWithVariants component = findJavaComponent(getComponents());
         if (component != null) {
             component.addVariantsFromConfiguration(variant, new JavaConfigurationVariantMapping("runtime", true));
