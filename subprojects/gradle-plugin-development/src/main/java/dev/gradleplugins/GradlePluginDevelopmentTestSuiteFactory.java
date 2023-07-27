@@ -24,6 +24,6 @@ public interface GradlePluginDevelopmentTestSuiteFactory {
      */
     static GradlePluginDevelopmentTestSuiteFactory forProject(Project project) {
         Objects.requireNonNull(project);
-        return new DefaultGradlePluginDevelopmentTestSuiteFactory(project);
+        return project.getExtensions().getByType(GradlePluginDevelopmentTestSuiteFactory.class);
     }
 }
