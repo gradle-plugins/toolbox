@@ -16,14 +16,8 @@
 
 package dev.gradleplugins.internal.plugins;
 
-import dev.gradleplugins.GradlePluginDevelopmentRepositoryExtension;
-import dev.gradleplugins.internal.GradlePluginDevelopmentExtensionInternal;
 import org.gradle.api.GradleException;
-import org.gradle.api.Project;
-import org.gradle.api.plugins.ExtensionAware;
-import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.plugins.PluginManager;
-import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 
 public abstract class AbstractGradlePluginDevelopmentPlugin {
     public static void assertJavaGradlePluginIsNotPreviouslyApplied(PluginManager pluginManager, String currentPluginId) {
@@ -37,19 +31,5 @@ public abstract class AbstractGradlePluginDevelopmentPlugin {
         pluginManager.withPlugin("org.gradle.kotlin.kotlin-dsl", appliedPlugin -> {
             throw new GradleException("The Gradle plugin 'kotlin-dsl' should not be applied within your build when using '" + currentPluginId + "'.");
         });
-    }
-
-    public static <T> GradlePluginDevelopmentExtensionInternal registerLanguageExtension(Project project, String languageName, Class<T> type) {
-        GradlePluginDevelopmentExtension gradlePlugin = project.getExtensions().getByType(GradlePluginDevelopmentExtension.class);
-        GradlePluginDevelopmentExtensionInternal extension = project.getObjects().newInstance(GradlePluginDevelopmentExtensionInternal.class, project.getExtensions().getByType(JavaPluginExtension.class));
-        ((ExtensionAware)gradlePlugin).getExtensions().add(type, languageName, type.cast(extension));
-
-        project.afterEvaluate(proj -> {
-            if (!extension.isDefaultRepositoriesDisabled()) {
-                GradlePluginDevelopmentRepositoryExtension.from(project.getRepositories()).gradlePluginDevelopment();
-            }
-        });
-
-        return extension;
     }
 }

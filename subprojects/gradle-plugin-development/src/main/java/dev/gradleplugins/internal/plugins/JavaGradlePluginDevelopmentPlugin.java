@@ -18,12 +18,12 @@ package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.JavaGradlePluginDevelopmentExtension;
 import dev.gradleplugins.internal.rules.OtherGradlePluginDevelopmentPluginsIncompatibilityRule;
+import dev.gradleplugins.internal.rules.RegisterLanguageExtensionRule;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 
 import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.assertJavaGradlePluginIsNotPreviouslyApplied;
 import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.assertKotlinDslPluginIsNeverApplied;
-import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.registerLanguageExtension;
 
 public class JavaGradlePluginDevelopmentPlugin implements Plugin<Project> {
     private static final String PLUGIN_ID = "dev.gradleplugins.java-gradle-plugin";
@@ -38,6 +38,6 @@ public class JavaGradlePluginDevelopmentPlugin implements Plugin<Project> {
         project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-testing-base");
         project.getPluginManager().apply("java-gradle-plugin"); // For plugin development
 
-        registerLanguageExtension(project, "java", JavaGradlePluginDevelopmentExtension.class);
+        new RegisterLanguageExtensionRule("java", JavaGradlePluginDevelopmentExtension.class).execute(project);
     }
 }
