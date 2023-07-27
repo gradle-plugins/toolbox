@@ -5,7 +5,7 @@ import org.gradle.api.Action;
 import org.gradle.api.plugins.PluginManager;
 import org.gradle.api.tasks.TaskContainer;
 
-final class AttachTestTasksToCheckTaskIfPresent implements Action<GradlePluginDevelopmentTestSuite> {
+public final class AttachTestTasksToCheckTaskIfPresent implements Action<GradlePluginDevelopmentTestSuite> {
     private final PluginManager pluginManager;
     private final TaskContainer tasks;
 

@@ -4,6 +4,7 @@ import dev.gradleplugins.CompositeGradlePluginTestingStrategy;
 import dev.gradleplugins.GradlePluginDevelopmentTestSuite;
 import dev.gradleplugins.GradlePluginTestingStrategy;
 import dev.gradleplugins.GradleVersionCoverageTestingStrategy;
+import dev.gradleplugins.internal.rules.RegisterTestSuiteFactoryServiceRule;
 import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.Action;
 import org.gradle.api.model.ObjectFactory;
@@ -22,7 +23,7 @@ import java.util.stream.StreamSupport;
 import static dev.gradleplugins.internal.RegisterTestingStrategyPropertyExtensionRule.testingStrategyProperty;
 import static java.util.Collections.emptyList;
 
-final class CreateTestTasksFromTestingStrategiesRule implements Action<GradlePluginDevelopmentTestSuite> {
+public final class CreateTestTasksFromTestingStrategiesRule implements Action<GradlePluginDevelopmentTestSuite> {
     private final TaskContainer tasks;
     private final ObjectFactory objects;
     private final SetProperty<Test> testElements;
@@ -58,7 +59,7 @@ final class CreateTestTasksFromTestingStrategiesRule implements Action<GradlePlu
 
     private Action<Test> applyTestActions(GradlePluginDevelopmentTestSuite testSuite) {
         return task -> {
-            for (Action<? super Test> action : ((GradlePluginDevelopmentTestSuiteInternal) testSuite).getTestTaskActions()) {
+            for (Action<? super Test> action : ((RegisterTestSuiteFactoryServiceRule.DefaultGradlePluginDevelopmentTestSuiteFactory.GradlePluginDevelopmentTestSuiteInternal) testSuite).getTestTaskActions()) {
                 action.execute(task);
             }
         };

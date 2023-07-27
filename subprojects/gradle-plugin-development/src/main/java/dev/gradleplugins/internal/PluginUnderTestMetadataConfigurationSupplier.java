@@ -9,7 +9,7 @@ import org.gradle.api.tasks.SourceSet;
 
 import java.util.function.Supplier;
 
-final class PluginUnderTestMetadataConfigurationSupplier implements Supplier<NamedDomainObjectProvider<Configuration>> {
+public final class PluginUnderTestMetadataConfigurationSupplier implements Supplier<NamedDomainObjectProvider<Configuration>> {
     private final Project project;
     private final GradlePluginDevelopmentTestSuite testSuite;
     private NamedDomainObjectProvider<Configuration> pluginUnderTestMetadata;
