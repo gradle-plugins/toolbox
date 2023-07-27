@@ -8,7 +8,6 @@ import dev.gradleplugins.internal.rules.RegisterTestSuiteFactoryServiceRule;
 import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.Action;
 import org.gradle.api.model.ObjectFactory;
-import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.testing.Test;
@@ -26,12 +25,10 @@ import static java.util.Collections.emptyList;
 public final class CreateTestTasksFromTestingStrategiesRule implements Action<GradlePluginDevelopmentTestSuite> {
     private final TaskContainer tasks;
     private final ObjectFactory objects;
-    private final SetProperty<Test> testElements;
 
-    public CreateTestTasksFromTestingStrategiesRule(TaskContainer tasks, ObjectFactory objects, SetProperty<Test> testElements) {
+    public CreateTestTasksFromTestingStrategiesRule(TaskContainer tasks, ObjectFactory objects) {
         this.tasks = tasks;
         this.objects = objects;
-        this.testElements = testElements;
     }
 
     @Override
@@ -41,28 +38,17 @@ public final class CreateTestTasksFromTestingStrategiesRule implements Action<Gr
         if (strategies.isEmpty()) {
             TaskProvider<Test> testTask = createTestTask(testSuite);
             testTask.configure(new RegisterTestingStrategyPropertyExtensionRule(objects));
-            testTask.configure(applyTestActions(testSuite));
         } else if (strategies.size() == 1) {
             TaskProvider<Test> testTask = createTestTask(testSuite);
             testTask.configure(new RegisterTestingStrategyPropertyExtensionRule(objects));
             testTask.configure(configureTestingStrategy(testSuite, strategies.iterator().next()));
-            testTask.configure(applyTestActions(testSuite));
         } else {
             for (GradlePluginTestingStrategy strategy : strategies) {
                 TaskProvider<Test> testTask = createTestTask(testSuite, strategy.getName());
                 testTask.configure(new RegisterTestingStrategyPropertyExtensionRule(objects));
                 testTask.configure(configureTestingStrategy(testSuite, strategy));
-                testTask.configure(applyTestActions(testSuite));
             }
         }
-    }
-
-    private Action<Test> applyTestActions(GradlePluginDevelopmentTestSuite testSuite) {
-        return task -> {
-            for (Action<? super Test> action : ((RegisterTestSuiteFactoryServiceRule.DefaultGradlePluginDevelopmentTestSuiteFactory.GradlePluginDevelopmentTestSuiteInternal) testSuite).getTestTaskActions()) {
-                action.execute(task);
-            }
-        };
     }
 
     private Action<Test> configureTestingStrategy(GradlePluginDevelopmentTestSuite testSuite, GradlePluginTestingStrategy strategy) {
@@ -120,7 +106,7 @@ public final class CreateTestTasksFromTestingStrategiesRule implements Action<Gr
         });
 
         // Register test task to TaskView
-        testElements.add(result);
+        ((RegisterTestSuiteFactoryServiceRule.DefaultGradlePluginDevelopmentTestSuiteFactory.GradlePluginDevelopmentTestSuiteInternal) testSuite).getTestTasks().add(result);
 
         return result;
     }

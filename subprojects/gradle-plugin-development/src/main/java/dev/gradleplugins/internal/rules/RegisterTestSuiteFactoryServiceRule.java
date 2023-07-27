@@ -11,7 +11,6 @@ import dev.gradleplugins.TaskView;
 import dev.gradleplugins.internal.AttachTestTasksToCheckTaskIfPresent;
 import dev.gradleplugins.internal.ConfigurePluginUnderTestMetadataTask;
 import dev.gradleplugins.internal.CreateTestTasksFromTestingStrategiesRule;
-import dev.gradleplugins.internal.DefaultDependencyBucket;
 import dev.gradleplugins.internal.DefaultDependencyBucketFactory;
 import dev.gradleplugins.internal.DependencyBucketFactory;
 import dev.gradleplugins.internal.DependencyFactory;
@@ -24,7 +23,6 @@ import dev.gradleplugins.internal.ReleasedVersionDistributions;
 import dev.gradleplugins.internal.TestFixturesDependencyModifier;
 import dev.gradleplugins.internal.TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule;
 import dev.gradleplugins.internal.runtime.dsl.GroovyHelper;
-import lombok.Getter;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.groovy.runtime.MethodClosure;
@@ -37,16 +35,13 @@ import org.gradle.api.artifacts.ProjectDependency;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
 import org.gradle.api.component.SoftwareComponent;
 import org.gradle.api.internal.provider.Providers;
-import org.gradle.api.plugins.PluginManager;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
-import org.gradle.api.provider.SetProperty;
 import org.gradle.api.reflect.HasPublicType;
 import org.gradle.api.reflect.TypeOf;
 import org.gradle.api.resources.TextResourceFactory;
 import org.gradle.api.services.BuildService;
 import org.gradle.api.services.BuildServiceParameters;
-import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.testing.Test;
@@ -58,11 +53,13 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
 import static dev.gradleplugins.internal.DefaultDependencyVersions.SPOCK_FRAMEWORK_VERSION;
@@ -205,7 +202,6 @@ public final class RegisterTestSuiteFactoryServiceRule implements Action<Project
 
             protected static abstract /*final*/ class Dependencies implements GradlePluginDevelopmentTestSuiteDependencies, Iterable<GradlePluginDevelopmentDependencyBucket> {
                 private final Map<String, GradlePluginDevelopmentDependencyBucket> dependencyBuckets = new LinkedHashMap<>();
-                private final PluginManager pluginManager;
                 private final Provider<String> defaultGroovyVersion;
                 private final DependencyFactory dependencyFactory;
                 private final GradlePluginDevelopmentDependencyModifiers.DependencyModifier platformDependencyModifier;
@@ -227,7 +223,6 @@ public final class RegisterTestSuiteFactoryServiceRule implements Action<Project
                     this.platformDependencyModifier = new PlatformDependencyModifier(project);
                     this.enforcedPlatformDependencyModifier = new EnforcedPlatformDependencyModifier(project);
                     this.testFixturesDependencyModifier = new TestFixturesDependencyModifier(project);
-                    this.pluginManager = project.getPluginManager();
                     this.defaultGroovyVersion = defaultGroovyVersion;
                     this.dependencyFactory = DependencyFactory.forProject(project);
                 }
@@ -288,7 +283,7 @@ public final class RegisterTestSuiteFactoryServiceRule implements Action<Project
 
                 @Override
                 public Dependency spockFramework(String version) {
-                    pluginManager.apply("groovy-base"); // Spock framework imply Groovy implementation language
+                    project.getPluginManager().apply("groovy-base"); // Spock framework imply Groovy implementation language
                     return dependencyFactory.create("org.spockframework:spock-core:" + version);
                 }
 
@@ -371,8 +366,6 @@ public final class RegisterTestSuiteFactoryServiceRule implements Action<Project
             private final GradlePluginTestingStrategyFactory strategyFactory;
             private final GradlePluginDevelopmentTestSuiteDependencies dependencies;
             private final String name;
-            @Getter
-            private final List<Action<? super Test>> testTaskActions = new ArrayList<>();
             private final List<Action<? super GradlePluginDevelopmentTestSuite>> finalizeActions = new ArrayList<>();
             private final TestTaskView testTasks;
             private final TaskProvider<PluginUnderTestMetadata> pluginUnderTestMetadataTask;
@@ -386,10 +379,10 @@ public final class RegisterTestSuiteFactoryServiceRule implements Action<Project
                 this.displayName = GUtil.toWords(name) + "s";
                 this.dependencies = dependenciesFactory.create(this);
                 this.pluginUnderTestMetadataTask = registerPluginUnderTestMetadataTask(project.getTasks(), pluginUnderTestMetadataTaskName(name), displayName);
-                this.testTasks = project.getObjects().newInstance(TestTaskView.class, testTaskActions, project.provider(new FinalizeComponentCallable<>()).orElse(getTestTaskCollection()));
+                this.testTasks = project.getObjects().newInstance(TestTaskView.class, project);
                 this.finalizeActions.add(testSuite -> new PluginUnderTestMetadataConfigurationSupplier(project, testSuite).get());
                 this.finalizeActions.add(new TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule());
-                this.finalizeActions.add(new CreateTestTasksFromTestingStrategiesRule(project.getTasks(), project.getObjects(), getTestTaskCollection()));
+                this.finalizeActions.add(new CreateTestTasksFromTestingStrategiesRule(project.getTasks(), project.getObjects()));
                 this.finalizeActions.add(new AttachTestTasksToCheckTaskIfPresent(project.getPluginManager(), project.getTasks()));
             }
 
@@ -419,15 +412,13 @@ public final class RegisterTestSuiteFactoryServiceRule implements Action<Project
                 return strategyFactory;
             }
 
-            public abstract SetProperty<Test> getTestTaskCollection();
-
             @Override
             public String toString() {
                 return "test suite '" + name + "'";
             }
 
             @Override
-            public TaskView<Test> getTestTasks() {
+            public TestTaskView getTestTasks() {
                 return testTasks;
             }
 
@@ -441,24 +432,45 @@ public final class RegisterTestSuiteFactoryServiceRule implements Action<Project
                 return displayName;
             }
 
-            protected static /*final*/ abstract class TestTaskView implements TaskView<Test> {
-                private final List<Action<? super Test>> testTaskActions;
+            public static /*final*/ abstract class TestTaskView implements TaskView<Test> {
+                private final DomainObjectSet<Spec> testTaskSpecs;
                 private final Provider<Set<Test>> elementsProvider;
 
                 @Inject
-                public TestTaskView(List<Action<? super Test>> testTaskActions, Provider<Set<Test>> elementsProvider) {
-                    this.testTaskActions = testTaskActions;
-                    this.elementsProvider = elementsProvider;
+                public TestTaskView(Project project) {
+                    this.testTaskSpecs = project.getObjects().domainObjectSet(Spec.class);
+                    this.elementsProvider = project.provider(() -> testTaskSpecs.stream().map(Spec::get).collect(Collectors.toCollection(LinkedHashSet::new)));
+
+                }
+
+                public boolean add(TaskProvider<Test> taskProvider) {
+                    return testTaskSpecs.add(new Spec(taskProvider));
                 }
 
                 @Override
                 public void configureEach(Action<? super Test> action) {
-                    testTaskActions.add(action);
+                    testTaskSpecs.configureEach(spec -> spec.configure(action));
                 }
 
                 @Override
                 public Provider<Set<Test>> getElements() {
                     return elementsProvider;
+                }
+
+                private static final class Spec {
+                    private final TaskProvider<Test> taskProvider;
+
+                    public Spec(TaskProvider<Test> taskProvider) {
+                        this.taskProvider = taskProvider;
+                    }
+
+                    public void configure(Action<? super Test> action) {
+                        taskProvider.configure(action);
+                    }
+
+                    public Test get() {
+                        return taskProvider.get();
+                    }
                 }
             }
 
