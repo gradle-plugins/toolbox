@@ -12,6 +12,8 @@ import dev.gradleplugins.internal.AttachTestTasksToCheckTaskIfPresent;
 import dev.gradleplugins.internal.ConfigurePluginUnderTestMetadataTask;
 import dev.gradleplugins.internal.CreateTestTasksFromTestingStrategiesRule;
 import dev.gradleplugins.internal.DefaultDependencyBucket;
+import dev.gradleplugins.internal.DefaultDependencyBucketFactory;
+import dev.gradleplugins.internal.DependencyBucketFactory;
 import dev.gradleplugins.internal.DependencyFactory;
 import dev.gradleplugins.internal.EnforcedPlatformDependencyModifier;
 import dev.gradleplugins.internal.FinalizableComponent;
@@ -38,13 +40,13 @@ import org.gradle.api.internal.provider.Providers;
 import org.gradle.api.plugins.PluginManager;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
-import org.gradle.api.provider.ProviderFactory;
 import org.gradle.api.provider.SetProperty;
 import org.gradle.api.reflect.HasPublicType;
 import org.gradle.api.reflect.TypeOf;
 import org.gradle.api.resources.TextResourceFactory;
 import org.gradle.api.services.BuildService;
 import org.gradle.api.services.BuildServiceParameters;
+import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.testing.Test;
@@ -105,7 +107,7 @@ public final class RegisterTestSuiteFactoryServiceRule implements Action<Project
 
         @Override
         public GradlePluginDevelopmentTestSuite create(String name) {
-            val result = project.getObjects().newInstance(GradlePluginDevelopmentTestSuiteInternal.class, name, project, minimumGradleVersion(project), gradleDistributions());
+            val result = project.getObjects().newInstance(GradlePluginDevelopmentTestSuiteInternal.class, name, project, minimumGradleVersion(project), gradleDistributions(), new DecoratingGradlePluginDevelopmentTestSuiteDependenciesFactory<>(new DefaultGradlePluginDevelopmentTestSuiteDependenciesFactory(project)));
             // Register as finalized action because it adds configuration which early finalize source set property
             result.whenFinalized(new ConfigurePluginUnderTestMetadataTask(project));
             result.getSourceSet().convention(project.provider(() -> {
@@ -185,139 +187,20 @@ public final class RegisterTestSuiteFactoryServiceRule implements Action<Project
             Property<String> getMinimumGradleVersion();
         }
 
-        public abstract static class GradlePluginDevelopmentTestSuiteInternal implements GradlePluginDevelopmentTestSuite, SoftwareComponent, HasPublicType, FinalizableComponent {
-            private static final String PLUGIN_UNDER_TEST_METADATA_TASK_NAME_PREFIX = "pluginUnderTestMetadata";
-            private static final String PLUGIN_DEVELOPMENT_GROUP = "Plugin development";
-            private static final String PLUGIN_UNDER_TEST_METADATA_TASK_DESCRIPTION_FORMAT = "Generates the metadata for plugin %s.";
-            private final GradlePluginTestingStrategyFactory strategyFactory;
-            private final Dependencies dependencies;
-            private final String name;
-            @Getter
-            private final List<Action<? super Test>> testTaskActions = new ArrayList<>();
-            private final List<Action<? super GradlePluginDevelopmentTestSuite>> finalizeActions = new ArrayList<>();
-            private final TestTaskView testTasks;
-            private final TaskProvider<PluginUnderTestMetadata> pluginUnderTestMetadataTask;
-            private final String displayName;
-            private boolean finalized = false;
+        interface GradlePluginDevelopmentTestSuiteDependenciesFactory<DependenciesType extends GradlePluginDevelopmentTestSuiteDependencies> {
+            DependenciesType create(GradlePluginDevelopmentTestSuite testSuite);
+        }
 
-            @Inject
-            public GradlePluginDevelopmentTestSuiteInternal(String name, Project project, ProviderFactory providers, Provider<String> minimumGradleVersion, ReleasedVersionDistributions releasedVersions) {
-                this.strategyFactory = new GradlePluginTestingStrategyFactoryInternal(minimumGradleVersion, releasedVersions);
-                this.name = name;
-                this.displayName = GUtil.toWords(name) + "s";
-                this.dependencies = project.getObjects().newInstance(Dependencies.class, project, minimumGradleVersion.orElse(GradleVersion.current().getVersion()).map(GradleRuntimeCompatibility::groovyVersionOf), this);
+        private static final class DefaultGradlePluginDevelopmentTestSuiteDependenciesFactory implements GradlePluginDevelopmentTestSuiteDependenciesFactory<DefaultGradlePluginDevelopmentTestSuiteDependenciesFactory.Dependencies> {
+            private final Project project;
 
-                // adhoc decoration of the dependencies
-                this.dependencies.forEach(dependencyBucket -> {
-                    GroovyHelper.instance().addNewInstanceMethod(this.dependencies, dependencyBucket.getName(), new MethodClosure(dependencyBucket, "add"));
-                });
-                GroovyHelper.instance().addNewInstanceMethod(this.dependencies, "platform", new MethodClosure(this.dependencies.getPlatform(), "modify"));
-                GroovyHelper.instance().addNewInstanceMethod(this.dependencies, "enforcedPlatform", new MethodClosure(this.dependencies.getEnforcedPlatform(), "modify"));
-                GroovyHelper.instance().addNewInstanceMethod(this.dependencies, "testFixtures", new MethodClosure(this.dependencies.getTestFixtures(), "modify"));
-
-                this.pluginUnderTestMetadataTask = registerPluginUnderTestMetadataTask(project.getTasks(), pluginUnderTestMetadataTaskName(name), displayName);
-                this.testTasks = project.getObjects().newInstance(TestTaskView.class, testTaskActions, providers.provider(new FinalizeComponentCallable<>()).orElse(getTestTaskCollection()));
-                this.finalizeActions.add(testSuite -> new PluginUnderTestMetadataConfigurationSupplier(project, testSuite).get());
-                this.finalizeActions.add(new TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule());
-                this.finalizeActions.add(new CreateTestTasksFromTestingStrategiesRule(project.getTasks(), project.getObjects(), getTestTaskCollection()));
-                this.finalizeActions.add(new AttachTestTasksToCheckTaskIfPresent(project.getPluginManager(), project.getTasks()));
-            }
-
-            private static TaskProvider<PluginUnderTestMetadata> registerPluginUnderTestMetadataTask(TaskContainer tasks, String taskName, String displayName) {
-                return tasks.register(taskName, PluginUnderTestMetadata.class, task -> {
-                    task.setGroup(PLUGIN_DEVELOPMENT_GROUP);
-                    task.setDescription(format(PLUGIN_UNDER_TEST_METADATA_TASK_DESCRIPTION_FORMAT, displayName));
-                });
-            }
-
-            private static String pluginUnderTestMetadataTaskName(String testSuiteName) {
-                return PLUGIN_UNDER_TEST_METADATA_TASK_NAME_PREFIX + StringUtils.capitalize(testSuiteName);
+            private DefaultGradlePluginDevelopmentTestSuiteDependenciesFactory(Project project) {
+                this.project = project;
             }
 
             @Override
-            public String getName() {
-                return name;
-            }
-
-            @Override
-            public TypeOf<?> getPublicType() {
-                return TypeOf.typeOf(GradlePluginDevelopmentTestSuite.class);
-            }
-
-            @Override
-            public GradlePluginTestingStrategyFactory getStrategies() {
-                return strategyFactory;
-            }
-
-            public abstract SetProperty<Test> getTestTaskCollection();
-
-            @Override
-            public String toString() {
-                return "test suite '" + name + "'";
-            }
-
-            @Override
-            public TaskView<Test> getTestTasks() {
-                return testTasks;
-            }
-
-            @Override
-            public TaskProvider<PluginUnderTestMetadata> getPluginUnderTestMetadataTask() {
-                return pluginUnderTestMetadataTask;
-            }
-
-            @Override
-            public String getDisplayName() {
-                return displayName;
-            }
-
-            protected static /*final*/ abstract class TestTaskView implements TaskView<Test> {
-                private final List<Action<? super Test>> testTaskActions;
-                private final Provider<Set<Test>> elementsProvider;
-
-                @Inject
-                public TestTaskView(List<Action<? super Test>> testTaskActions, Provider<Set<Test>> elementsProvider) {
-                    this.testTaskActions = testTaskActions;
-                    this.elementsProvider = elementsProvider;
-                }
-
-                @Override
-                public void configureEach(Action<? super Test> action) {
-                    testTaskActions.add(action);
-                }
-
-                @Override
-                public Provider<Set<Test>> getElements() {
-                    return elementsProvider;
-                }
-            }
-
-            @Override
-            public void finalizeComponent() {
-                if (!finalized) {
-                    finalized = true;
-                    finalizeActions.forEach(it -> it.execute(this));
-                    getSourceSet().finalizeValue();
-                }
-            }
-
-            @Override
-            public boolean isFinalized() {
-                return finalized;
-            }
-
-            public void whenFinalized(Action<? super GradlePluginDevelopmentTestSuite> action) {
-                finalizeActions.add(action);
-            }
-
-            @Override
-            public Dependencies getDependencies() {
-                return dependencies;
-            }
-
-            @Override
-            public void dependencies(Action<? super GradlePluginDevelopmentTestSuiteDependencies> action) {
-                action.execute(dependencies);
+            public Dependencies create(GradlePluginDevelopmentTestSuite testSuite) {
+                return project.getObjects().newInstance(Dependencies.class, project, minimumGradleVersion(project).orElse(GradleVersion.current().getVersion()).map(GradleRuntimeCompatibility::groovyVersionOf), new DefaultDependencyBucketFactory(project, testSuite.getSourceSet()));
             }
 
             protected static abstract /*final*/ class Dependencies implements GradlePluginDevelopmentTestSuiteDependencies, Iterable<GradlePluginDevelopmentDependencyBucket> {
@@ -334,13 +217,13 @@ public final class RegisterTestSuiteFactoryServiceRule implements Action<Project
                 protected abstract DependencyHandler getDependencies();
 
                 @Inject
-                public Dependencies(Project project, Provider<String> defaultGroovyVersion, GradlePluginDevelopmentTestSuite testSuite) {
+                public Dependencies(Project project, Provider<String> defaultGroovyVersion, DependencyBucketFactory dependencyBucketFactory) {
                     this.project = project;
-                    add(new DefaultDependencyBucket(project, testSuite.getSourceSet(), "implementation"));
-                    add(new DefaultDependencyBucket(project, testSuite.getSourceSet(), "compileOnly"));
-                    add(new DefaultDependencyBucket(project, testSuite.getSourceSet(), "runtimeOnly"));
-                    add(new DefaultDependencyBucket(project, testSuite.getSourceSet(), "annotationProcessor"));
-                    add(new DefaultDependencyBucket(project, testSuite.getSourceSet(), "pluginUnderTestMetadata"));
+                    add(dependencyBucketFactory.create("implementation"));
+                    add(dependencyBucketFactory.create("compileOnly"));
+                    add(dependencyBucketFactory.create("runtimeOnly"));
+                    add(dependencyBucketFactory.create("annotationProcessor"));
+                    add(dependencyBucketFactory.create("pluginUnderTestMetadata"));
                     this.platformDependencyModifier = new PlatformDependencyModifier(project);
                     this.enforcedPlatformDependencyModifier = new EnforcedPlatformDependencyModifier(project);
                     this.testFixturesDependencyModifier = new TestFixturesDependencyModifier(project);
@@ -455,6 +338,156 @@ public final class RegisterTestSuiteFactoryServiceRule implements Action<Project
                 public ProjectDependency project() {
                     return dependencyFactory.create(project);
                 }
+            }
+        }
+
+        private static final class DecoratingGradlePluginDevelopmentTestSuiteDependenciesFactory<DependenciesType extends GradlePluginDevelopmentTestSuiteDependencies & Iterable<GradlePluginDevelopmentDependencyBucket>> implements GradlePluginDevelopmentTestSuiteDependenciesFactory<DependenciesType> {
+            private final GradlePluginDevelopmentTestSuiteDependenciesFactory<DependenciesType> delegate;
+
+            private DecoratingGradlePluginDevelopmentTestSuiteDependenciesFactory(GradlePluginDevelopmentTestSuiteDependenciesFactory<DependenciesType> delegate) {
+                this.delegate = delegate;
+            }
+
+            @Override
+            public DependenciesType create(GradlePluginDevelopmentTestSuite testSuite) {
+                final DependenciesType result = delegate.create(testSuite);
+
+                // adhoc decoration of the dependencies
+                result.forEach(dependencyBucket -> {
+                    GroovyHelper.instance().addNewInstanceMethod(result, dependencyBucket.getName(), new MethodClosure(dependencyBucket, "add"));
+                });
+                GroovyHelper.instance().addNewInstanceMethod(result, "platform", new MethodClosure(result.getPlatform(), "modify"));
+                GroovyHelper.instance().addNewInstanceMethod(result, "enforcedPlatform", new MethodClosure(result.getEnforcedPlatform(), "modify"));
+                GroovyHelper.instance().addNewInstanceMethod(result, "testFixtures", new MethodClosure(result.getTestFixtures(), "modify"));
+
+                return result;
+            }
+        }
+
+        public abstract static class GradlePluginDevelopmentTestSuiteInternal implements GradlePluginDevelopmentTestSuite, SoftwareComponent, HasPublicType, FinalizableComponent {
+            private static final String PLUGIN_UNDER_TEST_METADATA_TASK_NAME_PREFIX = "pluginUnderTestMetadata";
+            private static final String PLUGIN_DEVELOPMENT_GROUP = "Plugin development";
+            private static final String PLUGIN_UNDER_TEST_METADATA_TASK_DESCRIPTION_FORMAT = "Generates the metadata for plugin %s.";
+            private final GradlePluginTestingStrategyFactory strategyFactory;
+            private final GradlePluginDevelopmentTestSuiteDependencies dependencies;
+            private final String name;
+            @Getter
+            private final List<Action<? super Test>> testTaskActions = new ArrayList<>();
+            private final List<Action<? super GradlePluginDevelopmentTestSuite>> finalizeActions = new ArrayList<>();
+            private final TestTaskView testTasks;
+            private final TaskProvider<PluginUnderTestMetadata> pluginUnderTestMetadataTask;
+            private final String displayName;
+            private boolean finalized = false;
+
+            @Inject
+            public GradlePluginDevelopmentTestSuiteInternal(String name, Project project, Provider<String> minimumGradleVersion, ReleasedVersionDistributions releasedVersions, GradlePluginDevelopmentTestSuiteDependenciesFactory<? extends GradlePluginDevelopmentTestSuiteDependencies> dependenciesFactory) {
+                this.strategyFactory = new GradlePluginTestingStrategyFactoryInternal(minimumGradleVersion, releasedVersions);
+                this.name = name;
+                this.displayName = GUtil.toWords(name) + "s";
+                this.dependencies = dependenciesFactory.create(this);
+                this.pluginUnderTestMetadataTask = registerPluginUnderTestMetadataTask(project.getTasks(), pluginUnderTestMetadataTaskName(name), displayName);
+                this.testTasks = project.getObjects().newInstance(TestTaskView.class, testTaskActions, project.provider(new FinalizeComponentCallable<>()).orElse(getTestTaskCollection()));
+                this.finalizeActions.add(testSuite -> new PluginUnderTestMetadataConfigurationSupplier(project, testSuite).get());
+                this.finalizeActions.add(new TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule());
+                this.finalizeActions.add(new CreateTestTasksFromTestingStrategiesRule(project.getTasks(), project.getObjects(), getTestTaskCollection()));
+                this.finalizeActions.add(new AttachTestTasksToCheckTaskIfPresent(project.getPluginManager(), project.getTasks()));
+            }
+
+            private static TaskProvider<PluginUnderTestMetadata> registerPluginUnderTestMetadataTask(TaskContainer tasks, String taskName, String displayName) {
+                return tasks.register(taskName, PluginUnderTestMetadata.class, task -> {
+                    task.setGroup(PLUGIN_DEVELOPMENT_GROUP);
+                    task.setDescription(format(PLUGIN_UNDER_TEST_METADATA_TASK_DESCRIPTION_FORMAT, displayName));
+                });
+            }
+
+            private static String pluginUnderTestMetadataTaskName(String testSuiteName) {
+                return PLUGIN_UNDER_TEST_METADATA_TASK_NAME_PREFIX + StringUtils.capitalize(testSuiteName);
+            }
+
+            @Override
+            public String getName() {
+                return name;
+            }
+
+            @Override
+            public TypeOf<?> getPublicType() {
+                return TypeOf.typeOf(GradlePluginDevelopmentTestSuite.class);
+            }
+
+            @Override
+            public GradlePluginTestingStrategyFactory getStrategies() {
+                return strategyFactory;
+            }
+
+            public abstract SetProperty<Test> getTestTaskCollection();
+
+            @Override
+            public String toString() {
+                return "test suite '" + name + "'";
+            }
+
+            @Override
+            public TaskView<Test> getTestTasks() {
+                return testTasks;
+            }
+
+            @Override
+            public TaskProvider<PluginUnderTestMetadata> getPluginUnderTestMetadataTask() {
+                return pluginUnderTestMetadataTask;
+            }
+
+            @Override
+            public String getDisplayName() {
+                return displayName;
+            }
+
+            protected static /*final*/ abstract class TestTaskView implements TaskView<Test> {
+                private final List<Action<? super Test>> testTaskActions;
+                private final Provider<Set<Test>> elementsProvider;
+
+                @Inject
+                public TestTaskView(List<Action<? super Test>> testTaskActions, Provider<Set<Test>> elementsProvider) {
+                    this.testTaskActions = testTaskActions;
+                    this.elementsProvider = elementsProvider;
+                }
+
+                @Override
+                public void configureEach(Action<? super Test> action) {
+                    testTaskActions.add(action);
+                }
+
+                @Override
+                public Provider<Set<Test>> getElements() {
+                    return elementsProvider;
+                }
+            }
+
+            @Override
+            public void finalizeComponent() {
+                if (!finalized) {
+                    finalized = true;
+                    finalizeActions.forEach(it -> it.execute(this));
+                    getSourceSet().finalizeValue();
+                }
+            }
+
+            @Override
+            public boolean isFinalized() {
+                return finalized;
+            }
+
+            public void whenFinalized(Action<? super GradlePluginDevelopmentTestSuite> action) {
+                finalizeActions.add(action);
+            }
+
+            @Override
+            public GradlePluginDevelopmentTestSuiteDependencies getDependencies() {
+                return dependencies;
+            }
+
+            @Override
+            public void dependencies(Action<? super GradlePluginDevelopmentTestSuiteDependencies> action) {
+                action.execute(dependencies);
             }
 
             private final class FinalizeComponentCallable<T> implements Callable<T> {

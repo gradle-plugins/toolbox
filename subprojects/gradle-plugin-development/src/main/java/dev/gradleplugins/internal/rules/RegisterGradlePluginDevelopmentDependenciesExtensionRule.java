@@ -4,6 +4,8 @@ import dev.gradleplugins.GradlePluginDevelopmentDependencies;
 import dev.gradleplugins.GradlePluginDevelopmentDependencyBucket;
 import dev.gradleplugins.GradlePluginDevelopmentDependencyModifiers;
 import dev.gradleplugins.internal.DefaultDependencyBucket;
+import dev.gradleplugins.internal.DefaultDependencyBucketFactory;
+import dev.gradleplugins.internal.DependencyBucketFactory;
 import dev.gradleplugins.internal.DependencyFactory;
 import dev.gradleplugins.internal.EnforcedPlatformDependencyModifier;
 import dev.gradleplugins.internal.PlatformDependencyModifier;
@@ -31,7 +33,7 @@ public final class RegisterGradlePluginDevelopmentDependenciesExtensionRule impl
         assert project.getPluginManager().hasPlugin("java-gradle-plugin");
 
         gradlePlugin(project, extension -> {
-            final DefaultGradlePluginDevelopmentDependencies dependenciesExtension = project.getObjects().newInstance(DefaultGradlePluginDevelopmentDependencies.class, project);
+            final DefaultGradlePluginDevelopmentDependencies dependenciesExtension = project.getObjects().newInstance(DefaultGradlePluginDevelopmentDependencies.class, project, new DefaultDependencyBucketFactory(project, pluginSourceSet(project)));
 
             // adhoc decoration of the dependencies
             dependenciesExtension.forEach(dependencyBucket -> {
@@ -56,16 +58,16 @@ public final class RegisterGradlePluginDevelopmentDependenciesExtensionRule impl
         private final Project project;
 
         @Inject
-        public DefaultGradlePluginDevelopmentDependencies(Project project) {
+        public DefaultGradlePluginDevelopmentDependencies(Project project, DependencyBucketFactory dependencyBucketFactory) {
             this.dependencyFactory = DependencyFactory.forProject(project);
             this.platformDependencyModifier = new PlatformDependencyModifier(project);
             this.enforcedPlatformDependencyModifier = new EnforcedPlatformDependencyModifier(project);
             this.project = project;
-            add(new DefaultDependencyBucket(project, pluginSourceSet(project), "api"));
-            add(new DefaultDependencyBucket(project, pluginSourceSet(project), "implementation"));
-            add(new DefaultDependencyBucket(project, pluginSourceSet(project), "compileOnly"));
-            add(new DefaultDependencyBucket(project, pluginSourceSet(project), "runtimeOnly"));
-            add(new DefaultDependencyBucket(project, pluginSourceSet(project), "annotationProcessor"));
+            add(dependencyBucketFactory.create("api"));
+            add(dependencyBucketFactory.create("implementation"));
+            add(dependencyBucketFactory.create("compileOnly"));
+            add(dependencyBucketFactory.create("runtimeOnly"));
+            add(dependencyBucketFactory.create("annotationProcessor"));
         }
 
         private void add(GradlePluginDevelopmentDependencyBucket dependencyBucket) {
