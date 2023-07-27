@@ -4,7 +4,6 @@ import dev.gradleplugins.runnerkit.BuildResult;
 import dev.gradleplugins.runnerkit.GradleExecutor;
 import dev.gradleplugins.runnerkit.GradleRunner;
 import dev.gradleplugins.testers.GradlePluginDevelopmentTestSuiteDependenciesTester;
-import org.gradle.api.artifacts.SelfResolvingDependency;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -21,8 +20,6 @@ import java.util.stream.Collectors;
 import static dev.gradleplugins.fixtures.runnerkit.BuildResultMatchers.hasFailureCause;
 import static dev.gradleplugins.fixtures.runnerkit.BuildResultMatchers.hasFailureDescription;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.isA;
 
 class GradlePluginDevelopmentFunctionalTestingFunctionalTests {
     @TempDir(cleanup = CleanupMode.ON_SUCCESS)
