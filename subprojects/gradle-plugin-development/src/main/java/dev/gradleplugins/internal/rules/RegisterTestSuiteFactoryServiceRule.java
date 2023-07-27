@@ -7,6 +7,7 @@ import dev.gradleplugins.internal.GradlePluginDevelopmentTestSuiteInternal;
 import dev.gradleplugins.internal.ReleasedVersionDistributions;
 import lombok.val;
 import org.gradle.api.Action;
+import org.gradle.api.DomainObjectSet;
 import org.gradle.api.Project;
 import org.gradle.api.Transformer;
 import org.gradle.api.internal.provider.Providers;
@@ -19,6 +20,7 @@ import org.gradle.util.GradleVersion;
 
 import javax.inject.Inject;
 import java.util.Objects;
+import java.util.Set;
 
 import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
@@ -27,10 +29,28 @@ import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.sourc
 public final class RegisterTestSuiteFactoryServiceRule implements Action<Project> {
     @Override
     public void execute(Project project) {
-        project.getExtensions().add(GradlePluginDevelopmentTestSuiteFactory.class, "testSuiteFactory", new DefaultGradlePluginDevelopmentTestSuiteFactory(project));
+        final DomainObjectSet<GradlePluginDevelopmentTestSuite> testSuites = project.getObjects().domainObjectSet(GradlePluginDevelopmentTestSuite.class);
+        project.getExtensions().add(GradlePluginDevelopmentTestSuiteFactory.class, "testSuiteFactory", new CapturingGradlePluginDevelopmentTestSuiteFactory(testSuites, new DefaultGradlePluginDevelopmentTestSuiteFactory(project)));
     }
 
-    static final class DefaultGradlePluginDevelopmentTestSuiteFactory implements GradlePluginDevelopmentTestSuiteFactory {
+    private static final class CapturingGradlePluginDevelopmentTestSuiteFactory implements GradlePluginDevelopmentTestSuiteFactory {
+        private final Set<GradlePluginDevelopmentTestSuite> testSuites;
+        private final GradlePluginDevelopmentTestSuiteFactory delegate;
+
+        CapturingGradlePluginDevelopmentTestSuiteFactory(Set<GradlePluginDevelopmentTestSuite> testSuites, GradlePluginDevelopmentTestSuiteFactory delegate) {
+            this.testSuites = testSuites;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public GradlePluginDevelopmentTestSuite create(String name) {
+            final GradlePluginDevelopmentTestSuite result = delegate.create(name);
+            testSuites.add(result);
+            return result;
+        }
+    }
+
+    private static final class DefaultGradlePluginDevelopmentTestSuiteFactory implements GradlePluginDevelopmentTestSuiteFactory {
         private final Project project;
 
         DefaultGradlePluginDevelopmentTestSuiteFactory(Project project) {
@@ -55,6 +75,10 @@ public final class RegisterTestSuiteFactoryServiceRule implements Action<Project
                 }
                 return null;
             }));
+
+            result.getSourceSet().finalizeValueOnRead();
+            result.getTestedSourceSet().finalizeValueOnRead();
+
             project.afterEvaluate(__ -> result.finalizeComponent());
             return result;
         }

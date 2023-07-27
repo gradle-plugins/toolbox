@@ -58,11 +58,11 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
     private boolean finalized = false;
 
     @Inject
-    public GradlePluginDevelopmentTestSuiteInternal(String name, Project project, TaskContainer tasks, ObjectFactory objects, PluginManager pluginManager, ProviderFactory providers, Provider<String> minimumGradleVersion, ReleasedVersionDistributions releasedVersions) {
+    public GradlePluginDevelopmentTestSuiteInternal(String name, Project project, ProviderFactory providers, Provider<String> minimumGradleVersion, ReleasedVersionDistributions releasedVersions) {
         this.strategyFactory = new GradlePluginTestingStrategyFactoryInternal(minimumGradleVersion, releasedVersions);
         this.name = name;
         this.displayName = GUtil.toWords(name) + "s";
-        this.dependencies = objects.newInstance(Dependencies.class, project, minimumGradleVersion.orElse(GradleVersion.current().getVersion()).map(GradleRuntimeCompatibility::groovyVersionOf), this);
+        this.dependencies = project.getObjects().newInstance(Dependencies.class, project, minimumGradleVersion.orElse(GradleVersion.current().getVersion()).map(GradleRuntimeCompatibility::groovyVersionOf), this);
 
         // adhoc decoration of the dependencies
         this.dependencies.forEach(dependencyBucket -> {
@@ -72,15 +72,13 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         GroovyHelper.instance().addNewInstanceMethod(this.dependencies, "enforcedPlatform", new MethodClosure(this.dependencies.getEnforcedPlatform(), "modify"));
         GroovyHelper.instance().addNewInstanceMethod(this.dependencies, "testFixtures", new MethodClosure(this.dependencies.getTestFixtures(), "modify"));
 
-        this.pluginUnderTestMetadataTask = registerPluginUnderTestMetadataTask(tasks, pluginUnderTestMetadataTaskName(name), displayName);
-        this.testTasks = objects.newInstance(TestTaskView.class, testTaskActions, providers.provider(new FinalizeComponentCallable<>()).orElse(getTestTaskCollection()));
+        this.pluginUnderTestMetadataTask = registerPluginUnderTestMetadataTask(project.getTasks(), pluginUnderTestMetadataTaskName(name), displayName);
+        this.testTasks = project.getObjects().newInstance(TestTaskView.class, testTaskActions, providers.provider(new FinalizeComponentCallable<>()).orElse(getTestTaskCollection()));
         this.finalizeActions.add(testSuite -> new PluginUnderTestMetadataConfigurationSupplier(project, testSuite).get());
         this.finalizeActions.add(new TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule());
-        this.finalizeActions.add(new CreateTestTasksFromTestingStrategiesRule(tasks, objects, getTestTaskCollection()));
-        this.finalizeActions.add(new AttachTestTasksToCheckTaskIfPresent(pluginManager, tasks));
+        this.finalizeActions.add(new CreateTestTasksFromTestingStrategiesRule(project.getTasks(), project.getObjects(), getTestTaskCollection()));
+        this.finalizeActions.add(new AttachTestTasksToCheckTaskIfPresent(project.getPluginManager(), project.getTasks()));
         this.finalizeActions.add(new FinalizeTestSuiteProperties());
-        getSourceSet().finalizeValueOnRead();
-        getTestingStrategies().finalizeValueOnRead();
     }
 
     private static TaskProvider<PluginUnderTestMetadata> registerPluginUnderTestMetadataTask(TaskContainer tasks, String taskName, String displayName) {
