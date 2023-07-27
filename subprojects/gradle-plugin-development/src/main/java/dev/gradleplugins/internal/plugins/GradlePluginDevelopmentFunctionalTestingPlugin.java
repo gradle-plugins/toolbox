@@ -1,6 +1,7 @@
 package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.GradlePluginDevelopmentTestSuite;
+import dev.gradleplugins.internal.rules.GradlePluginDevelopmentTestSuiteRegistrationRule;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 
@@ -10,7 +11,7 @@ import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradl
 
 public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements Plugin<Project> {
     private static final String FUNCTIONAL_TEST_NAME = "functionalTest";
-    private static final GradlePluginDevelopmentTestSuiteRegistrationAction FUNCTIONAL_TEST_RULE = new GradlePluginDevelopmentTestSuiteRegistrationAction(FUNCTIONAL_TEST_NAME);
+    private static final GradlePluginDevelopmentTestSuiteRegistrationRule FUNCTIONAL_TEST_RULE = new GradlePluginDevelopmentTestSuiteRegistrationRule(FUNCTIONAL_TEST_NAME);
 
     public static GradlePluginDevelopmentTestSuite functionalTest(Project project) {
         return (GradlePluginDevelopmentTestSuite) project.getExtensions().getByName(FUNCTIONAL_TEST_NAME);

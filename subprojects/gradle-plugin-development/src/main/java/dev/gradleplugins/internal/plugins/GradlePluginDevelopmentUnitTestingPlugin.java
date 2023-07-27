@@ -2,6 +2,7 @@ package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.GradlePluginDevelopmentDependencyExtension;
 import dev.gradleplugins.GradlePluginDevelopmentTestSuite;
+import dev.gradleplugins.internal.rules.GradlePluginDevelopmentTestSuiteRegistrationRule;
 import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -12,7 +13,7 @@ import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradl
 
 public abstract class GradlePluginDevelopmentUnitTestingPlugin implements Plugin<Project> {
     private static final String TEST_NAME = "test";
-    private static final GradlePluginDevelopmentTestSuiteRegistrationAction TEST_RULE = new GradlePluginDevelopmentTestSuiteRegistrationAction(TEST_NAME);
+    private static final GradlePluginDevelopmentTestSuiteRegistrationRule TEST_RULE = new GradlePluginDevelopmentTestSuiteRegistrationRule(TEST_NAME);
 
     public static GradlePluginDevelopmentTestSuite test(Project project) {
         return (GradlePluginDevelopmentTestSuite) project.getExtensions().getByName("test");
