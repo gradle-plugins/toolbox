@@ -31,6 +31,10 @@ public final class RegisterTestSuiteFactoryServiceRule implements Action<Project
     public void execute(Project project) {
         final DomainObjectSet<GradlePluginDevelopmentTestSuite> testSuites = project.getObjects().domainObjectSet(GradlePluginDevelopmentTestSuite.class);
         project.getExtensions().add(GradlePluginDevelopmentTestSuiteFactory.class, "testSuiteFactory", new CapturingGradlePluginDevelopmentTestSuiteFactory(testSuites, new DefaultGradlePluginDevelopmentTestSuiteFactory(project)));
+
+        project.afterEvaluate(__ -> {
+            testSuites.configureEach(new FinalizeTestSuiteProperties());
+        });
     }
 
     private static final class CapturingGradlePluginDevelopmentTestSuiteFactory implements GradlePluginDevelopmentTestSuiteFactory {
@@ -137,6 +141,16 @@ public final class RegisterTestSuiteFactoryServiceRule implements Action<Project
 
         protected interface MinimumGradleVersionProvider {
             Property<String> getMinimumGradleVersion();
+        }
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static final class FinalizeTestSuiteProperties implements Action<GradlePluginDevelopmentTestSuite> {
+        @Override
+        public void execute(GradlePluginDevelopmentTestSuite testSuite) {
+            testSuite.getTestedSourceSet().disallowChanges();
+            testSuite.getSourceSet().disallowChanges();
+            testSuite.getTestingStrategies().disallowChanges();
         }
     }
 }
