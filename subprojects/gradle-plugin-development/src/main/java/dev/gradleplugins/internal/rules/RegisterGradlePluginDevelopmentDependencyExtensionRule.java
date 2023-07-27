@@ -1,13 +1,11 @@
 package dev.gradleplugins.internal.rules;
 
 import dev.gradleplugins.GradlePluginDevelopmentDependencyExtension;
-import dev.gradleplugins.internal.DefaultDependencyVersions;
+import dev.gradleplugins.internal.DependencyFactory;
 import dev.gradleplugins.internal.runtime.dsl.DefaultGradleExtensionMixInService;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Dependency;
-import org.gradle.api.artifacts.ModuleDependency;
-import org.gradle.api.artifacts.dsl.DependencyHandler;
 import org.gradle.api.reflect.HasPublicType;
 import org.gradle.api.reflect.TypeOf;
 
@@ -18,47 +16,45 @@ public final class RegisterGradlePluginDevelopmentDependencyExtensionRule implem
     public void execute(Project project) {
         new DefaultGradleExtensionMixInService(project.getObjects())
                 .forExtension(GradlePluginDevelopmentDependencyExtension.class)
-                .useInstance(new DefaultGradlePluginDevelopmentDependencyExtension(project.getDependencies()))
+                .useInstance(new DefaultGradlePluginDevelopmentDependencyExtension(DependencyFactory.forProject(project)))
                 .build()
                 .mixInto(project.getDependencies());
     }
 
     private static final class DefaultGradlePluginDevelopmentDependencyExtension implements GradlePluginDevelopmentDependencyExtension, HasPublicType {
-        private static final String LOCAL_GRADLE_VERSION = "local";
-        private final DependencyHandler dependencies;
+        private final DependencyFactory dependencyFactory;
 
-        DefaultGradlePluginDevelopmentDependencyExtension(DependencyHandler dependencies) {
-            this.dependencies = dependencies;
+        DefaultGradlePluginDevelopmentDependencyExtension(DependencyFactory dependencyFactory) {
+            this.dependencyFactory = dependencyFactory;
         }
 
         @Override
         public Dependency gradleApi(String version) {
-            if (LOCAL_GRADLE_VERSION.equals(version)) {
-                return dependencies.gradleApi();
+            Objects.requireNonNull(version, "'version' must not be null");
+            if ("local".equals(version)) {
+                return dependencyFactory.localGradleApi();
             }
-            return dependencies.create("dev.gradleplugins:gradle-api:" + Objects.requireNonNull(version));
+            return dependencyFactory.gradleApi(version);
         }
 
         @Override
         public Dependency gradleTestKit(String version) {
-            if (LOCAL_GRADLE_VERSION.equals(version)) {
-                return dependencies.gradleTestKit();
+            Objects.requireNonNull(version, "'version' must not be null");
+            if ("local".equals(version)) {
+                return dependencyFactory.localGradleTestKit();
             }
-            return dependencies.create("dev.gradleplugins:gradle-test-kit:" + Objects.requireNonNull(version));
+            return dependencyFactory.gradleTestKit(version);
         }
 
         @Override
+        @SuppressWarnings("deprecation")
         public Dependency gradleFixtures() {
-            ModuleDependency dependency = (ModuleDependency)dependencies.create("dev.gradleplugins:gradle-fixtures:" + DefaultDependencyVersions.GRADLE_FIXTURES_VERSION);
-            dependency.capabilities(it -> {
-                it.requireCapability("dev.gradleplugins:gradle-fixtures-spock-support");
-            });
-            return dependency;
+            return dependencyFactory.gradleFixtures();
         }
 
         @Override
         public Dependency gradleRunnerKit() {
-            return dependencies.create("dev.gradleplugins:gradle-runner-kit:" + DefaultDependencyVersions.GRADLE_FIXTURES_VERSION);
+            return dependencyFactory.gradleRunnerKit();
         }
 
         @Override

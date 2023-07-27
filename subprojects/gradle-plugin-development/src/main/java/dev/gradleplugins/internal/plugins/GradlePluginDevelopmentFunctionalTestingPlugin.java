@@ -27,7 +27,7 @@ public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements 
         });
 
         functionalTest(project).dependencies(dependencies -> {
-            dependencies.implementation(project.provider(() -> {
+            dependencies.getImplementation().add(project.provider(() -> {
                 if (project.getPluginManager().hasPlugin("java-gradle-plugin")) {
                     return compatibility(gradlePlugin(project)).getGradleApiVersion().getOrElse("local");
                 }

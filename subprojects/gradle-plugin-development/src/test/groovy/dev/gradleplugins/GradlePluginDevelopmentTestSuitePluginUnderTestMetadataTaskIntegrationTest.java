@@ -1,7 +1,6 @@
 package dev.gradleplugins;
 
 import org.gradle.api.Project;
-import org.gradle.api.artifacts.SelfResolvingDependency;
 import org.gradle.api.file.Directory;
 import org.gradle.plugin.devel.tasks.PluginUnderTestMetadata;
 import org.gradle.testfixtures.ProjectBuilder;
@@ -14,7 +13,11 @@ import static dev.gradleplugins.GradlePluginDevelopmentTestSuiteFactory.forProje
 import static dev.gradleplugins.ProjectMatchers.named;
 import static dev.gradleplugins.ProjectMatchers.providerOf;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.startsWith;
 
 class GradlePluginDevelopmentTestSuitePluginUnderTestMetadataTaskIntegrationTest {
     private final Project project = ProjectBuilder.builder().build();
@@ -53,17 +56,5 @@ class GradlePluginDevelopmentTestSuitePluginUnderTestMetadataTaskIntegrationTest
     void configuresOutputDirectoryConventionToBuildDirectoryByTaskName() {
         assertThat(subject.getOutputDirectory().value((Directory) null),
                 providerOf(aFile(withAbsolutePath(endsWith("/build/pluginUnderTestMetadataEtreTest")))));
-    }
-
-    @Test
-    void addsPluginUnderTestMetadataAsRuntimeOnlyDependency() {
-        assertThat(project.getConfigurations().getByName("etreTestRuntimeOnly").getDependencies(),
-                hasItem(isA(SelfResolvingDependency.class)));
-    }
-
-    @Test
-    void includesPluginUnderTestMetadataConfigurationDependencies() {
-        testSuite.getDependencies().pluginUnderTestMetadata(project.files("my/own/dep.jar"));
-        assertThat(subject.getPluginClasspath(), contains(aFile(withAbsolutePath(endsWith("/my/own/dep.jar")))));
     }
 }

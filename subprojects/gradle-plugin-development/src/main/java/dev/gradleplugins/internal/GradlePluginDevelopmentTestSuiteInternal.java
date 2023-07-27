@@ -1,19 +1,20 @@
 package dev.gradleplugins.internal;
 
-import dev.gradleplugins.GradlePluginDevelopmentDependencyExtension;
+import dev.gradleplugins.GradlePluginDevelopmentDependencyBucket;
+import dev.gradleplugins.GradlePluginDevelopmentDependencyModifiers;
 import dev.gradleplugins.GradlePluginDevelopmentTestSuite;
 import dev.gradleplugins.GradlePluginDevelopmentTestSuiteDependencies;
 import dev.gradleplugins.GradlePluginTestingStrategyFactory;
 import dev.gradleplugins.GradleRuntimeCompatibility;
 import dev.gradleplugins.TaskView;
+import dev.gradleplugins.internal.runtime.dsl.GroovyHelper;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.groovy.runtime.MethodClosure;
 import org.gradle.api.Action;
-import org.gradle.api.NamedDomainObjectProvider;
 import org.gradle.api.Project;
-import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.artifacts.ConfigurationContainer;
-import org.gradle.api.artifacts.ModuleDependency;
+import org.gradle.api.artifacts.Dependency;
+import org.gradle.api.artifacts.ProjectDependency;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
 import org.gradle.api.component.SoftwareComponent;
 import org.gradle.api.model.ObjectFactory;
@@ -23,7 +24,6 @@ import org.gradle.api.provider.ProviderFactory;
 import org.gradle.api.provider.SetProperty;
 import org.gradle.api.reflect.HasPublicType;
 import org.gradle.api.reflect.TypeOf;
-import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.testing.Test;
@@ -33,10 +33,12 @@ import org.gradle.util.GradleVersion;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.function.Supplier;
 
 import static dev.gradleplugins.internal.DefaultDependencyVersions.SPOCK_FRAMEWORK_VERSION;
 import static java.lang.String.format;
@@ -61,8 +63,18 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         this.name = name;
         this.displayName = GUtil.toWords(name) + "s";
         this.dependencies = objects.newInstance(Dependencies.class, project, minimumGradleVersion.orElse(GradleVersion.current().getVersion()).map(GradleRuntimeCompatibility::groovyVersionOf), this);
+
+        // adhoc decoration of the dependencies
+        this.dependencies.forEach(dependencyBucket -> {
+            GroovyHelper.instance().addNewInstanceMethod(this.dependencies, dependencyBucket.getName(), new MethodClosure(dependencyBucket, "add"));
+        });
+        GroovyHelper.instance().addNewInstanceMethod(this.dependencies, "platform", new MethodClosure(this.dependencies.getPlatform(), "modify"));
+        GroovyHelper.instance().addNewInstanceMethod(this.dependencies, "enforcedPlatform", new MethodClosure(this.dependencies.getEnforcedPlatform(), "modify"));
+        GroovyHelper.instance().addNewInstanceMethod(this.dependencies, "testFixtures", new MethodClosure(this.dependencies.getTestFixtures(), "modify"));
+
         this.pluginUnderTestMetadataTask = registerPluginUnderTestMetadataTask(tasks, pluginUnderTestMetadataTaskName(name), displayName);
         this.testTasks = objects.newInstance(TestTaskView.class, testTaskActions, providers.provider(new FinalizeComponentCallable<>()).orElse(getTestTaskCollection()));
+        this.finalizeActions.add(testSuite -> new PluginUnderTestMetadataConfigurationSupplier(project, testSuite).get());
         this.finalizeActions.add(new TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule());
         this.finalizeActions.add(new CreateTestTasksFromTestingStrategiesRule(tasks, objects, getTestTaskCollection()));
         this.finalizeActions.add(new AttachTestTasksToCheckTaskIfPresent(pluginManager, tasks));
@@ -168,122 +180,140 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         action.execute(dependencies);
     }
 
-    protected abstract static class Dependencies implements GradlePluginDevelopmentTestSuiteDependencies {
-        private final ConfigurationContainer configurations;
-        private final Provider<SourceSet> sourceSetProvider;
+    protected static abstract /*final*/ class Dependencies implements GradlePluginDevelopmentTestSuiteDependencies, Iterable<GradlePluginDevelopmentDependencyBucket> {
+        private final Map<String, GradlePluginDevelopmentDependencyBucket> dependencyBuckets = new LinkedHashMap<>();
         private final PluginManager pluginManager;
         private final Provider<String> defaultGroovyVersion;
-        private final DependencyFactory factory;
-        private final Supplier<NamedDomainObjectProvider<Configuration>> pluginUnderTestMetadataSupplier;
-
-        @Inject
-        protected abstract ConfigurationContainer getConfigurations();
+        private final DependencyFactory dependencyFactory;
+        private final GradlePluginDevelopmentDependencyModifiers.DependencyModifier platformDependencyModifier;
+        private final GradlePluginDevelopmentDependencyModifiers.DependencyModifier enforcedPlatformDependencyModifier;
+        private final GradlePluginDevelopmentDependencyModifiers.DependencyModifier testFixturesDependencyModifier;
+        private final Project project;
 
         @Inject
         protected abstract DependencyHandler getDependencies();
 
-        private SourceSet sourceSet() {
-            return sourceSetProvider.get();
-        }
-
-        private NamedDomainObjectProvider<Configuration> pluginUnderTestMetadata() {
-            return pluginUnderTestMetadataSupplier.get();
-        }
-
         @Inject
         public Dependencies(Project project, Provider<String> defaultGroovyVersion, GradlePluginDevelopmentTestSuite testSuite) {
-            this.configurations = project.getConfigurations();
-            this.sourceSetProvider = testSuite.getSourceSet();
+            this.project = project;
+            add(new DefaultDependencyBucket(project, testSuite.getSourceSet(), "implementation"));
+            add(new DefaultDependencyBucket(project, testSuite.getSourceSet(), "compileOnly"));
+            add(new DefaultDependencyBucket(project, testSuite.getSourceSet(), "runtimeOnly"));
+            add(new DefaultDependencyBucket(project, testSuite.getSourceSet(), "annotationProcessor"));
+            add(new DefaultDependencyBucket(project, testSuite.getSourceSet(), "pluginUnderTestMetadata"));
+            this.platformDependencyModifier = new PlatformDependencyModifier(project);
+            this.enforcedPlatformDependencyModifier = new EnforcedPlatformDependencyModifier(project);
+            this.testFixturesDependencyModifier = new TestFixturesDependencyModifier(project);
             this.pluginManager = project.getPluginManager();
             this.defaultGroovyVersion = defaultGroovyVersion;
-            this.factory = DependencyFactory.forProject(project);
-            this.pluginUnderTestMetadataSupplier = new PluginUnderTestMetadataConfigurationSupplier(project, testSuite);
+            this.dependencyFactory = DependencyFactory.forProject(project);
+        }
+
+        private void add(GradlePluginDevelopmentDependencyBucket dependencyBucket) {
+            dependencyBuckets.put(dependencyBucket.getName(), dependencyBucket);
         }
 
         @Override
-        public void implementation(Object notation) {
-            configurations.named(sourceSet().getImplementationConfigurationName()).configure(new AddDependency(notation, factory));
+        public GradlePluginDevelopmentDependencyBucket getImplementation() {
+            return dependencyBuckets.get("implementation");
         }
 
         @Override
-        public void implementation(Object notation, Action<? super ModuleDependency> action) {
-            configurations.named(sourceSet().getImplementationConfigurationName()).configure(new AddDependency(notation, action, factory));
+        public GradlePluginDevelopmentDependencyBucket getCompileOnly() {
+            return dependencyBuckets.get("compileOnly");
         }
 
         @Override
-        public void compileOnly(Object notation) {
-            configurations.named(sourceSet().getCompileOnlyConfigurationName()).configure(new AddDependency(notation, factory));
+        public GradlePluginDevelopmentDependencyBucket getRuntimeOnly() {
+            return dependencyBuckets.get("runtimeOnly");
         }
 
         @Override
-        public void runtimeOnly(Object notation) {
-            configurations.named(sourceSet().getRuntimeOnlyConfigurationName()).configure(new AddDependency(notation, factory));
+        public GradlePluginDevelopmentDependencyBucket getAnnotationProcessor() {
+            return dependencyBuckets.get("annotationProcessor");
         }
 
         @Override
-        public void annotationProcessor(Object notation) {
-            configurations.named(sourceSet().getAnnotationProcessorConfigurationName()).configure(new AddDependency(notation, factory));
+        public GradlePluginDevelopmentDependencyBucket getPluginUnderTestMetadata() {
+            return dependencyBuckets.get("pluginUnderTestMetadata");
         }
 
         @Override
-        public void pluginUnderTestMetadata(Object notation) {
-            pluginUnderTestMetadata().configure(new AddDependency(notation, factory));
+        public GradlePluginDevelopmentDependencyModifiers.DependencyModifier getPlatform() {
+            return platformDependencyModifier;
         }
 
         @Override
-        public NamedDomainObjectProvider<Configuration> getPluginUnderTestMetadata() {
-            return pluginUnderTestMetadata();
+        public GradlePluginDevelopmentDependencyModifiers.DependencyModifier getEnforcedPlatform() {
+            return enforcedPlatformDependencyModifier;
         }
 
         @Override
-        public Object testFixtures(Object notation) {
-            return getDependencies().testFixtures(notation);
+        public GradlePluginDevelopmentDependencyModifiers.DependencyModifier getTestFixtures() {
+            return testFixturesDependencyModifier;
         }
 
         @Override
-        public Object platform(Object notation) {
-            return getDependencies().platform(notation);
+        public Iterator<GradlePluginDevelopmentDependencyBucket> iterator() {
+            return dependencyBuckets.values().iterator();
         }
 
         @Override
-        public Object spockFramework() {
+        public Dependency spockFramework() {
             return spockFramework(SPOCK_FRAMEWORK_VERSION);
         }
 
         @Override
-        public Object spockFramework(String version) {
+        public Dependency spockFramework(String version) {
             pluginManager.apply("groovy-base"); // Spock framework imply Groovy implementation language
-            return getDependencies().create("org.spockframework:spock-core:" + version);
+            return dependencyFactory.create("org.spockframework:spock-core:" + version);
         }
 
         @Override
-        public Object gradleFixtures() {
-            return GradlePluginDevelopmentDependencyExtension.from(getDependencies()).gradleFixtures();
+        @SuppressWarnings("deprecation")
+        public Dependency gradleFixtures() {
+            return dependencyFactory.gradleFixtures();
         }
 
         @Override
-        public Object gradleTestKit() {
-            return getDependencies().gradleTestKit();
+        public Dependency gradleTestKit() {
+            return dependencyFactory.localGradleTestKit();
         }
 
         @Override
-        public Object gradleTestKit(String version) {
-            return GradlePluginDevelopmentDependencyExtension.from(getDependencies()).gradleTestKit(version);
+        public Dependency gradleTestKit(String version) {
+            if ("local".equals(version)) {
+                return dependencyFactory.localGradleTestKit();
+            }
+            return dependencyFactory.gradleTestKit(version);
         }
 
         @Override
-        public Object groovy() {
+        public Provider<Dependency> groovy() {
             return defaultGroovyVersion.map(this::groovy);
         }
 
         @Override
-        public Object groovy(String version) {
-            return getDependencies().create("org.codehaus.groovy:groovy-all:" + version);
+        public Dependency groovy(String version) {
+            return dependencyFactory.create("org.codehaus.groovy:groovy-all:" + version);
         }
 
         @Override
-        public Object gradleApi(String version) {
-            return GradlePluginDevelopmentDependencyExtension.from(getDependencies()).gradleApi(version);
+        public Dependency gradleApi(String version) {
+            if ("local".equals(version)) {
+                return dependencyFactory.localGradleApi();
+            }
+            return dependencyFactory.gradleApi(version);
+        }
+
+        @Override
+        public ProjectDependency project(String projectPath) {
+            return dependencyFactory.create(project.project(projectPath));
+        }
+
+        @Override
+        public ProjectDependency project() {
+            return dependencyFactory.create(project);
         }
     }
 

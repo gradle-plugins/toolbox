@@ -1,47 +1,38 @@
 package dev.gradleplugins;
 
-import org.gradle.api.Action;
-import org.gradle.api.NamedDomainObjectProvider;
-import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.artifacts.ModuleDependency;
+import org.gradle.api.artifacts.Dependency;
+import org.gradle.api.artifacts.ProjectDependency;
+import org.gradle.api.provider.Provider;
 
-public interface GradlePluginDevelopmentTestSuiteDependencies {
-    void implementation(Object notation);
-
-    void implementation(Object notation, Action<? super ModuleDependency> action);
-
-    void compileOnly(Object notation);
-
-    void runtimeOnly(Object notation);
-
-    void annotationProcessor(Object notation);
-
-    void pluginUnderTestMetadata(Object notation);
-
-    NamedDomainObjectProvider<Configuration> getPluginUnderTestMetadata();
-
-    Object testFixtures(Object notation);
-
-    Object platform(Object notation);
+//@DslDecorator(DependencyBucketDecorator.class)
+public interface GradlePluginDevelopmentTestSuiteDependencies extends GradlePluginDevelopmentDependencyModifiers.PlatformDependencyModifiers, GradlePluginDevelopmentDependencyModifiers.TestFixturesDependencyModifiers {
+    GradlePluginDevelopmentDependencyBucket getImplementation();
+    GradlePluginDevelopmentDependencyBucket getCompileOnly();
+    GradlePluginDevelopmentDependencyBucket getRuntimeOnly();
+    GradlePluginDevelopmentDependencyBucket getAnnotationProcessor();
+    GradlePluginDevelopmentDependencyBucket getPluginUnderTestMetadata();
 
     @Deprecated
-    Object spockFramework();
+    Dependency spockFramework();
 
     @Deprecated
-    Object spockFramework(String version);
+    Dependency spockFramework(String version);
 
     @Deprecated
-    Object gradleFixtures();
+    Dependency gradleFixtures();
 
-    Object gradleTestKit();
+    Dependency gradleTestKit();
 
-    Object gradleTestKit(String version);
-
-    @Deprecated
-    Object groovy();
+    Dependency gradleTestKit(String version);
 
     @Deprecated
-    Object groovy(String version);
+    Provider<Dependency> groovy();
 
-    Object gradleApi(String version);
+    @Deprecated
+    Dependency groovy(String version);
+
+    Dependency gradleApi(String version);
+
+    ProjectDependency project(String projectPath);
+    ProjectDependency project();
 }

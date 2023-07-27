@@ -16,7 +16,6 @@
 
 package dev.gradleplugins.internal.plugins;
 
-import dev.gradleplugins.internal.AddDependency;
 import dev.gradleplugins.internal.DeferredRepositoryFactory;
 import dev.gradleplugins.internal.DependencyFactory;
 import dev.gradleplugins.internal.GroovySpockFrameworkTestSuite;
@@ -60,8 +59,8 @@ public class SpockFrameworkTestSuiteBasePlugin implements Plugin<Project> {
 
     public static void configureSpockFrameworkProjectDependency(Provider<String> spockVersion, SourceSet sourceSet, Project project) {
         val factory = DependencyFactory.forProject(project);
-        project.getConfigurations().named(sourceSet.getImplementationConfigurationName(), new AddDependency("org.codehaus.groovy:groovy-all:" + GROOVY_ALL_VERSION, factory));
-        project.getConfigurations().named(sourceSet.getImplementationConfigurationName(), new AddDependency(spockVersion.map(version -> project.getDependencies().platform("org.spockframework:spock-bom:" + version)), factory));
-        project.getConfigurations().named(sourceSet.getImplementationConfigurationName(), new AddDependency("org.spockframework:spock-core", factory));
+        project.getConfigurations().named(sourceSet.getImplementationConfigurationName(), it -> it.getDependencies().add(factory.create("org.codehaus.groovy:groovy-all:" + GROOVY_ALL_VERSION)));
+        project.getConfigurations().named(sourceSet.getImplementationConfigurationName(), it -> it.getDependencies().addLater(spockVersion.map(version -> project.getDependencies().platform("org.spockframework:spock-bom:" + version))));
+        project.getConfigurations().named(sourceSet.getImplementationConfigurationName(), it -> it.getDependencies().add(factory.create("org.spockframework:spock-core")));
     }
 }

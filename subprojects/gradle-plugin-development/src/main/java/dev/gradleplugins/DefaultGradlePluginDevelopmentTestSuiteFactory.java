@@ -47,6 +47,7 @@ final class DefaultGradlePluginDevelopmentTestSuiteFactory implements GradlePlug
             }
             return null;
         }));
+        project.afterEvaluate(__ -> result.finalizeComponent());
         return result;
     }
 

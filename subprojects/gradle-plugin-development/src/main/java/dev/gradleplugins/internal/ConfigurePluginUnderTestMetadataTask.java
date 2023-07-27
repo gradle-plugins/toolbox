@@ -7,6 +7,7 @@ import org.gradle.api.NamedDomainObjectProvider;
 import org.gradle.api.Project;
 import org.gradle.api.Transformer;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.ClasspathNormalizer;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.internal.component.local.model.OpaqueComponentIdentifier;
@@ -25,7 +26,7 @@ public final class ConfigurePluginUnderTestMetadataTask implements Action<Gradle
 
     @Override
     public void execute(GradlePluginDevelopmentTestSuite testSuite) {
-        final NamedDomainObjectProvider<Configuration> pluginUnderTestMetadata = testSuite.getDependencies().getPluginUnderTestMetadata();
+        final Provider<Configuration> pluginUnderTestMetadata = testSuite.getDependencies().getPluginUnderTestMetadata().getAsConfiguration();
         testSuite.getPluginUnderTestMetadataTask().configure(task -> {
             task.getOutputDirectory().convention(project.getLayout().getBuildDirectory().dir(task.getName()));
             task.getPluginClasspath().from(testSuite.getTestedSourceSet().map(asPluginClasspath(project)).orElse(Collections.emptyList()));
@@ -39,7 +40,7 @@ public final class ConfigurePluginUnderTestMetadataTask implements Action<Gradle
 
     private static void configurePluginUnderTestMetadataAsRuntimeOnlyDependencies(Project project, GradlePluginDevelopmentTestSuite testSuite) {
         // Consider adding gradleTestKit to implementation as per java-gradle-plugin
-        testSuite.getDependencies().runtimeOnly(project.getLayout().files(testSuite.getPluginUnderTestMetadataTask()));
+        testSuite.getDependencies().getRuntimeOnly().add(project.getLayout().files(testSuite.getPluginUnderTestMetadataTask()));
     }
 
     private static void configurePluginUnderTestMetadataAsTestInputs(GradlePluginDevelopmentTestSuite testSuite) {

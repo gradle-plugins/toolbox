@@ -30,7 +30,7 @@ final class PluginUnderTestMetadataConfigurationSupplier implements Supplier<Nam
             configuration.setCanBeResolved(true);
             configuration.setCanBeConsumed(false);
             configuration.attributes(attributes -> attributes.attribute(Usage.USAGE_ATTRIBUTE, project.getObjects().named(Usage.class, Usage.JAVA_RUNTIME)));
-            configuration.setDescription("Plugin under test metadata for " + sourceSet() + ".");
+            configuration.setDescription("Plugin under test metadata for source set '" + sourceSet().getName() + "'.");
             pluginUnderTestMetadata = project.getConfigurations().named(configuration.getName());
         }
         return pluginUnderTestMetadata;
