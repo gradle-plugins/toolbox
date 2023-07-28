@@ -10,7 +10,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static dev.gradleplugins.GradlePluginTestingStrategy.testingStrategy;
-import static dev.gradleplugins.ProjectMatchers.*;
+import static dev.gradleplugins.ProjectMatchers.absentProvider;
+import static dev.gradleplugins.ProjectMatchers.extensions;
+import static dev.gradleplugins.ProjectMatchers.named;
+import static dev.gradleplugins.ProjectMatchers.presentProvider;
+import static dev.gradleplugins.ProjectMatchers.providerOf;
+import static dev.gradleplugins.ProjectMatchers.publicType;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -21,13 +26,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class GradlePluginDevelopmentTestSuiteTestingStrategyPropertyOnTestTaskIntegrationTest {
     private static final TypeOf<Property<GradlePluginTestingStrategy>> PROPERTY_TYPE = new TypeOf<Property<GradlePluginTestingStrategy>>() {};
-    private final Project project = ProjectBuilder.builder().build();
-    private final GradlePluginDevelopmentTestSuiteFactory factory = GradlePluginDevelopmentTestSuiteFactory.forProject(project);
-    private final GradlePluginDevelopmentTestSuite subject = factory.create("boat");
+    Project project = ProjectBuilder.builder().build();
+    GradlePluginDevelopmentTestSuiteFactory factory ;
+    GradlePluginDevelopmentTestSuite subject;
 
     @BeforeEach
     void setup() {
+        project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-testing-base");
         project.getPluginManager().apply("java-base");
+        factory = GradlePluginDevelopmentTestSuiteFactory.forProject(project);
+        subject = factory.create("boat");
         subject.getTestingStrategies().addAll(subject.getStrategies().coverageForGradleVersion("6.5"), subject.getStrategies().coverageForGradleVersion("6.6"), subject.getStrategies().coverageForGradleVersion("6.9"));
     }
 

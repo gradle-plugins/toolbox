@@ -17,18 +17,25 @@ import static dev.gradleplugins.ProjectMatchers.providerOf;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.iterableWithSize;
 
 class GradlePluginDevelopmentTestSuiteCompositeTestingStrategyIntegrationTest {
-    private final Project project = ProjectBuilder.builder().build();
-    private final GradlePluginDevelopmentTestSuiteFactory factory = forProject(project);
-    private final GradlePluginDevelopmentTestSuite subject = factory.create("ldke");
-    private final CompositeGradlePluginTestingStrategy firstStrategy = subject.getStrategies().composite(aStrategy(), anotherStrategy(), subject.getStrategies().coverageForGradleVersion("6.7"));
-    private final CompositeGradlePluginTestingStrategy secondStrategy = subject.getStrategies().composite(aStrategy(), anotherStrategy("dege"), subject.getStrategies().coverageForGradleVersion("7.0"));
+    Project project = ProjectBuilder.builder().build();
+    GradlePluginDevelopmentTestSuiteFactory factory;
+    GradlePluginDevelopmentTestSuite subject;
+    CompositeGradlePluginTestingStrategy firstStrategy;
+    CompositeGradlePluginTestingStrategy secondStrategy;
 
     @BeforeEach
     void configureTestingStrategies() {
+        project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-testing-base");
         project.getPluginManager().apply("java-base");
+        factory = forProject(project);
+        subject = factory.create("ldke");
+        firstStrategy = subject.getStrategies().composite(aStrategy(), anotherStrategy(), subject.getStrategies().coverageForGradleVersion("6.7"));
+        secondStrategy = subject.getStrategies().composite(aStrategy(), anotherStrategy("dege"), subject.getStrategies().coverageForGradleVersion("7.0"));
         subject.getTestingStrategies().add(firstStrategy);
         subject.getTestingStrategies().add(secondStrategy);
     }

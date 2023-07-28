@@ -1,16 +1,18 @@
 package dev.gradleplugins.internal.rules;
 
+import dev.gradleplugins.CompositeGradlePluginTestingStrategy;
 import dev.gradleplugins.GradlePluginDevelopmentDependencyBucket;
 import dev.gradleplugins.GradlePluginDevelopmentDependencyModifiers;
 import dev.gradleplugins.GradlePluginDevelopmentTestSuite;
 import dev.gradleplugins.GradlePluginDevelopmentTestSuiteDependencies;
 import dev.gradleplugins.GradlePluginDevelopmentTestSuiteFactory;
+import dev.gradleplugins.GradlePluginTestingStrategy;
 import dev.gradleplugins.GradlePluginTestingStrategyFactory;
 import dev.gradleplugins.GradleRuntimeCompatibility;
+import dev.gradleplugins.GradleVersionCoverageTestingStrategy;
 import dev.gradleplugins.TaskView;
 import dev.gradleplugins.internal.AttachTestTasksToCheckTaskIfPresent;
 import dev.gradleplugins.internal.ConfigurePluginUnderTestMetadataTask;
-import dev.gradleplugins.internal.CreateTestTasksFromTestingStrategiesRule;
 import dev.gradleplugins.internal.DefaultDependencyBucketFactory;
 import dev.gradleplugins.internal.DependencyBucketFactory;
 import dev.gradleplugins.internal.DependencyFactory;
@@ -19,6 +21,7 @@ import dev.gradleplugins.internal.FinalizableComponent;
 import dev.gradleplugins.internal.GradlePluginTestingStrategyFactoryInternal;
 import dev.gradleplugins.internal.PlatformDependencyModifier;
 import dev.gradleplugins.internal.PluginUnderTestMetadataConfigurationSupplier;
+import dev.gradleplugins.internal.RegisterTestingStrategyPropertyExtensionRule;
 import dev.gradleplugins.internal.ReleasedVersionDistributions;
 import dev.gradleplugins.internal.TestFixturesDependencyModifier;
 import dev.gradleplugins.internal.TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule;
@@ -37,6 +40,7 @@ import org.gradle.api.component.SoftwareComponent;
 import org.gradle.api.internal.provider.Providers;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
+import org.gradle.api.provider.SetProperty;
 import org.gradle.api.reflect.HasPublicType;
 import org.gradle.api.reflect.TypeOf;
 import org.gradle.api.resources.TextResourceFactory;
@@ -45,6 +49,7 @@ import org.gradle.api.services.BuildServiceParameters;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.testing.Test;
+import org.gradle.language.base.plugins.LifecycleBasePlugin;
 import org.gradle.plugin.devel.tasks.PluginUnderTestMetadata;
 import org.gradle.util.GUtil;
 import org.gradle.util.GradleVersion;
@@ -59,13 +64,18 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
 import static dev.gradleplugins.internal.DefaultDependencyVersions.SPOCK_FRAMEWORK_VERSION;
+import static dev.gradleplugins.internal.RegisterTestingStrategyPropertyExtensionRule.testingStrategyProperty;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.sourceSets;
 import static java.lang.String.format;
+import static java.util.Collections.emptyList;
 
 public final class RegisterTestSuiteFactoryServiceRule implements Action<Project> {
     @Override
@@ -120,12 +130,108 @@ public final class RegisterTestSuiteFactoryServiceRule implements Action<Project
                 }
                 return null;
             }));
+            result.getTestSpecs().addAll(result.getTestingStrategies().map(new CreateTestTasksFromTestingStrategiesTransformer(result)));
+            result.getTestSpecs().disallowChanges(); // do not allow rewire
 
+            result.getTestingStrategies().finalizeValueOnRead();
             result.getSourceSet().finalizeValueOnRead();
             result.getTestedSourceSet().finalizeValueOnRead();
+            result.getTestSpecs().finalizeValueOnRead();
 
-            project.afterEvaluate(__ -> result.finalizeComponent());
+            project.afterEvaluate(__ -> {
+                result.getTestTasks().realize();
+                result.finalizeComponent();
+            });
             return result;
+        }
+
+        private final class CreateTestTasksFromTestingStrategiesTransformer implements Transformer<Iterable<GradlePluginDevelopmentTestSuiteInternal.TestTaskView.Spec>, Set<GradlePluginTestingStrategy>> {
+            private final GradlePluginDevelopmentTestSuite testSuite;
+
+            private CreateTestTasksFromTestingStrategiesTransformer(GradlePluginDevelopmentTestSuite testSuite) {
+                this.testSuite = testSuite;
+            }
+
+            @Override
+            public Iterable<GradlePluginDevelopmentTestSuiteInternal.TestTaskView.Spec> transform(Set<GradlePluginTestingStrategy> strategies) {
+                Set<GradlePluginDevelopmentTestSuiteInternal.TestTaskView.Spec> result = new LinkedHashSet<>();
+                if (strategies.isEmpty()) {
+                    TaskProvider<Test> testTask = createTestTask(testSuite);
+                    testTask.configure(new RegisterTestingStrategyPropertyExtensionRule(project.getObjects()));
+                    result.add(new GradlePluginDevelopmentTestSuiteInternal.TestTaskView.Spec(testTask));
+                } else if (strategies.size() == 1) {
+                    TaskProvider<Test> testTask = createTestTask(testSuite);
+                    testTask.configure(new RegisterTestingStrategyPropertyExtensionRule(project.getObjects()));
+                    testTask.configure(configureTestingStrategy(testSuite, strategies.iterator().next()));
+                    result.add(new GradlePluginDevelopmentTestSuiteInternal.TestTaskView.Spec(testTask));
+                } else {
+                    for (GradlePluginTestingStrategy strategy : strategies) {
+                        TaskProvider<Test> testTask = createTestTask(testSuite, strategy.getName());
+                        testTask.configure(new RegisterTestingStrategyPropertyExtensionRule(project.getObjects()));
+                        testTask.configure(configureTestingStrategy(testSuite, strategy));
+                        result.add(new GradlePluginDevelopmentTestSuiteInternal.TestTaskView.Spec(testTask));
+                    }
+                }
+
+                return result;
+            }
+
+            private Action<Test> configureTestingStrategy(GradlePluginDevelopmentTestSuite testSuite, GradlePluginTestingStrategy strategy) {
+                return task -> {
+                    Stream.of(strategy)
+                            .flatMap(this::unpackCompositeTestingStrategy)
+                            .flatMap(this::onlyCoverageTestingStrategy)
+                            .map(GradleVersionCoverageTestingStrategy::getVersion)
+                            .findFirst()
+                            .ifPresent(setDefaultGradleVersionSystemProperty(task));
+                    testingStrategyProperty(task).set(strategy);
+                };
+            }
+
+            private Consumer<String> setDefaultGradleVersionSystemProperty(Test task) {
+                return version -> task.systemProperty("dev.gradleplugins.defaultGradleVersion", version);
+            }
+
+            private Stream<GradleVersionCoverageTestingStrategy> onlyCoverageTestingStrategy(GradlePluginTestingStrategy strategy) {
+                if (strategy instanceof GradleVersionCoverageTestingStrategy) {
+                    return Stream.of((GradleVersionCoverageTestingStrategy) strategy);
+                } else {
+                    return Stream.empty();
+                }
+            }
+
+            private Stream<GradlePluginTestingStrategy> unpackCompositeTestingStrategy(GradlePluginTestingStrategy strategy) {
+                if (strategy instanceof CompositeGradlePluginTestingStrategy) {
+                    return StreamSupport.stream(((CompositeGradlePluginTestingStrategy) strategy).spliterator(), false);
+                } else {
+                    return Stream.of(strategy);
+                }
+            }
+
+            private TaskProvider<Test> createTestTask(GradlePluginDevelopmentTestSuite testSuite) {
+                return createTestTask(testSuite, "");
+            }
+
+            private TaskProvider<Test> createTestTask(GradlePluginDevelopmentTestSuite testSuite, String variant) {
+                String taskName = testSuite.getName() + StringUtils.capitalize(variant);
+
+                TaskProvider<Test> result = null;
+                if (project.getTasks().getNames().contains(taskName)) {
+                    result = project.getTasks().named(taskName, Test.class);
+                } else {
+                    result = project.getTasks().register(taskName, Test.class);
+                }
+
+                result.configure(it -> {
+                    it.setDescription("Runs the " + GUtil.toWords(testSuite.getName()) + "s.");
+                    it.setGroup(LifecycleBasePlugin.VERIFICATION_GROUP);
+
+                    it.setTestClassesDirs(project.getObjects().fileCollection().from(testSuite.getSourceSet().map(t -> (Object) t.getOutput().getClassesDirs()).orElse(emptyList())));
+                    it.setClasspath(project.getObjects().fileCollection().from(testSuite.getSourceSet().map(t -> (Object) t.getRuntimeClasspath()).orElse(emptyList())));
+                });
+
+                return result;
+            }
         }
 
         private ReleasedVersionDistributions gradleDistributions() {
@@ -379,10 +485,9 @@ public final class RegisterTestSuiteFactoryServiceRule implements Action<Project
                 this.displayName = GUtil.toWords(name) + "s";
                 this.dependencies = dependenciesFactory.create(this);
                 this.pluginUnderTestMetadataTask = registerPluginUnderTestMetadataTask(project.getTasks(), pluginUnderTestMetadataTaskName(name), displayName);
-                this.testTasks = project.getObjects().newInstance(TestTaskView.class, project);
+                this.testTasks = project.getObjects().newInstance(TestTaskView.class, project, getTestSpecs());
                 this.finalizeActions.add(testSuite -> new PluginUnderTestMetadataConfigurationSupplier(project, testSuite).get());
                 this.finalizeActions.add(new TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule());
-                this.finalizeActions.add(new CreateTestTasksFromTestingStrategiesRule(project.getTasks(), project.getObjects()));
                 this.finalizeActions.add(new AttachTestTasksToCheckTaskIfPresent(project.getPluginManager(), project.getTasks()));
             }
 
@@ -422,6 +527,8 @@ public final class RegisterTestSuiteFactoryServiceRule implements Action<Project
                 return testTasks;
             }
 
+            public abstract SetProperty<TestTaskView.Spec> getTestSpecs();
+
             @Override
             public TaskProvider<PluginUnderTestMetadata> getPluginUnderTestMetadataTask() {
                 return pluginUnderTestMetadataTask;
@@ -437,10 +544,11 @@ public final class RegisterTestSuiteFactoryServiceRule implements Action<Project
                 private final Provider<Set<Test>> elementsProvider;
 
                 @Inject
-                public TestTaskView(Project project) {
+                public TestTaskView(Project project, Provider<Set<Spec>> testSpecsProvider) {
                     this.testTaskSpecs = project.getObjects().domainObjectSet(Spec.class);
                     this.elementsProvider = project.provider(() -> testTaskSpecs.stream().map(Spec::get).collect(Collectors.toCollection(LinkedHashSet::new)));
 
+                    testTaskSpecs.addAllLater(testSpecsProvider);
                 }
 
                 public boolean add(TaskProvider<Test> taskProvider) {
@@ -455,6 +563,10 @@ public final class RegisterTestSuiteFactoryServiceRule implements Action<Project
                 @Override
                 public Provider<Set<Test>> getElements() {
                     return elementsProvider;
+                }
+
+                public void realize() {
+                    testTaskSpecs.iterator();
                 }
 
                 private static final class Spec {

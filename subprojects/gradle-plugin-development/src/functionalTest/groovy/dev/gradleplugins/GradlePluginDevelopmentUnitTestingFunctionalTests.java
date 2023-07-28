@@ -120,6 +120,51 @@ class GradlePluginDevelopmentUnitTestingFunctionalTests {
         }
 
         @Test
+        void disallowChangesToTestedSourceSetProperty() throws IOException {
+            Files.write(testDirectory.resolve("build.gradle"), Arrays.asList(
+                    "afterEvaluate {",
+                    "  test.testedSourceSet = null", // expect failure
+                    "}",
+                    "tasks.register('verify')"
+            ), StandardOpenOption.APPEND);
+
+            BuildResult result = runner.withTasks("verify").buildAndFail();
+            assertThat(result, hasFailureDescription("A problem occurred configuring root project 'gradle-plugin'."));
+            assertThat(result, hasFailureCause("The value for property 'testedSourceSet' is final and cannot be changed any further."));
+        }
+
+        @Test
+        void disallowChangesToTestingStrategiesProperty() throws IOException {
+            Files.write(testDirectory.resolve("build.gradle"), Arrays.asList(
+                    "afterEvaluate {",
+                    "  test.testingStrategies = null", // expect failure
+                    "}",
+                    "tasks.register('verify')"
+            ), StandardOpenOption.APPEND);
+
+            BuildResult result = runner.withTasks("verify").buildAndFail();
+            assertThat(result, hasFailureDescription("A problem occurred configuring root project 'gradle-plugin'."));
+            assertThat(result, hasFailureCause("The value for property 'testingStrategies' is final and cannot be changed any further."));
+        }
+
+        @Test
+        void returnsTestTasksOnTaskViewElementQuery() throws IOException {
+            Files.write(testDirectory.resolve("build.gradle"), Arrays.asList(
+                    "test {",
+                    "  testingStrategies = [strategies.coverageForGradleVersion('6.8'), strategies.coverageForGradleVersion('7.1')]",
+                    "}",
+                    "",
+                    "tasks.register('verify') {",
+                    "  doLast {",
+                    "    assert test.testTasks.elements.get().every { it.name == 'test6.8' || it.name == 'test7.1' }",
+                    "  }",
+                    "}"
+            ), StandardOpenOption.APPEND);
+
+            runner.withTasks("verify").build();
+        }
+
+        @Test
         void includesPluginUnderTestMetadataConfigurationDependencies() throws IOException {
             Files.write(testDirectory.resolve("build.gradle"), Arrays.asList(
                     "test.dependencies.pluginUnderTestMetadata files('my/own/dep.jar')",

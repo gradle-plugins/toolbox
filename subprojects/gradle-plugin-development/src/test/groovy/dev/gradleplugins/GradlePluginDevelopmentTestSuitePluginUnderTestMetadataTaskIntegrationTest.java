@@ -20,15 +20,18 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.startsWith;
 
 class GradlePluginDevelopmentTestSuitePluginUnderTestMetadataTaskIntegrationTest {
-    private final Project project = ProjectBuilder.builder().build();
-    private final GradlePluginDevelopmentTestSuiteFactory factory = forProject(project);
-    private final GradlePluginDevelopmentTestSuite testSuite = factory.create("etreTest");
-    private final PluginUnderTestMetadata subject = testSuite.getPluginUnderTestMetadataTask().get();
+    Project project = ProjectBuilder.builder().build();
+    GradlePluginDevelopmentTestSuiteFactory factory;
+    GradlePluginDevelopmentTestSuite testSuite;
+    PluginUnderTestMetadata subject;
 
     @BeforeEach
     void configureSourceSet() {
         project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-testing-base");
         project.getPluginManager().apply("java-base");
+        factory = forProject(project);
+        testSuite = factory.create("etreTest");
+        subject = testSuite.getPluginUnderTestMetadataTask().get();
         testSuite.finalizeComponent();
     }
 

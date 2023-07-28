@@ -1,6 +1,5 @@
 package dev.gradleplugins;
 
-import dev.gradleplugins.internal.FinalizableComponent;
 import org.gradle.api.Project;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.gradle.util.GradleVersion;
@@ -12,20 +11,23 @@ import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.co
 import static dev.gradleplugins.GradlePluginDevelopmentTestSuiteFactory.forProject;
 import static dev.gradleplugins.ProjectMatchers.absentProvider;
 import static dev.gradleplugins.ProjectMatchers.coordinate;
-import static dev.gradleplugins.ProjectMatchers.providerOf;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class GradlePluginDevelopmentTestSuiteMinimumGradleVersionIntegrationTest {
-    private final Project project = ProjectBuilder.builder().build();
-    private final GradlePluginDevelopmentTestSuiteFactory factory = forProject(project);
-    private final GradlePluginDevelopmentTestSuite subject = factory.create("holu");
+    Project project = ProjectBuilder.builder().build();
+    GradlePluginDevelopmentTestSuiteFactory factory;
+    GradlePluginDevelopmentTestSuite subject;
 
     @BeforeEach
     void appliesBasePlugin() {
         project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-development");
+        project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-testing-base");
+        factory = forProject(project);
+        subject = factory.create("holu");
     }
 
     @Test

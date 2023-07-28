@@ -9,7 +9,7 @@ import org.gradle.api.provider.Property;
 import org.gradle.api.reflect.TypeOf;
 import org.gradle.api.tasks.testing.Test;
 
-final class RegisterTestingStrategyPropertyExtensionRule implements Action<Test> {
+public final class RegisterTestingStrategyPropertyExtensionRule implements Action<Test> {
     /** @see GradlePluginTestingStrategy#testingStrategy(Test) Synchronize constant */
     private static final String TESTING_STRATEGY_EXTENSION_NAME = "testingStrategy";
     private static final TypeOf<Property<GradlePluginTestingStrategy>> TESTING_STRATEGY_PROPERTY_TYPE = new TypeOf<Property<GradlePluginTestingStrategy>>() {};

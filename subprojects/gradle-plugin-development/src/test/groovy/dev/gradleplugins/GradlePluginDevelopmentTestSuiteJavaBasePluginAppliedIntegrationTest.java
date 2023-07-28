@@ -14,13 +14,16 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 
 class GradlePluginDevelopmentTestSuiteJavaBasePluginAppliedIntegrationTest {
-    private final Project project = ProjectBuilder.builder().build();
-    private final GradlePluginDevelopmentTestSuiteFactory factory = forProject(project);
-    private final GradlePluginDevelopmentTestSuite subject = factory.create("loke");
+    Project project = ProjectBuilder.builder().build();
+    GradlePluginDevelopmentTestSuiteFactory factory;
+    GradlePluginDevelopmentTestSuite subject;
 
     @BeforeEach
     void applyJavaBasePlugin() {
+        project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-testing-base");
         project.getPluginManager().apply("java-base");
+        factory = forProject(project);
+        subject = factory.create("loke");
     }
 
     @Test
