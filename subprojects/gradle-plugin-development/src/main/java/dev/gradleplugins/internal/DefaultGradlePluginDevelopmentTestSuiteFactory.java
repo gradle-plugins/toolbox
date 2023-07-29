@@ -475,7 +475,7 @@ public final class DefaultGradlePluginDevelopmentTestSuiteFactory implements Gra
         }
 
         @Override
-        public GradlePluginDevelopmentTestSuiteInternal.TestTaskView getTestTasks() {
+        public TestTaskView getTestTasks() {
             return testTasks;
         }
 
@@ -501,10 +501,6 @@ public final class DefaultGradlePluginDevelopmentTestSuiteFactory implements Gra
                 this.elementsProvider = project.provider(() -> testTaskSpecs.stream().map(GradlePluginDevelopmentTestSuiteInternal.TestTaskView.Spec::get).collect(Collectors.toCollection(LinkedHashSet::new)));
 
                 testTaskSpecs.addAllLater(testSpecsProvider);
-            }
-
-            public boolean add(TaskProvider<Test> taskProvider) {
-                return testTaskSpecs.add(new GradlePluginDevelopmentTestSuiteInternal.TestTaskView.Spec(taskProvider));
             }
 
             @Override
