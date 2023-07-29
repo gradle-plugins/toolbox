@@ -24,6 +24,7 @@ import org.gradle.api.artifacts.ProjectDependency;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
 import org.gradle.api.component.SoftwareComponent;
 import org.gradle.api.internal.provider.Providers;
+import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.provider.SetProperty;
@@ -54,7 +55,7 @@ import java.util.stream.StreamSupport;
 
 import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
 import static dev.gradleplugins.internal.DefaultDependencyVersions.SPOCK_FRAMEWORK_VERSION;
-import static dev.gradleplugins.internal.RegisterTestingStrategyPropertyExtensionRule.testingStrategyProperty;
+import static dev.gradleplugins.internal.DefaultGradlePluginDevelopmentTestSuiteFactory.RegisterTestingStrategyPropertyExtensionRule.testingStrategyProperty;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.sourceSets;
 import static java.lang.String.format;
@@ -542,6 +543,28 @@ public final class DefaultGradlePluginDevelopmentTestSuiteFactory implements Gra
         @Override
         public void dependencies(Action<? super GradlePluginDevelopmentTestSuiteDependencies> action) {
             action.execute(dependencies);
+        }
+    }
+
+    public static final class RegisterTestingStrategyPropertyExtensionRule implements Action<Test> {
+        /** @see GradlePluginTestingStrategy#testingStrategy(Test) Synchronize constant */
+        private static final String TESTING_STRATEGY_EXTENSION_NAME = "testingStrategy";
+        private static final TypeOf<Property<GradlePluginTestingStrategy>> TESTING_STRATEGY_PROPERTY_TYPE = new TypeOf<Property<GradlePluginTestingStrategy>>() {};
+        private final ObjectFactory objects;
+
+        public RegisterTestingStrategyPropertyExtensionRule(ObjectFactory objects) {
+            this.objects = objects;
+        }
+
+        @Override
+        public void execute(Test task) {
+            val testingStrategy = objects.property(GradlePluginTestingStrategy.class);
+            task.getExtensions().add(TESTING_STRATEGY_PROPERTY_TYPE, TESTING_STRATEGY_EXTENSION_NAME, testingStrategy);
+        }
+
+        @SuppressWarnings("unchecked")
+        public static Property<GradlePluginTestingStrategy> testingStrategyProperty(Test task) {
+            return (Property<GradlePluginTestingStrategy>) task.getExtensions().getByName(TESTING_STRATEGY_EXTENSION_NAME);
         }
     }
 }
