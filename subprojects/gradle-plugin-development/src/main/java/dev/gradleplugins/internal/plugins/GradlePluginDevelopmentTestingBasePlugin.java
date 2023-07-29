@@ -2,6 +2,7 @@ package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.internal.rules.RegisterTestSuiteFactoryServiceRule;
 import dev.gradleplugins.internal.rules.RegisterTestingExtensionOnGradleDevelExtensionRule;
+import dev.gradleplugins.internal.rules.RemoveTestSourceSetsRule;
 import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -17,6 +18,7 @@ abstract class GradlePluginDevelopmentTestingBasePlugin implements Plugin<Projec
         project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-base");
         whenPluginApplied(project, "java-gradle-plugin", new RegisterTestingExtensionOnGradleDevelExtensionRule());
         new RegisterTestSuiteFactoryServiceRule().execute(project);
+       whenPluginApplied(project, "java-gradle-plugin", new RemoveTestSourceSetsRule());
     }
 
     private static void whenPluginApplied(Project project, String pluginId, Action<? super Project> action) {
