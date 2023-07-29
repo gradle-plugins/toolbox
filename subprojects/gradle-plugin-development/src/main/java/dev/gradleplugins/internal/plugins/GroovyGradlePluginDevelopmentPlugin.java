@@ -51,8 +51,8 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
             project.getPluginManager().apply("groovy-gradle-plugin"); // For plugin development
         } else {
             project.getPluginManager().apply("java-gradle-plugin"); // For plugin development
+            project.getPluginManager().apply("groovy");
         }
-        project.getPluginManager().apply("groovy");
 
         new RegisterLanguageExtensionRule("groovy", GroovyGradlePluginDevelopmentExtension.class).execute(project);
 
