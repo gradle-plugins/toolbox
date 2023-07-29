@@ -20,6 +20,8 @@ import dev.gradleplugins.GradleRuntimeCompatibility;
 import dev.gradleplugins.GroovyGradlePluginDevelopmentExtension;
 import dev.gradleplugins.internal.DeferredRepositoryFactory;
 import dev.gradleplugins.internal.DependencyFactory;
+import dev.gradleplugins.internal.rules.JavaGradlePluginIsNotPreviouslyAppliedRule;
+import dev.gradleplugins.internal.rules.KotlinDslPluginIsNeverAppliedRule;
 import dev.gradleplugins.internal.rules.OtherGradlePluginDevelopmentPluginsIncompatibilityRule;
 import dev.gradleplugins.internal.rules.RegisterLanguageExtensionRule;
 import lombok.val;
@@ -32,8 +34,6 @@ import org.gradle.util.GradleVersion;
 import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
 import static dev.gradleplugins.GradlePluginDevelopmentDependencies.dependencies;
 import static dev.gradleplugins.GroovyGradlePluginDevelopmentExtension.groovy;
-import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.assertJavaGradlePluginIsNotPreviouslyApplied;
-import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.assertKotlinDslPluginIsNeverApplied;
 
 public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
     private static final String PLUGIN_ID = "dev.gradleplugins.groovy-gradle-plugin";
@@ -41,8 +41,8 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
     @Override
     public void apply(Project project) {
         new OtherGradlePluginDevelopmentPluginsIncompatibilityRule(PLUGIN_ID).execute(project);
-        assertJavaGradlePluginIsNotPreviouslyApplied(project.getPluginManager(), PLUGIN_ID);
-        assertKotlinDslPluginIsNeverApplied(project.getPluginManager(), PLUGIN_ID);
+        new JavaGradlePluginIsNotPreviouslyAppliedRule(PLUGIN_ID).execute(project);
+        new KotlinDslPluginIsNeverAppliedRule(PLUGIN_ID).execute(project);
 
         project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-base");
         project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-testing-base");

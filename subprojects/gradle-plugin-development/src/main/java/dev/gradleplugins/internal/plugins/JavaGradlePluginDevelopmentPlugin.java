@@ -17,13 +17,12 @@
 package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.JavaGradlePluginDevelopmentExtension;
+import dev.gradleplugins.internal.rules.JavaGradlePluginIsNotPreviouslyAppliedRule;
+import dev.gradleplugins.internal.rules.KotlinDslPluginIsNeverAppliedRule;
 import dev.gradleplugins.internal.rules.OtherGradlePluginDevelopmentPluginsIncompatibilityRule;
 import dev.gradleplugins.internal.rules.RegisterLanguageExtensionRule;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-
-import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.assertJavaGradlePluginIsNotPreviouslyApplied;
-import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.assertKotlinDslPluginIsNeverApplied;
 
 public class JavaGradlePluginDevelopmentPlugin implements Plugin<Project> {
     private static final String PLUGIN_ID = "dev.gradleplugins.java-gradle-plugin";
@@ -31,8 +30,8 @@ public class JavaGradlePluginDevelopmentPlugin implements Plugin<Project> {
     @Override
     public void apply(Project project) {
         new OtherGradlePluginDevelopmentPluginsIncompatibilityRule(PLUGIN_ID).execute(project);
-        assertJavaGradlePluginIsNotPreviouslyApplied(project.getPluginManager(), PLUGIN_ID);
-        assertKotlinDslPluginIsNeverApplied(project.getPluginManager(), PLUGIN_ID);
+        new JavaGradlePluginIsNotPreviouslyAppliedRule(PLUGIN_ID).execute(project);
+        new KotlinDslPluginIsNeverAppliedRule(PLUGIN_ID).execute(project);
 
         project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-base");
         project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-testing-base");
