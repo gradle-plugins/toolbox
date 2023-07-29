@@ -1,5 +1,6 @@
 package dev.gradleplugins;
 
+import dev.gradleplugins.internal.DefaultGradlePluginDevelopmentTestSuiteFactory;
 import org.gradle.api.Project;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.gradle.util.GradleVersion;
@@ -8,7 +9,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
-import static dev.gradleplugins.GradlePluginDevelopmentTestSuiteFactory.forProject;
 import static dev.gradleplugins.ProjectMatchers.absentProvider;
 import static dev.gradleplugins.ProjectMatchers.coordinate;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
@@ -19,15 +19,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class GradlePluginDevelopmentTestSuiteMinimumGradleVersionIntegrationTest {
     Project project = ProjectBuilder.builder().build();
-    GradlePluginDevelopmentTestSuiteFactory factory;
-    GradlePluginDevelopmentTestSuite subject;
+    GradlePluginDevelopmentTestSuiteFactory factory = new DefaultGradlePluginDevelopmentTestSuiteFactory(project);
+    GradlePluginDevelopmentTestSuite subject = factory.create("holu");
 
     @BeforeEach
     void appliesBasePlugin() {
         project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-development");
-        project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-testing-base");
-        factory = forProject(project);
-        subject = factory.create("holu");
     }
 
     @Test

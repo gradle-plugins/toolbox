@@ -1,5 +1,6 @@
 package dev.gradleplugins;
 
+import dev.gradleplugins.internal.DefaultGradlePluginDevelopmentTestSuiteFactory;
 import org.gradle.api.Project;
 import org.gradle.api.provider.Property;
 import org.gradle.api.reflect.TypeOf;
@@ -27,15 +28,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class GradlePluginDevelopmentTestSuiteTestingStrategyPropertyOnTestTaskIntegrationTest {
     private static final TypeOf<Property<GradlePluginTestingStrategy>> PROPERTY_TYPE = new TypeOf<Property<GradlePluginTestingStrategy>>() {};
     Project project = ProjectBuilder.builder().build();
-    GradlePluginDevelopmentTestSuiteFactory factory ;
-    GradlePluginDevelopmentTestSuite subject;
+    GradlePluginDevelopmentTestSuiteFactory factory = new DefaultGradlePluginDevelopmentTestSuiteFactory(project);
+    GradlePluginDevelopmentTestSuite subject = factory.create("boat");
 
     @BeforeEach
     void setup() {
-        project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-testing-base");
         project.getPluginManager().apply("java-base");
-        factory = GradlePluginDevelopmentTestSuiteFactory.forProject(project);
-        subject = factory.create("boat");
         subject.getTestingStrategies().addAll(subject.getStrategies().coverageForGradleVersion("6.5"), subject.getStrategies().coverageForGradleVersion("6.6"), subject.getStrategies().coverageForGradleVersion("6.9"));
     }
 

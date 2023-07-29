@@ -1,5 +1,6 @@
 package dev.gradleplugins;
 
+import dev.gradleplugins.internal.DefaultGradlePluginDevelopmentTestSuiteFactory;
 import org.gradle.api.Project;
 import org.gradle.api.file.Directory;
 import org.gradle.plugin.devel.tasks.PluginUnderTestMetadata;
@@ -10,7 +11,6 @@ import org.junit.jupiter.api.Test;
 
 import static dev.gradleplugins.FileMatchers.aFile;
 import static dev.gradleplugins.FileMatchers.withAbsolutePath;
-import static dev.gradleplugins.GradlePluginDevelopmentTestSuiteFactory.forProject;
 import static dev.gradleplugins.ProjectMatchers.named;
 import static dev.gradleplugins.ProjectMatchers.providerOf;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -22,17 +22,13 @@ import static org.hamcrest.Matchers.startsWith;
 
 class GradlePluginDevelopmentTestSuitePluginUnderTestMetadataTaskIntegrationTest {
     Project project = ProjectBuilder.builder().build();
-    GradlePluginDevelopmentTestSuiteFactory factory;
-    GradlePluginDevelopmentTestSuite testSuite;
-    PluginUnderTestMetadata subject;
+    GradlePluginDevelopmentTestSuiteFactory factory = new DefaultGradlePluginDevelopmentTestSuiteFactory(project);
+    GradlePluginDevelopmentTestSuite testSuite = factory.create("etreTest");
+    PluginUnderTestMetadata subject = testSuite.getPluginUnderTestMetadataTask().get();
 
     @BeforeEach
     void configureSourceSet() {
-        project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-testing-base");
         project.getPluginManager().apply("java-base");
-        factory = forProject(project);
-        testSuite = factory.create("etreTest");
-        subject = testSuite.getPluginUnderTestMetadataTask().get();
     }
 
     @Test

@@ -6,6 +6,7 @@ import dev.gradleplugins.GradlePluginDevelopmentTestingExtension;
 import lombok.val;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
+import org.gradle.api.component.SoftwareComponent;
 import org.gradle.api.component.SoftwareComponentContainer;
 import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.reflect.HasPublicType;
@@ -31,7 +32,7 @@ public final class RegisterTestingExtensionOnGradleDevelExtensionRule implements
         @Override
         public GradlePluginDevelopmentTestSuite registerSuite(String name) {
             val result = factory.create(name);
-            components.add((RegisterTestSuiteFactoryServiceRule.DefaultGradlePluginDevelopmentTestSuiteFactory.GradlePluginDevelopmentTestSuiteInternal) result);
+            components.add((SoftwareComponent) result);
             return result;
         }
 
