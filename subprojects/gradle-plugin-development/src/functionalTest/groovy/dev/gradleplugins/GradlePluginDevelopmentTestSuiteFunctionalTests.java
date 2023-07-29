@@ -20,8 +20,6 @@ import java.util.stream.Collectors;
 import static dev.gradleplugins.fixtures.runnerkit.BuildResultMatchers.hasFailureCause;
 import static dev.gradleplugins.fixtures.runnerkit.BuildResultMatchers.hasFailureDescription;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.endsWith;
 
 class GradlePluginDevelopmentTestSuiteFunctionalTests {
     @TempDir(cleanup = CleanupMode.ON_SUCCESS)
@@ -176,6 +174,60 @@ class GradlePluginDevelopmentTestSuiteFunctionalTests {
                 "    assert !gradlePlugin.testSourceSets.any { it.name == 'foo' }",
                 "  }",
                 "}"
+        ), StandardOpenOption.APPEND);
+
+        runner.withTasks("verify").build();
+    }
+
+    @Test
+    void createsDefaultSourceSetOnSourceSetPropertyQueryOfConvention() throws IOException {
+        Files.write(testDirectory.resolve("build.gradle"), Arrays.asList(
+                "testSuiteUnderTest.sourceSet = null // reset value to convention",
+                "assert testSuiteUnderTest.sourceSet.get().name == 'foo'",
+                "assert sourceSets.findByName('foo') != null",
+                "",
+                "tasks.register('verify')"
+        ), StandardOpenOption.APPEND);
+
+        runner.withTasks("verify").build();
+    }
+
+    @Test
+    void createsDefaultSourceSetWhenProjectConfigured() throws IOException {
+        Files.write(testDirectory.resolve("build.gradle"), Arrays.asList(
+                "tasks.register('verify') {",
+                "  doLast {",
+                "    assert sourceSets.findByName('foo') != null",
+                "  }",
+                "}"
+        ), StandardOpenOption.APPEND);
+
+        runner.withTasks("verify").build();
+    }
+
+
+    @Test
+    void doesNotCreateDefaultSourceSetWhenSourceSetPropertyOverridden() throws IOException {
+        Files.write(testDirectory.resolve("build.gradle"), Arrays.asList(
+                "testSuiteUnderTest.sourceSet = sourceSets.create('kiel')",
+                "tasks.register('verify') {",
+                "  doLast {",
+                "    assert sourceSets.findByName('foo') == null",
+                "    assert sourceSets.findByName('kiel') != null",
+                "    assert testSuiteUnderTest.sourceSet.get().name == 'kiel'",
+                "  }",
+                "}"
+        ), StandardOpenOption.APPEND);
+
+        runner.withTasks("verify").build();
+    }
+
+    @Test
+    void doesNotCreateDefaultSourceSetOnTestSuiteCreation() throws IOException {
+        Files.write(testDirectory.resolve("build.gradle"), Arrays.asList(
+                "assert sourceSets.findByName('foo') == null : 'not yet created until sourceSet property realized'",
+                "",
+                "tasks.register('verify')"
         ), StandardOpenOption.APPEND);
 
         runner.withTasks("verify").build();

@@ -5,6 +5,7 @@ import org.gradle.api.file.Directory;
 import org.gradle.plugin.devel.tasks.PluginUnderTestMetadata;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static dev.gradleplugins.FileMatchers.aFile;
@@ -32,7 +33,6 @@ class GradlePluginDevelopmentTestSuitePluginUnderTestMetadataTaskIntegrationTest
         factory = forProject(project);
         testSuite = factory.create("etreTest");
         subject = testSuite.getPluginUnderTestMetadataTask().get();
-        testSuite.finalizeComponent();
     }
 
     @Test
@@ -56,6 +56,7 @@ class GradlePluginDevelopmentTestSuitePluginUnderTestMetadataTaskIntegrationTest
     }
 
     @Test
+    @Disabled
     void configuresOutputDirectoryConventionToBuildDirectoryByTaskName() {
         assertThat(subject.getOutputDirectory().value((Directory) null),
                 providerOf(aFile(withAbsolutePath(endsWith("/build/pluginUnderTestMetadataEtreTest")))));

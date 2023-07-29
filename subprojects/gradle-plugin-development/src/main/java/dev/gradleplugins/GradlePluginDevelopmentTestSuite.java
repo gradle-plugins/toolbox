@@ -42,7 +42,7 @@ public interface GradlePluginDevelopmentTestSuite extends Named, ExtensionAware 
     /**
      * Returns plugin under test metadata generator task for this test suite.
      *
-     * Use {@link GradlePluginDevelopmentTestSuiteDependencies#pluginUnderTestMetadata(Object)} to add plugin classpath.
+     * Use {@link GradlePluginDevelopmentTestSuiteDependencies#getPluginUnderTestMetadata()} to add plugin classpath.
      *
      * @return generator task for {@literal plugin-under-test-metadata.properties} file, never null
      */
@@ -60,11 +60,4 @@ public interface GradlePluginDevelopmentTestSuite extends Named, ExtensionAware 
     GradlePluginDevelopmentTestSuiteDependencies getDependencies();
 
     void dependencies(Action<? super GradlePluginDevelopmentTestSuiteDependencies> action);
-
-    /**
-     * Finalize this component.
-     * Upon finalizing, the test suite will calculate its final testing strategies and create all of its test tasks.
-     * Once the component is finalized, users cannot change any of component properties.
-     */
-    void finalizeComponent();
 }

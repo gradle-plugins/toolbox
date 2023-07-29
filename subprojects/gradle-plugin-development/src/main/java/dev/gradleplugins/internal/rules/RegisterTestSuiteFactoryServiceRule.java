@@ -17,7 +17,6 @@ import dev.gradleplugins.internal.DefaultDependencyBucketFactory;
 import dev.gradleplugins.internal.DependencyBucketFactory;
 import dev.gradleplugins.internal.DependencyFactory;
 import dev.gradleplugins.internal.EnforcedPlatformDependencyModifier;
-import dev.gradleplugins.internal.FinalizableComponent;
 import dev.gradleplugins.internal.GradlePluginTestingStrategyFactoryInternal;
 import dev.gradleplugins.internal.PlatformDependencyModifier;
 import dev.gradleplugins.internal.PluginUnderTestMetadataConfigurationSupplier;
@@ -55,15 +54,12 @@ import org.gradle.util.GUtil;
 import org.gradle.util.GradleVersion;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -85,6 +81,12 @@ public final class RegisterTestSuiteFactoryServiceRule implements Action<Project
 
         project.afterEvaluate(__ -> {
             testSuites.configureEach(new FinalizeTestSuiteProperties());
+            testSuites.configureEach(testSuite -> new PluginUnderTestMetadataConfigurationSupplier(project, testSuite).get());
+            testSuites.configureEach(new TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule());
+            testSuites.configureEach(new AttachTestTasksToCheckTaskIfPresent(project.getPluginManager(), project.getTasks()));
+
+            // Register as finalized action because it adds configuration which early finalize source set property
+            testSuites.configureEach(new ConfigurePluginUnderTestMetadataTask(project));
         });
     }
 
@@ -115,8 +117,6 @@ public final class RegisterTestSuiteFactoryServiceRule implements Action<Project
         @Override
         public GradlePluginDevelopmentTestSuite create(String name) {
             val result = project.getObjects().newInstance(GradlePluginDevelopmentTestSuiteInternal.class, name, project, minimumGradleVersion(project), gradleDistributions(), new DecoratingGradlePluginDevelopmentTestSuiteDependenciesFactory<>(new DefaultGradlePluginDevelopmentTestSuiteDependenciesFactory(project)));
-            // Register as finalized action because it adds configuration which early finalize source set property
-            result.whenFinalized(new ConfigurePluginUnderTestMetadataTask(project));
             result.getSourceSet().convention(project.provider(() -> {
                 if (project.getPluginManager().hasPlugin("java-base")) {
                     return sourceSets(project).maybeCreate(name);
@@ -140,7 +140,7 @@ public final class RegisterTestSuiteFactoryServiceRule implements Action<Project
 
             project.afterEvaluate(__ -> {
                 result.getTestTasks().realize();
-                result.finalizeComponent();
+                result.getSourceSet().getOrNull(); // force realized
             });
             return result;
         }
@@ -465,18 +465,16 @@ public final class RegisterTestSuiteFactoryServiceRule implements Action<Project
             }
         }
 
-        public abstract static class GradlePluginDevelopmentTestSuiteInternal implements GradlePluginDevelopmentTestSuite, SoftwareComponent, HasPublicType, FinalizableComponent {
+        public abstract static class GradlePluginDevelopmentTestSuiteInternal implements GradlePluginDevelopmentTestSuite, SoftwareComponent, HasPublicType {
             private static final String PLUGIN_UNDER_TEST_METADATA_TASK_NAME_PREFIX = "pluginUnderTestMetadata";
             private static final String PLUGIN_DEVELOPMENT_GROUP = "Plugin development";
             private static final String PLUGIN_UNDER_TEST_METADATA_TASK_DESCRIPTION_FORMAT = "Generates the metadata for plugin %s.";
             private final GradlePluginTestingStrategyFactory strategyFactory;
             private final GradlePluginDevelopmentTestSuiteDependencies dependencies;
             private final String name;
-            private final List<Action<? super GradlePluginDevelopmentTestSuite>> finalizeActions = new ArrayList<>();
             private final TestTaskView testTasks;
             private final TaskProvider<PluginUnderTestMetadata> pluginUnderTestMetadataTask;
             private final String displayName;
-            private boolean finalized = false;
 
             @Inject
             public GradlePluginDevelopmentTestSuiteInternal(String name, Project project, Provider<String> minimumGradleVersion, ReleasedVersionDistributions releasedVersions, GradlePluginDevelopmentTestSuiteDependenciesFactory<? extends GradlePluginDevelopmentTestSuiteDependencies> dependenciesFactory) {
@@ -486,9 +484,6 @@ public final class RegisterTestSuiteFactoryServiceRule implements Action<Project
                 this.dependencies = dependenciesFactory.create(this);
                 this.pluginUnderTestMetadataTask = registerPluginUnderTestMetadataTask(project.getTasks(), pluginUnderTestMetadataTaskName(name), displayName);
                 this.testTasks = project.getObjects().newInstance(TestTaskView.class, project, getTestSpecs());
-                this.finalizeActions.add(testSuite -> new PluginUnderTestMetadataConfigurationSupplier(project, testSuite).get());
-                this.finalizeActions.add(new TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule());
-                this.finalizeActions.add(new AttachTestTasksToCheckTaskIfPresent(project.getPluginManager(), project.getTasks()));
             }
 
             private static TaskProvider<PluginUnderTestMetadata> registerPluginUnderTestMetadataTask(TaskContainer tasks, String taskName, String displayName) {
@@ -587,24 +582,6 @@ public final class RegisterTestSuiteFactoryServiceRule implements Action<Project
             }
 
             @Override
-            public void finalizeComponent() {
-                if (!finalized) {
-                    finalized = true;
-                    finalizeActions.forEach(it -> it.execute(this));
-                    getSourceSet().finalizeValue();
-                }
-            }
-
-            @Override
-            public boolean isFinalized() {
-                return finalized;
-            }
-
-            public void whenFinalized(Action<? super GradlePluginDevelopmentTestSuite> action) {
-                finalizeActions.add(action);
-            }
-
-            @Override
             public GradlePluginDevelopmentTestSuiteDependencies getDependencies() {
                 return dependencies;
             }
@@ -612,14 +589,6 @@ public final class RegisterTestSuiteFactoryServiceRule implements Action<Project
             @Override
             public void dependencies(Action<? super GradlePluginDevelopmentTestSuiteDependencies> action) {
                 action.execute(dependencies);
-            }
-
-            private final class FinalizeComponentCallable<T> implements Callable<T> {
-                @Override
-                public T call() throws Exception {
-                    finalizeComponent();
-                    return null;
-                }
             }
         }
     }

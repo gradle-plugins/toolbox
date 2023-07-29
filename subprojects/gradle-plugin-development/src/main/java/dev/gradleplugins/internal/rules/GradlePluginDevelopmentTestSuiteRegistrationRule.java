@@ -23,7 +23,5 @@ public final class GradlePluginDevelopmentTestSuiteRegistrationRule implements A
 
         project.getExtensions().add(testSuiteName, testSuite);
         project.getComponents().add((SoftwareComponent) testSuite);
-
-        project.afterEvaluate(proj -> testSuite.finalizeComponent());
     }
 }

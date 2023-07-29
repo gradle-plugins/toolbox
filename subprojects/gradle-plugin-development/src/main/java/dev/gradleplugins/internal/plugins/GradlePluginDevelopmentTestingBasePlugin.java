@@ -17,7 +17,6 @@ abstract class GradlePluginDevelopmentTestingBasePlugin implements Plugin<Projec
         project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-base");
         whenPluginApplied(project, "java-gradle-plugin", new RegisterTestingExtensionOnGradleDevelExtensionRule());
         new RegisterTestSuiteFactoryServiceRule().execute(project);
-        project.afterEvaluate(new FinalizeComponents());
     }
 
     private static void whenPluginApplied(Project project, String pluginId, Action<? super Project> action) {
