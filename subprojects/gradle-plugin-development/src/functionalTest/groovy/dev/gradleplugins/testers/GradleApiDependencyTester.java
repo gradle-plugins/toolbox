@@ -1,24 +1,21 @@
 package dev.gradleplugins.testers;
 
+import dev.gradleplugins.buildscript.io.GradleBuildFile;
 import dev.gradleplugins.runnerkit.GradleRunner;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
+import static dev.gradleplugins.buildscript.syntax.Syntax.groovyDsl;
 
 public abstract class GradleApiDependencyTester {
     public abstract GradleRunner runner();
 
-    public abstract Path buildFile();
+    public abstract GradleBuildFile buildFile();
 
     public abstract String gradleApiDsl(String version);
 
     @Test
-    void testGradleApiDependency() throws IOException {
-        Files.write(buildFile(), Arrays.asList(
+    void testGradleApiDependency() {
+        buildFile().append(groovyDsl(
                 "def dependencyUnderTest = " + gradleApiDsl("6.3"),
                 "tasks.register('verify') {",
                 "  doLast {",
@@ -28,14 +25,14 @@ public abstract class GradleApiDependencyTester {
                 "    assert dependencyUnderTest.version == '6.3'",
                 "  }",
                 "}"
-        ), StandardOpenOption.APPEND);
+        ));
 
         runner().withTasks("verify").build();
     }
 
     @Test
-    void testLocalGradleApiDependency() throws IOException {
-        Files.write(buildFile(), Arrays.asList(
+    void testLocalGradleApiDependency() {
+        buildFile().append(groovyDsl(
                 "def dependencyUnderTest = " + gradleApiDsl("local"),
                 "tasks.register('verify') {",
                 "  doLast {",
@@ -43,7 +40,7 @@ public abstract class GradleApiDependencyTester {
                 "    assert dependencyUnderTest.targetComponentId.displayName == 'Gradle API'",
                 "  }",
                 "}"
-        ), StandardOpenOption.APPEND);
+        ));
 
         runner().withTasks("verify").build();
     }

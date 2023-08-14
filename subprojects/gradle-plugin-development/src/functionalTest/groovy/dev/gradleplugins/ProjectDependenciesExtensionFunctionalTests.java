@@ -1,5 +1,6 @@
 package dev.gradleplugins;
 
+import dev.gradleplugins.buildscript.io.GradleBuildFile;
 import dev.gradleplugins.runnerkit.GradleExecutor;
 import dev.gradleplugins.runnerkit.GradleRunner;
 import dev.gradleplugins.testers.GradleApiDependencyTester;
@@ -10,22 +11,17 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.io.CleanupMode;
 import org.junit.jupiter.api.io.TempDir;
 
-import java.io.IOException;
 import java.nio.file.Path;
 
 class ProjectDependenciesExtensionFunctionalTests {
     @TempDir(cleanup = CleanupMode.ON_SUCCESS) Path testDirectory;
     GradleRunner runner = GradleRunner.create(GradleExecutor.gradleTestKit()).withGradleVersion(System.getProperty("dev.gradleplugins.defaultGradleVersion")).withPluginClasspath().inDirectory(() -> testDirectory);
-    BuildScriptFile buildFile;
+    GradleBuildFile buildFile;
 
     @BeforeEach
-    void setup() throws IOException {
-        buildFile = new BuildScriptFile(testDirectory.resolve("build.gradle"));
-        buildFile.append(
-                "plugins {",
-                "  id(\"dev.gradleplugins.gradle-plugin-base\")",
-                "}"
-        );
+    void setup() {
+        buildFile = GradleBuildFile.inDirectory(testDirectory);
+        buildFile.plugins(it -> it.id("dev.gradleplugins.gradle-plugin-base"));
     }
 
     @Nested
@@ -36,8 +32,8 @@ class ProjectDependenciesExtensionFunctionalTests {
         }
 
         @Override
-        public Path buildFile() {
-            return testDirectory.resolve("build.gradle");
+        public GradleBuildFile buildFile() {
+            return buildFile;
         }
 
         @Override
@@ -54,8 +50,8 @@ class ProjectDependenciesExtensionFunctionalTests {
         }
 
         @Override
-        public Path buildFile() {
-            return testDirectory.resolve("build.gradle");
+        public GradleBuildFile buildFile() {
+            return buildFile;
         }
 
         @Override

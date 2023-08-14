@@ -1,100 +1,94 @@
 package dev.gradleplugins.testers;
 
-import dev.gradleplugins.BuildScriptFile;
+import dev.gradleplugins.buildscript.ast.ExpressionBuilder;
+import dev.gradleplugins.buildscript.ast.expressions.Expression;
+import dev.gradleplugins.buildscript.ast.type.ReferenceType;
+import dev.gradleplugins.buildscript.io.GradleBuildFile;
+import dev.gradleplugins.buildscript.io.GradleSettingsFile;
 import dev.gradleplugins.runnerkit.GradleRunner;
+import org.gradle.api.artifacts.ExternalModuleDependency;
+import org.gradle.api.artifacts.FileCollectionDependency;
+import org.gradle.api.artifacts.ProjectDependency;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
+import static dev.gradleplugins.buildscript.ast.expressions.ItExpression.it;
+import static dev.gradleplugins.buildscript.ast.expressions.MethodCallExpression.call;
+import static dev.gradleplugins.buildscript.ast.type.UnknownType.unknownType;
+import static dev.gradleplugins.buildscript.blocks.GradleBuildScriptBlocks.doLast;
+import static dev.gradleplugins.buildscript.blocks.GradleBuildScriptBlocks.registerTask;
+import static dev.gradleplugins.buildscript.syntax.Syntax.assertTrue;
+import static dev.gradleplugins.buildscript.syntax.Syntax.lambda;
+import static dev.gradleplugins.buildscript.syntax.Syntax.literal;
+import static dev.gradleplugins.buildscript.syntax.Syntax.setOf;
+import static dev.gradleplugins.buildscript.syntax.Syntax.string;
 
 public abstract class DependencyBucketTester {
     public abstract GradleRunner runner();
 
-    public abstract String bucketDsl();
+    public abstract ExpressionBuilder<?> bucketDsl();
 
-    public abstract BuildScriptFile buildFile();
+    public abstract GradleBuildFile buildFile();
 
-    public BuildScriptFile settingsFile() {
-        return new BuildScriptFile(buildFile().getLocation().getParent().resolve("settings.gradle"));
-    }
+    public abstract GradleSettingsFile settingsFile();
 
     private abstract class Tester {
-        public abstract String bucketDsl(String dsl);
-
-        public String instanceofOperator() {
-            return "instanceof";
-        }
-
-        public String setOf(String elements) {
-            return "[" + elements + "] as Set";
-        }
+        public abstract Expression bucketDsl(Expression dsl);
 
         @Test
-        void testGroupArtifactVersionNotation() throws IOException {
-            buildFile().append(
-                    bucketDsl("\"com.example:foo:1.0\""),
-                    "",
-                    "tasks.register(\"verify\") {",
-                    "  doLast {",
-                    "    assert(" + DependencyBucketTester.this.bucketDsl() + ".asConfiguration.get().dependencies.any {",
-                    "      it " + instanceofOperator() + " ExternalModuleDependency && \"com.example:foo:1.0\" == \"${it.group}:${it.name}:${it.version}\"",
-                    "    })",
-                    "  }",
-                    "}"
-            );
+        void testGroupArtifactVersionNotation() {
+            buildFile().append(bucketDsl(string("com.example:foo:1.0")));
+            buildFile().append(registerTask("verify", taskBlock -> {
+                taskBlock.add(doLast(it -> {
+                    it.add(assertTrue(DependencyBucketTester.this.bucketDsl().call("asConfiguration.get().dependencies.any", lambda(anyBlock -> {
+                        anyBlock.add(it().instanceOf(ExternalModuleDependency.class).and(string("com.example:foo:1.0").equalTo(literal("\"${it.group}:${it.name}:${it.version}\""))));
+                    }))));
+                }));
+            }));
 
             runner().withTasks("verify").build();
         }
 
         @Test
-        void testProjectNotation() throws IOException {
-            settingsFile().append("include 'other-project'");
-            buildFile().append(
-                    bucketDsl("project(\":other-project\")"),
-                    "",
-                    "tasks.register(\"verify\") {",
-                    "  doLast {",
-                    "    assert(" + DependencyBucketTester.this.bucketDsl() + ".asConfiguration.get().dependencies.any {",
-                    "      it " + instanceofOperator() + " ProjectDependency && \":other-project\" == it.dependencyProject.path",
-                    "    })",
-                    "  }",
-                    "}"
-            );
+        void testProjectNotation() {
+            settingsFile().append(call("include", string("other-project")));
+            buildFile().append(bucketDsl(call("project", string(":other-project"))));
+            buildFile().append(registerTask("verify", taskBlock -> {
+                taskBlock.add(doLast(it ->{
+                    it.add(assertTrue(DependencyBucketTester.this.bucketDsl().call("asConfiguration.get().dependencies.any", lambda(anyBlock -> {
+                        anyBlock.add(it().instanceOf(ProjectDependency.class).and(string(":other-project").equalTo(it().dot("dependencyProject.path"))));
+                    }))));
+                }));
+            }));
 
             runner().withTasks("verify").build();
         }
 
         @Test
-        void testLocalProjectNotation() throws IOException {
-            buildFile().append(
-                    bucketDsl("project"),
-                    "",
-                    "tasks.register(\"verify\") {",
-                    "  doLast {",
-                    "    assert(" + DependencyBucketTester.this.bucketDsl() + ".asConfiguration.get().dependencies.any {",
-                    "      it " + instanceofOperator() + " ProjectDependency && project.path == it.dependencyProject.path",
-                    "    })",
-                    "  }",
-                    "}"
-            );
+        void testLocalProjectNotation() {
+            buildFile().append(bucketDsl(literal("project")));
+            buildFile().append(registerTask("verify", taskBlock -> {
+                taskBlock.add(doLast(doLastBlock -> {
+                    doLastBlock.add(assertTrue(DependencyBucketTester.this.bucketDsl().call("asConfiguration.get().dependencies.any", lambda(anyBlock -> {
+                        anyBlock.add(it().instanceOf(ProjectDependency.class).and(literal("project.path").equalTo(it().dot("dependencyProject.path"))));
+                    }))));
+                }));
+            }));
 
             runner().withTasks("verify").build();
         }
 
         @Test
-        void testFileCollectionNotation() throws IOException {
-            buildFile().append(
-                    bucketDsl("files(\"my-path\")"),
-                    "",
-                    "tasks.register(\"verify\") {",
-                    "  doLast {",
-                    "    assert(" + DependencyBucketTester.this.bucketDsl() + ".asConfiguration.get().dependencies.any {",
-                    "      it " + instanceofOperator() + " FileCollectionDependency && " +  setOf("project.file(\"my-path\")") + " == it.files.files",
-                    "    })",
-                    "  }",
-                    "}"
-            );
+        void testFileCollectionNotation() {
+            buildFile().append(bucketDsl(call("files", string("my-path"))));
+            buildFile().append(registerTask("verify", taskBlock -> {
+                taskBlock.add(doLast(doLastBlock -> {
+                    doLastBlock.add(assertTrue(DependencyBucketTester.this.bucketDsl().call("asConfiguration.get().dependencies.any", lambda(anyBlock -> {
+                        anyBlock.add(it().instanceOf(FileCollectionDependency.class).and(setOf(call("project.file", string("my-path"))).equalTo(it().dot("files.files"))));
+                    }))));
+                }));
+            }));
 
             runner().withTasks("verify").build();
         }
@@ -103,39 +97,29 @@ public abstract class DependencyBucketTester {
     @Nested
     public class GroovyDslTest extends Tester {
         @Override
-        public String bucketDsl(String dsl) {
-            return DependencyBucketTester.this.bucketDsl() + "(" + dsl + ")";
+        public Expression bucketDsl(Expression dsl) {
+            return DependencyBucketTester.this.bucketDsl().call(dsl);
         }
     }
 
     @Nested
     public class KotlinDslTest extends Tester {
         @BeforeEach
-        void useKotlinDsl() throws IOException {
+        void useKotlinDsl() {
             buildFile().useKotlinDsl();
         }
 
         @Override
-        public String bucketDsl(String dsl) {
-            return DependencyBucketTester.this.bucketDsl() + "(" + dsl + ")";
-        }
-
-        @Override
-        public String instanceofOperator() {
-            return "is";
-        }
-
-        @Override
-        public String setOf(String elements) {
-            return "setOf(" + elements + ")";
+        public Expression bucketDsl(Expression dsl) {
+            return DependencyBucketTester.this.bucketDsl().call(dsl);
         }
     }
 
     @Nested
     public class AdderTest extends Tester {
         @Override
-        public String bucketDsl(String dsl) {
-            return DependencyBucketTester.this.bucketDsl() + ".add(" + dsl + ")";
+        public Expression bucketDsl(Expression dsl) {
+            return DependencyBucketTester.this.bucketDsl().call("add", dsl);
         }
     }
 }

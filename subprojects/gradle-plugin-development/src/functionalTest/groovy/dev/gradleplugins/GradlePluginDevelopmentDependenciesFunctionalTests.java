@@ -1,5 +1,8 @@
 package dev.gradleplugins;
 
+import dev.gradleplugins.buildscript.ast.ExpressionBuilder;
+import dev.gradleplugins.buildscript.io.GradleBuildFile;
+import dev.gradleplugins.buildscript.io.GradleSettingsFile;
 import dev.gradleplugins.runnerkit.GradleExecutor;
 import dev.gradleplugins.runnerkit.GradleRunner;
 import dev.gradleplugins.testers.DependencyBucketTester;
@@ -13,23 +16,25 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.io.CleanupMode;
 import org.junit.jupiter.api.io.TempDir;
 
-import java.io.IOException;
 import java.nio.file.Path;
+
+import static dev.gradleplugins.buildscript.syntax.Syntax.literal;
+
 
 class GradlePluginDevelopmentDependenciesFunctionalTests {
     @TempDir(cleanup = CleanupMode.ON_SUCCESS) Path testDirectory;
     GradleRunner runner = GradleRunner.create(GradleExecutor.gradleTestKit()).withGradleVersion(System.getProperty("dev.gradleplugins.defaultGradleVersion")).withPluginClasspath().inDirectory(() -> testDirectory);
-    BuildScriptFile buildFile;
+    GradleBuildFile buildFile;
+    GradleSettingsFile settingsFile;
 
     @BeforeEach
-    void setup() throws IOException {
-        buildFile = new BuildScriptFile(testDirectory.resolve("build.gradle"));
-        buildFile.append(
-                "plugins {",
-                "  id(\"dev.gradleplugins.gradle-plugin-base\")",
-                "  id(\"java-gradle-plugin\")",
-                "}"
-        );
+    void setup() {
+        settingsFile = GradleSettingsFile.inDirectory(testDirectory);
+        buildFile = GradleBuildFile.inDirectory(testDirectory);
+        buildFile.plugins(it -> {
+            it.id("dev.gradleplugins.gradle-plugin-base");
+            it.id("java-gradle-plugin");
+        });
     }
 
     @Nested
@@ -40,8 +45,8 @@ class GradlePluginDevelopmentDependenciesFunctionalTests {
         }
 
         @Override
-        public Path buildFile() {
-            return testDirectory.resolve("build.gradle");
+        public GradleBuildFile buildFile() {
+            return buildFile;
         }
 
         @Override
@@ -58,8 +63,13 @@ class GradlePluginDevelopmentDependenciesFunctionalTests {
         }
 
         @Override
-        public Path buildFile() {
-            return testDirectory.resolve("build.gradle");
+        public GradleBuildFile buildFile() {
+            return buildFile;
+        }
+
+        @Override
+        public GradleSettingsFile settingsFile() {
+            return settingsFile;
         }
 
         @Override
@@ -99,12 +109,12 @@ class GradlePluginDevelopmentDependenciesFunctionalTests {
         }
 
         @Override
-        public String modifierDsl() {
-            return "gradlePlugin.dependencies.platform";
+        public ExpressionBuilder<?> modifierDsl() {
+            return literal("gradlePlugin.dependencies.platform");
         }
 
         @Override
-        public BuildScriptFile buildFile() {
+        public GradleBuildFile buildFile() {
             return buildFile;
         }
     }
@@ -117,12 +127,12 @@ class GradlePluginDevelopmentDependenciesFunctionalTests {
         }
 
         @Override
-        public String modifierDsl() {
-            return "gradlePlugin.dependencies.enforcedPlatform";
+        public ExpressionBuilder<?> modifierDsl() {
+            return literal("gradlePlugin.dependencies.enforcedPlatform");
         }
 
         @Override
-        public BuildScriptFile buildFile() {
+        public GradleBuildFile buildFile() {
             return buildFile;
         }
     }
@@ -135,13 +145,18 @@ class GradlePluginDevelopmentDependenciesFunctionalTests {
         }
 
         @Override
-        public String bucketDsl() {
-            return "gradlePlugin.dependencies.api";
+        public ExpressionBuilder<?> bucketDsl() {
+            return literal("gradlePlugin.dependencies.api");
         }
 
         @Override
-        public BuildScriptFile buildFile() {
+        public GradleBuildFile buildFile() {
             return buildFile;
+        }
+
+        @Override
+        public GradleSettingsFile settingsFile() {
+            return settingsFile;
         }
     }
 
@@ -153,13 +168,18 @@ class GradlePluginDevelopmentDependenciesFunctionalTests {
         }
 
         @Override
-        public String bucketDsl() {
-            return "gradlePlugin.dependencies.implementation";
+        public ExpressionBuilder<?> bucketDsl() {
+            return literal("gradlePlugin.dependencies.implementation");
         }
 
         @Override
-        public BuildScriptFile buildFile() {
+        public GradleBuildFile buildFile() {
             return buildFile;
+        }
+
+        @Override
+        public GradleSettingsFile settingsFile() {
+            return settingsFile;
         }
     }
 
@@ -171,13 +191,18 @@ class GradlePluginDevelopmentDependenciesFunctionalTests {
         }
 
         @Override
-        public String bucketDsl() {
-            return "gradlePlugin.dependencies.compileOnly";
+        public ExpressionBuilder<?> bucketDsl() {
+            return literal("gradlePlugin.dependencies.compileOnly");
         }
 
         @Override
-        public BuildScriptFile buildFile() {
+        public GradleBuildFile buildFile() {
             return buildFile;
+        }
+
+        @Override
+        public GradleSettingsFile settingsFile() {
+            return settingsFile;
         }
     }
 
@@ -189,13 +214,18 @@ class GradlePluginDevelopmentDependenciesFunctionalTests {
         }
 
         @Override
-        public String bucketDsl() {
-            return "gradlePlugin.dependencies.runtimeOnly";
+        public ExpressionBuilder<?> bucketDsl() {
+            return literal("gradlePlugin.dependencies.runtimeOnly");
         }
 
         @Override
-        public BuildScriptFile buildFile() {
+        public GradleBuildFile buildFile() {
             return buildFile;
+        }
+
+        @Override
+        public GradleSettingsFile settingsFile() {
+            return settingsFile;
         }
     }
 
@@ -207,13 +237,18 @@ class GradlePluginDevelopmentDependenciesFunctionalTests {
         }
 
         @Override
-        public String bucketDsl() {
-            return "gradlePlugin.dependencies.annotationProcessor";
+        public ExpressionBuilder<?> bucketDsl() {
+            return literal("gradlePlugin.dependencies.annotationProcessor");
         }
 
         @Override
-        public BuildScriptFile buildFile() {
+        public GradleBuildFile buildFile() {
             return buildFile;
+        }
+
+        @Override
+        public GradleSettingsFile settingsFile() {
+            return settingsFile;
         }
     }
 }

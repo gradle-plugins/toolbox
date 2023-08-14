@@ -1,5 +1,8 @@
 package dev.gradleplugins;
 
+import dev.gradleplugins.buildscript.ast.ExpressionBuilder;
+import dev.gradleplugins.buildscript.io.GradleBuildFile;
+import dev.gradleplugins.buildscript.io.GradleSettingsFile;
 import dev.gradleplugins.runnerkit.BuildResult;
 import dev.gradleplugins.runnerkit.GradleExecutor;
 import dev.gradleplugins.runnerkit.GradleRunner;
@@ -11,12 +14,12 @@ import org.junit.jupiter.api.io.CleanupMode;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
+import static dev.gradleplugins.buildscript.blocks.BuildscriptBlock.classpath;
+import static dev.gradleplugins.buildscript.blocks.DependencyNotation.files;
+import static dev.gradleplugins.buildscript.syntax.Syntax.groovyDsl;
+import static dev.gradleplugins.buildscript.syntax.Syntax.literal;
 import static dev.gradleplugins.fixtures.runnerkit.BuildResultMatchers.hasFailureCause;
 import static dev.gradleplugins.fixtures.runnerkit.BuildResultMatchers.hasFailureDescription;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -25,32 +28,25 @@ class GradlePluginDevelopmentUnitTestingFunctionalTests {
     @TempDir(cleanup = CleanupMode.ON_SUCCESS)
     Path testDirectory;
     GradleRunner runner = GradleRunner.create(GradleExecutor.gradleTestKit()).withGradleVersion(System.getProperty("dev.gradleplugins.defaultGradleVersion")).withPluginClasspath().inDirectory(() -> testDirectory);
-    BuildScriptFile buildFile;
+    GradleBuildFile buildFile;
+    GradleSettingsFile settingsFile;
 
     @BeforeEach
     void givenProject() throws IOException {
-        buildFile = new BuildScriptFile(testDirectory.resolve("build.gradle"));
-        Files.write(testDirectory.resolve("settings.gradle"), Arrays.asList(
-                "buildscript {",
-                "  dependencies {",
-                "    classpath files(" + runner.getPluginClasspath().stream().map(it -> "'" + it + "'").collect(Collectors.joining(", ")) + ")",
-                "  }",
-                "}",
-                "rootProject.name = 'gradle-plugin'"
-        ));
-        Files.write(testDirectory.resolve("build.gradle"), Arrays.asList(
-                "plugins {",
-                "  id(\"dev.gradleplugins.gradle-plugin-unit-test\")",
-                "}"
-        ));
+        settingsFile = GradleSettingsFile.inDirectory(testDirectory);
+        settingsFile.buildscript(it -> it.dependencies(classpath(files(runner.getPluginClasspath()))));
+        settingsFile.append(groovyDsl("rootProject.name = 'gradle-plugin'"));
+
+        buildFile = GradleBuildFile.inDirectory(testDirectory);
+        buildFile.plugins(it -> it.id("dev.gradleplugins.gradle-plugin-unit-test"));
     }
 
     @Test // https://github.com/gradle-plugins/toolbox/issues/65
-    void canAddDependenciesBeforeCoreGradleDevelPluginApplied() throws IOException {
+    void canAddDependenciesBeforeCoreGradleDevelPluginApplied() {
         // We need to avoid an implementation that rely on the sourceSet for the component dependencies.
         // If we do, the sourceSet can realize/register before we apply core Gradle plugins.
         // Those plugins assume the sourceSet does not exist which result in a failure.
-        Files.write(testDirectory.resolve("build.gradle"), Arrays.asList(
+        buildFile.append(groovyDsl(
                 "test.dependencies.implementation 'org.junit.jupiter:junit-jupiter:5.8.1'",
                 "apply plugin: 'java-gradle-plugin'",
                 "",
@@ -59,7 +55,7 @@ class GradlePluginDevelopmentUnitTestingFunctionalTests {
                 "    assert configurations.testImplementation.dependencies.any { 'org.junit.jupiter:junit-jupiter:5.8.1' == \"${it.group}:${it.name}:${it.version}\" }",
                 "  }",
                 "}"
-        ), StandardOpenOption.APPEND);
+        ));
 
         runner.withTasks("verify").build();
     }
@@ -68,31 +64,26 @@ class GradlePluginDevelopmentUnitTestingFunctionalTests {
     class GivenCorePluginAppliedTest {
         @BeforeEach
         void givenProject() throws IOException {
-            Files.write(testDirectory.resolve("build.gradle"), Arrays.asList(
-                    "plugins {",
-                    "  id(\"dev.gradleplugins.gradle-plugin-unit-test\")",
-                    "  id(\"java-gradle-plugin\")",
-                    "}"
-            ));
+            buildFile.plugins(it -> it.id("java-gradle-plugin"));
         }
 
         @Test
-        void hasMainSourceSetAsTestedSourceSetConvention() throws IOException {
-            Files.write(testDirectory.resolve("build.gradle"), Arrays.asList(
+        void hasMainSourceSetAsTestedSourceSetConvention() {
+            buildFile.append(groovyDsl(
                     "test.testedSourceSet = null",
                     "tasks.register('verify') {",
                     "  doLast {",
                     "    assert test.testedSourceSet.orNull?.name == 'main'",
                     "  }",
                     "}"
-            ), StandardOpenOption.APPEND);
+            ));
 
             runner.withTasks("verify").build();
         }
 
         @Test
-        void usesDevelPluginSourceSetAsTestedSourceSetConvention() throws IOException {
-            Files.write(testDirectory.resolve("build.gradle"), Arrays.asList(
+        void usesDevelPluginSourceSetAsTestedSourceSetConvention() {
+            buildFile.append(groovyDsl(
                     "gradlePlugin.pluginSourceSet(sourceSets.create('anotherMain'))",
                     "test.testedSourceSet = null",
                     "tasks.register('verify') {",
@@ -100,19 +91,19 @@ class GradlePluginDevelopmentUnitTestingFunctionalTests {
                     "    assert test.testedSourceSet.orNull?.name == 'anotherMain'",
                     "  }",
                     "}"
-            ), StandardOpenOption.APPEND);
+            ));
 
             runner.withTasks("verify").build();
         }
 
         @Test
-        void disallowChangesToSourceSetProperty() throws IOException {
-            Files.write(testDirectory.resolve("build.gradle"), Arrays.asList(
+        void disallowChangesToSourceSetProperty() {
+            buildFile.append(groovyDsl(
                     "afterEvaluate {",
                     "  test.sourceSet = null", // expect failure
                     "}",
                     "tasks.register('verify')"
-            ), StandardOpenOption.APPEND);
+            ));
 
             BuildResult result = runner.withTasks("verify").buildAndFail();
             assertThat(result, hasFailureDescription("A problem occurred configuring root project 'gradle-plugin'."));
@@ -120,13 +111,13 @@ class GradlePluginDevelopmentUnitTestingFunctionalTests {
         }
 
         @Test
-        void disallowChangesToTestedSourceSetProperty() throws IOException {
-            Files.write(testDirectory.resolve("build.gradle"), Arrays.asList(
+        void disallowChangesToTestedSourceSetProperty() {
+            buildFile.append(groovyDsl(
                     "afterEvaluate {",
                     "  test.testedSourceSet = null", // expect failure
                     "}",
                     "tasks.register('verify')"
-            ), StandardOpenOption.APPEND);
+            ));
 
             BuildResult result = runner.withTasks("verify").buildAndFail();
             assertThat(result, hasFailureDescription("A problem occurred configuring root project 'gradle-plugin'."));
@@ -134,13 +125,13 @@ class GradlePluginDevelopmentUnitTestingFunctionalTests {
         }
 
         @Test
-        void disallowChangesToTestingStrategiesProperty() throws IOException {
-            Files.write(testDirectory.resolve("build.gradle"), Arrays.asList(
+        void disallowChangesToTestingStrategiesProperty() {
+            buildFile.append(groovyDsl(
                     "afterEvaluate {",
                     "  test.testingStrategies = null", // expect failure
                     "}",
                     "tasks.register('verify')"
-            ), StandardOpenOption.APPEND);
+            ));
 
             BuildResult result = runner.withTasks("verify").buildAndFail();
             assertThat(result, hasFailureDescription("A problem occurred configuring root project 'gradle-plugin'."));
@@ -148,8 +139,8 @@ class GradlePluginDevelopmentUnitTestingFunctionalTests {
         }
 
         @Test
-        void returnsTestTasksOnTaskViewElementQuery() throws IOException {
-            Files.write(testDirectory.resolve("build.gradle"), Arrays.asList(
+        void returnsTestTasksOnTaskViewElementQuery() {
+            buildFile.append(groovyDsl(
                     "test {",
                     "  testingStrategies = [strategies.coverageForGradleVersion('6.8'), strategies.coverageForGradleVersion('7.1')]",
                     "}",
@@ -159,14 +150,14 @@ class GradlePluginDevelopmentUnitTestingFunctionalTests {
                     "    assert test.testTasks.elements.get().every { it.name == 'test6.8' || it.name == 'test7.1' }",
                     "  }",
                     "}"
-            ), StandardOpenOption.APPEND);
+            ));
 
             runner.withTasks("verify").build();
         }
 
         @Test
-        void includesPluginUnderTestMetadataConfigurationDependencies() throws IOException {
-            Files.write(testDirectory.resolve("build.gradle"), Arrays.asList(
+        void includesPluginUnderTestMetadataConfigurationDependencies() {
+            buildFile.append(groovyDsl(
                     "test.dependencies.pluginUnderTestMetadata files('my/own/dep.jar')",
                     "",
                     "tasks.register('verify') {",
@@ -174,14 +165,14 @@ class GradlePluginDevelopmentUnitTestingFunctionalTests {
                     "    assert test.pluginUnderTestMetadataTask.get().pluginClasspath.any { it.path.endsWith('/my/own/dep.jar') }",
                     "  }",
                     "}"
-            ), StandardOpenOption.APPEND);
+            ));
 
             runner.withTasks("verify").build();
         }
 
         @Test
-        void addsPluginUnderTestMetadataAsRuntimeOnlyDependency() throws IOException {
-            Files.write(testDirectory.resolve("build.gradle"), Arrays.asList(
+        void addsPluginUnderTestMetadataAsRuntimeOnlyDependency() {
+            buildFile.append(groovyDsl(
                     "tasks.register('verify') {",
                     "  doLast {",
                     "    assert test.dependencies.runtimeOnly.asConfiguration.get().dependencies.any {",
@@ -189,27 +180,27 @@ class GradlePluginDevelopmentUnitTestingFunctionalTests {
                     "    }",
                     "  }",
                     "}"
-            ), StandardOpenOption.APPEND);
+            ));
 
             runner.withTasks("verify").build();
         }
 
         @Test
-        void doesNotIncludesSourceSetInDevelTestSourceSets() throws IOException {
-            Files.write(testDirectory.resolve("build.gradle"), Arrays.asList(
+        void doesNotIncludesSourceSetInDevelTestSourceSets() {
+            buildFile.append(groovyDsl(
                     "tasks.register('verify') {",
                     "  doLast {",
                     "    assert !gradlePlugin.testSourceSets.any { it.name == 'test' }",
                     "  }",
                     "}"
-            ), StandardOpenOption.APPEND);
+            ));
 
             runner.withTasks("verify").build();
         }
 
         @Test
-        void hasGradleApiImplementationDependency() throws IOException {
-            Files.write(testDirectory.resolve("build.gradle"), Arrays.asList(
+        void hasGradleApiImplementationDependency() {
+            buildFile.append(groovyDsl(
                     "apply plugin: 'dev.gradleplugins.gradle-plugin-base'",
                     "gradlePlugin.compatibility.minimumGradleVersion = '5.6'",
                     "tasks.register('verify') {",
@@ -217,7 +208,7 @@ class GradlePluginDevelopmentUnitTestingFunctionalTests {
                     "    assert configurations.testImplementation.dependencies.any { 'dev.gradleplugins:gradle-api:5.6' == \"${it.group}:${it.name}:${it.version}\" }",
                     "  }",
                     "}"
-            ), StandardOpenOption.APPEND);
+            ));
 
             runner.withTasks("verify").build();
         }
@@ -230,13 +221,18 @@ class GradlePluginDevelopmentUnitTestingFunctionalTests {
             }
 
             @Override
-            public String testSuiteDsl() {
-                return "test";
+            public ExpressionBuilder<?> testSuiteDsl() {
+                return literal("test");
             }
 
             @Override
-            public BuildScriptFile buildFile() {
+            public GradleBuildFile buildFile() {
                 return buildFile;
+            }
+
+            @Override
+            public GradleSettingsFile settingsFile() {
+                return settingsFile;
             }
         }
     }

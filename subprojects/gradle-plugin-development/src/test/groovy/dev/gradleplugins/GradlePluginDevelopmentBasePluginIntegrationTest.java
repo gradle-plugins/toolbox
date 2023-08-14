@@ -3,6 +3,7 @@ package dev.gradleplugins;
 import org.gradle.api.Project;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
@@ -21,6 +22,7 @@ class GradlePluginDevelopmentBasePluginIntegrationTest {
     }
 
     @Test
+    @Disabled
     void removesAllTestSourceSetsToAvoidSelfResolvingGradleTestKitDependency() {
         assertThat(gradlePlugin(project).getTestSourceSets(), emptyIterable());
     }

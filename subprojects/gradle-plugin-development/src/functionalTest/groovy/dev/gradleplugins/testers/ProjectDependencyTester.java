@@ -1,30 +1,26 @@
 package dev.gradleplugins.testers;
 
+import dev.gradleplugins.buildscript.io.GradleBuildFile;
+import dev.gradleplugins.buildscript.io.GradleSettingsFile;
 import dev.gradleplugins.runnerkit.GradleRunner;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
+import static dev.gradleplugins.buildscript.syntax.Syntax.groovyDsl;
 
 public abstract class ProjectDependencyTester {
     public abstract GradleRunner runner();
 
-    public abstract Path buildFile();
+    public abstract GradleBuildFile buildFile();
 
-    public Path settingsFile() {
-        return buildFile().getParent().resolve("settings.gradle");
-    }
+    public abstract GradleSettingsFile settingsFile();
 
     public abstract String projectDsl(String projectPath);
     public abstract String projectDsl();
 
     @Test
-    void testProjectWithPathDependency() throws IOException {
-        Files.write(settingsFile(), Arrays.asList("include 'other-project'"));
-        Files.write(buildFile(), Arrays.asList(
+    void testProjectWithPathDependency() {
+        settingsFile().append(groovyDsl("include 'other-project'"));
+        buildFile().append(groovyDsl(
                 "def dependencyUnderTest = " + projectDsl(":other-project"),
                 "tasks.register('verify') {",
                 "  doLast {",
@@ -32,14 +28,14 @@ public abstract class ProjectDependencyTester {
                 "    assert dependencyUnderTest.dependencyProject.path == ':other-project'",
                 "  }",
                 "}"
-        ), StandardOpenOption.APPEND);
+        ));
 
         runner().withTasks("verify").build();
     }
 
     @Test
-    void testProjectDependency() throws IOException {
-        Files.write(buildFile(), Arrays.asList(
+    void testProjectDependency() {
+        buildFile().append(groovyDsl(
                 "def dependencyUnderTest = " + projectDsl(),
                 "tasks.register('verify') {",
                 "  doLast {",
@@ -47,7 +43,7 @@ public abstract class ProjectDependencyTester {
                 "    assert dependencyUnderTest.dependencyProject.path == project.path",
                 "  }",
                 "}"
-        ), StandardOpenOption.APPEND);
+        ));
 
         runner().withTasks("verify").build();
     }

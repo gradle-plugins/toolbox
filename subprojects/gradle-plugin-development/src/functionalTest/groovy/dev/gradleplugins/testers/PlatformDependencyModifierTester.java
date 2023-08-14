@@ -1,83 +1,80 @@
 package dev.gradleplugins.testers;
 
-import dev.gradleplugins.BuildScriptFile;
+import dev.gradleplugins.buildscript.ast.ExpressionBuilder;
+import dev.gradleplugins.buildscript.ast.expressions.Expression;
+import dev.gradleplugins.buildscript.io.GradleBuildFile;
 import dev.gradleplugins.runnerkit.GradleRunner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
+import static dev.gradleplugins.buildscript.ast.expressions.AssignmentExpression.assign;
+import static dev.gradleplugins.buildscript.ast.expressions.MethodCallExpression.call;
+import static dev.gradleplugins.buildscript.ast.expressions.VariableDeclarationExpression.val;
+import static dev.gradleplugins.buildscript.blocks.GradleBuildScriptBlocks.doLast;
+import static dev.gradleplugins.buildscript.blocks.GradleBuildScriptBlocks.registerTask;
+import static dev.gradleplugins.buildscript.syntax.Syntax.assertTrue;
+import static dev.gradleplugins.buildscript.syntax.Syntax.literal;
+import static dev.gradleplugins.buildscript.syntax.Syntax.string;
 
 public abstract class PlatformDependencyModifierTester {
     public abstract GradleRunner runner();
 
-    public abstract String modifierDsl();
+    public abstract ExpressionBuilder<?> modifierDsl();
 
-    public abstract BuildScriptFile buildFile();
+    public abstract GradleBuildFile buildFile();
 
     private abstract class Tester {
-        public abstract String modifierDsl(String dsl);
+        public abstract ExpressionBuilder<?> modifierDsl(Expression dsl);
 
         @Test
-        void testPlatformDependencyModifierOnExternalModuleDependency() throws IOException {
-            buildFile().append(
-                    "def dependencyUnderTest = " + modifierDsl("dependencies.create(\"com.example:foo:1.0\")"),
-                    "",
-                    "tasks.register(\"verify\") {",
-                    "  doLast {",
-                    "    assert(dependencyUnderTest.isEndorsingStrictVersions())",
-                    "    assert(dependencyUnderTest.attributes.getAttribute(Category.CATEGORY_ATTRIBUTE)?.name == \"platform\")",
-                    "  }",
-                    "}"
-            );
+        void testPlatformDependencyModifierOnExternalModuleDependency() {
+            buildFile().append(val("dependencyUnderTest", assign(modifierDsl(call("dependencies.create", string("com.example:foo:1.0"))))));
+            buildFile().append(registerTask("verify", taskBlock -> {
+                taskBlock.add(doLast(doLastBlock -> {
+                    doLastBlock.add(assertTrue(call("dependencyUnderTest.isEndorsingStrictVersions")));
+                    doLastBlock.add(assertTrue(literal("dependencyUnderTest.attributes.getAttribute(Category.CATEGORY_ATTRIBUTE)?.name").equalTo(string("platform"))));
+                }));
+            }));
 
             runner().withTasks("verify").build();
         }
 
         @Test
-        void testPlatformDependencyModifierOnGroupArtifactVersionNotation() throws IOException {
-            buildFile().append(
-                    "def dependencyUnderTest = " + modifierDsl("\"com.example:foo:1.0\""),
-                    "",
-                    "tasks.register(\"verify\") {",
-                    "  doLast {",
-                    "    assert(dependencyUnderTest.isEndorsingStrictVersions())",
-                    "    assert(dependencyUnderTest.attributes.getAttribute(Category.CATEGORY_ATTRIBUTE)?.name == \"platform\")",
-                    "  }",
-                    "}"
-            );
+        void testPlatformDependencyModifierOnGroupArtifactVersionNotation() {
+            buildFile().append(val("dependencyUnderTest", assign(modifierDsl(string("com.example:foo:1.0")))));
+            buildFile().append(registerTask("verify", taskBlock -> {
+                taskBlock.add(doLast(doLastBlock -> {
+                    doLastBlock.add(assertTrue(call("dependencyUnderTest.isEndorsingStrictVersions")));
+                    doLastBlock.add(assertTrue(literal("dependencyUnderTest.attributes.getAttribute(Category.CATEGORY_ATTRIBUTE)?.name").equalTo(string("platform"))));
+                }));
+            }));
 
             runner().withTasks("verify").build();
         }
 
         @Test
-        void testPlatformDependencyModifierOnProjectDependency() throws IOException {
-            buildFile().append(
-                    "def dependencyUnderTest = " + modifierDsl("dependencies.create(project)"),
-                    "",
-                    "tasks.register(\"verify\") {",
-                    "  doLast {",
-                    "    assert(dependencyUnderTest.isEndorsingStrictVersions())",
-                    "    assert(dependencyUnderTest.attributes.getAttribute(Category.CATEGORY_ATTRIBUTE)?.name == \"platform\")",
-                    "  }",
-                    "}"
-            );
+        void testPlatformDependencyModifierOnProjectDependency() {
+            buildFile().append(val("dependencyUnderTest", assign(modifierDsl(call("dependencies.create", literal("project"))))));
+            buildFile().append(registerTask("verify", taskBlock -> {
+                taskBlock.add(doLast(doLastBlock -> {
+                    doLastBlock.add(assertTrue(call("dependencyUnderTest.isEndorsingStrictVersions")));
+                    doLastBlock.add(assertTrue(literal("dependencyUnderTest.attributes.getAttribute(Category.CATEGORY_ATTRIBUTE)?.name").equalTo(string("platform"))));
+                }));
+            }));
 
             runner().withTasks("verify").build();
         }
 
         @Test
-        void testPlatformDependencyModifierOnProjectNotation() throws IOException {
-            buildFile().append(
-                    "def dependencyUnderTest = " + modifierDsl("project"),
-                    "",
-                    "tasks.register(\"verify\") {",
-                    "  doLast {",
-                    "    assert(dependencyUnderTest.isEndorsingStrictVersions())",
-                    "    assert(dependencyUnderTest.attributes.getAttribute(Category.CATEGORY_ATTRIBUTE)?.name == \"platform\")",
-                    "  }",
-                    "}"
-            );
+        void testPlatformDependencyModifierOnProjectNotation() {
+            buildFile().append(val("dependencyUnderTest", assign(modifierDsl(literal("project")))));
+            buildFile().append(registerTask("verify", taskBlock -> {
+                taskBlock.add(doLast(doLastBlock -> {
+                    doLastBlock.add(assertTrue(call("dependencyUnderTest.isEndorsingStrictVersions")));
+                    doLastBlock.add(assertTrue(literal("dependencyUnderTest.attributes.getAttribute(Category.CATEGORY_ATTRIBUTE)?.name").equalTo(string("platform"))));
+                }));
+            }));
 
             runner().withTasks("verify").build();
         }
@@ -86,29 +83,29 @@ public abstract class PlatformDependencyModifierTester {
     @Nested
     public class GroovyDslTest extends Tester {
         @Override
-        public String modifierDsl(String dsl) {
-            return PlatformDependencyModifierTester.this.modifierDsl() + "(" + dsl + ")";
+        public ExpressionBuilder<?> modifierDsl(Expression dsl) {
+            return PlatformDependencyModifierTester.this.modifierDsl().call(dsl);
         }
     }
 
     @Nested
     public class KotlinDslTest extends Tester {
         @BeforeEach
-        void useKotlinDsl() throws IOException {
+        void useKotlinDsl() {
             buildFile().useKotlinDsl();
         }
 
         @Override
-        public String modifierDsl(String dsl) {
-            return PlatformDependencyModifierTester.this.modifierDsl() + "(" + dsl + ")";
+        public ExpressionBuilder<?> modifierDsl(Expression dsl) {
+            return PlatformDependencyModifierTester.this.modifierDsl().call(dsl);
         }
     }
 
     @Nested
     public class ModifierTest extends Tester {
         @Override
-        public String modifierDsl(String dsl) {
-            return PlatformDependencyModifierTester.this.modifierDsl() + ".modify(" + dsl + ")";
+        public ExpressionBuilder<?> modifierDsl(Expression dsl) {
+            return PlatformDependencyModifierTester.this.modifierDsl().call("modify", dsl);
         }
     }
 }

@@ -1,19 +1,27 @@
 package dev.gradleplugins.testers;
 
-import dev.gradleplugins.BuildScriptFile;
+import dev.gradleplugins.buildscript.ast.ExpressionBuilder;
+import dev.gradleplugins.buildscript.io.GradleBuildFile;
+import dev.gradleplugins.buildscript.io.GradleSettingsFile;
 import dev.gradleplugins.runnerkit.GradleRunner;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.nio.file.Path;
+
+import static dev.gradleplugins.buildscript.GradleDsl.GROOVY;
+import static dev.gradleplugins.buildscript.blocks.GradleBuildScriptBlocks.doLast;
+import static dev.gradleplugins.buildscript.blocks.GradleBuildScriptBlocks.registerTask;
+import static dev.gradleplugins.buildscript.syntax.Syntax.assertTrue;
+import static dev.gradleplugins.buildscript.syntax.Syntax.string;
 
 public abstract class GradlePluginDevelopmentTestSuiteDependenciesTester {
     public abstract GradleRunner runner();
 
-    public abstract String testSuiteDsl();
+    public abstract ExpressionBuilder<?> testSuiteDsl();
 
-    public abstract BuildScriptFile buildFile();
+    public abstract GradleBuildFile buildFile();
+    public abstract GradleSettingsFile settingsFile();
 
     @Nested
     class GradleApiDependencyTest extends GradleApiDependencyTester {
@@ -23,13 +31,13 @@ public abstract class GradlePluginDevelopmentTestSuiteDependenciesTester {
         }
 
         @Override
-        public Path buildFile() {
-            return GradlePluginDevelopmentTestSuiteDependenciesTester.this.buildFile().getLocation();
+        public GradleBuildFile buildFile() {
+            return GradlePluginDevelopmentTestSuiteDependenciesTester.this.buildFile();
         }
 
         @Override
         public String gradleApiDsl(String version) {
-            return testSuiteDsl() + ".dependencies.gradleApi('" + version + "')";
+            return testSuiteDsl().toString(GROOVY) + ".dependencies.gradleApi('" + version + "')";
         }
     }
 
@@ -41,18 +49,18 @@ public abstract class GradlePluginDevelopmentTestSuiteDependenciesTester {
         }
 
         @Override
-        public Path buildFile() {
-            return GradlePluginDevelopmentTestSuiteDependenciesTester.this.buildFile().getLocation();
+        public GradleBuildFile buildFile() {
+            return GradlePluginDevelopmentTestSuiteDependenciesTester.this.buildFile();
         }
 
         @Override
         public String gradleTestKitDsl(String version) {
-            return testSuiteDsl() + ".dependencies.gradleTestKit('" + version + "')";
+            return testSuiteDsl().toString(GROOVY) + ".dependencies.gradleTestKit('" + version + "')";
         }
 
         @Override
         public String gradleTestKitDsl() {
-            return testSuiteDsl() + ".dependencies.gradleTestKit()";
+            return testSuiteDsl().toString(GROOVY) + ".dependencies.gradleTestKit()";
         }
     }
 
@@ -64,18 +72,23 @@ public abstract class GradlePluginDevelopmentTestSuiteDependenciesTester {
         }
 
         @Override
-        public Path buildFile() {
-            return GradlePluginDevelopmentTestSuiteDependenciesTester.this.buildFile().getLocation();
+        public GradleBuildFile buildFile() {
+            return GradlePluginDevelopmentTestSuiteDependenciesTester.this.buildFile();
+        }
+
+        @Override
+        public GradleSettingsFile settingsFile() {
+            return GradlePluginDevelopmentTestSuiteDependenciesTester.this.settingsFile();
         }
 
         @Override
         public String projectDsl(String projectPath) {
-            return testSuiteDsl() + ".dependencies.project('" + projectPath + "')";
+            return testSuiteDsl().toString(GROOVY) + ".dependencies.project('" + projectPath + "')";
         }
 
         @Override
         public String projectDsl() {
-            return testSuiteDsl() + ".dependencies.project()";
+            return testSuiteDsl().toString(GROOVY) + ".dependencies.project()";
         }
     }
 
@@ -87,12 +100,12 @@ public abstract class GradlePluginDevelopmentTestSuiteDependenciesTester {
         }
 
         @Override
-        public String modifierDsl() {
-            return testSuiteDsl() + ".dependencies.platform";
+        public ExpressionBuilder<?> modifierDsl() {
+            return testSuiteDsl().dot("dependencies.platform");
         }
 
         @Override
-        public BuildScriptFile buildFile() {
+        public GradleBuildFile buildFile() {
             return GradlePluginDevelopmentTestSuiteDependenciesTester.this.buildFile();
         }
     }
@@ -105,12 +118,12 @@ public abstract class GradlePluginDevelopmentTestSuiteDependenciesTester {
         }
 
         @Override
-        public String modifierDsl() {
-            return testSuiteDsl() + ".dependencies.enforcedPlatform";
+        public ExpressionBuilder<?> modifierDsl() {
+            return testSuiteDsl().dot("dependencies.enforcedPlatform");
         }
 
         @Override
-        public BuildScriptFile buildFile() {
+        public GradleBuildFile buildFile() {
             return GradlePluginDevelopmentTestSuiteDependenciesTester.this.buildFile();
         }
     }
@@ -123,13 +136,18 @@ public abstract class GradlePluginDevelopmentTestSuiteDependenciesTester {
         }
 
         @Override
-        public String modifierDsl() {
-            return testSuiteDsl() + ".dependencies.testFixtures";
+        public ExpressionBuilder<?> modifierDsl() {
+            return testSuiteDsl().dot("dependencies.testFixtures");
         }
 
         @Override
-        public BuildScriptFile buildFile() {
+        public GradleBuildFile buildFile() {
             return GradlePluginDevelopmentTestSuiteDependenciesTester.this.buildFile();
+        }
+
+        @Override
+        public GradleSettingsFile settingsFile() {
+            return GradlePluginDevelopmentTestSuiteDependenciesTester.this.settingsFile();
         }
     }
 
@@ -141,13 +159,18 @@ public abstract class GradlePluginDevelopmentTestSuiteDependenciesTester {
         }
 
         @Override
-        public String bucketDsl() {
-            return testSuiteDsl() + ".dependencies.implementation";
+        public ExpressionBuilder<?> bucketDsl() {
+            return testSuiteDsl().dot("dependencies.implementation");
         }
 
         @Override
-        public BuildScriptFile buildFile() {
+        public GradleBuildFile buildFile() {
             return GradlePluginDevelopmentTestSuiteDependenciesTester.this.buildFile();
+        }
+
+        @Override
+        public GradleSettingsFile settingsFile() {
+            return GradlePluginDevelopmentTestSuiteDependenciesTester.this.settingsFile();
         }
     }
 
@@ -159,13 +182,18 @@ public abstract class GradlePluginDevelopmentTestSuiteDependenciesTester {
         }
 
         @Override
-        public String bucketDsl() {
-            return testSuiteDsl() + ".dependencies.compileOnly";
+        public ExpressionBuilder<?> bucketDsl() {
+            return testSuiteDsl().dot("dependencies.compileOnly");
         }
 
         @Override
-        public BuildScriptFile buildFile() {
+        public GradleBuildFile buildFile() {
             return GradlePluginDevelopmentTestSuiteDependenciesTester.this.buildFile();
+        }
+
+        @Override
+        public GradleSettingsFile settingsFile() {
+            return GradlePluginDevelopmentTestSuiteDependenciesTester.this.settingsFile();
         }
     }
 
@@ -177,13 +205,18 @@ public abstract class GradlePluginDevelopmentTestSuiteDependenciesTester {
         }
 
         @Override
-        public String bucketDsl() {
-            return testSuiteDsl() + ".dependencies.runtimeOnly";
+        public ExpressionBuilder<?> bucketDsl() {
+            return testSuiteDsl().dot("dependencies.runtimeOnly");
         }
 
         @Override
-        public BuildScriptFile buildFile() {
+        public GradleBuildFile buildFile() {
             return GradlePluginDevelopmentTestSuiteDependenciesTester.this.buildFile();
+        }
+
+        @Override
+        public GradleSettingsFile settingsFile() {
+            return GradlePluginDevelopmentTestSuiteDependenciesTester.this.settingsFile();
         }
     }
 
@@ -195,13 +228,18 @@ public abstract class GradlePluginDevelopmentTestSuiteDependenciesTester {
         }
 
         @Override
-        public String bucketDsl() {
-            return testSuiteDsl() + ".dependencies.annotationProcessor";
+        public ExpressionBuilder<?> bucketDsl() {
+            return testSuiteDsl().dot("dependencies.annotationProcessor");
         }
 
         @Override
-        public BuildScriptFile buildFile() {
+        public GradleBuildFile buildFile() {
             return GradlePluginDevelopmentTestSuiteDependenciesTester.this.buildFile();
+        }
+
+        @Override
+        public GradleSettingsFile settingsFile() {
+            return GradlePluginDevelopmentTestSuiteDependenciesTester.this.settingsFile();
         }
     }
 
@@ -213,51 +251,50 @@ public abstract class GradlePluginDevelopmentTestSuiteDependenciesTester {
         }
 
         @Override
-        public String bucketDsl() {
-            return testSuiteDsl() + ".dependencies.pluginUnderTestMetadata";
+        public ExpressionBuilder<?> bucketDsl() {
+            return testSuiteDsl().dot("dependencies.pluginUnderTestMetadata");
         }
 
         @Override
-        public BuildScriptFile buildFile() {
+        public GradleBuildFile buildFile() {
             return GradlePluginDevelopmentTestSuiteDependenciesTester.this.buildFile();
         }
 
+        @Override
+        public GradleSettingsFile settingsFile() {
+            return GradlePluginDevelopmentTestSuiteDependenciesTester.this.settingsFile();
+        }
+
         @Test
-        void isResolvableDependencyBucket() throws IOException {
-            buildFile().append(
-                    "tasks.register('verify') {",
-                    "  doLast {",
-                    "    assert !" + bucketDsl() + ".asConfiguration.get().canBeConsumed",
-                    "    assert " + bucketDsl() + ".asConfiguration.get().canBeResolved",
-                    "  }",
-                    "}"
-            );
+        void isResolvableDependencyBucket() {
+            buildFile().append(registerTask("verify", taskBlock -> {
+                taskBlock.add(doLast(doLastBlock -> {
+                    doLastBlock.add(assertTrue(bucketDsl().dot("asConfiguration.get().isCanBeConsumed()").negate()));
+                    doLastBlock.add(assertTrue(bucketDsl().dot("asConfiguration.get().isCanBeResolved()")));
+                }));
+            }));
 
             runner().withTasks("verify").build();
         }
 
         @Test
-        void hasDescription() throws IOException {
-            buildFile().append(
-                    "tasks.register('verify') {",
-                    "  doLast {",
-                    "    assert " + bucketDsl() + ".asConfiguration.get().description == \"Plugin under test metadata for source set '${" + testSuiteDsl() + ".name}'.\"",
-                    "  }",
-                    "}"
-            );
+        void hasDescription() {
+            buildFile().append(registerTask("verify", taskBlock -> {
+                taskBlock.add(doLast(doLastBlock -> {
+                    doLastBlock.add(assertTrue(bucketDsl().dot("asConfiguration.get().description").equalTo(string("Plugin under test metadata for source set '").plus(testSuiteDsl().dot("name")).plus(string("'.")))));
+                }));
+            }));
 
             runner().withTasks("verify").build();
         }
 
         @Test
         void hasJavaRuntimeUsageAttribute() throws IOException {
-            buildFile().append(
-                    "tasks.register('verify') {",
-                    "  doLast {",
-                    "    assert " + bucketDsl() + ".asConfiguration.get().attributes.getAttribute(Usage.USAGE_ATTRIBUTE).name == 'java-runtime'",
-                    "  }",
-                    "}"
-            );
+            buildFile().append(registerTask("verify", taskBlock -> {
+                taskBlock.add(doLast(doLastBlock -> {
+                    doLastBlock.add(assertTrue(bucketDsl().dot("asConfiguration.get().attributes.getAttribute(Usage.USAGE_ATTRIBUTE).name").equalTo(string("java-runtime"))));
+                }));
+            }));
 
             runner().withTasks("verify").build();
         }

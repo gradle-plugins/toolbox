@@ -14,6 +14,8 @@ apply plugin: 'dev.gradleplugins.gradle-plugin-development'
 
 rootProject.name = 'toolbox'
 
+includeBuild '../gradle-build-script'
+
 // Gradle Fixtures
 include('gradle-fixtures')
 project(':gradle-fixtures').projectDir = file('subprojects/gradle-fixtures')
