@@ -3,6 +3,7 @@ package dev.gradleplugins;
 import dev.gradleplugins.internal.runtime.dsl.DslMethod;
 import dev.gradleplugins.internal.runtime.dsl.DslTarget;
 import org.gradle.api.artifacts.Dependency;
+import org.gradle.api.artifacts.ExternalModuleDependency;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
 
 import java.util.Objects;
@@ -47,6 +48,17 @@ public interface GradlePluginDevelopmentDependencyExtension {
      */
     @DslMethod
     Dependency gradleRunnerKit();
+
+    /**
+     * Returns the Gradle plugin's external dependency marked by the specified plugin notation.
+     * The Gradle plugin marker consist of a published redirection artifact at {@literal <plugin-id>:<plugin-id>.gradle.plugin:<version>}.
+     * The plugin notation is a short form notation a-la Maven: {@literal <plugin-id>:<version>}.
+     *
+     * @param pluginNotation  the plugin id and version of the Gradle plugin dependency
+     * @return a dependency instance to the Gradle Plugin marked by the specified notation, never null
+     */
+    @DslMethod
+    ExternalModuleDependency gradlePlugin(String pluginNotation);
 
     /**
      * Returns {@link DependencyHandler} extension methods.

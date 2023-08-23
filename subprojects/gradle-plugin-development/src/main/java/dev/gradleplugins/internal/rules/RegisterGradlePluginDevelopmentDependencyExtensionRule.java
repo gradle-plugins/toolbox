@@ -6,6 +6,7 @@ import dev.gradleplugins.internal.runtime.dsl.DefaultGradleExtensionMixInService
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Dependency;
+import org.gradle.api.artifacts.ExternalModuleDependency;
 import org.gradle.api.reflect.HasPublicType;
 import org.gradle.api.reflect.TypeOf;
 
@@ -55,6 +56,11 @@ public final class RegisterGradlePluginDevelopmentDependencyExtensionRule implem
         @Override
         public Dependency gradleRunnerKit() {
             return dependencyFactory.gradleRunnerKit();
+        }
+
+        @Override
+        public ExternalModuleDependency gradlePlugin(String pluginNotation) {
+            return dependencyFactory.gradlePlugin(pluginNotation);
         }
 
         @Override

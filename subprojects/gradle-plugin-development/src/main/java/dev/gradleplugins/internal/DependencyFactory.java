@@ -23,6 +23,8 @@ public interface DependencyFactory {
 
     Dependency gradleRunnerKit();
 
+    ExternalModuleDependency gradlePlugin(String notation);
+
     static DependencyFactory forProject(Project project) {
         return new DefaultDependencyFactory(project.getDependencies());
     }

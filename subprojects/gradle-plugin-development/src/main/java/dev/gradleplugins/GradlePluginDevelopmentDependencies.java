@@ -1,6 +1,7 @@
 package dev.gradleplugins;
 
 import org.gradle.api.artifacts.Dependency;
+import org.gradle.api.artifacts.ExternalModuleDependency;
 import org.gradle.api.artifacts.ProjectDependency;
 import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
@@ -17,6 +18,8 @@ public interface GradlePluginDevelopmentDependencies extends GradlePluginDevelop
 
     ProjectDependency project(String projectPath);
     ProjectDependency project();
+
+    ExternalModuleDependency gradlePlugin(String pluginNotation);
 
     static GradlePluginDevelopmentDependencies dependencies(GradlePluginDevelopmentExtension extension) {
         return (GradlePluginDevelopmentDependencies) ((ExtensionAware) extension).getExtensions().getByName("dependencies");

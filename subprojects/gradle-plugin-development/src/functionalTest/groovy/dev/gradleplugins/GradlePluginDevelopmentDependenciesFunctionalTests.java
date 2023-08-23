@@ -5,6 +5,7 @@ import dev.gradleplugins.runnerkit.GradleRunner;
 import dev.gradleplugins.testers.DependencyBucketTester;
 import dev.gradleplugins.testers.EnforcedPlatformDependencyModifierTester;
 import dev.gradleplugins.testers.GradleApiDependencyTester;
+import dev.gradleplugins.testers.GradlePluginDependencyTester;
 import dev.gradleplugins.testers.PlatformDependencyModifierTester;
 import dev.gradleplugins.testers.ProjectDependencyTester;
 import org.junit.jupiter.api.BeforeEach;
@@ -69,6 +70,24 @@ class GradlePluginDevelopmentDependenciesFunctionalTests {
         @Override
         public String projectDsl() {
             return "gradlePlugin.dependencies.project()";
+        }
+    }
+
+    @Nested
+    class GradlePluginDependencyTest extends GradlePluginDependencyTester {
+        @Override
+        public GradleRunner runner() {
+            return runner;
+        }
+
+        @Override
+        public GradleBuildFile buildFile() {
+            return buildFile;
+        }
+
+        @Override
+        public Expression gradlePluginDsl(String pluginNotation) {
+            return groovyDsl("gradlePlugin.dependencies.gradlePlugin('" + pluginNotation + "')");
         }
     }
 

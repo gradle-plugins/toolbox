@@ -14,6 +14,7 @@ import org.codehaus.groovy.runtime.MethodClosure;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Dependency;
+import org.gradle.api.artifacts.ExternalModuleDependency;
 import org.gradle.api.artifacts.ModuleDependency;
 import org.gradle.api.artifacts.ProjectDependency;
 import org.gradle.api.plugins.ExtensionAware;
@@ -125,6 +126,11 @@ public final class RegisterGradlePluginDevelopmentDependenciesExtensionRule impl
         @Override
         public ProjectDependency project() {
             return dependencyFactory.create(project);
+        }
+
+        @Override
+        public ExternalModuleDependency gradlePlugin(String pluginNotation) {
+            return dependencyFactory.gradlePlugin(pluginNotation);
         }
 
         @Override
