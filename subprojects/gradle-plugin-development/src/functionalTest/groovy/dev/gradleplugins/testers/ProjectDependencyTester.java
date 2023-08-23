@@ -1,10 +1,13 @@
 package dev.gradleplugins.testers;
 
+import dev.gradleplugins.buildscript.ast.expressions.Expression;
 import dev.gradleplugins.buildscript.io.GradleBuildFile;
 import dev.gradleplugins.buildscript.io.GradleSettingsFile;
 import dev.gradleplugins.runnerkit.GradleRunner;
 import org.junit.jupiter.api.Test;
 
+import static dev.gradleplugins.buildscript.ast.expressions.AssignmentExpression.assign;
+import static dev.gradleplugins.buildscript.ast.expressions.VariableDeclarationExpression.val;
 import static dev.gradleplugins.buildscript.syntax.Syntax.groovyDsl;
 
 public abstract class ProjectDependencyTester {
@@ -14,14 +17,14 @@ public abstract class ProjectDependencyTester {
 
     public abstract GradleSettingsFile settingsFile();
 
-    public abstract String projectDsl(String projectPath);
-    public abstract String projectDsl();
+    public abstract Expression projectDsl(String projectPath);
+    public abstract Expression projectDsl();
 
     @Test
     void testProjectWithPathDependency() {
         settingsFile().append(groovyDsl("include 'other-project'"));
+        buildFile().append(val("dependencyUnderTest", assign(projectDsl(":other-project"))));
         buildFile().append(groovyDsl(
-                "def dependencyUnderTest = " + projectDsl(":other-project"),
                 "tasks.register('verify') {",
                 "  doLast {",
                 "    assert dependencyUnderTest instanceof ProjectDependency",
@@ -35,8 +38,8 @@ public abstract class ProjectDependencyTester {
 
     @Test
     void testProjectDependency() {
+        buildFile().append(val("dependencyUnderTest", assign(projectDsl())));
         buildFile().append(groovyDsl(
-                "def dependencyUnderTest = " + projectDsl(),
                 "tasks.register('verify') {",
                 "  doLast {",
                 "    assert dependencyUnderTest instanceof ProjectDependency",

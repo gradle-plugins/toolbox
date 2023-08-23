@@ -46,11 +46,12 @@ class GradlePluginDevelopmentTestSuiteFunctionalTests {
             it.id("dev.gradleplugins.gradle-plugin-testing-base");
             it.id("java-gradle-plugin");
         });
-        buildFile.append(val("testSuiteUnderTest", assign(call("testSuiteFactory.create", string("foo")))));
+        buildFile.append(val("_testSuiteUnderTest_", assign(call("testSuiteFactory.create", string("foo")))));
     }
 
     @Test
     void hasMainSourceSetAsTestedSourceSetConvention() {
+        buildFile.append(val("testSuiteUnderTest", assign(literal("_testSuiteUnderTest_"))));
         buildFile.append(groovyDsl(
                 "testSuiteUnderTest.testedSourceSet = null",
                 "tasks.register('verify') {",
@@ -65,6 +66,7 @@ class GradlePluginDevelopmentTestSuiteFunctionalTests {
 
     @Test
     void usesDevelPluginSourceSetAsTestedSourceSetConvention() {
+        buildFile.append(val("testSuiteUnderTest", assign(literal("_testSuiteUnderTest_"))));
         buildFile.append(groovyDsl(
                 "gradlePlugin.pluginSourceSet(sourceSets.create('anotherMain'))",
                 "testSuiteUnderTest.testedSourceSet = null",
@@ -80,6 +82,7 @@ class GradlePluginDevelopmentTestSuiteFunctionalTests {
 
     @Test
     void disallowChangesToSourceSetProperty() {
+        buildFile.append(val("testSuiteUnderTest", assign(literal("_testSuiteUnderTest_"))));
         buildFile.append(groovyDsl(
                 "afterEvaluate {",
                 "  testSuiteUnderTest.sourceSet = null", // expect failure
@@ -94,6 +97,7 @@ class GradlePluginDevelopmentTestSuiteFunctionalTests {
 
     @Test
     void disallowChangesToTestedSourceSetProperty() {
+        buildFile.append(val("testSuiteUnderTest", assign(literal("_testSuiteUnderTest_"))));
         buildFile.append(groovyDsl(
                 "afterEvaluate {",
                 "  testSuiteUnderTest.testedSourceSet = null", // expect failure
@@ -108,6 +112,7 @@ class GradlePluginDevelopmentTestSuiteFunctionalTests {
 
     @Test
     void disallowChangesToTestingStrategiesProperty() {
+        buildFile.append(val("testSuiteUnderTest", assign(literal("_testSuiteUnderTest_"))));
         buildFile.append(groovyDsl(
                 "afterEvaluate {",
                 "  testSuiteUnderTest.testingStrategies = null", // expect failure
@@ -122,6 +127,7 @@ class GradlePluginDevelopmentTestSuiteFunctionalTests {
 
     @Test
     void returnsTestTasksOnTaskViewElementQuery() {
+        buildFile.append(val("testSuiteUnderTest", assign(literal("_testSuiteUnderTest_"))));
         buildFile.append(groovyDsl(
                 "testSuiteUnderTest.with {",
                 "  testingStrategies = [strategies.coverageForGradleVersion('6.8'), strategies.coverageForGradleVersion('7.1')]",
@@ -139,6 +145,7 @@ class GradlePluginDevelopmentTestSuiteFunctionalTests {
 
     @Test
     void includesPluginUnderTestMetadataConfigurationDependencies() {
+        buildFile.append(val("testSuiteUnderTest", assign(literal("_testSuiteUnderTest_"))));
         buildFile.append(groovyDsl(
                 "testSuiteUnderTest.dependencies.pluginUnderTestMetadata files('my/own/dep.jar')",
                 "",
@@ -154,6 +161,7 @@ class GradlePluginDevelopmentTestSuiteFunctionalTests {
 
     @Test
     void addsPluginUnderTestMetadataAsRuntimeOnlyDependency() {
+        buildFile.append(val("testSuiteUnderTest", assign(literal("_testSuiteUnderTest_"))));
         buildFile.append(groovyDsl(
                 "tasks.register('verify') {",
                 "  doLast {",
@@ -169,6 +177,7 @@ class GradlePluginDevelopmentTestSuiteFunctionalTests {
 
     @Test
     void doesNotIncludesSourceSetInDevelTestSourceSets() {
+        buildFile.append(val("testSuiteUnderTest", assign(literal("_testSuiteUnderTest_"))));
         buildFile.append(groovyDsl(
                 "tasks.register('verify') {",
                 "  doLast {",
@@ -182,6 +191,7 @@ class GradlePluginDevelopmentTestSuiteFunctionalTests {
 
     @Test
     void createsDefaultSourceSetOnSourceSetPropertyQueryOfConvention() {
+        buildFile.append(val("testSuiteUnderTest", assign(literal("_testSuiteUnderTest_"))));
         buildFile.append(groovyDsl(
                 "testSuiteUnderTest.sourceSet = null // reset value to convention",
                 "assert testSuiteUnderTest.sourceSet.get().name == 'foo'",
@@ -195,6 +205,7 @@ class GradlePluginDevelopmentTestSuiteFunctionalTests {
 
     @Test
     void createsDefaultSourceSetWhenProjectConfigured() {
+        buildFile.append(val("testSuiteUnderTest", assign(literal("_testSuiteUnderTest_"))));
         buildFile.append(groovyDsl(
                 "tasks.register('verify') {",
                 "  doLast {",
@@ -209,6 +220,7 @@ class GradlePluginDevelopmentTestSuiteFunctionalTests {
 
     @Test
     void doesNotCreateDefaultSourceSetWhenSourceSetPropertyOverridden() {
+        buildFile.append(val("testSuiteUnderTest", assign(literal("_testSuiteUnderTest_"))));
         buildFile.append(groovyDsl(
                 "testSuiteUnderTest.sourceSet = sourceSets.create('kiel')",
                 "tasks.register('verify') {",
@@ -225,6 +237,7 @@ class GradlePluginDevelopmentTestSuiteFunctionalTests {
 
     @Test
     void doesNotCreateDefaultSourceSetOnTestSuiteCreation() {
+        buildFile.append(val("testSuiteUnderTest", assign(literal("_testSuiteUnderTest_"))));
         buildFile.append(groovyDsl(
                 "assert sourceSets.findByName('foo') == null : 'not yet created until sourceSet property realized'",
                 "",
@@ -243,7 +256,7 @@ class GradlePluginDevelopmentTestSuiteFunctionalTests {
 
         @Override
         public ExpressionBuilder<?> testSuiteDsl() {
-            return literal("testSuiteUnderTest");
+            return literal("_testSuiteUnderTest_");
         }
 
         @Override

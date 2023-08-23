@@ -1,5 +1,6 @@
 package dev.gradleplugins;
 
+import dev.gradleplugins.buildscript.ast.expressions.Expression;
 import dev.gradleplugins.buildscript.io.GradleBuildFile;
 import dev.gradleplugins.runnerkit.GradleExecutor;
 import dev.gradleplugins.runnerkit.GradleRunner;
@@ -12,6 +13,8 @@ import org.junit.jupiter.api.io.CleanupMode;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
+
+import static dev.gradleplugins.buildscript.syntax.Syntax.groovyDsl;
 
 class ProjectDependenciesExtensionFunctionalTests {
     @TempDir(cleanup = CleanupMode.ON_SUCCESS) Path testDirectory;
@@ -37,8 +40,8 @@ class ProjectDependenciesExtensionFunctionalTests {
         }
 
         @Override
-        public String gradleApiDsl(String version) {
-            return "dependencies.gradleApi('" + version + "')";
+        public Expression gradleApiDsl(String version) {
+            return groovyDsl("dependencies.gradleApi('" + version + "')");
         }
     }
 
@@ -55,13 +58,13 @@ class ProjectDependenciesExtensionFunctionalTests {
         }
 
         @Override
-        public String gradleTestKitDsl(String version) {
-            return "dependencies.gradleTestKit('" + version + "')";
+        public Expression gradleTestKitDsl(String version) {
+            return groovyDsl("dependencies.gradleTestKit('" + version + "')");
         }
 
         @Override
-        public String gradleTestKitDsl() {
-            return "dependencies.gradleTestKit()";
+        public Expression gradleTestKitDsl() {
+            return groovyDsl("dependencies.gradleTestKit()");
         }
     }
 

@@ -9,12 +9,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static dev.gradleplugins.buildscript.ast.expressions.AssignmentExpression.assign;
-import static dev.gradleplugins.buildscript.ast.expressions.MethodCallExpression.call;
 import static dev.gradleplugins.buildscript.ast.expressions.VariableDeclarationExpression.val;
-import static dev.gradleplugins.buildscript.blocks.GradleBuildScriptBlocks.doLast;
-import static dev.gradleplugins.buildscript.blocks.GradleBuildScriptBlocks.registerTask;
-import static dev.gradleplugins.buildscript.syntax.Syntax.assertTrue;
-import static dev.gradleplugins.buildscript.syntax.Syntax.literal;
+import static dev.gradleplugins.buildscript.syntax.Syntax.groovyDsl;
 import static dev.gradleplugins.buildscript.syntax.Syntax.string;
 
 public abstract class PlatformDependencyModifierTester {
@@ -29,13 +25,15 @@ public abstract class PlatformDependencyModifierTester {
 
         @Test
         void testPlatformDependencyModifierOnExternalModuleDependency() {
-            buildFile().append(val("dependencyUnderTest", assign(modifierDsl(call("dependencies.create", string("com.example:foo:1.0"))))));
-            buildFile().append(registerTask("verify", taskBlock -> {
-                taskBlock.add(doLast(doLastBlock -> {
-                    doLastBlock.add(assertTrue(call("dependencyUnderTest.isEndorsingStrictVersions")));
-                    doLastBlock.add(assertTrue(literal("dependencyUnderTest.attributes.getAttribute(Category.CATEGORY_ATTRIBUTE)?.name").equalTo(string("platform"))));
-                }));
-            }));
+            buildFile().append(val("dependencyUnderTest", assign(modifierDsl(groovyDsl("dependencies.create('com.example:foo:1.0')")))));
+            buildFile().append(groovyDsl(
+                    "tasks.register('verify') {",
+                    "  doLast {",
+                    "    assert dependencyUnderTest.isEndorsingStrictVersions()",
+                    "    assert dependencyUnderTest.attributes.getAttribute(Category.CATEGORY_ATTRIBUTE)?.name == 'platform'",
+                    "  }",
+                    "}"
+            ));
 
             runner().withTasks("verify").build();
         }
@@ -43,38 +41,44 @@ public abstract class PlatformDependencyModifierTester {
         @Test
         void testPlatformDependencyModifierOnGroupArtifactVersionNotation() {
             buildFile().append(val("dependencyUnderTest", assign(modifierDsl(string("com.example:foo:1.0")))));
-            buildFile().append(registerTask("verify", taskBlock -> {
-                taskBlock.add(doLast(doLastBlock -> {
-                    doLastBlock.add(assertTrue(call("dependencyUnderTest.isEndorsingStrictVersions")));
-                    doLastBlock.add(assertTrue(literal("dependencyUnderTest.attributes.getAttribute(Category.CATEGORY_ATTRIBUTE)?.name").equalTo(string("platform"))));
-                }));
-            }));
+            buildFile().append(groovyDsl(
+                    "tasks.register('verify') {",
+                    "  doLast {",
+                    "    assert dependencyUnderTest.isEndorsingStrictVersions()",
+                    "    assert dependencyUnderTest.attributes.getAttribute(Category.CATEGORY_ATTRIBUTE)?.name == 'platform'",
+                    "  }",
+                    "}"
+            ));
 
             runner().withTasks("verify").build();
         }
 
         @Test
         void testPlatformDependencyModifierOnProjectDependency() {
-            buildFile().append(val("dependencyUnderTest", assign(modifierDsl(call("dependencies.create", literal("project"))))));
-            buildFile().append(registerTask("verify", taskBlock -> {
-                taskBlock.add(doLast(doLastBlock -> {
-                    doLastBlock.add(assertTrue(call("dependencyUnderTest.isEndorsingStrictVersions")));
-                    doLastBlock.add(assertTrue(literal("dependencyUnderTest.attributes.getAttribute(Category.CATEGORY_ATTRIBUTE)?.name").equalTo(string("platform"))));
-                }));
-            }));
+            buildFile().append(val("dependencyUnderTest", assign(modifierDsl(groovyDsl("dependencies.create(project)")))));
+            buildFile().append(groovyDsl(
+                    "tasks.register('verify') {",
+                    "  doLast {",
+                    "    assert dependencyUnderTest.isEndorsingStrictVersions()",
+                    "    assert dependencyUnderTest.attributes.getAttribute(Category.CATEGORY_ATTRIBUTE)?.name == 'platform'",
+                    "  }",
+                    "}"
+            ));
 
             runner().withTasks("verify").build();
         }
 
         @Test
         void testPlatformDependencyModifierOnProjectNotation() {
-            buildFile().append(val("dependencyUnderTest", assign(modifierDsl(literal("project")))));
-            buildFile().append(registerTask("verify", taskBlock -> {
-                taskBlock.add(doLast(doLastBlock -> {
-                    doLastBlock.add(assertTrue(call("dependencyUnderTest.isEndorsingStrictVersions")));
-                    doLastBlock.add(assertTrue(literal("dependencyUnderTest.attributes.getAttribute(Category.CATEGORY_ATTRIBUTE)?.name").equalTo(string("platform"))));
-                }));
-            }));
+            buildFile().append(val("dependencyUnderTest", assign(modifierDsl(groovyDsl("project")))));
+            buildFile().append(groovyDsl(
+                    "tasks.register('verify') {",
+                    "  doLast {",
+                    "    assert dependencyUnderTest.isEndorsingStrictVersions()",
+                    "    assert dependencyUnderTest.attributes.getAttribute(Category.CATEGORY_ATTRIBUTE)?.name == 'platform'",
+                    "  }",
+                    "}"
+            ));
 
             runner().withTasks("verify").build();
         }

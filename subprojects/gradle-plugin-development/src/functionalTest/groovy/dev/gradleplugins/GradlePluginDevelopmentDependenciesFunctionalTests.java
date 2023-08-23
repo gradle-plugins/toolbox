@@ -1,6 +1,7 @@
 package dev.gradleplugins;
 
 import dev.gradleplugins.buildscript.ast.ExpressionBuilder;
+import dev.gradleplugins.buildscript.ast.expressions.Expression;
 import dev.gradleplugins.buildscript.io.GradleBuildFile;
 import dev.gradleplugins.buildscript.io.GradleSettingsFile;
 import dev.gradleplugins.runnerkit.GradleExecutor;
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
 
+import static dev.gradleplugins.buildscript.syntax.Syntax.groovyDsl;
 import static dev.gradleplugins.buildscript.syntax.Syntax.literal;
 
 
@@ -50,8 +52,8 @@ class GradlePluginDevelopmentDependenciesFunctionalTests {
         }
 
         @Override
-        public String gradleApiDsl(String version) {
-            return "gradlePlugin.dependencies.gradleApi('" + version + "')";
+        public Expression gradleApiDsl(String version) {
+            return groovyDsl("gradlePlugin.dependencies.gradleApi('" + version + "')");
         }
     }
 
@@ -73,13 +75,13 @@ class GradlePluginDevelopmentDependenciesFunctionalTests {
         }
 
         @Override
-        public String projectDsl(String projectPath) {
-            return "gradlePlugin.dependencies.project('" + projectPath + "')";
+        public Expression projectDsl(String projectPath) {
+            return groovyDsl("gradlePlugin.dependencies.project('" + projectPath + "')");
         }
 
         @Override
-        public String projectDsl() {
-            return "gradlePlugin.dependencies.project()";
+        public Expression projectDsl() {
+            return groovyDsl("gradlePlugin.dependencies.project()");
         }
     }
 

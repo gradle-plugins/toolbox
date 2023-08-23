@@ -1,9 +1,12 @@
 package dev.gradleplugins.testers;
 
+import dev.gradleplugins.buildscript.ast.expressions.Expression;
 import dev.gradleplugins.buildscript.io.GradleBuildFile;
 import dev.gradleplugins.runnerkit.GradleRunner;
 import org.junit.jupiter.api.Test;
 
+import static dev.gradleplugins.buildscript.ast.expressions.AssignmentExpression.assign;
+import static dev.gradleplugins.buildscript.ast.expressions.VariableDeclarationExpression.val;
 import static dev.gradleplugins.buildscript.syntax.Syntax.groovyDsl;
 
 public abstract class GradleApiDependencyTester {
@@ -11,12 +14,12 @@ public abstract class GradleApiDependencyTester {
 
     public abstract GradleBuildFile buildFile();
 
-    public abstract String gradleApiDsl(String version);
+    public abstract Expression gradleApiDsl(String version);
 
     @Test
     void testGradleApiDependency() {
+        buildFile().append(val("dependencyUnderTest", assign(gradleApiDsl("6.3"))));
         buildFile().append(groovyDsl(
-                "def dependencyUnderTest = " + gradleApiDsl("6.3"),
                 "tasks.register('verify') {",
                 "  doLast {",
                 "    assert dependencyUnderTest instanceof ExternalModuleDependency",
@@ -32,8 +35,8 @@ public abstract class GradleApiDependencyTester {
 
     @Test
     void testLocalGradleApiDependency() {
+        buildFile().append(val("dependencyUnderTest", assign(gradleApiDsl("local"))));
         buildFile().append(groovyDsl(
-                "def dependencyUnderTest = " + gradleApiDsl("local"),
                 "tasks.register('verify') {",
                 "  doLast {",
                 "    assert dependencyUnderTest instanceof SelfResolvingDependency",
