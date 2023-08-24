@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import static dev.gradleplugins.buildscript.ast.expressions.AssignmentExpression.assign;
 import static dev.gradleplugins.buildscript.ast.expressions.VariableDeclarationExpression.val;
 import static dev.gradleplugins.buildscript.syntax.Syntax.groovyDsl;
+import static dev.gradleplugins.buildscript.syntax.Syntax.not;
 import static dev.gradleplugins.buildscript.syntax.Syntax.string;
 
 public abstract class GradlePluginDevelopmentTestSuiteDependenciesTester {
@@ -150,10 +151,14 @@ public abstract class GradlePluginDevelopmentTestSuiteDependenciesTester {
     }
 
     @Nested
-    class ImplementationDependencyBucketTest extends DependencyBucketTester {
+    class ImplementationDependencyBucketTest extends DependencyBucketTester implements DependencyWiringTester {
         @Override
         public GradleRunner runner() {
             return GradlePluginDevelopmentTestSuiteDependenciesTester.this.runner();
+        }
+
+        public ExpressionBuilder<?> sourceSetDsl() {
+            return testSuiteDsl().dot("sourceSet.get()");
         }
 
         @Override
@@ -170,13 +175,27 @@ public abstract class GradlePluginDevelopmentTestSuiteDependenciesTester {
         public GradleSettingsFile settingsFile() {
             return GradlePluginDevelopmentTestSuiteDependenciesTester.this.settingsFile();
         }
+
+        @Test
+        void testCompileClasspathWiring() {
+            assertBucketDependencyIs(containedIn(sourceSetDsl().dot("compileClasspathConfigurationName")));
+        }
+
+        @Test
+        void testRuntimeClasspathWiring() {
+            assertBucketDependencyIs(containedIn(sourceSetDsl().dot("runtimeClasspathConfigurationName")));
+        }
     }
 
     @Nested
-    class CompileOnlyDependencyBucketTest extends DependencyBucketTester {
+    class CompileOnlyDependencyBucketTest extends DependencyBucketTester implements DependencyWiringTester {
         @Override
         public GradleRunner runner() {
             return GradlePluginDevelopmentTestSuiteDependenciesTester.this.runner();
+        }
+
+        public ExpressionBuilder<?> sourceSetDsl() {
+            return testSuiteDsl().dot("sourceSet.get()");
         }
 
         @Override
@@ -193,13 +212,27 @@ public abstract class GradlePluginDevelopmentTestSuiteDependenciesTester {
         public GradleSettingsFile settingsFile() {
             return GradlePluginDevelopmentTestSuiteDependenciesTester.this.settingsFile();
         }
+
+        @Test
+        void testCompileClasspathWiring() {
+            assertBucketDependencyIs(containedIn(sourceSetDsl().dot("compileClasspathConfigurationName")));
+        }
+
+        @Test
+        void testRuntimeClasspathWiring() {
+            assertBucketDependencyIs(not(containedIn(sourceSetDsl().dot("runtimeClasspathConfigurationName"))));
+        }
     }
 
     @Nested
-    class RuntimeOnlyDependencyBucketTest extends DependencyBucketTester {
+    class RuntimeOnlyDependencyBucketTest extends DependencyBucketTester implements DependencyWiringTester {
         @Override
         public GradleRunner runner() {
             return GradlePluginDevelopmentTestSuiteDependenciesTester.this.runner();
+        }
+
+        public ExpressionBuilder<?> sourceSetDsl() {
+            return testSuiteDsl().dot("sourceSet.get()");
         }
 
         @Override
@@ -216,13 +249,27 @@ public abstract class GradlePluginDevelopmentTestSuiteDependenciesTester {
         public GradleSettingsFile settingsFile() {
             return GradlePluginDevelopmentTestSuiteDependenciesTester.this.settingsFile();
         }
+
+        @Test
+        void testCompileClasspathWiring() {
+            assertBucketDependencyIs(not(containedIn(sourceSetDsl().dot("compileClasspathConfigurationName"))));
+        }
+
+        @Test
+        void testRuntimeClasspathWiring() {
+            assertBucketDependencyIs(containedIn(sourceSetDsl().dot("runtimeClasspathConfigurationName")));
+        }
     }
 
     @Nested
-    class AnnotationProcessorDependencyBucketTest extends DependencyBucketTester {
+    class AnnotationProcessorDependencyBucketTest extends DependencyBucketTester implements DependencyWiringTester {
         @Override
         public GradleRunner runner() {
             return GradlePluginDevelopmentTestSuiteDependenciesTester.this.runner();
+        }
+
+        public ExpressionBuilder<?> sourceSetDsl() {
+            return testSuiteDsl().dot("sourceSet.get()");
         }
 
         @Override
@@ -238,6 +285,16 @@ public abstract class GradlePluginDevelopmentTestSuiteDependenciesTester {
         @Override
         public GradleSettingsFile settingsFile() {
             return GradlePluginDevelopmentTestSuiteDependenciesTester.this.settingsFile();
+        }
+
+        @Test
+        void testCompileClasspathWiring() {
+            assertBucketDependencyIs(not(containedIn(sourceSetDsl().dot("compileClasspathConfigurationName"))));
+        }
+
+        @Test
+        void testRuntimeClasspathWiring() {
+            assertBucketDependencyIs(not(containedIn(sourceSetDsl().dot("runtimeClasspathConfigurationName"))));
         }
     }
 

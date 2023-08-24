@@ -11,6 +11,7 @@ public interface GradlePluginDevelopmentDependencies extends GradlePluginDevelop
     GradlePluginDevelopmentDependencyBucket getApi();
     GradlePluginDevelopmentDependencyBucket getImplementation();
     GradlePluginDevelopmentDependencyBucket getCompileOnly();
+    GradlePluginDevelopmentDependencyBucket getCompileOnlyApi();
     GradlePluginDevelopmentDependencyBucket getRuntimeOnly();
     GradlePluginDevelopmentDependencyBucket getAnnotationProcessor();
 
