@@ -15,10 +15,14 @@ import org.gradle.api.artifacts.PublishArtifact;
 import org.gradle.api.artifacts.PublishArtifactSet;
 import org.gradle.api.artifacts.type.ArtifactTypeDefinition;
 import org.gradle.api.plugins.ExtensionAware;
+import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
+import org.gradle.api.reflect.HasPublicType;
+import org.gradle.api.reflect.TypeOf;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.Sync;
+import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskDependency;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.bundling.Jar;
@@ -26,6 +30,7 @@ import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 import org.gradle.util.GradleVersion;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,7 +45,7 @@ public final class RegisterGradlePluginDevelopmentApiExtensionRule implements Ac
 
     @Override
     public void execute(Project project) {
-        final GradlePluginDevelopmentApiExtension apiExtension = project.getObjects().newInstance(GradlePluginDevelopmentApiExtension.class);
+        final GradlePluginDevelopmentApiExtensionInternal apiExtension = project.getObjects().newInstance(GradlePluginDevelopmentApiExtensionInternal.class);
 
         gradlePlugin(project, developmentExtension -> {
             ((ExtensionAware) developmentExtension).getExtensions().add(EXTENSION_NAME, apiExtension);
@@ -68,21 +73,48 @@ public final class RegisterGradlePluginDevelopmentApiExtensionRule implements Ac
             return null;
         }));
 
-        apiExtension.getJarTask().finalizeValueOnRead();
-        apiExtension.getJarTask().convention(apiExtension.getSourceSet().map(sourceSet -> {
-            if (project.getTasks().getNames().contains(sourceSet.getJarTaskName())) {
-                return project.getTasks().named(sourceSet.getJarTaskName(), Jar.class);
+        apiExtension.getJarTaskName().finalizeValueOnRead();
+        apiExtension.getJarTaskName().convention(apiExtension.getSourceSet().map(sourceSet -> {
+            // Create JAR task with sensible default when it doesn't exist
+            if (!project.getTasks().getNames().contains(sourceSet.getJarTaskName())) {
+                project.getTasks().register(sourceSet.getJarTaskName(), Jar.class, task -> {
+                    task.from(sourceSet.getOutput());
+                    task.getArchiveClassifier().set(sourceSet.getName());
+                });
             }
-            return project.getTasks().register(sourceSet.getJarTaskName(), Jar.class, task -> {
-                task.from(sourceSet.getOutput());
-                task.getArchiveClassifier().set(sourceSet.getName());
-            });
-        }).flatMap(it -> it));
+            return sourceSet.getJarTaskName();
+        }));
 
         project.afterEvaluate(__ -> {
             wirePluginApiSourceSetIntoPluginSourceSetIfDifferent(project);
             wirePluginApiIntoExportedElements(project);
         });
+    }
+
+    public static /*final*/ abstract class GradlePluginDevelopmentApiExtensionInternal implements GradlePluginDevelopmentApiExtension, HasPublicType {
+        private final TaskContainer tasks;
+
+        @Inject
+        public GradlePluginDevelopmentApiExtensionInternal(TaskContainer tasks) {
+            this.tasks = tasks;
+        }
+
+        @Override
+        public TaskProvider<Jar> getJarTask() {
+            return tasks.named(getJarTaskName().get(), Jar.class);
+        }
+
+        @Override
+        public void setJarTask(TaskProvider<Jar> jarTaskProvider) {
+            getJarTaskName().set(jarTaskProvider.getName());
+        }
+
+        public abstract Property<String> getJarTaskName();
+
+        @Override
+        public TypeOf<?> getPublicType() {
+            return TypeOf.typeOf(GradlePluginDevelopmentApiExtension.class);
+        }
     }
 
     private static void gradlePlugin(Project project, Action<? super GradlePluginDevelopmentExtension> action) {
@@ -152,11 +184,11 @@ public final class RegisterGradlePluginDevelopmentApiExtensionRule implements Ac
         final SourceSet pluginSourceSet = Objects.requireNonNull(pluginSourceSet(project), sourceSetMustNotBeNull("plugin"));
         final GradlePluginDevelopmentExtension developmentExtension = (GradlePluginDevelopmentExtension) project.getExtensions().getByName("gradlePlugin");
 
-        final Provider<Jar> jar = GradlePluginDevelopmentApiExtension.api(developmentExtension).getJarTask().flatMap(it -> project.getTasks().named(it.getName(), Jar.class)); // expect Jar task to exist
+        final TaskProvider<Jar> jar = GradlePluginDevelopmentApiExtension.api(developmentExtension).getJarTask();
         final PublishArtifact jarArtifact = new JarPublishArtifact(jar);
 
 
-        if (!developmentExtension.getPluginSourceSet().getJarTaskName().equals(jar.get().getName())) {
+        if (!developmentExtension.getPluginSourceSet().getJarTaskName().equals(jar.getName())) {
             final TaskProvider<Sync> classes = project.getTasks().register("syncApiClasses", Sync.class, task -> {
                 task.setDestinationDir(project.file(project.getLayout().getBuildDirectory().dir("tmp/" + task.getName())));
                 task.from(jar.flatMap(it -> it.getInputs().getSourceFiles().getElements().map(__ -> it.getInputs().getSourceFiles())).map(it -> it.getAsFileTree().matching(p -> p.include("**/*.class"))));
@@ -208,15 +240,15 @@ public final class RegisterGradlePluginDevelopmentApiExtensionRule implements Ac
     }
 
     private static final class JarPublishArtifact implements PublishArtifact {
-        private final Provider<Jar> jarTaskProvider;
+        private final TaskProvider<Jar> jarTaskProvider;
 
-        private JarPublishArtifact(Provider<Jar> jarTaskProvider) {
+        private JarPublishArtifact(TaskProvider<Jar> jarTaskProvider) {
             this.jarTaskProvider = jarTaskProvider;
         }
 
         @Override
         public String getName() {
-            return jarTaskProvider.get().getName();
+            return jarTaskProvider.getName();
         }
 
         @Override

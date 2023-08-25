@@ -3,6 +3,7 @@ package dev.gradleplugins;
 import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.SourceSet;
+import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 
@@ -34,6 +35,15 @@ public interface GradlePluginDevelopmentApiExtension {
     Property<SourceSet> getSourceSet();
 
     /**
+     * Returns the task provider for the exported API JAR.
+     *
+     * Note: Once this property is queried, it's not possible to change the Jar task anymore.
+     *
+     * @return a task provider to the exported API JAR, never null
+     */
+    TaskProvider<Jar> getJarTask();
+
+    /**
      * Configures the API Jar for the plugin.
      *
      * <p>
@@ -56,9 +66,9 @@ public interface GradlePluginDevelopmentApiExtension {
      * </code>
      * </p>
      *
-     * @return a property to configure the exported API JAR, never null.
+     * @param jarTaskProvider  a JAR task to use as the exported API JAR, never null.
      */
-    Property<Jar> getJarTask();
+    void setJarTask(TaskProvider<Jar> jarTaskProvider);
 
     /**
      * Returns {@literal api} extension from Gradle plugin development extension.
