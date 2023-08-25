@@ -38,7 +38,6 @@ import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.testing.Test;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
 import org.gradle.plugin.devel.tasks.PluginUnderTestMetadata;
-import org.gradle.util.GUtil;
 import org.gradle.util.GradleVersion;
 
 import javax.inject.Inject;
@@ -49,6 +48,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -352,6 +353,52 @@ public final class DefaultGradlePluginDevelopmentTestSuiteFactory implements Gra
             getTestSpecs().addAll(getTestingStrategies().map(new CreateTestTasksFromTestingStrategiesTransformer(project)));
             getTestSpecs().disallowChanges(); // do not allow rewire
             getTestSpecs().finalizeValueOnRead();
+        }
+
+        // From Gradle codebase
+        private static final class GUtil {
+            private static final Pattern UPPER_LOWER = Pattern.compile("(?m)([A-Z]*)([a-z0-9]*)");
+
+            public static String toWords(CharSequence string) {
+                return toWords(string, ' ');
+            }
+
+            public static String toWords(CharSequence string, char separator) {
+                if (string == null) {
+                    return null;
+                }
+                StringBuilder builder = new StringBuilder();
+                int pos = 0;
+                Matcher matcher = UPPER_LOWER.matcher(string);
+                while (pos < string.length()) {
+                    matcher.find(pos);
+                    if (matcher.end() == pos) {
+                        // Not looking at a match
+                        pos++;
+                        continue;
+                    }
+                    if (builder.length() > 0) {
+                        builder.append(separator);
+                    }
+                    String group1 = matcher.group(1).toLowerCase();
+                    String group2 = matcher.group(2);
+                    if (group2.length() == 0) {
+                        builder.append(group1);
+                    } else {
+                        if (group1.length() > 1) {
+                            builder.append(group1.substring(0, group1.length() - 1));
+                            builder.append(separator);
+                            builder.append(group1.substring(group1.length() - 1));
+                        } else {
+                            builder.append(group1);
+                        }
+                        builder.append(group2);
+                    }
+                    pos = matcher.end();
+                }
+
+                return builder.toString();
+            }
         }
 
         private final class CreateTestTasksFromTestingStrategiesTransformer implements Transformer<Iterable<GradlePluginDevelopmentTestSuiteInternal.TestTaskView.Spec>, Set<GradlePluginTestingStrategy>> {
