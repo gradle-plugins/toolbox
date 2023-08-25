@@ -17,7 +17,7 @@ public interface DependencyWiringTester {
     GradleRunner runner();
 
     default void assertBucketDependencyIs(Expression expression) {
-        buildFile().append(bucketDsl().call("add", string("com.example:foo:1.0")));
+        buildFile().append(bucketDsl().call(string("com.example:foo:1.0")));
         buildFile().append(groovyDsl(
                 "Set<String> allDependencies(Configuration configuration) {",
                 "  return configuration.allDependencies.collect {",

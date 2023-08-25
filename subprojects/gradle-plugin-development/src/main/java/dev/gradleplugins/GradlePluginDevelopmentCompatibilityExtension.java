@@ -31,7 +31,7 @@ public interface GradlePluginDevelopmentCompatibilityExtension {
 
     /**
      * Returns {@literal compatibility} extension from Gradle plugin development extension.
-     * The plugin {@literal dev.gradleplugins.base} registers this extension.
+     * The plugin {@literal dev.gradleplugins.gradle-plugin-base} registers this extension.
      *
      * @param extension  the {@literal gradlePlugin} extension, must not be null
      * @return the compatibility extension, never null

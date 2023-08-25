@@ -1,6 +1,7 @@
 package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.internal.rules.ConvertGradleApiSelfResolvingDependencyToExternalDependencyRule;
+import dev.gradleplugins.internal.rules.RegisterGradlePluginDevelopmentApiExtensionRule;
 import dev.gradleplugins.internal.rules.RegisterGradlePluginDevelopmentCompatibilityExtensionRule;
 import dev.gradleplugins.internal.rules.RegisterGradlePluginDevelopmentDependenciesExtensionRule;
 import dev.gradleplugins.internal.rules.RemoveTestSourceSetsRule;
@@ -22,6 +23,7 @@ abstract /*final*/ class GradlePluginDevelopmentBasePlugin implements Plugin<Pro
         whenPluginApplied(project, "java-gradle-plugin", new RegisterGradlePluginDevelopmentCompatibilityExtensionRule());
         whenPluginApplied(project, "java-gradle-plugin", new ConvertGradleApiSelfResolvingDependencyToExternalDependencyRule());
         whenPluginApplied(project, "java-gradle-plugin", new RegisterGradlePluginDevelopmentDependenciesExtensionRule());
+        whenPluginApplied(project, "java-gradle-plugin", new RegisterGradlePluginDevelopmentApiExtensionRule());
     }
 
     private static void whenPluginApplied(Project project, String pluginId, Action<? super Project> action) {
