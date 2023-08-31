@@ -11,7 +11,6 @@ import org.gradle.api.Project;
 import org.gradle.api.Transformer;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.attributes.Usage;
-import org.gradle.api.internal.artifacts.dsl.dependencies.DependencyFactory;
 import org.gradle.api.plugins.PluginManager;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.ClasspathNormalizer;
@@ -141,8 +140,8 @@ public final class RegisterTestSuiteFactoryServiceRule implements Action<Project
                 val view = runtimeClasspath.getIncoming().artifactView(config -> {
                     config.componentFilter(componentId -> {
                         if (componentId instanceof OpaqueComponentIdentifier) {
-                            return !componentId.getDisplayName().equals(DependencyFactory.ClassPathNotation.GRADLE_API.displayName)
-                                    && !componentId.getDisplayName().equals(DependencyFactory.ClassPathNotation.LOCAL_GROOVY.displayName);
+                            return !componentId.getDisplayName().equals("Gradle API")
+                                    && !componentId.getDisplayName().equals("Local Groovy");
                         }
                         return true;
                     });
