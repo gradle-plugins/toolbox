@@ -15,8 +15,13 @@
  */
 package dev.gradleplugins.test.fixtures.maven;
 
+import java.net.URI;
+
 /**
  * A fixture for dealing with Maven repositories.
  */
 public interface MavenRepository {
+    URI getUri(); // TODO: Should be in Repository interface
+
+    MavenModule module(String groupId, String artifactId, String version);
 }
