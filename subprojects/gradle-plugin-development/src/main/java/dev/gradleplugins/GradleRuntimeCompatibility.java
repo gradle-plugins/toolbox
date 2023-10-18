@@ -123,6 +123,7 @@ public final class GradleRuntimeCompatibility {
                 LOGGER.warn(String.format("Unknown Groovy version for Gradle '%s', please open an issue on https://github.com/gradle-plugins/toolbox. Assuming value of the latest known version.", gradleVersion.toString()));
             case "8.2":
             case "8.3":
+            case "8.4":
                 return "3.0.17";
         }
     }
@@ -286,10 +287,12 @@ public final class GradleRuntimeCompatibility {
                 return Optional.of("1.8.10");
             case "8.2":
                 return Optional.of("1.8.20");
-            default:
-                LOGGER.warn(String.format("Unknown Kotlin version for Gradle '%s', please open an issue on https://github.com/gradle-plugins/toolbox. Assuming value of the latest known version.", gradleVersion.toString()));
             case "8.3":
                 return Optional.of("1.9.0");
+            default:
+                LOGGER.warn(String.format("Unknown Kotlin version for Gradle '%s', please open an issue on https://github.com/gradle-plugins/toolbox. Assuming value of the latest known version.", gradleVersion.toString()));
+            case "8.4":
+                return Optional.of("1.9.10");
         }
     }
 }
