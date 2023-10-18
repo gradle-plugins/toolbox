@@ -2,7 +2,6 @@ package dev.gradleplugins.internal;
 
 import dev.gradleplugins.GroovyGradlePluginDevelopmentExtension;
 import dev.gradleplugins.JavaGradlePluginDevelopmentExtension;
-import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.attributes.Bundling;
@@ -12,13 +11,10 @@ import org.gradle.api.attributes.Usage;
 import org.gradle.api.component.AdhocComponentWithVariants;
 import org.gradle.api.component.SoftwareComponent;
 import org.gradle.api.component.SoftwareComponentContainer;
-import org.gradle.api.internal.artifacts.dsl.LazyPublishArtifact;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.plugins.internal.JavaConfigurationVariantMapping;
-import org.gradle.api.provider.Property;
-import org.gradle.api.provider.ProviderFactory;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.javadoc.Groovydoc;
@@ -95,8 +91,8 @@ public abstract class GradlePluginDevelopmentExtensionInternal implements Groovy
             }
         }
 
-        TaskProvider<Task> jar = getTasks().named(jarTaskName);
-        variant.getOutgoing().artifact(new LazyPublishArtifact(jar));
+        TaskProvider<Jar> jar = getTasks().named(jarTaskName, Jar.class);
+        variant.getOutgoing().artifact(new JarBasedPublishArtifact(jar));
         AdhocComponentWithVariants component = findJavaComponent(getComponents());
         if (component != null) {
             component.addVariantsFromConfiguration(variant, new JavaConfigurationVariantMapping("runtime", true));
