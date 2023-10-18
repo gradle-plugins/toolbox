@@ -60,9 +60,9 @@ class GradlePluginDevelopmentFunctionalTest extends AbstractGradleSpecification 
 
             tasks.register("verify") {
                 doLast {
-                    assert(configurations.implementation.dependencies.first().group == "dev.gradleplugins")
-                    assert(configurations.implementation.dependencies.first().name == "gradle-api")
-                    assert(configurations.implementation.dependencies.first().version == "6.2.1")
+                    assert(configurations.getByName("implementation").dependencies.first().group == "dev.gradleplugins")
+                    assert(configurations.getByName("implementation").dependencies.first().name == "gradle-api")
+                    assert(configurations.getByName("implementation").dependencies.first().version == "6.2.1")
                 }
             }
         """
