@@ -14,7 +14,6 @@ import javax.inject.Inject;
 
 import static dev.gradleplugins.GradlePluginDevelopmentDependencyExtension.GRADLE_API_LOCAL_VERSION;
 import static dev.gradleplugins.GradleRuntimeCompatibility.minimumJavaVersionFor;
-import static org.gradle.util.VersionNumber.parse;
 
 @SuppressWarnings("UnstableApiUsage")
 abstract /*final*/ class DefaultGradlePluginDevelopmentCompatibilityExtension implements GradlePluginDevelopmentCompatibilityExtension, HasPublicType, FinalizableComponent {
@@ -46,7 +45,7 @@ abstract /*final*/ class DefaultGradlePluginDevelopmentCompatibilityExtension im
         if (!finalized) {
             finalized = true;
             if (getMinimumGradleVersion().isPresent()) {
-                compatibilities.set(minimumJavaVersionFor(parse(getMinimumGradleVersion().get())));
+                compatibilities.set(minimumJavaVersionFor(getMinimumGradleVersion().get()));
             } else {
                 getMinimumGradleVersion().set(GradleVersion.current().getVersion());
             }
