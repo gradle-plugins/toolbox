@@ -3,7 +3,6 @@ package dev.gradleplugins;
 import org.gradle.api.JavaVersion;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
-import org.gradle.util.VersionNumber;
 
 import java.util.Optional;
 
@@ -30,7 +29,12 @@ public final class GradleRuntimeCompatibility {
      * @param gradleVersion a specific Gradle version
      * @return the Groovy version of the specified Gradle version, never null.
      */
-    public static String groovyVersionOf(VersionNumber gradleVersion) {
+    @Deprecated
+    public static String groovyVersionOf(org.gradle.util.VersionNumber gradleVersion) {
+        return groovyVersionOf(VersionNumber.parse(gradleVersion.toString()));
+    }
+
+    private static String groovyVersionOf(VersionNumber gradleVersion) {
         // Use `find ~/.gradle/wrapper -name "groovy-all-*"` once the distribution was downloaded locally
         switch (String.format("%d.%d", gradleVersion.getMajor(), gradleVersion.getMinor())) {
             case "1.12":
@@ -110,10 +114,16 @@ public final class GradleRuntimeCompatibility {
                 return "3.0.9";
             case "7.5":
                 return "3.0.10";
+            case "7.6":
+            case "8.0":
+                return "3.0.13";
+            case "8.1":
+                return "3.0.15";
             default:
                 LOGGER.warn(String.format("Unknown Groovy version for Gradle '%s', please open an issue on https://github.com/gradle-plugins/toolbox. Assuming value of the latest known version.", gradleVersion.toString()));
-            case "7.6":
-                return "3.0.13";
+            case "8.2":
+            case "8.3":
+                return "3.0.17";
         }
     }
 
@@ -133,7 +143,12 @@ public final class GradleRuntimeCompatibility {
      * @param gradleVersion a specific Gradle version
      * @return the minimum Java version for the specified Gradle version, never null.
      */
-    public static JavaVersion minimumJavaVersionFor(VersionNumber gradleVersion) {
+    @Deprecated
+    public static JavaVersion minimumJavaVersionFor(org.gradle.util.VersionNumber gradleVersion) {
+        return minimumJavaVersionFor(VersionNumber.parse(gradleVersion.toString()));
+    }
+
+    private static JavaVersion minimumJavaVersionFor(VersionNumber gradleVersion) {
         switch (gradleVersion.getMajor()) {
             case 0:
                 throw new UnsupportedOperationException("Minimum Java version for Gradle version below 1.0 is unavailable, please open an issue on https://github.com/gradle-plugins/toolbox.");
@@ -149,6 +164,7 @@ public final class GradleRuntimeCompatibility {
             case 5:
             case 6:
             case 7:
+            case 8:
                 return JavaVersion.VERSION_1_8;
         }
     }
@@ -171,7 +187,12 @@ public final class GradleRuntimeCompatibility {
      * @param gradleVersion a specific Gradle version
      * @return the Kotlin version for the specified Gradle version, never null.
      */
-    public static Optional<String> kotlinVersionOf(VersionNumber gradleVersion) {
+    @Deprecated
+    public static Optional<String> kotlinVersionOf(org.gradle.util.VersionNumber gradleVersion) {
+        return kotlinVersionOf(VersionNumber.parse(gradleVersion.toString()));
+    }
+
+    private static Optional<String> kotlinVersionOf(VersionNumber gradleVersion) {
         // Use `find ~/.gradle/wrapper -name "kotlin-stdlib-*"` once the distribution was downloaded locally
         switch (String.format("%d.%d", gradleVersion.getMajor(), gradleVersion.getMinor())) {
             case "2.0":
@@ -258,10 +279,17 @@ public final class GradleRuntimeCompatibility {
                 return Optional.of("1.5.31");
             case "7.5":
                 return Optional.of("1.6.21");
-            default:
-                LOGGER.warn(String.format("Unknown Kotlin version for Gradle '%s', please open an issue on https://github.com/gradle-plugins/toolbox. Assuming value of the latest known version.", gradleVersion.toString()));
             case "7.6":
                 return Optional.of("1.7.10");
+            case "8.0":
+            case "8.1":
+                return Optional.of("1.8.10");
+            case "8.2":
+                return Optional.of("1.8.20");
+            default:
+                LOGGER.warn(String.format("Unknown Kotlin version for Gradle '%s', please open an issue on https://github.com/gradle-plugins/toolbox. Assuming value of the latest known version.", gradleVersion.toString()));
+            case "8.3":
+                return Optional.of("1.9.0");
         }
     }
 }
