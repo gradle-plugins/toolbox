@@ -12,7 +12,6 @@ import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.testing.Test;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
-import org.gradle.util.GUtil;
 
 import java.util.Set;
 import java.util.function.Consumer;
@@ -111,7 +110,7 @@ final class CreateTestTasksFromTestingStrategiesRule implements Action<GradlePlu
         }
 
         result.configure(it -> {
-            it.setDescription("Runs the " + GUtil.toWords(testSuite.getName()) + "s.");
+            it.setDescription("Runs the " + testSuite.getDisplayName() + ".");
             it.setGroup(LifecycleBasePlugin.VERIFICATION_GROUP);
 
             it.setTestClassesDirs(objects.fileCollection().from(testSuite.getSourceSet().map(t -> (Object) t.getOutput().getClassesDirs()).orElse(emptyList())));
