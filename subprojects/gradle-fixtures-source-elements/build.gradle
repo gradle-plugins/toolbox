@@ -10,5 +10,4 @@ description = 'Gradle fixtures'
 dependencies {
     implementation 'org.apache.commons:commons-lang3:3.9'
     implementation 'commons-io:commons-io:2.6'
-    implementation 'com.google.guava:guava:28.2-jre'
 }

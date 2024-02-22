@@ -1,8 +1,10 @@
 package dev.gradleplugins.fixtures.sources;
 
-import com.google.common.collect.ImmutableSet;
 import org.apache.commons.io.FilenameUtils;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -17,14 +19,14 @@ public final class SourceKind {
     public static final SourceKind KOTLIN = new SourceKind("kotlin", "kt");
     public static final SourceKind HEADER = new SourceKind("header", "h", "hpp");
     public static final SourceKind UNKNOWN = new SourceKind("unknown");
-    private static final Set<SourceKind> DEFAULT_KINDS = ImmutableSet.of(C, CPP, OBJECTIVE_C, OBJECTIVE_CPP, SWIFT, JAVA, GROOVY, KOTLIN, HEADER);
+    private static final Set<SourceKind> DEFAULT_KINDS = Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList(C, CPP, OBJECTIVE_C, OBJECTIVE_CPP, SWIFT, JAVA, GROOVY, KOTLIN, HEADER)));
 
     private final String identifier;
     private final Set<String> fileExtensions; // excluded from equals/hashCode
 
     private SourceKind(String identifier, String... fileExtensions) {
         this.identifier = identifier;
-        this.fileExtensions = ImmutableSet.copyOf(fileExtensions);
+        this.fileExtensions = Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList(fileExtensions)));
     }
 
     public static SourceKind of(String identifier) {
