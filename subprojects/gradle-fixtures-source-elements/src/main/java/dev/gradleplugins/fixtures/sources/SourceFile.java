@@ -16,12 +16,11 @@
 
 package dev.gradleplugins.fixtures.sources;
 
-import org.apache.commons.io.FileUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -60,8 +59,8 @@ public final class SourceFile {
 
     public void writeToFile(File file) {
         try {
-            FileUtils.touch(file);
-            FileUtils.write(file, content, Charset.defaultCharset());
+            file.getParentFile().mkdirs();
+            Files.write(file.toPath(), content.getBytes(Charset.defaultCharset()));
         } catch (IOException ex) {
             throw new UncheckedIOException(String.format("Unable to create source file at '%s'.", file.getAbsolutePath()), ex);
         }

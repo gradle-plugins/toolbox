@@ -1,7 +1,5 @@
 package dev.gradleplugins.fixtures.sources;
 
-import org.apache.commons.io.FilenameUtils;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -34,9 +32,44 @@ public final class SourceKind {
     }
 
     public static SourceKind valueOf(String fileName) {
-        final String extension = FilenameUtils.getExtension(fileName);
+        final String extension = getExtension(fileName);
         return DEFAULT_KINDS.stream().filter(it -> it.fileExtensions.contains(extension)).findFirst().orElse(UNKNOWN);
     }
+
+    //region FilenameUtils#getExtension
+    private static final int NOT_FOUND = -1;
+    private static final char UNIX_SEPARATOR = '/';
+    private static final char WINDOWS_SEPARATOR = '\\';
+    private static int indexOfExtension(final String filename) {
+        if (filename == null) {
+            return NOT_FOUND;
+        }
+        final int extensionPos = filename.lastIndexOf('.');
+        final int lastSeparator = indexOfLastSeparator(filename);
+        return lastSeparator > extensionPos ? NOT_FOUND : extensionPos;
+    }
+
+    private static int indexOfLastSeparator(final String filename) {
+        if (filename == null) {
+            return NOT_FOUND;
+        }
+        final int lastUnixPos = filename.lastIndexOf(UNIX_SEPARATOR);
+        final int lastWindowsPos = filename.lastIndexOf(WINDOWS_SEPARATOR);
+        return Math.max(lastUnixPos, lastWindowsPos);
+    }
+
+    private static String getExtension(final String filename) {
+        if (filename == null) {
+            return null;
+        }
+        final int index = indexOfExtension(filename);
+        if (index == NOT_FOUND) {
+            return "";
+        } else {
+            return filename.substring(index + 1);
+        }
+    }
+    //endregion
 
     @Override
     public boolean equals(Object o) {
