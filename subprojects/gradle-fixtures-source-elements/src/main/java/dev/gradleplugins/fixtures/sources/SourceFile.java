@@ -16,30 +16,44 @@
 
 package dev.gradleplugins.fixtures.sources;
 
-import lombok.Value;
-import lombok.val;
 import org.apache.commons.io.FileUtils;
 
-import javax.tools.JavaFileObject;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.Objects;
 
-@Value
-public class SourceFile {
-    String path;
-    String name;
-    String content;
+public final class SourceFile {
+    private final String path;
+    private final String name;
+    private final String content;
+
+    public SourceFile(String path, String name, String content) {
+        this.path = path;
+        this.name = name;
+        this.content = content;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getContent() {
+        return content;
+    }
 
     public File writeToDirectory(File base) {
         return writeToDirectory(base, name);
     }
 
     private File writeToDirectory(File base, String name) {
-        val file = new File(base, String.join(File.separator, path, name));
+        final File file = new File(base, String.join(File.separator, path, name));
         writeToFile(file);
         return file;
     }
@@ -57,15 +71,6 @@ public class SourceFile {
         return String.join("/", basePath, path, name);
     }
 
-    @Override
-    public String toString() {
-        return "SourceFile{" +
-                "path='" + path + '\'' +
-                ", name='" + name + '\'' +
-                ", content='" + firstContentLine(content) + '\'' +
-                '}';
-    }
-
     private static String firstContentLine(String content) {
         String[] tokens = content.split("\n", -1);
         return Arrays.stream(tokens).map(String::trim).filter(line -> !line.isEmpty()).findFirst().map(it -> it + "...").orElse("");
@@ -73,5 +78,29 @@ public class SourceFile {
 
     public SourceKind getKind() {
         return SourceKind.valueOf(name);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        SourceFile that = (SourceFile) o;
+        return Objects.equals(path, that.path) && Objects.equals(name, that.name) && Objects.equals(content, that.content);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(path, name, content);
+    }
+
+    @Override
+    public String toString() {
+        return "SourceFile{" +
+                "path='" + path + '\'' +
+                ", name='" + name + '\'' +
+                ", content='" + firstContentLine(content) + '\'' +
+                '}';
     }
 }

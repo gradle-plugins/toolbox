@@ -4,10 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static dev.gradleplugins.fixtures.sources.Element.sourceFile;
-import static dev.gradleplugins.fixtures.sources.SourceElement.empty;
-import static dev.gradleplugins.fixtures.sources.SourceElement.ofElements;
-
 public abstract class NativeLibraryElement extends NativeSourceElement {
     public abstract SourceElement getPublicHeaders();
 

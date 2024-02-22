@@ -1,13 +1,11 @@
 package dev.gradleplugins.fixtures.sources;
 
 import com.google.common.collect.ImmutableSet;
-import lombok.EqualsAndHashCode;
-import lombok.val;
 import org.apache.commons.io.FilenameUtils;
 
+import java.util.Objects;
 import java.util.Set;
 
-@EqualsAndHashCode
 public final class SourceKind {
     public static final SourceKind C = new SourceKind("c", "c");
     public static final SourceKind CPP = new SourceKind("cpp", "cpp", "cc", "cxx");
@@ -22,7 +20,7 @@ public final class SourceKind {
     private static final Set<SourceKind> DEFAULT_KINDS = ImmutableSet.of(C, CPP, OBJECTIVE_C, OBJECTIVE_CPP, SWIFT, JAVA, GROOVY, KOTLIN, HEADER);
 
     private final String identifier;
-    @EqualsAndHashCode.Exclude private final Set<String> fileExtensions;
+    private final Set<String> fileExtensions; // excluded from equals/hashCode
 
     private SourceKind(String identifier, String... fileExtensions) {
         this.identifier = identifier;
@@ -34,7 +32,22 @@ public final class SourceKind {
     }
 
     public static SourceKind valueOf(String fileName) {
-        val extension = FilenameUtils.getExtension(fileName);
+        final String extension = FilenameUtils.getExtension(fileName);
         return DEFAULT_KINDS.stream().filter(it -> it.fileExtensions.contains(extension)).findFirst().orElse(UNKNOWN);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        SourceKind that = (SourceKind) o;
+        return Objects.equals(identifier, that.identifier);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(identifier);
     }
 }

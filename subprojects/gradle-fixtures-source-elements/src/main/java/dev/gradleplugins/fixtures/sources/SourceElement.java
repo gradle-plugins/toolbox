@@ -23,8 +23,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static dev.gradleplugins.fixtures.file.FileSystemUtils.file;
-
 /**
  * An element containing zero or more source files.
  */
@@ -45,7 +43,7 @@ public abstract class SourceElement extends Element {
      * Writes the source files of this element to the given project, using the Gradle convention for source layout.
      */
     public void writeToProject(File projectDir) {
-        File srcDir = file(projectDir, "src/" + getSourceSetName());
+        final File srcDir = new File(projectDir, "src/" + getSourceSetName());
         for (SourceFile sourceFile : getFiles()) {
             sourceFile.writeToDirectory(srcDir);
         }
@@ -56,7 +54,7 @@ public abstract class SourceElement extends Element {
      */
     public void writeToSourceDir(File sourceDir) {
         for (SourceFile sourceFile : getFiles()) {
-            sourceFile.writeToFile(file(sourceDir, sourceFile.getName()));
+            sourceFile.writeToFile(new File(sourceDir, sourceFile.getName()));
         }
     }
 
