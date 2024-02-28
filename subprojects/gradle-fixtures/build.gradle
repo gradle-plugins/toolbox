@@ -59,7 +59,7 @@ dependencies {
     // SPOCK SUPPORT
     spockSupportApi testFixtures(project(':gradle-runner-kit'))
     spockSupportApi project(':gradle-fixtures')
-    spockSupportApi project(':gradle-fixtures-source-elements')
+    spockSupportApi 'dev.gradleplugins:gradle-fixtures-source-elements'
     spockSupportApi "org.codehaus.groovy:groovy-all:${groovyVersionOf(minimumGradleVersion)}"
     spockSupportApi platform('org.spockframework:spock-bom:1.2-groovy-2.5')
     spockSupportApi 'org.spockframework:spock-core'

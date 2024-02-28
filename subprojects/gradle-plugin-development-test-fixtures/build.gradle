@@ -11,7 +11,7 @@ version = '1.6.10'
 
 dependencies {
     compileOnly gradleApi(minimumGradleVersion)
-    api project(':gradle-fixtures-source-elements')
+    api 'dev.gradleplugins:gradle-fixtures-source-elements'
     implementation project(':gradle-fixtures')
     implementation(project(':gradle-fixtures')) {
         capabilities {
