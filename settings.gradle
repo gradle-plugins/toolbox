@@ -15,6 +15,7 @@ apply plugin: 'dev.gradleplugins.gradle-plugin-development'
 rootProject.name = 'toolbox'
 
 includeBuild 'gradle/libraries/source-elements'
+includeBuild 'subprojects/gradle-plugin-development-test-fixtures/testProjects'
 
 // Gradle Fixtures
 include('gradle-fixtures')

@@ -1,0 +1,39 @@
+plugins {
+    id 'dev.gradleplugins.groovy-gradle-plugin'
+}
+
+import static dev.gradleplugins.GradleRuntimeCompatibility.*
+
+gradlePlugin {
+    plugins {
+        basic {
+            id = 'com.example.hello'
+            implementationClass = 'com.example.BasicPlugin'
+        }
+    }
+
+    dependencies {
+        implementation("org.codehaus.groovy:groovy-all:${groovyVersionOf(gradle.gradleVersion)}")
+    }
+}
+
+sourceSets.test {
+    //region TestKit configuration
+    tasks.named(name, Test) {
+        classpath += files(tasks.named('pluginUnderTestMetadata', PluginUnderTestMetadata).flatMap { it.outputDirectory })
+    }
+    dependencies {
+        "$implementationConfigurationName"("dev.gradleplugins:gradle-test-kit:${gradle.gradleVersion}")
+    }
+    //endregion
+
+    //region Spock Framework configuration
+    // Because spock framework 2.0 use JUnit 5
+    tasks.named(name, Test) { useJUnitPlatform() }
+
+    dependencies {
+        "$implementationConfigurationName"(platform('org.spockframework:spock-bom:2.0-groovy-3.0'))
+        "$implementationConfigurationName"('org.spockframework:spock-core')
+    }
+    //endregion
+}

@@ -20,3 +20,10 @@ dependencies {
     }
     implementation "org.codehaus.groovy:groovy-all:${groovyVersionOf(minimumGradleVersion)}"
 }
+
+sourceSets.main {
+    dependencies.add(annotationProcessorConfigurationName, 'dev.gradleplugins:source-elements-annotation-processor')
+    tasks.named(compileJavaTaskName, JavaCompile) {
+        options.compilerArgs.add('-AbasePath=' + file('testProjects'))
+    }
+}

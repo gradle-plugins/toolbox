@@ -1,34 +1,13 @@
-/*
- * Copyright 2019 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+package com.example
 
-package dev.gradleplugins.fixtures.sample
-
-import dev.gradleplugins.fixtures.sources.SourceElement
-import dev.gradleplugins.fixtures.sources.SourceFile
-
-class GradleVersionAwareTestKitFunctionalTest extends SourceElement {
-    @Override
-    List<SourceFile> getFiles() {
-        return Collections.singletonList(sourceFile('groovy', 'com/example/VersionAwareFunctionalTest.groovy', """package com.example
 import org.gradle.testkit.runner.GradleRunner
-import static org.gradle.testkit.runner.TaskOutcome.*
-import spock.lang.TempDir
-import spock.lang.Specification
-import java.nio.file.Path
 import org.gradle.util.GradleVersion
+import spock.lang.Specification
+import spock.lang.TempDir
+
+import java.nio.file.Path
+
+import static org.gradle.testkit.runner.TaskOutcome.*
 
 class VersionAwareFunctionalTest extends Specification {
     private static final String DEFAULT_GRADLE_VERSION_SYSPROP_NAME = 'dev.gradleplugins.defaultGradleVersion'
@@ -68,22 +47,14 @@ class VersionAwareFunctionalTest extends Specification {
 
         when:
         def result = GradleRunner.create()
-            .withPluginClasspath()
-            .forwardOutput()
-            .withGradleVersion(gradleDistributionUnderTest)
-            .withProjectDir(testProjectDir.toFile())
-            .withArguments('help')
-            .build()
+                .withPluginClasspath()
+                .forwardOutput()
+                .withGradleVersion(gradleDistributionUnderTest)
+                .withProjectDir(testProjectDir.toFile())
+                .withArguments('help')
+                .build()
 
         then:
         result.output.contains('Hello')
-    }
-}
-"""))
-    }
-
-    @Override
-    String getSourceSetName() {
-        return "functionalTest"
     }
 }

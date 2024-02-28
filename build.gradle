@@ -40,3 +40,9 @@ subprojects {
         releaseTask.configure { dependsOn('publishPlugins') }
     }
 }
+
+tasks.register('check') {
+    group = 'verification'
+    dependsOn(gradle.includedBuild('testProjects').task(":groovy-gradle-plugin:check"))
+    dependsOn(gradle.includedBuild('testProjects').task(":java-gradle-plugin:check"))
+}

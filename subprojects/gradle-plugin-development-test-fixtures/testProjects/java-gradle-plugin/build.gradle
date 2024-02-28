@@ -1,0 +1,28 @@
+plugins {
+    id 'dev.gradleplugins.java-gradle-plugin'
+}
+
+gradlePlugin {
+    plugins {
+        basic {
+            id = 'com.example.hello'
+            implementationClass = 'com.example.BasicPlugin'
+        }
+    }
+}
+
+sourceSets.test {
+    //region JUnit 5 configuration
+    tasks.named(name, Test) { useJUnitPlatform() }
+    dependencies {
+        "$implementationConfigurationName"(platform('org.junit:junit-bom:5.10.0'))
+        "$implementationConfigurationName"('org.junit.jupiter:junit-jupiter')
+    }
+    //endregion
+
+    //region Gradle API configuration
+    dependencies {
+        "$implementationConfigurationName"("dev.gradleplugins:gradle-api:${gradle.gradleVersion}")
+    }
+    //endregion
+}
