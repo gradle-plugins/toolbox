@@ -10,15 +10,9 @@ import org.gradle.util.GradleVersion;
 import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
 
-public final class AddGradleApiDependencyToCompileOnlyApiConfiguration implements Action<AppliedPlugin> {
-    private final Project project;
-
-    public AddGradleApiDependencyToCompileOnlyApiConfiguration(Project project) {
-        this.project = project;
-    }
-
+public final class AddGradleApiDependencyToCompileOnlyApiConfiguration implements Action<Project> {
     @Override
-    public void execute(AppliedPlugin ignored) {
+    public void execute(Project project) {
         val dependencies = GradlePluginDevelopmentDependencyExtensionInternal.of(project.getDependencies());
         dependencies.add(getCompileOnlyApiConfigurationName(), compatibility(gradlePlugin(project)).getGradleApiVersion().map(dependencies::gradleApi));
     }

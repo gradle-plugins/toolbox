@@ -9,24 +9,19 @@ import org.gradle.api.plugins.ExtensionAware;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.java;
 
-final class RegisterCompatibilityExtension implements Action<AppliedPlugin> {
+final class RegisterCompatibilityExtension implements Action<Project> {
     private static final String EXTENSION_NAME = "compatibility";
-    private final Project project;
-
-    RegisterCompatibilityExtension(Project project) {
-        this.project = project;
-    }
 
     @Override
-    public void execute(AppliedPlugin ignored) {
-        val extension = newCompatibilityExtension();
+    public void execute(Project project) {
+        val extension = newCompatibilityExtension(project);
 
         ((ExtensionAware) gradlePlugin(project)).getExtensions().add(EXTENSION_NAME, extension);
 
         project.afterEvaluate(finalize(extension));
     }
 
-    private DefaultGradlePluginDevelopmentCompatibilityExtension newCompatibilityExtension() {
+    private DefaultGradlePluginDevelopmentCompatibilityExtension newCompatibilityExtension(Project project) {
         return project.getObjects().newInstance(DefaultGradlePluginDevelopmentCompatibilityExtension.class, java(project));
     }
 
