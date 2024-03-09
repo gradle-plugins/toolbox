@@ -1,9 +1,7 @@
 package dev.gradleplugins.test.fixtures.gradle.daemon;
 
-import lombok.val;
-import lombok.var;
+import org.gradle.internal.time.CountdownTimer;
 import org.gradle.internal.time.Time;
-import org.gradle.launcher.daemon.server.api.DaemonStateControl;
 import org.gradle.launcher.daemon.server.api.DaemonStateControl.State;
 import org.gradle.util.GradleVersion;
 
@@ -22,8 +20,8 @@ public class LegacyDaemon extends AbstractDaemonFixture {
     }
 
     protected void waitForState(State state) throws InterruptedException {
-        val timer = Time.startCountdownTimer(STATE_CHANGE_TIMEOUT);
-        var lastLogState = logFileProbe.getCurrentState();
+        final CountdownTimer timer = Time.startCountdownTimer(STATE_CHANGE_TIMEOUT);
+        State lastLogState = logFileProbe.getCurrentState();
         while (!timer.hasExpired() && lastLogState != state) {
             Thread.sleep(200);
             lastLogState = logFileProbe.getCurrentState();

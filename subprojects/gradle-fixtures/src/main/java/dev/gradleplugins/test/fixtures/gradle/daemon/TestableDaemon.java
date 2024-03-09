@@ -1,7 +1,6 @@
 package dev.gradleplugins.test.fixtures.gradle.daemon;
 
-import lombok.val;
-import lombok.var;
+import org.gradle.internal.time.CountdownTimer;
 import org.gradle.internal.time.Time;
 import org.gradle.launcher.daemon.registry.DaemonRegistry;
 import org.gradle.launcher.daemon.server.api.DaemonStateControl;
@@ -20,9 +19,9 @@ public class TestableDaemon extends AbstractDaemonFixture {
     }
 
     protected void waitForState(State state) throws InterruptedException {
-        val timer = Time.startCountdownTimer(STATE_CHANGE_TIMEOUT);
-        var lastRegistryState = registryProbe.getCurrentState();
-        var lastLogState = logFileProbe.getCurrentState();
+        final CountdownTimer timer = Time.startCountdownTimer(STATE_CHANGE_TIMEOUT);
+        DaemonStateControl.State lastRegistryState = registryProbe.getCurrentState();
+        State lastLogState = logFileProbe.getCurrentState();
         while (!timer.hasExpired() && (lastRegistryState != state || lastLogState != state)) {
             Thread.sleep(200);
             lastRegistryState = registryProbe.getCurrentState();
