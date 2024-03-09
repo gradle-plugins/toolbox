@@ -17,14 +17,9 @@
 package dev.gradleplugins.fixtures.sample;
 
 import dev.gradleplugins.fixtures.sources.RegularFileContent;
-import dev.gradleplugins.fixtures.sources.SourceElement;
-import dev.gradleplugins.fixtures.sources.SourceFile;
 import dev.gradleplugins.fixtures.sources.annotations.SourceFileLocation;
 
-import java.util.Collections;
-import java.util.List;
-
-@SourceFileLocation(file = "groovy-gradle-plugin/src/groovy/com/example/BasicPluginFunctionalTest.groovy")
+@SourceFileLocation(file = "groovy-gradle-plugin/src/test/groovy/com/example/BasicPluginFunctionalTest.groovy")
 public final class BasicGradlePluginTestKitTest extends RegularFileContent {
     private final String sourceSetName;
 
