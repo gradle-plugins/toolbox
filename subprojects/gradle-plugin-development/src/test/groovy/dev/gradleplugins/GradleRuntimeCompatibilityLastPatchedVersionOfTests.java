@@ -9,7 +9,7 @@ import static org.hamcrest.Matchers.equalTo;
 
 class GradleRuntimeCompatibilityLastPatchedVersionOfTests {
     @ParameterizedTest
-    @CsvSource({
+    @CsvSource(delimiter = '|', useHeadersInDisplayName = true, value = {
             // According to https://gradle.org/releases/
             "validGradleVersion | expectedLastPatchedGradleVersion",
             "0.7                | 0.7",

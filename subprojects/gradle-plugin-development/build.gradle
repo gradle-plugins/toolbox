@@ -98,8 +98,9 @@ test {
     dependencies {
         implementation spockFramework()
         implementation groovy()
-        implementation "org.junit.jupiter:junit-jupiter:5.8.2"
-        runtimeOnly "org.junit.vintage:junit-vintage-engine:5.8.2"
+        implementation(platform('org.junit:junit-bom:5.10.2'))
+        implementation('org.junit.jupiter:junit-jupiter')
+        runtimeOnly 'org.junit.vintage:junit-vintage-engine'
         implementation "org.hamcrest:hamcrest:2.2"
         implementation "org.mockito:mockito-core:4.2.0"
     }
