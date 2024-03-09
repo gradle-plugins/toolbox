@@ -7,8 +7,6 @@ import spock.lang.TempDir
 
 import java.nio.file.Path
 
-import static org.gradle.testkit.runner.TaskOutcome.*
-
 class VersionAwareFunctionalTest extends Specification {
     private static final String DEFAULT_GRADLE_VERSION_SYSPROP_NAME = 'dev.gradleplugins.defaultGradleVersion'
     @TempDir Path testProjectDir
@@ -20,7 +18,7 @@ class VersionAwareFunctionalTest extends Specification {
         buildFile = testProjectDir.resolve('build.gradle').toFile()
 
         if (System.properties.containsKey(DEFAULT_GRADLE_VERSION_SYSPROP_NAME)) {
-            println "Default Gradle version: \${gradleDistributionUnderTest}"
+            println "Default Gradle version: ${gradleDistributionUnderTest}"
         } else {
             println "No default Gradle version"
         }
@@ -42,7 +40,7 @@ class VersionAwareFunctionalTest extends Specification {
                 id('com.example.hello')
             }
 
-            println "Using Gradle version: \${project.gradle.gradleVersion}"
+            println "Using Gradle version: ${project.gradle.gradleVersion}"
         '''
 
         when:
