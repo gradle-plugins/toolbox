@@ -47,7 +47,7 @@ class GradlePluginDevelopmentCompatibilityExtensionFinalizeComponentIntegrationT
     @Test
     void disallowChangesToGradleApiVersion() {
         final Throwable ex = assertThrows(RuntimeException.class, () -> subject.getGradleApiVersion().set("6.9"));
-        assertEquals("The value for property 'gradleApiVersion' cannot be changed any further.", ex.getMessage());
+        assertEquals("The value for property 'gradleApiVersion' is final and cannot be changed any further.", ex.getMessage());
     }
 
     @Test

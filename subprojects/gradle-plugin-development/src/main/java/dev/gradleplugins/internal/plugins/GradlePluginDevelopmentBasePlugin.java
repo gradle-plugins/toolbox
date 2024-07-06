@@ -12,8 +12,9 @@ abstract /*final*/ class GradlePluginDevelopmentBasePlugin implements Plugin<Pro
 
     @Override
     public void apply(Project project) {
+        project.getPluginManager().apply("gradlepluginsdev.rules.gradle-jvm-compatibilities");
         project.getPluginManager().apply(GradlePluginDevelopmentExtensionPlugin.class);
-        whenPluginApplied("java-gradle-plugin", new RegisterCompatibilityExtension()).execute(project);
+        project.getPluginManager().apply("gradlepluginsdev.rules.gradle-plugin-compatibility-extension");
         whenPluginApplied("java-gradle-plugin", new RemoveGradleApiProjectDependency()).execute(project);
         whenPluginApplied("java-gradle-plugin", new AddGradleApiDependencyToCompileOnlyApiConfiguration()).execute(project);
         whenPluginApplied("java-gradle-plugin", new RemoveTestSourceSets()).execute(project);

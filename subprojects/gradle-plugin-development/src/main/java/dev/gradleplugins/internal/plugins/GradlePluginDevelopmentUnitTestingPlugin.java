@@ -35,7 +35,9 @@ public abstract class GradlePluginDevelopmentUnitTestingPlugin implements Plugin
         return ignored -> {
             // Automatically add Gradle API as a dependency. We assume unit tests are accomplished via ProjectBuilder
             val dependencies = GradlePluginDevelopmentDependencyExtensionInternal.of(project.getDependencies());
-            dependencies.add(test(project).getSourceSet().get().getImplementationConfigurationName(), project.provider(() -> dependencies.gradleApi(compatibility(gradlePlugin(project)).getGradleApiVersion().get())));
+            dependencies.add(test(project).getSourceSet().get().getImplementationConfigurationName(), project.provider(() -> {
+                return dependencies.gradleApi(compatibility(gradlePlugin(project)).getGradleApiVersion().getOrElse("local"));
+            }));
         };
     }
 }

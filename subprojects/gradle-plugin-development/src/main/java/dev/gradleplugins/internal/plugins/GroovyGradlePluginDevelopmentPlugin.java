@@ -26,7 +26,10 @@ import org.gradle.api.Project;
 import org.gradle.util.GradleVersion;
 
 import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
-import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.*;
+import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.assertJavaGradlePluginIsNotPreviouslyApplied;
+import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.assertKotlinDslPluginIsNeverApplied;
+import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.assertOtherGradlePluginDevelopmentPluginsAreNeverApplied;
+import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.registerLanguageExtension;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
 
 public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
@@ -49,10 +52,10 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
         project.getPluginManager().apply("groovy");
 
         val groovy = registerLanguageExtension(project, "groovy", GroovyGradlePluginDevelopmentExtension.class);
-        val extension = compatibility(gradlePlugin(project));
+        val extension = project.provider(() -> compatibility(gradlePlugin(project)));
 
         // Configure the Groovy version and dependency
-        groovy.getGroovyVersion().convention(extension.getMinimumGradleVersion().map(GradleRuntimeCompatibility::groovyVersionOf));
+        groovy.getGroovyVersion().convention(extension.flatMap(it -> it.getMinimumGradleVersion().map(GradleRuntimeCompatibility::groovyVersionOf)));
         val dependencies = GradlePluginDevelopmentDependencyExtensionInternal.of(project.getDependencies());
         dependencies.add("compileOnly", groovy.getGroovyVersion().map(dependencies::groovy));
 
