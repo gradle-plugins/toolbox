@@ -4,10 +4,12 @@ import dev.gradleplugins.fixtures.sample.GradlePluginElement
 import dev.gradleplugins.fixtures.sample.GroovyBasicGradlePlugin
 import dev.gradleplugins.fixtures.sample.JavaBasicGradlePlugin
 import org.apache.commons.lang3.JavaVersion
+import org.gradle.util.GradleVersion
 import spock.lang.Unroll
 import spock.util.environment.Jvm
 
 import static org.junit.Assume.assumeFalse
+import static org.junit.Assume.assumeTrue
 
 abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends AbstractGradlePluginDevelopmentFunctionalSpec {
     def "register an compatibility extension on gradlePlugin extension"() {
@@ -81,6 +83,37 @@ abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends Ab
 
             java {
                 sourceCompatibility = JavaVersion.VERSION_12
+            }
+
+            tasks.register('verify') {
+                doLast {
+                    assert java.sourceCompatibility.toString() == '${JavaVersion.JAVA_12}'
+                    assert java.targetCompatibility.toString() == '${JavaVersion.JAVA_12}'
+                    assert tasks.compileJava.sourceCompatibility == '${JavaVersion.JAVA_12}'
+                    assert tasks.compileJava.targetCompatibility == '${JavaVersion.JAVA_12}'
+                }
+            }
+        """
+
+        expect:
+        succeeds('verify')
+    }
+
+    def "override JVM compatibility via toolchain"() {
+        assumeFalse(Jvm.current.javaVersion == '12')
+        assumeTrue(GradleVersion.version(gradleDistributionUnderTest) >= GradleVersion.version("6.7"))
+
+        given:
+        makeSingleProject()
+        buildFile << """
+            gradlePlugin {
+                compatibility.minimumGradleVersion = '6.2.1'
+            }
+
+            java {
+                toolchain {
+                    languageVersion = JavaLanguageVersion.of(12)
+                }
             }
 
             tasks.register('verify') {

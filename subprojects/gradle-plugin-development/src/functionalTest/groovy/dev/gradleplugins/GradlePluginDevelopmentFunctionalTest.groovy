@@ -5,6 +5,7 @@ import dev.gradleplugins.fixtures.sample.JavaBasicGradlePlugin
 import dev.gradleplugins.integtests.fixtures.AbstractGradleSpecification
 import dev.gradleplugins.test.fixtures.gradle.GradleScriptDsl
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
+import org.gradle.util.GradleVersion
 import spock.lang.Unroll
 
 class GradlePluginDevelopmentFunctionalTest extends AbstractGradleSpecification {
@@ -395,6 +396,7 @@ public class Bar {}
 
     private static String mainClassName(String mainClass) {
         return """
+            import ${GradleVersion.canonicalName}
             if (GradleVersion.version('8.0') > GradleVersion.current()) {
                 mainClassName = '${mainClass}'
             } else {
