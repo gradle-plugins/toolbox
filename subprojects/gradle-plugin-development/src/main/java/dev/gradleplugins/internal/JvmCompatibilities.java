@@ -9,11 +9,18 @@ import org.gradle.api.Project;
 import org.gradle.api.Transformer;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.plugins.JavaPluginExtension;
+import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.compile.JavaCompile;
 
 import javax.inject.Inject;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -23,29 +30,88 @@ public abstract class JvmCompatibilities {
 
     public static abstract class ForProjectExtension extends JvmCompatibilities {}
 
+    private static Provider<JavaVersion> javaToolchainLanguageVersion(Project project) {
+        final JavaPluginExtension java = project.getExtensions().getByType(JavaPluginExtension.class);
+
+        try {
+            Method JavaPluginExtension__getToolchain = java.getClass().getDeclaredMethod("getToolchain");
+            Object toolchain = JavaPluginExtension__getToolchain.invoke(java);
+            Method JavaToolchainSpec__getLanguageVersion = toolchain.getClass().getDeclaredMethod("getLanguageVersion");
+            Provider<?> languageVersion = (Provider<?>) JavaToolchainSpec__getLanguageVersion.invoke(toolchain);
+            return languageVersion.map(Object::toString).map(JavaVersion::toVersion);
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            // ignore failure, most likely lower Gradle
+        }
+
+        return project.provider(() -> null);
+    }
+
+    private static <T> Provider<? extends Iterable<T>> asList(Provider<T> provider) {
+        return provider.map(Collections::singletonList).orElse(Collections.emptyList());
+    }
+
+    private static <T> Provider<T> firstDefined(Project project, Action<? super ListProperty<T>> action) {
+        @SuppressWarnings("unchecked")
+        ListProperty<T> versions = (ListProperty<T>) project.getObjects().listProperty(Object.class);
+        versions.finalizeValueOnRead();
+        action.execute(versions);
+        return versions.map(it -> {
+            final Iterator<T> iter = it.iterator();
+            if (!iter.hasNext()) {
+                return null;
+            } else {
+                return iter.next();
+            }
+        });
+    }
+
+    private static <T> Callable<T> disconnect(Provider<T> provider) {
+        return new Callable<T>() {
+            private T value;
+            private boolean memoized = false;
+
+            @Override
+            public T call() throws Exception {
+                if (!memoized) {
+                    value = provider.getOrNull();
+                    memoized = true;
+                }
+                return value;
+            }
+        };
+    }
+
     /*private*/ static abstract /*final*/ class ProjectJvmCompatibilitiesExtension extends ForProjectExtension {
         @Inject
         public ProjectJvmCompatibilitiesExtension(Project project) {
             JavaPluginExtension java = project.getExtensions().getByType(JavaPluginExtension.class);
 
-            getTargetCompatibility().convention(project.provider(java::getTargetCompatibility).map(toFinalValue(java::getTargetCompatibility, java::setTargetCompatibility, it -> {
-                // Important to restore the normla behaviour
-                //   Normally, targetCompatibility derived from sourceCompatibility when not set
-                final JavaVersion sourceCompatibility = java.getSourceCompatibility();
-                if (!sourceCompatibility.equals(JavaVersion.VERSION_1_1)) {
-                    java.setTargetCompatibility(sourceCompatibility);
-                } else {
-                    java.setTargetCompatibility(it);
-                }
-            })).orElse(getSourceCompatibility()));
+            getTargetCompatibility().convention(firstDefined(project, (ListProperty<JavaVersion> versions) -> {
+                versions.addAll(asList(javaToolchainLanguageVersion(project)));
+                versions.addAll(asList(project.provider(disconnect(project.provider(java::getTargetCompatibility).map(toFinalValue(java::getTargetCompatibility, java::setTargetCompatibility, it -> {
+                        // Important to restore the normal behaviour
+                        //   Normally, targetCompatibility derived from sourceCompatibility when not set
+                        final JavaVersion sourceCompatibility = java.getSourceCompatibility();
+                        if (!sourceCompatibility.equals(JavaVersion.VERSION_1_1)) {
+                            java.setTargetCompatibility(sourceCompatibility);
+                        } else if (javaToolchainLanguageVersion(project).isPresent()) {
+                            java.setTargetCompatibility(null);
+                        } else {
+                            java.setTargetCompatibility(it);
+                        }
+                    }))))));
+            }).orElse(getSourceCompatibility()));
             getTargetCompatibility().finalizeValueOnRead();
             getTargetCompatibility().disallowChanges();
             project.afterEvaluate(__ -> getTargetCompatibility().finalizeValue());
 
-            getSourceCompatibility().convention(project.provider(java::getSourceCompatibility).map(toFinalValue(java::getSourceCompatibility, java::setSourceCompatibility, it -> {
-                // Important to restore the normal behaviour
-                java.setSourceCompatibility(it);
-            })));
+            getSourceCompatibility().convention(firstDefined(project, (ListProperty<JavaVersion> versions) -> {
+                versions.addAll(asList(javaToolchainLanguageVersion(project)));
+                versions.addAll(asList(project.provider(disconnect(project.provider(java::getSourceCompatibility).map(toFinalValue(java::getSourceCompatibility, java::setSourceCompatibility, it -> {
+                        // Important to restore the normal behaviour
+                        java.setSourceCompatibility(it);
+                    }))))));
+            }));
             getSourceCompatibility().finalizeValueOnRead();
             getSourceCompatibility().disallowChanges();
             project.afterEvaluate(__ -> getSourceCompatibility().finalizeValue());
@@ -76,8 +142,10 @@ public abstract class JvmCompatibilities {
             final SourceSetJvmCompatibilitiesExtension extension = project.getExtensions().create("$jvmCompatibilities", SourceSetJvmCompatibilitiesExtension.class);
 
             extension.configureEach(it -> {
-                it.getSourceCompatibility().convention(jvmCompatibilities.getSourceCompatibility());
-                it.getTargetCompatibility().convention(jvmCompatibilities.getTargetCompatibility()
+                it.getSourceCompatibility().convention(javaToolchainLanguageVersion(project)
+                        .orElse(jvmCompatibilities.getSourceCompatibility()));
+                it.getTargetCompatibility().convention(javaToolchainLanguageVersion(project)
+                        .orElse(jvmCompatibilities.getTargetCompatibility())
                         .orElse(it.getSourceCompatibility()));
             });
 
