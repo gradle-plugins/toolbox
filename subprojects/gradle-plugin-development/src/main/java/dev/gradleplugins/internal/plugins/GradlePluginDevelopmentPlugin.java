@@ -37,7 +37,7 @@ public abstract class GradlePluginDevelopmentPlugin implements Plugin<Object> {
     }
 
     private void doApply(Project project) {
-        project.getPluginManager().apply(GradlePluginDevelopmentExtensionPlugin.class);
+        project.getPluginManager().apply("gradlepluginsdev.rules.project-extensions");
     }
 
     private void doApply(Settings settings) {
@@ -63,7 +63,7 @@ public abstract class GradlePluginDevelopmentPlugin implements Plugin<Object> {
     }
 
     private void applyToProject(Project project) {
-        project.getPluginManager().apply(GradlePluginDevelopmentExtensionPlugin.class);
+        project.getPluginManager().apply("gradlepluginsdev.rules.project-extensions");
         project.afterEvaluate(this::warnWhenUsingCoreGradlePluginDevelopment);
     }
 
