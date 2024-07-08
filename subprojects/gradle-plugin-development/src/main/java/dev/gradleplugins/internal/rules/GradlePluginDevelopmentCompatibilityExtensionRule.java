@@ -179,12 +179,7 @@ import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradl
         }
 
         public void configure(Action<? super GradlePluginDevelopmentCompatibilityExtension> action) {
-            provider.configure(new Action<GradleCompatibilities>() {
-                @Override
-                public void execute(GradleCompatibilities delegate) {
-                    action.execute(adapterFactory.create(delegate));
-                }
-            });
+            provider.configure(delegate -> action.execute(adapterFactory.create(delegate)));
         }
 
         /*private*/ static abstract /*final*/ class GradlePluginDevelopmentCompatibilityExtensionAdapter implements GradlePluginDevelopmentCompatibilityExtension {
