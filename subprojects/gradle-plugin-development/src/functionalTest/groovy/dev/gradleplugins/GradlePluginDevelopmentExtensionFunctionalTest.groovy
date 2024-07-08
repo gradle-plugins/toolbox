@@ -41,7 +41,7 @@ abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends Ab
     }
 
     def "does not change source/target compatibility if already configured when a minimum Gradle version is configured"() {
-        assumeFalse(Jvm.current.java9)
+        assumeFalse(Jvm.current.javaVersion == '12')
 
         given:
         makeSingleProject()
@@ -51,16 +51,16 @@ abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends Ab
             }
 
             java {
-                sourceCompatibility = JavaVersion.VERSION_1_9
-                targetCompatibility = JavaVersion.VERSION_1_9
+                sourceCompatibility = JavaVersion.VERSION_12
+                targetCompatibility = JavaVersion.VERSION_12
             }
 
             tasks.register('verify') {
                 doLast {
-                    assert java.sourceCompatibility.toString() == '${JavaVersion.JAVA_9}'
-                    assert java.targetCompatibility.toString() == '${JavaVersion.JAVA_9}'
-                    assert tasks.compileJava.sourceCompatibility == '${JavaVersion.JAVA_9}'
-                    assert tasks.compileJava.targetCompatibility == '${JavaVersion.JAVA_9}'
+                    assert java.sourceCompatibility.toString() == '${JavaVersion.JAVA_12}'
+                    assert java.targetCompatibility.toString() == '${JavaVersion.JAVA_12}'
+                    assert tasks.compileJava.sourceCompatibility == '${JavaVersion.JAVA_12}'
+                    assert tasks.compileJava.targetCompatibility == '${JavaVersion.JAVA_12}'
                 }
             }
         """
@@ -70,7 +70,7 @@ abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends Ab
     }
 
     def "override if only source compatibility configured"() {
-        assumeFalse(Jvm.current.java9)
+        assumeFalse(Jvm.current.javaVersion == '12')
 
         given:
         makeSingleProject()
@@ -80,15 +80,15 @@ abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends Ab
             }
 
             java {
-                sourceCompatibility = JavaVersion.VERSION_1_9
+                sourceCompatibility = JavaVersion.VERSION_12
             }
 
             tasks.register('verify') {
                 doLast {
-                    assert java.sourceCompatibility.toString() == '${JavaVersion.JAVA_9}'
-                    assert java.targetCompatibility.toString() == '${JavaVersion.JAVA_9}'
-                    assert tasks.compileJava.sourceCompatibility == '${JavaVersion.JAVA_9}'
-                    assert tasks.compileJava.targetCompatibility == '${JavaVersion.JAVA_9}'
+                    assert java.sourceCompatibility.toString() == '${JavaVersion.JAVA_12}'
+                    assert java.targetCompatibility.toString() == '${JavaVersion.JAVA_12}'
+                    assert tasks.compileJava.sourceCompatibility == '${JavaVersion.JAVA_12}'
+                    assert tasks.compileJava.targetCompatibility == '${JavaVersion.JAVA_12}'
                 }
             }
         """
@@ -98,22 +98,22 @@ abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends Ab
     }
 
     def "does not change source/target compatibility if already configured when a no minimum Gradle version is configured"() {
-        assumeFalse(Jvm.current.java9)
+        assumeFalse(Jvm.current.javaVersion == '12')
 
         given:
         makeSingleProject()
         buildFile << """
             java {
-                sourceCompatibility = JavaVersion.VERSION_1_9
-                targetCompatibility = JavaVersion.VERSION_1_9
+                sourceCompatibility = JavaVersion.VERSION_12
+                targetCompatibility = JavaVersion.VERSION_12
             }
 
             tasks.register('verify') {
                 doLast {
-                    assert java.sourceCompatibility.toString() == '${JavaVersion.JAVA_9}'
-                    assert java.targetCompatibility.toString() == '${JavaVersion.JAVA_9}'
-                    assert tasks.compileJava.sourceCompatibility == '${JavaVersion.JAVA_9}'
-                    assert tasks.compileJava.targetCompatibility == '${JavaVersion.JAVA_9}'
+                    assert java.sourceCompatibility.toString() == '${JavaVersion.JAVA_12}'
+                    assert java.targetCompatibility.toString() == '${JavaVersion.JAVA_12}'
+                    assert tasks.compileJava.sourceCompatibility == '${JavaVersion.JAVA_12}'
+                    assert tasks.compileJava.targetCompatibility == '${JavaVersion.JAVA_12}'
                 }
             }
         """
