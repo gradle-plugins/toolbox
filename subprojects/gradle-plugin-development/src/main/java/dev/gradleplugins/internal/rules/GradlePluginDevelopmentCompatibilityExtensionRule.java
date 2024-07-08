@@ -12,6 +12,7 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.plugins.ExtensionAware;
+import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.provider.Property;
 import org.gradle.api.reflect.HasPublicType;
 import org.gradle.api.reflect.TypeOf;
@@ -55,6 +56,7 @@ import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradl
         private boolean finalized = false;
         private final GradleCompatibilitiesProvider provider;
         private final Runnable finalizeSourceCompatibilityForBackwardCompatibility;
+        private final Runnable overrideProjectJvmCompatibilitiesForBackwardCompatibility;
         private final GradlePluginDevelopmentCompatibilityExtensionAdapter.Factory adapterFactory;
 
         private static final class GradleCompatibilitiesProvider {
@@ -118,6 +120,13 @@ import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradl
             this.finalizeSourceCompatibilityForBackwardCompatibility = () -> {
                 project.getExtensions().getByType(JvmCompatibilities.ForSourceSetExtension.class).forSourceSet(pluginSourceSetOf(project)).configure(x -> x.getSourceCompatibility().finalizeValue());
             };
+            this.overrideProjectJvmCompatibilitiesForBackwardCompatibility = () -> {
+                project.getExtensions().configure(JavaPluginExtension.class, java -> {
+                    JvmCompatibilities.ForSourceSetExtension.SourceSetJvmCompatibilities jvmCompatibilities = project.getExtensions().getByType(JvmCompatibilities.ForSourceSetExtension.class).forSourceSet(pluginSourceSetOf(project)).get();
+                    java.setTargetCompatibility(jvmCompatibilities.getTargetCompatibility().get());
+                    java.setSourceCompatibility(jvmCompatibilities.getSourceCompatibility().get());
+                });
+            };
             this.adapterFactory = new GradlePluginDevelopmentCompatibilityExtensionAdapter.Factory(project.getObjects());
         }
 
@@ -145,6 +154,12 @@ import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradl
                     //   Because we force the convention for `minimumGradleVersion` the convention current Gradle,
                     //   we need to finalize the value `sourceCompatibility` so the value resolve in the right order.
                     finalizeSourceCompatibilityForBackwardCompatibility.run();
+
+                    // For backward compatibility with 1.x series
+                    //   We used to rely only on the `java` extension for the JVM compatibilities.
+                    //   Now, we modeled a middle layer that handle per-source set compatibilities.
+                    //   At the moment, we will just back-set the matching source set compatibilities.
+                    overrideProjectJvmCompatibilitiesForBackwardCompatibility.run();
 
                     // For backward compatibility with 1.x series
                     it.getGradleApiVersion().finalizeValue();

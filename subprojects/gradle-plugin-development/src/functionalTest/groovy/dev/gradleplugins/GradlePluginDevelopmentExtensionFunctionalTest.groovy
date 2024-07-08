@@ -148,6 +148,8 @@ abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends Ab
             gradlePlugin.compatibility.minimumGradleVersion = '${gradleVersion}'
             tasks.register('verify') {
                 doLast {
+                    assert java.sourceCompatibility.toString() == '${javaVersion}'
+                    assert java.targetCompatibility.toString() == '${javaVersion}'
                     assert tasks.compileJava.sourceCompatibility == '${javaVersion}'
                     assert tasks.compileJava.targetCompatibility == '${javaVersion}'
                 }
