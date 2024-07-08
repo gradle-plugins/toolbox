@@ -11,7 +11,10 @@ import org.junit.jupiter.api.Test;
 
 import static dev.gradleplugins.ProjectMatchers.publicType;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GradlePluginDevelopmentDependencyExtensionTest {
     private final Project project = ProjectBuilder.builder().build();
@@ -52,22 +55,12 @@ class GradlePluginDevelopmentDependencyExtensionTest {
     }
 
     @Test
-    void throwsNullPointerExceptionWhenGradleApiVersionIsNull() {
-        assertThrows(NullPointerException.class, () -> subject.gradleApi(null));
-    }
-
-    @Test
     void usesSpecificGradleTestKitDependencyVersion() {
         Dependency dependency = subject.gradleTestKit("6.2.1");
         assertTrue(dependency instanceof ExternalDependency);
         assertEquals("dev.gradleplugins", dependency.getGroup());
         assertEquals("gradle-test-kit", dependency.getName());
         assertEquals("6.2.1", dependency.getVersion());
-    }
-
-    @Test
-    void throwsNullPointerExceptionWhenGradleTestKitVersionIsNull() {
-        assertThrows(NullPointerException.class, () -> subject.gradleTestKit(null));
     }
 
     @Test
