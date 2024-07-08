@@ -3,6 +3,7 @@ package dev.gradleplugins.internal.plugins;
 import dev.gradleplugins.GradlePluginDevelopmentTestSuite;
 import dev.gradleplugins.internal.DependencyBucketFactory;
 import dev.gradleplugins.internal.DependencyFactory;
+import dev.gradleplugins.internal.util.LocalOrRemoteVersionTransformer;
 import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -42,8 +43,6 @@ public abstract class GradlePluginDevelopmentUnitTestingPlugin implements Plugin
     }
 
     private static Transformer<Dependency, String> localOrRemoteGradleApi(DependencyFactory factory) {
-        return version -> {
-            return version.equals("local") ? factory.localGradleApi() : factory.gradleApi(version);
-        };
+        return new LocalOrRemoteVersionTransformer<>(factory::localGradleApi, factory::gradleApi);
     }
 }

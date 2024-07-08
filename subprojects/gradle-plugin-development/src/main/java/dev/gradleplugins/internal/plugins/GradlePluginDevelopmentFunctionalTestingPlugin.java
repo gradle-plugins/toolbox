@@ -1,6 +1,7 @@
 package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.GradlePluginDevelopmentTestSuite;
+import dev.gradleplugins.internal.util.LocalOrRemoteVersionTransformer;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 
@@ -29,10 +30,12 @@ public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements 
         functionalTest(project).dependencies(dependencies -> {
             dependencies.implementation(project.provider(() -> {
                 if (project.getPluginManager().hasPlugin("java-gradle-plugin")) {
-                    return compatibility(gradlePlugin(project)).getGradleApiVersion().getOrElse("local");
+                    return compatibility(gradlePlugin(project));
                 }
-                return "local";
-            }).map(dependencies::gradleTestKit));
+                return null;
+            })
+                    .flatMap(it -> it.getGradleApiVersion().orElse("local"))
+                    .map(new LocalOrRemoteVersionTransformer<>(dependencies::gradleTestKit, dependencies::gradleTestKit)));
         });
     }
 }
