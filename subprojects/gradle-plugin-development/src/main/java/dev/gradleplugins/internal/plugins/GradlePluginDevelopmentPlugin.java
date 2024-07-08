@@ -41,6 +41,7 @@ public abstract class GradlePluginDevelopmentPlugin implements Plugin<Object> {
     }
 
     private void doApply(Settings settings) {
+        settings.getPluginManager().apply("gradlepluginsdev.rules.settings-repositories-extension");
         settings.getGradle().addBuildListener(new BuildAdapter() {
             @Override
             public void buildFinished(BuildResult result) {
