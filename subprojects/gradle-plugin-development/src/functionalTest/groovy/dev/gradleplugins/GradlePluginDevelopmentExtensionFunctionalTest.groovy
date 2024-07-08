@@ -41,7 +41,7 @@ abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends Ab
     }
 
     def "does not change source/target compatibility if already configured when a minimum Gradle version is configured"() {
-        assumeFalse(Jvm.current.java11)
+        assumeFalse(Jvm.current.java9)
 
         given:
         makeSingleProject()
@@ -51,14 +51,44 @@ abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends Ab
             }
 
             java {
-                sourceCompatibility = JavaVersion.VERSION_11
-                targetCompatibility = JavaVersion.VERSION_11
+                sourceCompatibility = JavaVersion.VERSION_1_9
+                targetCompatibility = JavaVersion.VERSION_1_9
             }
 
             tasks.register('verify') {
                 doLast {
-                    assert java.sourceCompatibility.toString() == '${JavaVersion.JAVA_11}'
-                    assert java.targetCompatibility.toString() == '${JavaVersion.JAVA_11}'
+                    assert java.sourceCompatibility.toString() == '${JavaVersion.JAVA_9}'
+                    assert java.targetCompatibility.toString() == '${JavaVersion.JAVA_9}'
+                    assert tasks.compileJava.sourceCompatibility == '${JavaVersion.JAVA_9}'
+                    assert tasks.compileJava.targetCompatibility == '${JavaVersion.JAVA_9}'
+                }
+            }
+        """
+
+        expect:
+        succeeds('verify')
+    }
+
+    def "override if only source compatibility configured"() {
+        assumeFalse(Jvm.current.java9)
+
+        given:
+        makeSingleProject()
+        buildFile << """
+            gradlePlugin {
+                compatibility.minimumGradleVersion = '6.2.1'
+            }
+
+            java {
+                sourceCompatibility = JavaVersion.VERSION_1_9
+            }
+
+            tasks.register('verify') {
+                doLast {
+                    assert java.sourceCompatibility.toString() == '${JavaVersion.JAVA_9}'
+                    assert java.targetCompatibility.toString() == '${JavaVersion.JAVA_9}'
+                    assert tasks.compileJava.sourceCompatibility == '${JavaVersion.JAVA_9}'
+                    assert tasks.compileJava.targetCompatibility == '${JavaVersion.JAVA_9}'
                 }
             }
         """
@@ -68,20 +98,22 @@ abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends Ab
     }
 
     def "does not change source/target compatibility if already configured when a no minimum Gradle version is configured"() {
-        assumeFalse(Jvm.current.java11)
+        assumeFalse(Jvm.current.java9)
 
         given:
         makeSingleProject()
         buildFile << """
             java {
-                sourceCompatibility = JavaVersion.VERSION_11
-                targetCompatibility = JavaVersion.VERSION_11
+                sourceCompatibility = JavaVersion.VERSION_1_9
+                targetCompatibility = JavaVersion.VERSION_1_9
             }
 
             tasks.register('verify') {
                 doLast {
-                    assert java.sourceCompatibility.toString() == '${JavaVersion.JAVA_11}'
-                    assert java.targetCompatibility.toString() == '${JavaVersion.JAVA_11}'
+                    assert java.sourceCompatibility.toString() == '${JavaVersion.JAVA_9}'
+                    assert java.targetCompatibility.toString() == '${JavaVersion.JAVA_9}'
+                    assert tasks.compileJava.sourceCompatibility == '${JavaVersion.JAVA_9}'
+                    assert tasks.compileJava.targetCompatibility == '${JavaVersion.JAVA_9}'
                 }
             }
         """
@@ -98,6 +130,8 @@ abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends Ab
                 doLast {
                     assert java.sourceCompatibility.toString() == '${Jvm.current.javaSpecificationVersion}'
                     assert java.targetCompatibility.toString() == '${Jvm.current.javaSpecificationVersion}'
+                    assert tasks.compileJava.sourceCompatibility == '${Jvm.current.javaSpecificationVersion}'
+                    assert tasks.compileJava.targetCompatibility == '${Jvm.current.javaSpecificationVersion}'
                 }
             }
         """
@@ -114,8 +148,8 @@ abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends Ab
             gradlePlugin.compatibility.minimumGradleVersion = '${gradleVersion}'
             tasks.register('verify') {
                 doLast {
-                    assert java.sourceCompatibility.toString() == '${javaVersion}'
-                    assert java.targetCompatibility.toString() == '${javaVersion}'
+                    assert tasks.compileJava.sourceCompatibility == '${javaVersion}'
+                    assert tasks.compileJava.targetCompatibility == '${javaVersion}'
                 }
             }
         """

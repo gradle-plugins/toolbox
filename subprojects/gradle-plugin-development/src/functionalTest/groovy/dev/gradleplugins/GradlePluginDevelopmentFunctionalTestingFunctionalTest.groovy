@@ -33,14 +33,31 @@ abstract class AbstractGradlePluginDevelopmentFunctionalTestingFunctionalTest ex
         jar("build/libs/gradle-plugin.jar").assertFileContent("META-INF/gradle-plugins/${componentUnderTest.pluginId}.properties", CoreMatchers.startsWith('implementation-class=com.example.BasicPlugin'))
     }
 
-    def "has no self-resolving Gradle TestKit dependency"() {
+    def "has no self-resolving Gradle TestKit dependency if using minimum Gradle version"() {
+        given:
+        makeSingleProject()
+        componentUnderTest.writeToProject(testDirectory)
+        buildFile << """
+            gradlePlugin.compatibility.minimumGradleVersion = '6.8'
+            tasks.register('verify') {
+                doLast {
+                    assert !configurations.functionalTestImplementation.dependencies.any { it instanceof ${SelfResolvingDependencyInternal.canonicalName} ? it.targetComponentId.displayName == 'Gradle TestKit' : false }
+                }
+            }
+        """
+
+        expect:
+        succeeds('verify')
+    }
+
+    def "use self-resolving Gradle TestKit dependency if no minimum Gradle version"() {
         given:
         makeSingleProject()
         componentUnderTest.writeToProject(testDirectory)
         buildFile << """
             tasks.register('verify') {
                 doLast {
-                    assert !configurations.functionalTestImplementation.dependencies.any { it instanceof ${SelfResolvingDependencyInternal.canonicalName} ? it.targetComponentId.displayName == 'Gradle TestKit' : false }
+                    assert configurations.functionalTestImplementation.dependencies.any { it instanceof ${SelfResolvingDependencyInternal.canonicalName} ? it.targetComponentId.displayName == 'Gradle TestKit' : false }
                 }
             }
         """

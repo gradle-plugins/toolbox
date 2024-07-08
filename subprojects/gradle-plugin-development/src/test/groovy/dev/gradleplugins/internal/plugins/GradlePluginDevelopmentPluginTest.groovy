@@ -22,8 +22,8 @@ abstract class AbstractGradlePluginDevelopmentPluginTest extends Specification {
         project.evaluate()
 
         then:
-        project.java.sourceCompatibility == expectedSourceCompatibility
-        project.java.targetCompatibility == expectedTargetCompatibility
+        project.compileJava.sourceCompatibility == expectedSourceCompatibility.toString()
+        project.compileJava.targetCompatibility == expectedTargetCompatibility.toString()
 
         where:
         minimumGradleVersion    || expectedSourceCompatibility  | expectedTargetCompatibility
