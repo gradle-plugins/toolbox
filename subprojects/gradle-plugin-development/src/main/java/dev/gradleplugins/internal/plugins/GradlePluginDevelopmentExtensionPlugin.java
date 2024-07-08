@@ -7,6 +7,6 @@ public abstract class GradlePluginDevelopmentExtensionPlugin implements Plugin<P
     @Override
     public void apply(Project project) {
         new RegisterGradlePluginDevelopmentRepositoryExtensionRule().execute(project);
-        new RegisterGradlePluginDevelopmentDependencyExtensionRule().execute(project);
+        project.getPluginManager().apply("gradlepluginsdev.rules.project-dependencies-extension");
     }
 }

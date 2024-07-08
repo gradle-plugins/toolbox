@@ -6,6 +6,7 @@ import org.gradle.api.artifacts.ExternalDependency;
 import org.gradle.api.artifacts.SelfResolvingDependency;
 import org.gradle.api.internal.artifacts.dependencies.SelfResolvingDependencyInternal;
 import org.gradle.testfixtures.ProjectBuilder;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static dev.gradleplugins.ProjectMatchers.publicType;
@@ -14,7 +15,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class GradlePluginDevelopmentDependencyExtensionTest {
     private final Project project = ProjectBuilder.builder().build();
-    private final GradlePluginDevelopmentDependencyExtension subject = GradlePluginDevelopmentDependencyExtension.from(project.getDependencies());
+    private GradlePluginDevelopmentDependencyExtension subject;
+
+    @BeforeEach
+    void setup() {
+        project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-base");
+        subject = GradlePluginDevelopmentDependencyExtension.from(project.getDependencies());
+    }
 
     @Test
     void canUseLocalGradleApiDependency() {

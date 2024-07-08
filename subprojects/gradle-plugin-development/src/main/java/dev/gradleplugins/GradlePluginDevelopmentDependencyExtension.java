@@ -49,6 +49,6 @@ public interface GradlePluginDevelopmentDependencyExtension {
      */
     static GradlePluginDevelopmentDependencyExtension from(DependencyHandler dependencies) {
         Objects.requireNonNull(dependencies);
-        return new DefaultGradlePluginDevelopmentDependencyExtension(dependencies);
+        return dependencies.getExtensions().getByType(GradlePluginDevelopmentDependencyExtension.class);
     }
 }
