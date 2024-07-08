@@ -1,12 +1,13 @@
 package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.GradlePluginDevelopmentTestSuite;
+import dev.gradleplugins.internal.DependencyBucketFactory;
 import dev.gradleplugins.internal.DependencyFactory;
-import dev.gradleplugins.internal.GradlePluginDevelopmentDependencyExtensionInternal;
-import lombok.val;
 import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.Transformer;
+import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.plugins.AppliedPlugin;
 
 import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
@@ -36,12 +37,13 @@ public abstract class GradlePluginDevelopmentUnitTestingPlugin implements Plugin
         return ignored -> {
             // Automatically add Gradle API as a dependency. We assume unit tests are accomplished via ProjectBuilder
             final DependencyFactory factory = new DependencyFactory(project.getDependencies());
-            val dependencies = GradlePluginDevelopmentDependencyExtensionInternal.of(project.getDependencies());
-            dependencies.add(test(project).getSourceSet().get().getImplementationConfigurationName(), project.provider(() -> {
-                return compatibility(gradlePlugin(project)).getGradleApiVersion().orElse("local").map(version -> {
-                    return version.equals("local") ? factory.localGradleApi() : factory.gradleApi(version);
-                });
-            }));
+            new DependencyBucketFactory(project, test(project).getSourceSet()).create("implementation").add(project.provider(() -> compatibility(gradlePlugin(project))).flatMap(it -> it.getGradleApiVersion().orElse("local").map(localOrRemoteGradleApi(factory))));
+        };
+    }
+
+    private static Transformer<Dependency, String> localOrRemoteGradleApi(DependencyFactory factory) {
+        return version -> {
+            return version.equals("local") ? factory.localGradleApi() : factory.gradleApi(version);
         };
     }
 }

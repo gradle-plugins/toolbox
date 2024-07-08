@@ -16,11 +16,11 @@
 
 package dev.gradleplugins.internal.plugins;
 
+import dev.gradleplugins.GradlePluginDevelopmentDependencyBucket;
 import dev.gradleplugins.internal.DeferredRepositoryFactory;
+import dev.gradleplugins.internal.DependencyBucketFactory;
 import dev.gradleplugins.internal.DependencyFactory;
-import dev.gradleplugins.internal.GradlePluginDevelopmentDependencyExtensionInternal;
 import dev.gradleplugins.internal.GroovySpockFrameworkTestSuite;
-import lombok.val;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.provider.Provider;
@@ -60,9 +60,9 @@ public class SpockFrameworkTestSuiteBasePlugin implements Plugin<Project> {
 
     public static void configureSpockFrameworkProjectDependency(Provider<String> spockVersion, SourceSet sourceSet, Project project) {
         final DependencyFactory factory = new DependencyFactory(project.getDependencies());
-        val dependencies = GradlePluginDevelopmentDependencyExtensionInternal.of(project.getDependencies());
-        dependencies.add(sourceSet.getImplementationConfigurationName(), factory.groovy(GROOVY_ALL_VERSION));
-        dependencies.add(sourceSet.getImplementationConfigurationName(), spockVersion.map(factory::spockFrameworkPlatform));
-        dependencies.add(sourceSet.getImplementationConfigurationName(), factory.spockFramework());
+        final GradlePluginDevelopmentDependencyBucket implementation = new DependencyBucketFactory(project, project.provider(() -> sourceSet)).create("implementation");
+        implementation.add(factory.groovy(GROOVY_ALL_VERSION));
+        implementation.add(spockVersion.map(factory::spockFrameworkPlatform));
+        implementation.add(factory.spockFramework());
     }
 }

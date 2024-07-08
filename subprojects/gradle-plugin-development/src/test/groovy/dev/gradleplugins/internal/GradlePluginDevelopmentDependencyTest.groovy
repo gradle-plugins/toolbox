@@ -9,7 +9,7 @@ import spock.lang.Specification
 
 class GradlePluginDevelopmentDependencyTest extends Specification {
     private final Project project = ProjectBuilder.builder().build()
-    private final def dependencies = new GradlePluginDevelopmentDependencyExtensionInternal(GradlePluginDevelopmentDependencyExtension.from(project.getDependencies()), project.getConfigurations(), DependencyFactory.forProject(project))
+    private final def dependencies = new GradlePluginDevelopmentDependencyExtensionInternal(GradlePluginDevelopmentDependencyExtension.from(project.getDependencies()), DependencyFactory.forProject(project))
 
     def "can use local Gradle API dependency"() {
         expect:

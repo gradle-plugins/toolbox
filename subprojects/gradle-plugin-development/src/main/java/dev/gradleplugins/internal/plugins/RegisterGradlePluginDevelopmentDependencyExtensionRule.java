@@ -23,7 +23,7 @@ final class RegisterGradlePluginDevelopmentDependencyExtensionRule implements Ac
     @Override
     public void execute(Project project) {
         final DependencyHandler dependencies = project.getDependencies();
-        dependencies.getExtensions().add("gradlePluginDevelopment", new GradlePluginDevelopmentDependencyExtensionInternal(from(project.getDependencies()), project.getConfigurations(), DependencyFactory.forProject(project)));
+        dependencies.getExtensions().add("gradlePluginDevelopment", new GradlePluginDevelopmentDependencyExtensionInternal(from(project.getDependencies()), DependencyFactory.forProject(project)));
         try {
             Method target = Class.forName("dev.gradleplugins.internal.dsl.groovy.GroovyDslRuntimeExtensions").getMethod("extendWithMethod", Object.class, String.class, Closure.class);
             target.invoke(null, dependencies, "gradleApi", new GradleApiClosure(dependencies));

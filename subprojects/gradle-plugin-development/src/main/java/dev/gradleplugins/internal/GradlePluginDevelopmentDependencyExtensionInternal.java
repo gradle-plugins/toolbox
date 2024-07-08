@@ -1,11 +1,8 @@
 package dev.gradleplugins.internal;
 
 import dev.gradleplugins.GradlePluginDevelopmentDependencyExtension;
-import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
-import org.gradle.api.plugins.ExtensionAware;
-import org.gradle.api.provider.Provider;
 import org.gradle.api.reflect.HasPublicType;
 import org.gradle.api.reflect.TypeOf;
 
@@ -13,13 +10,11 @@ import javax.inject.Inject;
 
 public class GradlePluginDevelopmentDependencyExtensionInternal implements GradlePluginDevelopmentDependencyExtension, HasPublicType {
     private final GradlePluginDevelopmentDependencyExtension extension;
-    private final ConfigurationContainer configurations;
     private final DependencyFactory factory;
 
     @Inject
-    public GradlePluginDevelopmentDependencyExtensionInternal(GradlePluginDevelopmentDependencyExtension extension, ConfigurationContainer configurations, DependencyFactory factory) {
+    public GradlePluginDevelopmentDependencyExtensionInternal(GradlePluginDevelopmentDependencyExtension extension, DependencyFactory factory) {
         this.extension = extension;
-        this.configurations = configurations;
         this.factory = factory;
     }
 
@@ -45,19 +40,6 @@ public class GradlePluginDevelopmentDependencyExtensionInternal implements Gradl
 
     public Dependency groovy(String version) {
         return factory.groovy(version);
-    }
-
-    // Shim for supporting older Gradle versions
-    public void add(String configuration, Provider<Object> notation) {
-        configurations.named(configuration, new AddDependency(notation, factory));
-    }
-
-    public void add(String configuration, Object notation) {
-        configurations.named(configuration, new AddDependency(notation, factory));
-    }
-
-    public static GradlePluginDevelopmentDependencyExtensionInternal of(DependencyHandler dependencies) {
-        return (GradlePluginDevelopmentDependencyExtensionInternal) ExtensionAware.class.cast(dependencies).getExtensions().getByType(GradlePluginDevelopmentDependencyExtension.class);
     }
 
     @Override
