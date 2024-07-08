@@ -1,51 +1,43 @@
 package dev.gradleplugins;
 
-import dev.gradleplugins.internal.DefaultDependencyVersions;
-import org.gradle.api.Project;
+import dev.gradleplugins.internal.DependencyFactory;
 import org.gradle.api.artifacts.Dependency;
-import org.gradle.api.artifacts.ModuleDependency;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
 import org.gradle.api.reflect.HasPublicType;
 import org.gradle.api.reflect.TypeOf;
 
-import java.util.Objects;
-
 final class DefaultGradlePluginDevelopmentDependencyExtension implements GradlePluginDevelopmentDependencyExtension, HasPublicType {
     private static final String LOCAL_GRADLE_VERSION = "local";
-    private final DependencyHandler dependencies;
+    private final DependencyFactory factory;
 
     DefaultGradlePluginDevelopmentDependencyExtension(DependencyHandler dependencies) {
-        this.dependencies = dependencies;
+        this.factory = new DependencyFactory(dependencies);
     }
 
     @Override
     public Dependency gradleApi(String version) {
         if (LOCAL_GRADLE_VERSION.equals(version)) {
-            return dependencies.gradleApi();
+            return factory.localGradleApi();
         }
-        return dependencies.create("dev.gradleplugins:gradle-api:" + Objects.requireNonNull(version));
+        return factory.gradleApi(version);
     }
 
     @Override
     public Dependency gradleTestKit(String version) {
         if (LOCAL_GRADLE_VERSION.equals(version)) {
-            return dependencies.gradleTestKit();
+            return factory.localGradleTestKit();
         }
-        return dependencies.create("dev.gradleplugins:gradle-test-kit:" + Objects.requireNonNull(version));
+        return factory.gradleTestKit(version);
     }
 
     @Override
     public Dependency gradleFixtures() {
-        ModuleDependency dependency = (ModuleDependency)dependencies.create("dev.gradleplugins:gradle-fixtures:" + DefaultDependencyVersions.GRADLE_FIXTURES_VERSION);
-        dependency.capabilities(it -> {
-            it.requireCapability("dev.gradleplugins:gradle-fixtures-spock-support");
-        });
-        return dependency;
+        return factory.gradleFixtures();
     }
 
     @Override
     public Dependency gradleRunnerKit() {
-        return dependencies.create("dev.gradleplugins:gradle-runner-kit:" + DefaultDependencyVersions.GRADLE_FIXTURES_VERSION);
+        return factory.gradleRunnerKit();
     }
 
     @Override

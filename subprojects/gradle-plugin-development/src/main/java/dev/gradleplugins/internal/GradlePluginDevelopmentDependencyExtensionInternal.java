@@ -12,14 +12,12 @@ import org.gradle.api.reflect.TypeOf;
 import javax.inject.Inject;
 
 public class GradlePluginDevelopmentDependencyExtensionInternal implements GradlePluginDevelopmentDependencyExtension, HasPublicType {
-    private final DependencyHandler dependencies;
     private final GradlePluginDevelopmentDependencyExtension extension;
     private final ConfigurationContainer configurations;
     private final DependencyFactory factory;
 
     @Inject
-    public GradlePluginDevelopmentDependencyExtensionInternal(DependencyHandler dependencies, GradlePluginDevelopmentDependencyExtension extension, ConfigurationContainer configurations, DependencyFactory factory) {
-        this.dependencies = dependencies;
+    public GradlePluginDevelopmentDependencyExtensionInternal(GradlePluginDevelopmentDependencyExtension extension, ConfigurationContainer configurations, DependencyFactory factory) {
         this.extension = extension;
         this.configurations = configurations;
         this.factory = factory;
@@ -42,25 +40,11 @@ public class GradlePluginDevelopmentDependencyExtensionInternal implements Gradl
 
     @Override
     public Dependency gradleRunnerKit() {
-        return extension.gradleRunnerKit();
+        return factory.gradleRunnerKit();
     }
 
     public Dependency groovy(String version) {
-        return factory.create("org.codehaus.groovy:groovy-all:" + version);
-    }
-
-    public Dependency spockFramework(String version) {
-        return factory.create("org.spockframework:spock-core:" + version);
-    }
-
-    // Used by SpockFrameworkTestSuiteBasePlugin
-    public Dependency spockFramework() {
-        return factory.create("org.spockframework:spock-core");
-    }
-
-    // Used by SpockFrameworkTestSuiteBasePlugin
-    public Dependency spockFrameworkPlatform(String version) {
-        return dependencies.platform(factory.create("org.spockframework:spock-bom:" + version));
+        return factory.groovy(version);
     }
 
     // Shim for supporting older Gradle versions

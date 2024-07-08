@@ -299,37 +299,37 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         @Override
         public Object spockFramework(String version) {
             pluginManager.apply("groovy-base"); // Spock framework imply Groovy implementation language
-            return GradlePluginDevelopmentDependencyExtensionInternal.of(getDependencies()).spockFramework(version);
+            return factory.spockFramework(version);
         }
 
         @Override
         public Object gradleFixtures() {
-            return GradlePluginDevelopmentDependencyExtensionInternal.of(getDependencies()).gradleFixtures();
+            return factory.gradleFixtures();
         }
 
         @Override
         public Object gradleTestKit() {
-            return getDependencies().gradleTestKit();
+            return factory.localGradleTestKit();
         }
 
         @Override
         public Object gradleTestKit(String version) {
-            return GradlePluginDevelopmentDependencyExtensionInternal.of(getDependencies()).gradleTestKit(version);
+            return factory.gradleTestKit(version);
         }
 
         @Override
         public Object groovy() {
-            return defaultGroovyVersion.map(GradlePluginDevelopmentDependencyExtensionInternal.of(getDependencies())::groovy);
+            return defaultGroovyVersion.map(factory::groovy);
         }
 
         @Override
         public Object groovy(String version) {
-            return GradlePluginDevelopmentDependencyExtensionInternal.of(getDependencies()).groovy(version);
+            return factory.groovy(version);
         }
 
         @Override
         public Object gradleApi(String version) {
-            return GradlePluginDevelopmentDependencyExtensionInternal.of(getDependencies()).gradleApi(version);
+            return factory.gradleApi(version);
         }
     }
 

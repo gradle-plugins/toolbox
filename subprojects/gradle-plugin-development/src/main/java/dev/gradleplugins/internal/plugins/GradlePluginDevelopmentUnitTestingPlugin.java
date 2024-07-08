@@ -1,6 +1,7 @@
 package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.GradlePluginDevelopmentTestSuite;
+import dev.gradleplugins.internal.DependencyFactory;
 import dev.gradleplugins.internal.GradlePluginDevelopmentDependencyExtensionInternal;
 import lombok.val;
 import org.gradle.api.Action;
@@ -34,9 +35,12 @@ public abstract class GradlePluginDevelopmentUnitTestingPlugin implements Plugin
     private static Action<AppliedPlugin> useGradleApiImplementationDependency(Project project) {
         return ignored -> {
             // Automatically add Gradle API as a dependency. We assume unit tests are accomplished via ProjectBuilder
+            final DependencyFactory factory = new DependencyFactory(project.getDependencies());
             val dependencies = GradlePluginDevelopmentDependencyExtensionInternal.of(project.getDependencies());
             dependencies.add(test(project).getSourceSet().get().getImplementationConfigurationName(), project.provider(() -> {
-                return dependencies.gradleApi(compatibility(gradlePlugin(project)).getGradleApiVersion().getOrElse("local"));
+                return compatibility(gradlePlugin(project)).getGradleApiVersion().orElse("local").map(version -> {
+                    return version.equals("local") ? factory.localGradleApi() : factory.gradleApi(version);
+                });
             }));
         };
     }

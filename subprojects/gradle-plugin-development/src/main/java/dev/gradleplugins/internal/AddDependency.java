@@ -8,22 +8,27 @@ import org.gradle.api.provider.Provider;
 
 public final class AddDependency implements Action<Configuration> {
     private final Object notation;
-    private final DependencyFactory factory;
+    private final Factory factory;
 
     public AddDependency(Object notation, DependencyFactory factory) {
         this.notation = notation;
-        this.factory = factory;
+        this.factory = factory::create;
     }
 
     public AddDependency(Object notation, Action<? super ModuleDependency> action, DependencyFactory factory) {
-        this(notation, new DependencyFactory() {
+        this.notation = notation;
+        this.factory = new Factory() {
             @Override
             public Dependency create(Object notation) {
                 ModuleDependency dependency = (ModuleDependency) factory.create(notation);
                 action.execute(dependency);
                 return dependency;
             }
-        });
+        };
+    }
+
+    interface Factory {
+        Dependency create(Object notation);
     }
 
     @Override
