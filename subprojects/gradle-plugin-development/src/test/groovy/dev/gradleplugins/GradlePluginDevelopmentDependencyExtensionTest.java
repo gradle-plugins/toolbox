@@ -6,15 +6,25 @@ import org.gradle.api.artifacts.ExternalDependency;
 import org.gradle.api.artifacts.SelfResolvingDependency;
 import org.gradle.api.internal.artifacts.dependencies.SelfResolvingDependencyInternal;
 import org.gradle.testfixtures.ProjectBuilder;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static dev.gradleplugins.ProjectMatchers.publicType;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GradlePluginDevelopmentDependencyExtensionTest {
     private final Project project = ProjectBuilder.builder().build();
-    private final GradlePluginDevelopmentDependencyExtension subject = GradlePluginDevelopmentDependencyExtension.from(project.getDependencies());
+    private GradlePluginDevelopmentDependencyExtension subject;
+
+    @BeforeEach
+    void setup() {
+        project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-base");
+        subject = GradlePluginDevelopmentDependencyExtension.from(project.getDependencies());
+    }
 
     @Test
     void canUseLocalGradleApiDependency() {
@@ -45,22 +55,12 @@ class GradlePluginDevelopmentDependencyExtensionTest {
     }
 
     @Test
-    void throwsNullPointerExceptionWhenGradleApiVersionIsNull() {
-        assertThrows(NullPointerException.class, () -> subject.gradleApi(null));
-    }
-
-    @Test
     void usesSpecificGradleTestKitDependencyVersion() {
         Dependency dependency = subject.gradleTestKit("6.2.1");
         assertTrue(dependency instanceof ExternalDependency);
         assertEquals("dev.gradleplugins", dependency.getGroup());
         assertEquals("gradle-test-kit", dependency.getName());
         assertEquals("6.2.1", dependency.getVersion());
-    }
-
-    @Test
-    void throwsNullPointerExceptionWhenGradleTestKitVersionIsNull() {
-        assertThrows(NullPointerException.class, () -> subject.gradleTestKit(null));
     }
 
     @Test

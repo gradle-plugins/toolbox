@@ -3,6 +3,7 @@ package dev.gradleplugins;
 import org.gradle.api.Action;
 import org.gradle.api.artifacts.dsl.RepositoryHandler;
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
+import org.gradle.api.plugins.ExtensionAware;
 
 /**
  * Extension methods for {@link RepositoryHandler}.
@@ -34,6 +35,6 @@ public interface GradlePluginDevelopmentRepositoryExtension {
      * @return the extension methods, never null
      */
     static GradlePluginDevelopmentRepositoryExtension from(RepositoryHandler repositories) {
-        return new DefaultGradlePluginDevelopmentRepositoryExtension(repositories);
+        return ((ExtensionAware) repositories).getExtensions().getByType(GradlePluginDevelopmentRepositoryExtension.class);
     }
 }

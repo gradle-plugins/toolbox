@@ -37,10 +37,11 @@ public abstract class GradlePluginDevelopmentPlugin implements Plugin<Object> {
     }
 
     private void doApply(Project project) {
-        project.getPluginManager().apply(GradlePluginDevelopmentExtensionPlugin.class);
+        project.getPluginManager().apply("gradlepluginsdev.rules.project-extensions");
     }
 
     private void doApply(Settings settings) {
+        settings.getPluginManager().apply("gradlepluginsdev.rules.settings-repositories-extension");
         settings.getGradle().addBuildListener(new BuildAdapter() {
             @Override
             public void buildFinished(BuildResult result) {
@@ -62,7 +63,7 @@ public abstract class GradlePluginDevelopmentPlugin implements Plugin<Object> {
     }
 
     private void applyToProject(Project project) {
-        project.getPluginManager().apply(GradlePluginDevelopmentExtensionPlugin.class);
+        project.getPluginManager().apply("gradlepluginsdev.rules.project-extensions");
         project.afterEvaluate(this::warnWhenUsingCoreGradlePluginDevelopment);
     }
 

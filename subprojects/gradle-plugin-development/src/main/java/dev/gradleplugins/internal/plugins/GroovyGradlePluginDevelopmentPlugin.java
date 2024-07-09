@@ -19,7 +19,8 @@ package dev.gradleplugins.internal.plugins;
 import dev.gradleplugins.GradleRuntimeCompatibility;
 import dev.gradleplugins.GroovyGradlePluginDevelopmentExtension;
 import dev.gradleplugins.internal.DeferredRepositoryFactory;
-import dev.gradleplugins.internal.GradlePluginDevelopmentDependencyExtensionInternal;
+import dev.gradleplugins.internal.DependencyBucketFactory;
+import dev.gradleplugins.internal.DependencyFactory;
 import lombok.val;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -56,8 +57,8 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
 
         // Configure the Groovy version and dependency
         groovy.getGroovyVersion().convention(extension.flatMap(it -> it.getMinimumGradleVersion().map(GradleRuntimeCompatibility::groovyVersionOf)));
-        val dependencies = GradlePluginDevelopmentDependencyExtensionInternal.of(project.getDependencies());
-        dependencies.add("compileOnly", groovy.getGroovyVersion().map(dependencies::groovy));
+        final DependencyFactory factory = new DependencyFactory(project.getDependencies());
+        new DependencyBucketFactory(project, project.provider(() -> gradlePlugin(project).getPluginSourceSet())).create("compileOnly").add(groovy.getGroovyVersion().map(factory::groovy));
 
         // TODO: We should warn that a repository is required instead of trying to add a groovy only repository
         DeferredRepositoryFactory repositoryFactory = project.getObjects().newInstance(DeferredRepositoryFactory.class, project);
