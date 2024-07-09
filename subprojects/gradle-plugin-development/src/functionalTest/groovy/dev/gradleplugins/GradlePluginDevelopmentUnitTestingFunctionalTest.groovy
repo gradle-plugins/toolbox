@@ -6,6 +6,7 @@ import dev.gradleplugins.fixtures.sources.SourceElement
 import dev.gradleplugins.fixtures.test.DefaultTestExecutionResult
 import dev.gradleplugins.integtests.fixtures.ArchiveTestFixture
 import org.gradle.api.internal.artifacts.dependencies.SelfResolvingDependencyInternal
+import org.gradle.util.GradleVersion
 import org.hamcrest.CoreMatchers
 
 abstract class AbstractGradlePluginDevelopmentUnitTestingFunctionalTest extends AbstractGradlePluginDevelopmentFunctionalSpec implements ArchiveTestFixture {
@@ -85,10 +86,15 @@ abstract class AbstractGradlePluginDevelopmentUnitTestingFunctionalTest extends 
             }
             
             import static ${GradleRuntimeCompatibility.canonicalName}.groovyVersionOf
+            import ${GradleVersion.canonicalName}
             
             test {
                 dependencies {
-                    implementation platform('org.spockframework:spock-bom:2.0-groovy-3.0')
+                    if (GradleVersion.current() > GradleVersion.version('6.5')) {
+                        implementation platform('org.spockframework:spock-bom:2.0-groovy-3.0')
+                    } else {
+                        implementation platform('org.spockframework:spock-bom:2.0-groovy-2.5')
+                    }
                     implementation 'org.spockframework:spock-core'
                 }
 
