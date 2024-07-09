@@ -8,12 +8,14 @@ import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
+import org.gradle.api.artifacts.DependencySet;
 import org.gradle.api.artifacts.ExternalModuleDependency;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.SourceSet;
 
 import java.util.Collections;
+import java.util.function.BiConsumer;
 
 public final class DependencyBucketFactory {
     private final Project project;
@@ -68,9 +70,9 @@ public final class DependencyBucketFactory {
 
         @Override
         public void add(Dependency dependency) {
-            project.getConfigurations().configureEach(it -> {
-                it.getDependencies().addAllLater(asCollectionProvider(asList(ifThisBucket(it).map(__ -> dependency))));
-            });
+            project.getConfigurations().configureEach(usingWorkaroundForBadlyCodedKotlinPlugin((it, dependencies) -> {
+                dependencies.addAllLater(asCollectionProvider(asList(ifThisBucket(it).map(__ -> dependency))));
+            }));
         }
 
         @Override
@@ -81,9 +83,17 @@ public final class DependencyBucketFactory {
 
         @Override
         public <DependencyType extends Dependency> void add(Provider<DependencyType> dependencyProvider) {
-            project.getConfigurations().configureEach(it -> {
-                it.getDependencies().addAllLater(asCollectionProvider(asList(ifThisBucket(it).flatMap(__ -> dependencyProvider))));
-            });
+            project.getConfigurations().configureEach(usingWorkaroundForBadlyCodedKotlinPlugin((it, dependencies) -> {
+                dependencies.addAllLater(asCollectionProvider(asList(ifThisBucket(it).flatMap(__ -> dependencyProvider))));
+            }));
+        }
+
+        private /*static*/ Action<Configuration> usingWorkaroundForBadlyCodedKotlinPlugin(BiConsumer<? super Configuration, ? super DependencySet> action) {
+            return it -> {
+                // Kotlin plugin is poorly coded causing lots of very strange errors.
+                //   The plugin eagerly resolve the Configuration#dependencies container.
+                it.defaultDependencies(dependencies -> action.accept(it, dependencies));
+            };
         }
 
         @Override
