@@ -125,6 +125,14 @@ functionalTest {
         implementation "org.junit.jupiter:junit-jupiter:latest.release"
         runtimeOnly "org.junit.vintage:junit-vintage-engine:latest.release"
         implementation "org.hamcrest:hamcrest:2.2"
+
+        // Force local fixtures
+        // TODO: Maybe look into dependency substitution
+        implementation(project(':gradle-fixtures')) {
+            capabilities {
+                requireCapability("dev.gradleplugins:gradle-fixtures-spock-support:${project(':gradle-fixtures').version}")
+            }
+        }
     }
     testTasks.configureEach { useJUnitPlatform() }
 }
@@ -133,12 +141,4 @@ dependencies {
     implementation 'org.apache.commons:commons-lang3:3.5'
     implementation 'com.google.code.gson:gson:2.8.6'
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-
-    // Force local fixtures
-    // TODO: Maybe look into dependency substitution
-    functionalTestImplementation(project(':gradle-fixtures')) {
-        capabilities {
-            requireCapability("dev.gradleplugins:gradle-fixtures-spock-support:${project(':gradle-fixtures').version}")
-        }
-    }
 }
