@@ -4,7 +4,6 @@ import dev.gradleplugins.internal.ConfigurePluginUnderTestMetadataTask;
 import dev.gradleplugins.internal.FinalizableComponent;
 import dev.gradleplugins.internal.GradlePluginDevelopmentTestSuiteInternal;
 import dev.gradleplugins.internal.ReleasedVersionDistributions;
-import lombok.val;
 import org.gradle.api.Project;
 import org.gradle.api.Transformer;
 import org.gradle.api.internal.provider.Providers;
@@ -30,7 +29,7 @@ final class DefaultGradlePluginDevelopmentTestSuiteFactory implements GradlePlug
 
     @Override
     public GradlePluginDevelopmentTestSuite create(String name) {
-        val result = project.getObjects().newInstance(GradlePluginDevelopmentTestSuiteInternal.class, name, project, minimumGradleVersion(project), gradleDistributions());
+        final GradlePluginDevelopmentTestSuiteInternal result = project.getObjects().newInstance(GradlePluginDevelopmentTestSuiteInternal.class, name, project, minimumGradleVersion(project), gradleDistributions());
         // Register as finalized action because it adds configuration which early finalize source set property
         result.whenFinalized(new ConfigurePluginUnderTestMetadataTask(project));
         result.getSourceSet().convention(project.provider(() -> {

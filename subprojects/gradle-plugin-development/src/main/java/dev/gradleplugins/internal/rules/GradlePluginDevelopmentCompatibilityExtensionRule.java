@@ -5,7 +5,6 @@ import dev.gradleplugins.internal.FinalizableComponent;
 import dev.gradleplugins.internal.GradleCompatibilities;
 import dev.gradleplugins.internal.JvmCompatibilities;
 import dev.gradleplugins.internal.util.Configurable;
-import lombok.val;
 import org.gradle.api.Action;
 import org.gradle.api.NamedDomainObjectProvider;
 import org.gradle.api.Plugin;
@@ -35,7 +34,7 @@ import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradl
     @Override
     public void apply(Project project) {
         project.getPluginManager().withPlugin("java-gradle-plugin", __ -> {
-            val extension = newCompatibilityExtension(project);
+            final DefaultGradlePluginDevelopmentCompatibilityExtension extension = newCompatibilityExtension(project);
 
             ((ExtensionAware) gradlePlugin(project)).getExtensions().add(EXTENSION_NAME, extension);
 

@@ -16,14 +16,16 @@
 
 package dev.gradleplugins.internal.plugins;
 
+import dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension;
 import dev.gradleplugins.GradleRuntimeCompatibility;
 import dev.gradleplugins.GroovyGradlePluginDevelopmentExtension;
 import dev.gradleplugins.internal.DeferredRepositoryFactory;
 import dev.gradleplugins.internal.DependencyBucketFactory;
 import dev.gradleplugins.internal.DependencyFactory;
-import lombok.val;
+import dev.gradleplugins.internal.GradlePluginDevelopmentExtensionInternal;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.provider.Provider;
 import org.gradle.util.GradleVersion;
 
 import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
@@ -52,8 +54,8 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
         }
         project.getPluginManager().apply("groovy");
 
-        val groovy = registerLanguageExtension(project, "groovy", GroovyGradlePluginDevelopmentExtension.class);
-        val extension = project.provider(() -> compatibility(gradlePlugin(project)));
+        final GradlePluginDevelopmentExtensionInternal groovy = registerLanguageExtension(project, "groovy", GroovyGradlePluginDevelopmentExtension.class);
+        final Provider<GradlePluginDevelopmentCompatibilityExtension> extension = project.provider(() -> compatibility(gradlePlugin(project)));
 
         // Configure the Groovy version and dependency
         groovy.getGroovyVersion().convention(extension.flatMap(it -> it.getMinimumGradleVersion().map(GradleRuntimeCompatibility::groovyVersionOf)));

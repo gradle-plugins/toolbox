@@ -2,7 +2,6 @@ package dev.gradleplugins.internal;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import lombok.Value;
 import org.gradle.api.resources.TextResourceFactory;
 
 import java.io.IOException;
@@ -10,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 import java.util.List;
+import java.util.Objects;
 
 public class ReleasedVersionDistributions {
     public static final ReleasedVersionDistributions GRADLE_DISTRIBUTIONS = new ReleasedVersionDistributions();
@@ -63,12 +63,49 @@ public class ReleasedVersionDistributions {
         return allVersions;
     }
 
-    @Value
-    public static class GradleRelease {
-        String version;
-        boolean snapshot;
-        boolean current;
-        String rcFor;
+    public static final class GradleRelease {
+        private final String version;
+        private final boolean snapshot;
+        private final boolean current;
+        private final String rcFor;
+
+        public GradleRelease(String version, boolean snapshot, boolean current, String rcFor) {
+            this.version = version;
+            this.snapshot = snapshot;
+            this.current = current;
+            this.rcFor = rcFor;
+        }
+
+        public String getVersion() {
+            return version;
+        }
+
+        public boolean isSnapshot() {
+            return snapshot;
+        }
+
+        public boolean isCurrent() {
+            return current;
+        }
+
+        public String getRcFor() {
+            return rcFor;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
+            GradleRelease that = (GradleRelease) o;
+            return snapshot == that.snapshot && current == that.current && Objects.equals(version, that.version) && Objects.equals(rcFor, that.rcFor);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(version, snapshot, current, rcFor);
+        }
     }
 
     private static final class HostedGradleVersionsService implements GradleVersionsService {

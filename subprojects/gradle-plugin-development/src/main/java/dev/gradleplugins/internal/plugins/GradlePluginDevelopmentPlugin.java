@@ -1,6 +1,5 @@
 package dev.gradleplugins.internal.plugins;
 
-import lombok.RequiredArgsConstructor;
 import org.gradle.BuildAdapter;
 import org.gradle.BuildResult;
 import org.gradle.api.Plugin;
@@ -145,9 +144,12 @@ public abstract class GradlePluginDevelopmentPlugin implements Plugin<Object> {
         void visitCause(Throwable cause);
     }
 
-    @RequiredArgsConstructor
     private static class UnwrappingGradleFailureVisitor implements GradleFailureVisitor {
         private final GradleFailureVisitor delegate;
+
+        public UnwrappingGradleFailureVisitor(GradleFailureVisitor delegate) {
+            this.delegate = delegate;
+        }
 
         @Override
         public void visitCause(Throwable cause) {
@@ -163,9 +165,12 @@ public abstract class GradlePluginDevelopmentPlugin implements Plugin<Object> {
         }
     }
 
-    @RequiredArgsConstructor
     private static class MultiGradleFailureVisitor implements GradleFailureVisitor {
         private final List<GradleFailureVisitor> delegates;
+
+        public MultiGradleFailureVisitor(List<GradleFailureVisitor> delegates) {
+            this.delegates = delegates;
+        }
 
         @Override
         public void visitCause(Throwable cause) {

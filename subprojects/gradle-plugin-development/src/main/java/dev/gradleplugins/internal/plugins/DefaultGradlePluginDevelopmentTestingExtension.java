@@ -4,7 +4,6 @@ import dev.gradleplugins.GradlePluginDevelopmentTestSuite;
 import dev.gradleplugins.GradlePluginDevelopmentTestSuiteFactory;
 import dev.gradleplugins.GradlePluginDevelopmentTestingExtension;
 import dev.gradleplugins.internal.GradlePluginDevelopmentTestSuiteInternal;
-import lombok.val;
 import org.gradle.api.component.SoftwareComponentContainer;
 import org.gradle.api.reflect.HasPublicType;
 import org.gradle.api.reflect.TypeOf;
@@ -23,7 +22,7 @@ abstract /*final*/ class DefaultGradlePluginDevelopmentTestingExtension implemen
 
     @Override
     public GradlePluginDevelopmentTestSuite registerSuite(String name) {
-        val result = factory.create(name);
+        final GradlePluginDevelopmentTestSuite result = factory.create(name);
         components.add((GradlePluginDevelopmentTestSuiteInternal) result);
         return result;
     }

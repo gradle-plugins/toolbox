@@ -16,7 +16,6 @@
 package dev.gradleplugins.internal.util;
 
 import groovy.lang.Closure;
-import lombok.EqualsAndHashCode;
 import org.gradle.api.Action;
 import org.gradle.util.GradleVersion;
 
@@ -24,7 +23,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Objects;
 
-@EqualsAndHashCode
 public final class ClosureWrappedConfigureAction<T> implements Action<T> {
 	@SuppressWarnings("rawtypes") private final Closure configureClosure;
 
@@ -54,5 +52,20 @@ public final class ClosureWrappedConfigureAction<T> implements Action<T> {
 	@SuppressWarnings("rawtypes")
 	public Closure getConfigureClosure() {
 		return configureClosure;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		ClosureWrappedConfigureAction<?> that = (ClosureWrappedConfigureAction<?>) o;
+		return Objects.equals(configureClosure, that.configureClosure);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(configureClosure);
 	}
 }

@@ -1,9 +1,7 @@
 package dev.gradleplugins.internal;
 
 import dev.gradleplugins.GradlePluginTestingStrategy;
-import lombok.val;
 import org.gradle.api.Action;
-import org.gradle.api.invocation.Gradle;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
 import org.gradle.api.reflect.TypeOf;
@@ -21,7 +19,7 @@ final class RegisterTestingStrategyPropertyExtensionRule implements Action<Test>
 
     @Override
     public void execute(Test task) {
-        val testingStrategy = objects.property(GradlePluginTestingStrategy.class);
+        final Property<GradlePluginTestingStrategy> testingStrategy = objects.property(GradlePluginTestingStrategy.class);
         task.getExtensions().add(TESTING_STRATEGY_PROPERTY_TYPE, TESTING_STRATEGY_EXTENSION_NAME, testingStrategy);
     }
 

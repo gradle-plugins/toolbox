@@ -6,7 +6,6 @@ import dev.gradleplugins.GradlePluginDevelopmentTestSuiteDependencies;
 import dev.gradleplugins.GradlePluginTestingStrategyFactory;
 import dev.gradleplugins.GradleRuntimeCompatibility;
 import dev.gradleplugins.TaskView;
-import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.Action;
 import org.gradle.api.NamedDomainObjectProvider;
@@ -48,7 +47,7 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
     private final GradlePluginTestingStrategyFactory strategyFactory;
     private final Dependencies dependencies;
     private final String name;
-    @Getter private final List<Action<? super Test>> testTaskActions = new ArrayList<>();
+    private final List<Action<? super Test>> testTaskActions = new ArrayList<>();
     private final List<Action<? super GradlePluginDevelopmentTestSuite>> finalizeActions = new ArrayList<>();
     private final TestTaskView testTasks;
     private final TaskProvider<PluginUnderTestMetadata> pluginUnderTestMetadataTask;
@@ -69,6 +68,10 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         this.finalizeActions.add(new FinalizeTestSuiteProperties());
         getSourceSet().finalizeValueOnRead();
         getTestingStrategies().finalizeValueOnRead();
+    }
+
+    public List<Action<? super Test>> getTestTaskActions() {
+        return testTaskActions;
     }
 
     // From Gradle codebase

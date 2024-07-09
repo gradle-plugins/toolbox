@@ -1,11 +1,11 @@
 package dev.gradleplugins.internal;
 
 import dev.gradleplugins.GradlePluginDevelopmentTestSuite;
-import lombok.val;
 import org.gradle.api.Action;
 import org.gradle.api.NamedDomainObjectProvider;
 import org.gradle.api.Project;
 import org.gradle.api.Transformer;
+import org.gradle.api.artifacts.ArtifactView;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.tasks.ClasspathNormalizer;
 import org.gradle.api.tasks.SourceSet;
@@ -55,8 +55,8 @@ public final class ConfigurePluginUnderTestMetadataTask implements Action<Gradle
 
     private static Transformer<Object, SourceSet> asPluginClasspath(Project project) {
         return sourceSet -> {
-            val runtimeClasspath = project.getConfigurations().getByName(sourceSet.getRuntimeClasspathConfigurationName());
-            val view = runtimeClasspath.getIncoming().artifactView(config -> {
+            final Configuration runtimeClasspath = project.getConfigurations().getByName(sourceSet.getRuntimeClasspathConfigurationName());
+            final ArtifactView view = runtimeClasspath.getIncoming().artifactView(config -> {
                 config.componentFilter(componentId -> {
                     if (componentId instanceof OpaqueComponentIdentifier) {
                         return !componentId.getDisplayName().equals(ClassPathNotation.GRADLE_API.displayName)

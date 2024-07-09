@@ -2,7 +2,6 @@ package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.GradlePluginDevelopmentTestSuite;
 import dev.gradleplugins.GradlePluginDevelopmentTestSuiteFactory;
-import lombok.val;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.component.SoftwareComponent;

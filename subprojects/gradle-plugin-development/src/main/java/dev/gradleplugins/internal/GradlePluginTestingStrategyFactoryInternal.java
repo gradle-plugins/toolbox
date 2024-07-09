@@ -4,20 +4,28 @@ import dev.gradleplugins.CompositeGradlePluginTestingStrategy;
 import dev.gradleplugins.GradlePluginTestingStrategy;
 import dev.gradleplugins.GradlePluginTestingStrategyFactory;
 import dev.gradleplugins.GradleVersionCoverageTestingStrategy;
-import lombok.EqualsAndHashCode;
-import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.provider.Provider;
 import org.gradle.util.VersionNumber;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static dev.gradleplugins.internal.GradlePluginTestingStrategyInternal.*;
+import static dev.gradleplugins.internal.GradlePluginTestingStrategyInternal.LATEST_GLOBAL_AVAILABLE;
+import static dev.gradleplugins.internal.GradlePluginTestingStrategyInternal.LATEST_NIGHTLY;
+import static dev.gradleplugins.internal.GradlePluginTestingStrategyInternal.MINIMUM_GRADLE;
 import static dev.gradleplugins.internal.ReleasedVersionDistributions.GRADLE_DISTRIBUTIONS;
 
 public final class GradlePluginTestingStrategyFactoryInternal implements GradlePluginTestingStrategyFactory {
@@ -36,7 +44,7 @@ public final class GradlePluginTestingStrategyFactoryInternal implements GradleP
     @Override
     public GradleVersionCoverageTestingStrategy getCoverageForMinimumVersion() {
         return new DefaultGradleVersionCoverageTestingStrategy(MINIMUM_GRADLE, () -> minimumVersion.get(), () -> {
-            val result = minimumVersion.get();
+            final String result = minimumVersion.get();
             assertKnownMinimumVersion(result);
             return result;
         });
@@ -51,9 +59,8 @@ public final class GradlePluginTestingStrategyFactoryInternal implements GradleP
     public Provider<Set<GradleVersionCoverageTestingStrategy>> getCoverageForLatestGlobalAvailableVersionOfEachSupportedMajorVersions() {
         return minimumVersion.map(version -> {
             assertKnownMinimumVersion(version);
-            val minimumMajorVersion = VersionNumber.parse(version).getMajor();
-            val h = releasedVersions.getAllVersions().stream().filter(it -> !it.isSnapshot() && !it.getVersion().contains("-rc-")).map(it -> VersionNumber.parse(it.getVersion())).filter(it -> it.getMajor() >= minimumMajorVersion).collect(
-            Collectors.groupingBy(it -> it.getMajor()));
+            final int minimumMajorVersion = VersionNumber.parse(version).getMajor();
+            final Map<Integer, List<VersionNumber>> h = releasedVersions.getAllVersions().stream().filter(it -> !it.isSnapshot() && !it.getVersion().contains("-rc-")).map(it -> VersionNumber.parse(it.getVersion())).filter(it -> it.getMajor() >= minimumMajorVersion).collect(Collectors.groupingBy(it -> it.getMajor()));
             return h.entrySet().stream().sorted(Map.Entry.comparingByKey()).map(Map.Entry::getValue).map(it -> {
                 it.sort(Comparator.reverseOrder());
                 return coverageForGradleVersion(format(it.iterator().next()));
@@ -62,7 +69,7 @@ public final class GradlePluginTestingStrategyFactoryInternal implements GradleP
     }
 
     private static String format(VersionNumber version) {
-        val builder = new StringBuilder();
+        final StringBuilder builder = new StringBuilder();
         builder.append(version.getMajor()).append(".").append(version.getMinor());
         if (version.getMicro() > 0) {
             builder.append(".").append(version.getMicro());
@@ -185,10 +192,9 @@ public final class GradlePluginTestingStrategyFactoryInternal implements GradleP
         }
     }
 
-    @EqualsAndHashCode
     private static final class DefaultCompositeGradlePluginTestingStrategy implements CompositeGradlePluginTestingStrategy {
         private final Iterable<GradlePluginTestingStrategy> strategies;
-        @EqualsAndHashCode.Exclude private final String name;
+        private final String name;
 
         private DefaultCompositeGradlePluginTestingStrategy(Iterable<GradlePluginTestingStrategy> strategies) {
             this.strategies = strategies;
@@ -205,6 +211,21 @@ public final class GradlePluginTestingStrategyFactoryInternal implements GradleP
         @Override
         public String getName() {
             return name;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
+            DefaultCompositeGradlePluginTestingStrategy that = (DefaultCompositeGradlePluginTestingStrategy) o;
+            return Objects.equals(strategies, that.strategies);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(strategies);
         }
 
         @Override
