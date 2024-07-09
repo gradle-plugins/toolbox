@@ -46,12 +46,7 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
 
         project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-base");
         project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-testing-base");
-        // Starting with Gradle 6.4, precompiled Groovy DSL plugins are available
-        if (GradleVersion.current().compareTo(GradleVersion.version("6.4")) >= 0) {
-            project.getPluginManager().apply("groovy-gradle-plugin"); // For plugin development
-        } else {
-            project.getPluginManager().apply("java-gradle-plugin"); // For plugin development
-        }
+        project.getPluginManager().apply(coreGradlePluginId());
         project.getPluginManager().apply("groovy");
 
         final GradlePluginDevelopmentExtensionInternal groovy = registerLanguageExtension(project, "groovy", GroovyGradlePluginDevelopmentExtension.class);
@@ -71,5 +66,14 @@ public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
         //   We could ensure GradlePlugin aren't applied to any Java source
         //   We could also check that no plugin id on `gradlePlugin` container points to a Java source
         //   We could do the same for Kotlin code
+    }
+
+    private static String coreGradlePluginId() {
+        // Starting with Gradle 6.4, precompiled Groovy DSL plugins are available
+        if (GradleVersion.current().compareTo(GradleVersion.version("6.4")) >= 0) {
+            return "groovy-gradle-plugin"; // For plugin development
+        } else {
+            return "java-gradle-plugin"; // For plugin development
+        }
     }
 }
