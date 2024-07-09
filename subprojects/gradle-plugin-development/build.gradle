@@ -125,6 +125,7 @@ functionalTest {
         implementation "org.junit.jupiter:junit-jupiter:latest.release"
         runtimeOnly "org.junit.vintage:junit-vintage-engine:latest.release"
         implementation "org.hamcrest:hamcrest:2.2"
+        implementation "dev.gradleplugins:gradle-build-script"
 
         // Force local fixtures
         // TODO: Maybe look into dependency substitution
