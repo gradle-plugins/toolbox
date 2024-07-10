@@ -11,6 +11,8 @@ import dev.gradleplugins.runnerkit.GradleRunner;
 import dev.gradleplugins.test.fixtures.maven.M2Installation;
 import dev.gradleplugins.testers.DependencyWiringTester;
 import dev.gradleplugins.testers.GradlePluginApiTester;
+import org.gradle.util.GradleVersion;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -238,6 +240,7 @@ class GradlePluginDevelopmentPluginApiFunctionalTests {
         class CompileOnlyApi_ApiSourceSetTest implements DependencyWiringTester {
             @BeforeEach
             void given() {
+                Assumptions.assumeTrue(GradleVersion.version(System.getProperty("dev.gradleplugins.defaultGradleVersion")).compareTo(GradleVersion.version("6.7")) >= 0);
                 buildFile().append(groovyDsl(
                         "sourceSets.configureEach {",
                         "  if (name == 'api') {",
