@@ -107,7 +107,7 @@ class GradlePluginDevelopmentUnitTestingFunctionalTests {
 
             BuildResult result = runner.withTasks("verify").buildAndFail();
             assertThat(result, hasFailureDescription("A problem occurred configuring root project 'gradle-plugin'."));
-            assertThat(result, hasFailureCause("The value for property 'sourceSet' is final and cannot be changed any further."));
+            assertThat(result, hasFailureCause("The value for test suite 'test' property 'sourceSet' is final and cannot be changed any further."));
         }
 
         @Test
@@ -121,7 +121,7 @@ class GradlePluginDevelopmentUnitTestingFunctionalTests {
 
             BuildResult result = runner.withTasks("verify").buildAndFail();
             assertThat(result, hasFailureDescription("A problem occurred configuring root project 'gradle-plugin'."));
-            assertThat(result, hasFailureCause("The value for property 'testedSourceSet' cannot be changed any further."));
+            assertThat(result, hasFailureCause("The value for test suite 'test' property 'testedSourceSet' cannot be changed any further."));
         }
 
         @Test
@@ -135,7 +135,7 @@ class GradlePluginDevelopmentUnitTestingFunctionalTests {
 
             BuildResult result = runner.withTasks("verify").buildAndFail();
             assertThat(result, hasFailureDescription("A problem occurred configuring root project 'gradle-plugin'."));
-            assertThat(result, hasFailureCause("The value for property 'testingStrategies' is final and cannot be changed any further."));
+            assertThat(result, hasFailureCause("The value for test suite 'test' property 'testingStrategies' is final and cannot be changed any further."));
         }
 
         @Test
