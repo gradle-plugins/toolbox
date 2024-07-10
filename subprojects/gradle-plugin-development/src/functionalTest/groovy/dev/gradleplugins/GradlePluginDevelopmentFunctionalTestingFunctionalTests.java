@@ -98,7 +98,7 @@ class GradlePluginDevelopmentFunctionalTestingFunctionalTests {
 
         BuildResult result = runner.withTasks("verify").buildAndFail();
         assertThat(result, hasFailureDescription("A problem occurred configuring root project 'gradle-plugin'."));
-        assertThat(result, hasFailureCause("The value for property 'testedSourceSet' is final and cannot be changed any further."));
+        assertThat(result, hasFailureCause("The value for property 'testedSourceSet' cannot be changed any further."));
     }
 
     @Test
@@ -137,7 +137,7 @@ class GradlePluginDevelopmentFunctionalTestingFunctionalTests {
         buildFile.append(groovyDsl(
                 "tasks.register('verify') {",
                 "  doLast {",
-                "    assert functionalTest.dependencies.runtimeOnly.asConfiguration.get().dependencies.any {",
+                "    assert functionalTest.dependencies.runtimeOnly.asConfiguration.get().incoming.dependencies.any {",
                 "      it instanceof SelfResolvingDependency && it.files.singleFile.path.endsWith('/pluginUnderTestMetadataFunctionalTest')",
                 "    }",
                 "  }",
@@ -180,7 +180,7 @@ class GradlePluginDevelopmentFunctionalTestingFunctionalTests {
         buildFile.append(groovyDsl(
                 "tasks.register('verify') {",
                 "  doLast {",
-                "    assert configurations.functionalTestImplementation.dependencies.any { it instanceof SelfResolvingDependency && it.targetComponentId?.displayName == 'Gradle TestKit' }",
+                "    assert configurations.functionalTestImplementation.incoming.dependencies.any { it instanceof SelfResolvingDependency && it.targetComponentId?.displayName == 'Gradle TestKit' }",
                 "  }",
                 "}"
         ));
@@ -195,7 +195,7 @@ class GradlePluginDevelopmentFunctionalTestingFunctionalTests {
                 "gradlePlugin.compatibility.gradleApiVersion = '5.6'",
                 "tasks.register('verify') {",
                 "  doLast {",
-                "    assert configurations.functionalTestImplementation.dependencies.any { 'dev.gradleplugins:gradle-test-kit:5.6' == \"${it.group}:${it.name}:${it.version}\" }",
+                "    assert configurations.functionalTestImplementation.incoming.dependencies.any { 'dev.gradleplugins:gradle-test-kit:5.6' == \"${it.group}:${it.name}:${it.version}\" }",
                 "  }",
                 "}"
         ));

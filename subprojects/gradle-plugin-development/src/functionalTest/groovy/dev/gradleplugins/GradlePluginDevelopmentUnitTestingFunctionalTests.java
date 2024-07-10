@@ -52,7 +52,7 @@ class GradlePluginDevelopmentUnitTestingFunctionalTests {
                 "",
                 "tasks.register('verify') {",
                 "  doLast {",
-                "    assert configurations.testImplementation.dependencies.any { 'org.junit.jupiter:junit-jupiter:5.8.1' == \"${it.group}:${it.name}:${it.version}\" }",
+                "    assert configurations.testImplementation.incoming.dependencies.any { 'org.junit.jupiter:junit-jupiter:5.8.1' == \"${it.group}:${it.name}:${it.version}\" }",
                 "  }",
                 "}"
         ));
@@ -121,7 +121,7 @@ class GradlePluginDevelopmentUnitTestingFunctionalTests {
 
             BuildResult result = runner.withTasks("verify").buildAndFail();
             assertThat(result, hasFailureDescription("A problem occurred configuring root project 'gradle-plugin'."));
-            assertThat(result, hasFailureCause("The value for property 'testedSourceSet' is final and cannot be changed any further."));
+            assertThat(result, hasFailureCause("The value for property 'testedSourceSet' cannot be changed any further."));
         }
 
         @Test
@@ -175,7 +175,7 @@ class GradlePluginDevelopmentUnitTestingFunctionalTests {
             buildFile.append(groovyDsl(
                     "tasks.register('verify') {",
                     "  doLast {",
-                    "    assert test.dependencies.runtimeOnly.asConfiguration.get().dependencies.any {",
+                    "    assert test.dependencies.runtimeOnly.asConfiguration.get().incoming.dependencies.any {",
                     "      it instanceof SelfResolvingDependency && it.files.singleFile.path.endsWith('/pluginUnderTestMetadataTest')",
                     "    }",
                     "  }",
@@ -205,7 +205,7 @@ class GradlePluginDevelopmentUnitTestingFunctionalTests {
                     "gradlePlugin.compatibility.minimumGradleVersion = '5.6'",
                     "tasks.register('verify') {",
                     "  doLast {",
-                    "    assert configurations.testImplementation.dependencies.any { 'dev.gradleplugins:gradle-api:5.6' == \"${it.group}:${it.name}:${it.version}\" }",
+                    "    assert configurations.testImplementation.incoming.dependencies.any { 'dev.gradleplugins:gradle-api:5.6' == \"${it.group}:${it.name}:${it.version}\" }",
                     "  }",
                     "}"
             ));
