@@ -15,6 +15,7 @@ abstract /*final*/ class GradlePluginDevelopmentBasePlugin implements Plugin<Pro
         project.getPluginManager().apply("gradlepluginsdev.rules.gradle-jvm-compatibilities");
         project.getPluginManager().apply("gradlepluginsdev.rules.project-extensions");
         project.getPluginManager().apply("gradlepluginsdev.rules.gradle-plugin-compatibility-extension");
+        project.getPluginManager().apply("gradlepluginsdev.rules.gradle-plugin-api-extension");
         whenPluginApplied("java-gradle-plugin", new RemoveGradleApiProjectDependency()).execute(project);
         whenPluginApplied("java-gradle-plugin", new AddGradleApiDependencyToCompileOnlyApiConfiguration()).execute(project);
         whenPluginApplied("java-gradle-plugin", new RemoveTestSourceSets()).execute(project);
