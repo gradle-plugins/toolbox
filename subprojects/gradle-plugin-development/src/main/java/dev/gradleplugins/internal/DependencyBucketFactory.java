@@ -92,7 +92,7 @@ public final class DependencyBucketFactory {
             return it -> {
                 // Kotlin plugin is poorly coded causing lots of very strange errors.
                 //   The plugin eagerly resolve the Configuration#dependencies container.
-                it.defaultDependencies(dependencies -> action.accept(it, dependencies));
+                it.withDependencies(dependencies -> action.accept(it, dependencies));
             };
         }
 
