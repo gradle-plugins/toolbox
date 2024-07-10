@@ -125,13 +125,11 @@ import static org.gradle.api.attributes.java.TargetJvmVersion.TARGET_JVM_VERSION
                         });
                     }
 
-                    if (!extension.getPluginSourceSet().getName().equals("main")) {
-                        apiElements.extendsFrom(api);
-                        apiElements.extendsFrom(compileOnlyApi);
+                    apiElements.extendsFrom(api);
+                    apiElements.extendsFrom(compileOnlyApi);
 
-                        runtimeElements.extendsFrom(project.getConfigurations().getByName(extension.getPluginSourceSet().getImplementationConfigurationName()));
-                        runtimeElements.extendsFrom(project.getConfigurations().getByName(extension.getPluginSourceSet().getRuntimeOnlyConfigurationName()));
-                    }
+                    runtimeElements.extendsFrom(project.getConfigurations().getByName(extension.getPluginSourceSet().getImplementationConfigurationName()));
+                    runtimeElements.extendsFrom(project.getConfigurations().getByName(extension.getPluginSourceSet().getRuntimeOnlyConfigurationName()));
                 }
 
                 private /*static*/ String compileOnlyApiConfigurationName(SourceSet sourceSet) {
