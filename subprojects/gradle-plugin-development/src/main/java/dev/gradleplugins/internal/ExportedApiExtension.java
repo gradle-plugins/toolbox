@@ -282,6 +282,7 @@ public abstract class ExportedApiExtension {
                             apiElements.outgoing(artifacts(jarTaskProvider, it -> {
                                 it.setName(implSourceSet.getName() + "-api-jar");
                                 it.setType(ArtifactTypeDefinition.JAR_TYPE);
+                                it.builtBy(jarTaskProvider);
                             }));
                             apiElements.getOutgoing().getVariants().named("classes", clearArtifacts());
                             apiElements.getOutgoing().getVariants().named("classes", artifacts(classesDirectory, it -> {
@@ -295,6 +296,7 @@ public abstract class ExportedApiExtension {
                             runtimeElements.outgoing(artifacts(jarTaskProvider, it -> {
                                 it.setName(implSourceSet.getName() + "-api-jar");
                                 it.setType(ArtifactTypeDefinition.JAR_TYPE);
+                                it.builtBy(jarTaskProvider);
                             }));
                             runtimeElements.getOutgoing().getVariants().named("classes", artifacts(classesDirectory, it -> {
                                 it.setName(implSourceSet.getName() + "-api-classes");
