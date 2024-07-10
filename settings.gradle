@@ -7,7 +7,7 @@ buildscript {
         maven { url = 'https://repo.nokee.dev/release' }
     }
     dependencies {
-        classpath 'dev.gradleplugins:gradle-plugin-development:1.7.1'
+        classpath 'dev.gradleplugins:gradle-plugin-development:1.7.2'
     }
 }
 apply plugin: 'dev.gradleplugins.gradle-plugin-development'
