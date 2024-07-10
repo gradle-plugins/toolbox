@@ -5,7 +5,8 @@ import org.gradle.api.Project;
 
 import javax.inject.Inject;
 
-abstract class GradlePluginDevelopmentTestingBasePlugin implements Plugin<Project> {
+// TODO(2.0): Make this class "private"
+abstract /*final*/ class GradlePluginDevelopmentTestingBasePlugin implements Plugin<Project> {
     @Inject
     public GradlePluginDevelopmentTestingBasePlugin() {}
 

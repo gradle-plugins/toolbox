@@ -6,7 +6,7 @@ import org.gradle.api.Project;
 
 import javax.inject.Inject;
 
-abstract /*final*/ class GradlePluginDevelopmentBasePlugin implements Plugin<Project> {
+/*private*/ abstract /*final*/ class GradlePluginDevelopmentBasePlugin implements Plugin<Project> {
     @Inject
     public GradlePluginDevelopmentBasePlugin() {}
 

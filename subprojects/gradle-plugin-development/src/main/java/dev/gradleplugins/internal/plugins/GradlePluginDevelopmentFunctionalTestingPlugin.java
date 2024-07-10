@@ -9,7 +9,8 @@ import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.co
 import static dev.gradleplugins.internal.plugins.GradlePluginDevelopmentUnitTestingPlugin.test;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
 
-public abstract class GradlePluginDevelopmentFunctionalTestingPlugin implements Plugin<Project> {
+// TODO(2.0): Make this class "private"
+public abstract /*final*/ class GradlePluginDevelopmentFunctionalTestingPlugin implements Plugin<Project> {
     private static final String FUNCTIONAL_TEST_NAME = "functionalTest";
     private static final GradlePluginDevelopmentTestSuiteRegistrationAction FUNCTIONAL_TEST_RULE = new GradlePluginDevelopmentTestSuiteRegistrationAction(FUNCTIONAL_TEST_NAME);
 
