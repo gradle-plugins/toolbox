@@ -1,22 +1,34 @@
 package dev.gradleplugins.internal.rules;
 
 import dev.gradleplugins.GradlePluginDevelopmentApiExtension;
+import dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension;
+import dev.gradleplugins.internal.DependencyBucketFactory;
+import dev.gradleplugins.internal.DependencyFactory;
 import dev.gradleplugins.internal.ExportedApiExtension;
 import dev.gradleplugins.internal.util.ActionSet;
 import dev.gradleplugins.internal.util.Configurable;
+import dev.gradleplugins.internal.util.LocalOrRemoteVersionTransformer;
 import org.gradle.api.Action;
 import org.gradle.api.NamedDomainObjectProvider;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.provider.Property;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.SourceSet;
+import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 
 import javax.inject.Inject;
+import java.util.Collections;
+import java.util.function.Predicate;
+
+import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
 
 /*private*/ abstract /*final*/ class GradlePluginDevelopmentApiExtensionRule implements Plugin<Project> {
     @Inject
@@ -30,6 +42,13 @@ import javax.inject.Inject;
             final DefaultGradlePluginDevelopmentApiExtension extension = newApiExtension(project);
 
             ((ExtensionAware) gradlePlugin(project)).getExtensions().add("api", extension);
+
+            // Add Gradle API to API source set
+            final DependencyFactory factory = DependencyFactory.forProject(project);
+            new DependencyBucketFactory(project, extension.getSourceSet()).create("compileOnly").add(project.provider(() -> ((ExtensionAware) gradlePlugin(project)).getExtensions().findByType(GradlePluginDevelopmentCompatibilityExtension.class))
+                    .flatMap(it -> it.getGradleApiVersion())
+                    .orElse("local")
+                    .map(new LocalOrRemoteVersionTransformer<>(factory::localGradleApi, factory::gradleApi)));
 
             // TODO: avoid this train wreck
             project.afterEvaluate(___ -> extension.provider.finalizeValue());
