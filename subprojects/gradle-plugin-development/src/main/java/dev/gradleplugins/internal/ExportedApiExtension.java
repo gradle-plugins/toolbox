@@ -184,6 +184,13 @@ public abstract class ExportedApiExtension {
                             if (project.getConfigurations().getNames().contains(compileOnlyApiConfigurationName(implSourceSet))) {
                                 project.getConfigurations().named(compileOnlyApiConfigurationName(implSourceSet))
                                         .configure(extendsFrom(named(apiSourceSet.map(this::compileOnlyApiConfigurationName))));
+                            } else {
+                                // Try to be lenient catch future existence of compileOnlyApi
+                                project.getConfigurations().configureEach(configuration -> {
+                                    if (compileOnlyApiConfigurationName(implSourceSet).equals(configuration.getName())) {
+                                        extendsFrom(named(apiSourceSet.map(this::compileOnlyApiConfigurationName))).execute(configuration);
+                                    }
+                                });
                             }
                         }
 
