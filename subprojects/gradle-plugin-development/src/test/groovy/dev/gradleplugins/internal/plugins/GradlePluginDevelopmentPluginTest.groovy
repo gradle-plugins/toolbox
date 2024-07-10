@@ -77,12 +77,12 @@ abstract class AbstractGradlePluginDevelopmentPluginTest extends Specification {
     }
 
     private static boolean hasLocalGradleApi(Configuration compileClasspath) {
-        assert compileClasspath.allDependencies.findAll { it instanceof SelfResolvingDependency }.any { it.targetComponentId.displayName == 'Gradle API' }
+        assert compileClasspath.incoming.dependencies.findAll { it instanceof SelfResolvingDependency }.any { it.targetComponentId.displayName == 'Gradle API' }
         return true
     }
 
     private static boolean hasExternalGradleApi(Configuration compileClasspath, String version) {
-        assert compileClasspath.allDependencies.findAll { it instanceof ExternalDependency }.any { it.group == 'dev.gradleplugins' && it.name == 'gradle-api' && it.version == version }
+        assert compileClasspath.incoming.dependencies.findAll { it instanceof ExternalDependency }.any { it.group == 'dev.gradleplugins' && it.name == 'gradle-api' && it.version == version }
         return true
     }
 

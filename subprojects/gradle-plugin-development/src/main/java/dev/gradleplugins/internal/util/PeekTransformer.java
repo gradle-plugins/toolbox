@@ -6,7 +6,7 @@ import org.gradle.api.Transformer;
 public final class PeekTransformer<T> implements Transformer<T, T> {
     private final Action<? super T> peekAction;
 
-    public PeekTransformer(Action<? super T> peekAction) {
+    private PeekTransformer(Action<? super T> peekAction) {
         this.peekAction = peekAction;
     }
 
@@ -14,5 +14,9 @@ public final class PeekTransformer<T> implements Transformer<T, T> {
     public T transform(T t) {
         peekAction.execute(t);
         return t;
+    }
+
+    public static <T> PeekTransformer<T> peek(Action<? super T> action) {
+        return new PeekTransformer<>(action);
     }
 }

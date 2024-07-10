@@ -11,7 +11,7 @@ apply plugin: 'dev.gradleplugins.gradle-plugin-unit-test'
 apply plugin: 'dev.gradleplugins.gradle-plugin-functional-test'
 
 description = 'Gradle plugin development plugins.'
-version = '1.7.2'
+version = '1.8.0'
 
 gradlePlugin {
     plugins {
@@ -125,6 +125,7 @@ functionalTest {
         implementation "org.junit.jupiter:junit-jupiter:latest.release"
         runtimeOnly "org.junit.vintage:junit-vintage-engine:latest.release"
         implementation "org.hamcrest:hamcrest:2.2"
+        implementation "dev.gradleplugins:gradle-build-script"
 
         // Force local fixtures
         // TODO: Maybe look into dependency substitution

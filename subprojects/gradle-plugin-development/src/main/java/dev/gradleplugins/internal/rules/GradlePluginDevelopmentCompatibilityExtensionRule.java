@@ -4,6 +4,7 @@ import dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension;
 import dev.gradleplugins.internal.FinalizableComponent;
 import dev.gradleplugins.internal.GradleCompatibilities;
 import dev.gradleplugins.internal.JvmCompatibilities;
+import dev.gradleplugins.internal.util.ActionSet;
 import dev.gradleplugins.internal.util.Configurable;
 import org.gradle.api.Action;
 import org.gradle.api.NamedDomainObjectProvider;
@@ -20,8 +21,6 @@ import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 import org.gradle.util.GradleVersion;
 
 import javax.inject.Inject;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
 
@@ -34,6 +33,8 @@ import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradl
     @Override
     public void apply(Project project) {
         project.getPluginManager().withPlugin("java-gradle-plugin", __ -> {
+            project.getPluginManager().apply("gradlepluginsdev.rules.gradle-compatibilities");
+
             final DefaultGradlePluginDevelopmentCompatibilityExtension extension = newCompatibilityExtension(project);
 
             ((ExtensionAware) gradlePlugin(project)).getExtensions().add(EXTENSION_NAME, extension);
@@ -96,21 +97,6 @@ import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradl
 
         private static SourceSet pluginSourceSetOf(Project project) {
             return project.getExtensions().getByType(GradlePluginDevelopmentExtension.class).getPluginSourceSet();
-        }
-
-        private static final class ActionSet<T> implements Action<T> {
-            private final Set<Action<? super T>> actions = new LinkedHashSet<>();
-
-            public boolean add(Action<? super T> action) {
-                return actions.add(action);
-            }
-
-            @Override
-            public void execute(T t) {
-                for (Action<? super T> action : actions) {
-                    action.execute(t);
-                }
-            }
         }
 
         @Inject

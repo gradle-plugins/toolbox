@@ -12,6 +12,7 @@ import org.gradle.util.GradleVersion;
 
 import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
+import static dev.gradleplugins.internal.util.PeekTransformer.peek;
 
 public final class AddGradleApiDependencyToCompileOnlyApiConfiguration implements Action<Project> {
     @Override

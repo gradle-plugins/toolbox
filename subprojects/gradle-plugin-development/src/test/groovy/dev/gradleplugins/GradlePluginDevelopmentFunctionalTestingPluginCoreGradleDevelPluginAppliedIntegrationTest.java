@@ -45,7 +45,7 @@ class GradlePluginDevelopmentFunctionalTestingPluginCoreGradleDevelPluginApplied
     @Test
     void hasGradleTestKitImplementationDependencyToLocalVersion() {
         subject().getSourceSet().get(); // required
-        assertTrue(project.getConfigurations().getByName("functionalTestImplementation").getDependencies().stream().anyMatch(localGradleTestKit()));
+        assertTrue(project.getConfigurations().getByName("functionalTestImplementation").getIncoming().getDependencies().stream().anyMatch(localGradleTestKit()));
     }
 
     private static Predicate<Dependency> localGradleTestKit() {
@@ -57,6 +57,6 @@ class GradlePluginDevelopmentFunctionalTestingPluginCoreGradleDevelPluginApplied
         project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-base");
         compatibility(gradlePlugin(project)).getGradleApiVersion().set("5.6");
         subject().getSourceSet().get(); // required
-        assertThat(project.getConfigurations().getByName("functionalTestImplementation").getDependencies(), hasItem(coordinate("dev.gradleplugins:gradle-test-kit:5.6")));
+        assertThat(project.getConfigurations().getByName("functionalTestImplementation").getIncoming().getDependencies(), hasItem(coordinate("dev.gradleplugins:gradle-test-kit:5.6")));
     }
 }

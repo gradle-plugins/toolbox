@@ -57,7 +57,7 @@ abstract class AbstractGradlePluginDevelopmentFunctionalTestingFunctionalTest ex
         buildFile << """
             tasks.register('verify') {
                 doLast {
-                    assert configurations.functionalTestImplementation.dependencies.any { it instanceof ${SelfResolvingDependencyInternal.canonicalName} ? it.targetComponentId.displayName == 'Gradle TestKit' : false }
+                    assert configurations.functionalTestImplementation.incoming.dependencies.any { it instanceof ${SelfResolvingDependencyInternal.canonicalName} ? it.targetComponentId.displayName == 'Gradle TestKit' : false }
                 }
             }
         """

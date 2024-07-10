@@ -31,20 +31,20 @@ class GradlePluginDevelopmentBasePluginIntegrationTest {
 
     @Test
     void removesSelfResolvingGradleApiDependency() {
-        assertThat(project.getConfigurations().getByName("api").getDependencies(), not(hasItem(isA(SelfResolvingDependency.class))));
+        assertThat(project.getConfigurations().getByName("api").getIncoming().getDependencies(), not(hasItem(isA(SelfResolvingDependency.class))));
     }
 
     @Test
     void addsExternalGradleApiDependencyForMinimumGradleVersionToCompileOnlyApiIfAvailable() {
         assumeTrue(project.getConfigurations().findByName("compileOnlyApi") != null);
-        assertThat(project.getConfigurations().getByName("compileOnlyApi").getDependencies(),
+        assertThat(project.getConfigurations().getByName("compileOnlyApi").getIncoming().getDependencies(),
                 hasItem(allOf(isA(ExternalDependency.class), coordinate("dev.gradleplugins:gradle-api:6.5"))));
     }
 
     @Test
     void addsExternalGradleApiDependencyForMinimumGradleVersionToCompileOnlyIfCompileOnlyApiIsNotAvailable() {
         assumeTrue(project.getConfigurations().findByName("compileOnlyApi") == null);
-        assertThat(project.getConfigurations().getByName("compileOnly").getDependencies(),
+        assertThat(project.getConfigurations().getByName("compileOnly").getIncoming().getDependencies(),
                 hasItem(allOf(isA(ExternalDependency.class), coordinate("dev.gradleplugins:gradle-api:6.5"))));
     }
 

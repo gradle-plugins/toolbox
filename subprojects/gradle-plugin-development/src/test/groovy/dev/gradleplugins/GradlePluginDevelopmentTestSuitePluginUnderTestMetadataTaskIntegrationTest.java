@@ -57,7 +57,7 @@ class GradlePluginDevelopmentTestSuitePluginUnderTestMetadataTaskIntegrationTest
 
     @Test
     void addsPluginUnderTestMetadataAsRuntimeOnlyDependency() {
-        assertThat(project.getConfigurations().getByName("etreTestRuntimeOnly").getDependencies(),
+        assertThat(project.getConfigurations().getByName("etreTestRuntimeOnly").getIncoming().getDependencies(),
                 hasItem(isA(SelfResolvingDependency.class)));
     }
 
