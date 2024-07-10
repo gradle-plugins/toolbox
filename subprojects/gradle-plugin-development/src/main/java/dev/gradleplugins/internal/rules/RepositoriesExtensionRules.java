@@ -2,6 +2,9 @@ package dev.gradleplugins.internal.rules;
 
 import dev.gradleplugins.GradlePluginDevelopmentRepositoryExtension;
 import dev.gradleplugins.internal.runtime.dsl.GroovyHelper;
+import dev.gradleplugins.internal.util.ClosureWrappedConfigureAction;
+import groovy.lang.Closure;
+import groovy.lang.DelegatesTo;
 import org.codehaus.groovy.runtime.MethodClosure;
 import org.gradle.api.Action;
 import org.gradle.api.Plugin;
@@ -54,12 +57,13 @@ import java.lang.reflect.Method;
     }
 
     private static void decorate(RepositoryHandler repositories) {
-        final GradlePluginDevelopmentRepositoryExtension extension = ((ExtensionAware) repositories).getExtensions().create("gradlePluginDevelopment", DefaultGradlePluginDevelopmentRepositoryExtension.class, repositories);
+        final GradlePluginDevelopmentRepositoryExtension extension = new DefaultGradlePluginDevelopmentRepositoryExtension(repositories);
+        ((ExtensionAware) repositories).getExtensions().add("gradlePluginDevelopment", extension);
 
         GroovyHelper.instance().addNewInstanceMethod(repositories, "gradlePluginDevelopment", new MethodClosure(extension, "gradlePluginDevelopment"));
     }
 
-    /*private*/ static abstract /*final*/ class DefaultGradlePluginDevelopmentRepositoryExtension implements GradlePluginDevelopmentRepositoryExtension, HasPublicType {
+    private static final class DefaultGradlePluginDevelopmentRepositoryExtension implements GradlePluginDevelopmentRepositoryExtension, HasPublicType {
         private final RepositoryHandler repositories;
 
         @Inject
@@ -87,6 +91,10 @@ import java.lang.reflect.Method;
                 });
                 action.execute(repository);
             });
+        }
+
+        public MavenArtifactRepository gradlePluginDevelopment(@DelegatesTo(MavenArtifactRepository.class) @SuppressWarnings("rawtypes") Closure action) {
+            return gradlePluginDevelopment(new ClosureWrappedConfigureAction<>(action));
         }
 
         @Override

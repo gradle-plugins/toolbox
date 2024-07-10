@@ -27,7 +27,8 @@ import javax.inject.Inject;
     @Override
     public void apply(Project project) {
         final DependencyHandler dependencies = project.getDependencies();
-        final GradlePluginDevelopmentDependencyExtension extension = dependencies.getExtensions().create("gradlePluginDevelopment", DefaultGradlePluginDevelopmentDependencyExtension.class, dependencies);
+        final GradlePluginDevelopmentDependencyExtension extension = new DefaultGradlePluginDevelopmentDependencyExtension(dependencies);
+        dependencies.getExtensions().add("gradlePluginDevelopment", extension);
 
         GroovyHelper.instance().addNewInstanceMethod(dependencies, "gradleApi", new MethodClosure(extension, "gradleApi"));
         GroovyHelper.instance().addNewInstanceMethod(dependencies, "gradleTestKit", new MethodClosure(extension, "gradleTestKit"));
@@ -36,7 +37,7 @@ import javax.inject.Inject;
         GroovyHelper.instance().addNewInstanceMethod(dependencies, "gradlePlugin", new MethodClosure(extension, "gradlePlugin"));
     }
 
-    /*private*/ static abstract /*final*/ class DefaultGradlePluginDevelopmentDependencyExtension implements GradlePluginDevelopmentDependencyExtension, HasPublicType {
+    private static final class DefaultGradlePluginDevelopmentDependencyExtension implements GradlePluginDevelopmentDependencyExtension, HasPublicType {
         private final DependencyFactory factory;
         private final Transformer<Dependency, String> gradleApiTransformer;
         private final Transformer<Dependency, String> gradleTestKitTransformer;
