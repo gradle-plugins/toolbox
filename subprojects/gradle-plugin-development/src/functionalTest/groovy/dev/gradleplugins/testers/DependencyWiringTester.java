@@ -21,7 +21,7 @@ public interface DependencyWiringTester {
         buildFile().append(afterEvaluate(it -> it.add(bucketDsl().call(string("com.example:foo:1.0")))));
         buildFile().append(groovyDsl(
                 "Set<String> allDependencies(Configuration configuration) {",
-                "  return configuration.allDependencies.collect {",
+                "  return configuration.incoming.dependencies.collect {",
                 "    if (it instanceof ExternalModuleDependency) {",
                 "      return \"${it.group}:${it.name}:${it.version}\".toString()",
                 "    } else if (it instanceof ProjectDependency) {",

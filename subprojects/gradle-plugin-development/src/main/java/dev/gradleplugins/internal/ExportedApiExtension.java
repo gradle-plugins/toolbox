@@ -205,7 +205,7 @@ public abstract class ExportedApiExtension {
                             return deferDependenciesConfiguration(new BiConsumer<Configuration, DependencySet>() {
                                 @Override
                                 public void accept(Configuration it, DependencySet dependencies) {
-                                    dependencies.addAllLater(asCollectionProvider(configuration.map(Configuration::getDependencies)));
+                                    dependencies.addAllLater(asCollectionProvider(configuration.map(t -> t.getIncoming().getDependencies())));
                                 }
 
                                 @SuppressWarnings("unchecked")

@@ -57,7 +57,7 @@ class GradlePluginDevelopmentUnitTestingPluginIntegrationTest {
             // If we do, the sourceSet can realize/register before we apply core Gradle plugins.
             // Those plugins assume the sourceSet does not exist which result in a failure.
             subject().getDependencies().implementation("org.junit.jupiter:junit-jupiter:5.8.1");
-            assertThat(project.getConfigurations().getByName("testImplementation").getDependencies(), hasItem(coordinate("org.junit.jupiter:junit-jupiter:5.8.1")));
+            assertThat(project.getConfigurations().getByName("testImplementation").getIncoming().getDependencies(), hasItem(coordinate("org.junit.jupiter:junit-jupiter:5.8.1")));
             assertDoesNotThrow(() -> project.getPluginManager().apply("java-gradle-plugin"));
         }
     }

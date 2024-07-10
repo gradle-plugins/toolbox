@@ -41,6 +41,6 @@ class GradlePluginDevelopmentUnitTestingPluginCoreGradleDevelPluginAppliedIntegr
     void hasGradleApiImplementationDependency() {
         project.getPluginManager().apply("dev.gradleplugins.gradle-plugin-base");
         compatibility(gradlePlugin(project)).getMinimumGradleVersion().set("5.6");
-        assertThat(project.getConfigurations().getByName("testImplementation").getDependencies(), hasItem(coordinate("dev.gradleplugins:gradle-api:5.6")));
+        assertThat(project.getConfigurations().getByName("testImplementation").getIncoming().getDependencies(), hasItem(coordinate("dev.gradleplugins:gradle-api:5.6")));
     }
 }
