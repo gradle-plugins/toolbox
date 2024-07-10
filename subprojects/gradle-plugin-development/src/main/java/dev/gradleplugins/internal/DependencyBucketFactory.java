@@ -1,8 +1,6 @@
 package dev.gradleplugins.internal;
 
 import dev.gradleplugins.GradlePluginDevelopmentDependencyBucket;
-import dev.gradleplugins.internal.util.FilterTransformer;
-import dev.gradleplugins.internal.util.PeekTransformer;
 import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
@@ -16,6 +14,9 @@ import org.gradle.api.tasks.SourceSet;
 
 import java.util.Collections;
 import java.util.function.BiConsumer;
+
+import static dev.gradleplugins.internal.util.FilterTransformer.filter;
+import static dev.gradleplugins.internal.util.PeekTransformer.peek;
 
 public final class DependencyBucketFactory {
     private final Project project;
@@ -65,7 +66,7 @@ public final class DependencyBucketFactory {
         }
 
         private Provider<String> ifThisBucket(Configuration configuration) {
-            return configurationNameProvider.map(new FilterTransformer<>(it -> it.equals(configuration.getName())));
+            return configurationNameProvider.map(filter(it -> it.equals(configuration.getName())));
         }
 
         @Override
@@ -98,7 +99,7 @@ public final class DependencyBucketFactory {
 
         @Override
         public <DependencyType extends Dependency> void add(Provider<DependencyType> dependencyProvider, Action<? super DependencyType> configureAction) {
-            add(dependencyProvider.map(new PeekTransformer<>(configureAction)));
+            add(dependencyProvider.map(peek(configureAction)));
         }
 
         @Override
