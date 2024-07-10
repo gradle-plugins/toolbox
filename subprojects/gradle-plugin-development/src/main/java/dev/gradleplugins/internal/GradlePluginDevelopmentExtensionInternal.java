@@ -4,6 +4,7 @@ import dev.gradleplugins.GroovyGradlePluginDevelopmentExtension;
 import dev.gradleplugins.JavaGradlePluginDevelopmentExtension;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
+import org.gradle.api.artifacts.type.ArtifactTypeDefinition;
 import org.gradle.api.attributes.Bundling;
 import org.gradle.api.attributes.Category;
 import org.gradle.api.attributes.DocsType;
@@ -92,7 +93,11 @@ public abstract class GradlePluginDevelopmentExtensionInternal implements Groovy
         }
 
         TaskProvider<Jar> jar = getTasks().named(jarTaskName, Jar.class);
-        variant.getOutgoing().artifact(new JarBasedPublishArtifact(jar));
+        variant.getOutgoing().artifact(jar, it -> {
+            it.setName(jar.getName());
+            it.setType(ArtifactTypeDefinition.JAR_TYPE);
+            it.builtBy(jar);
+        });
         AdhocComponentWithVariants component = findJavaComponent(getComponents());
         if (component != null) {
             component.addVariantsFromConfiguration(variant, new JavaConfigurationVariantMapping("runtime", true));
