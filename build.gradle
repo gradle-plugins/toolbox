@@ -5,7 +5,7 @@ plugins {
 allprojects {
     group = 'dev.gradleplugins'
 }
-version = '1.7.1'
+version = '1.7.2'
 
 // Configure javadoc
 allprojects {
@@ -19,7 +19,7 @@ allprojects {
 // Configure gradle-fixtures-* versions
 subprojects {
     if (project.name.startsWith('gradle-fixtures') || project.name.startsWith('gradle-runner-kit')) {
-        version = '0.0.145'
+        version = '0.0.146'
     }
 }
 
