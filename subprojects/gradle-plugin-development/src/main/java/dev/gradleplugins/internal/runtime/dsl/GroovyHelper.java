@@ -1,17 +1,15 @@
 package dev.gradleplugins.internal.runtime.dsl;
 
 import groovy.lang.Closure;
+import groovy.lang.GroovyObject;
+import org.codehaus.groovy.runtime.HandleMetaClass;
 
-public abstract class GroovyHelper {
+public final class GroovyHelper {
     private static final Object lock = new Object();
     private static GroovyHelper INSTANCE;
 
     private static GroovyHelper newInstance() {
-        try {
-            return (GroovyHelper) Class.forName("dev.gradleplugins.internal.dsl.groovy.GroovyDslRuntimeExtensions").newInstance();
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+        return new GroovyHelper();
     }
 
     public static GroovyHelper instance() {
@@ -25,7 +23,9 @@ public abstract class GroovyHelper {
         return INSTANCE;
     }
 
-    public abstract void addNewInstanceMethod(Object self, String methodName, @SuppressWarnings("rawtypes") Closure methodBody);
+    public void addNewInstanceMethod(Object self, String methodName, @SuppressWarnings("rawtypes") Closure methodBody) {
+        new HandleMetaClass(((GroovyObject) self).getMetaClass(), self).setProperty(methodName, methodBody);
+    }
 
 //    public abstract void mixin(Class type, String methodName, Closure methodBody);
 }
