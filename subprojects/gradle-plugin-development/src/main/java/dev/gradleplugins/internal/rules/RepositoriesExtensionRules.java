@@ -1,11 +1,11 @@
 package dev.gradleplugins.internal.rules;
 
 import dev.gradleplugins.GradlePluginDevelopmentRepositoryExtension;
-import groovy.lang.Closure;
+import dev.gradleplugins.internal.runtime.dsl.GroovyHelper;
+import org.codehaus.groovy.runtime.MethodClosure;
 import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.dsl.RepositoryHandler;
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.initialization.Settings;
@@ -54,26 +54,12 @@ import java.lang.reflect.Method;
     }
 
     private static void decorate(RepositoryHandler repositories) {
-        ((ExtensionAware) repositories).getExtensions().create("gradlePluginDevelopment", DefaultGradlePluginDevelopmentRepositoryExtension.class, repositories);
-        try {
-            Method target = Class.forName("dev.gradleplugins.internal.dsl.groovy.GroovyDslRuntimeExtensions").getMethod("extendWithMethod", Object.class, String.class, Closure.class);
-            target.invoke(null, repositories, "gradlePluginDevelopment", new GradlePluginDevelopmentClosure(repositories));
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            LOGGER.info("Unable to extend RepositoryHandler with gradlePluginDevelopment().");
-        }
+        final GradlePluginDevelopmentRepositoryExtension extension = ((ExtensionAware) repositories).getExtensions().create("gradlePluginDevelopment", DefaultGradlePluginDevelopmentRepositoryExtension.class, repositories);
+
+        GroovyHelper.instance().addNewInstanceMethod(repositories, "gradlePluginDevelopment", new MethodClosure(extension, "gradlePluginDevelopment"));
     }
 
-    private static class GradlePluginDevelopmentClosure extends Closure<Dependency> {
-        public GradlePluginDevelopmentClosure(RepositoryHandler repositories) {
-            super(repositories);
-        }
-
-        public MavenArtifactRepository doCall() {
-            return ((ExtensionAware) getOwner()).getExtensions().getByType(GradlePluginDevelopmentRepositoryExtension.class).gradlePluginDevelopment();
-        }
-    }
-
-    /*private*/ static /*final*/ class DefaultGradlePluginDevelopmentRepositoryExtension implements GradlePluginDevelopmentRepositoryExtension, HasPublicType {
+    /*private*/ static abstract /*final*/ class DefaultGradlePluginDevelopmentRepositoryExtension implements GradlePluginDevelopmentRepositoryExtension, HasPublicType {
         private final RepositoryHandler repositories;
 
         @Inject

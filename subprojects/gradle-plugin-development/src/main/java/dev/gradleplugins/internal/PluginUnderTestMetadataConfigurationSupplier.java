@@ -26,7 +26,15 @@ final class PluginUnderTestMetadataConfigurationSupplier implements Supplier<Nam
     @Override
     public NamedDomainObjectProvider<Configuration> get() {
         if (pluginUnderTestMetadata == null) {
+            final NamedDomainObjectProvider<Configuration> pluginUnderTest = project.getConfigurations().register(sourceSet().getName() + "PluginUnderTest");
+            pluginUnderTest.configure(it -> {
+                it.setCanBeResolved(false);
+                it.setCanBeConsumed(false);
+                it.setDescription("Plugin under test for " + sourceSet() + ".");
+            });
+
             final Configuration configuration = project.getConfigurations().maybeCreate(sourceSet().getName() + "PluginUnderTestMetadata");
+            configuration.extendsFrom(pluginUnderTest.get());
             configuration.setCanBeResolved(true);
             configuration.setCanBeConsumed(false);
             configuration.attributes(attributes -> attributes.attribute(Usage.USAGE_ATTRIBUTE, project.getObjects().named(Usage.class, Usage.JAVA_RUNTIME)));

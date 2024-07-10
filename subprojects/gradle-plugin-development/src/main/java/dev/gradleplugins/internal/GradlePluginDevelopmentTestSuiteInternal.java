@@ -1,19 +1,24 @@
 package dev.gradleplugins.internal;
 
 import dev.gradleplugins.GradlePluginDevelopmentDependencyBucket;
+import dev.gradleplugins.GradlePluginDevelopmentDependencyModifiers;
 import dev.gradleplugins.GradlePluginDevelopmentTestSuite;
 import dev.gradleplugins.GradlePluginDevelopmentTestSuiteDependencies;
 import dev.gradleplugins.GradlePluginTestingStrategyFactory;
 import dev.gradleplugins.GradleRuntimeCompatibility;
 import dev.gradleplugins.TaskView;
+import dev.gradleplugins.internal.runtime.dsl.GroovyHelper;
+import dev.gradleplugins.internal.util.LocalOrRemoteVersionTransformer;
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.groovy.runtime.MethodClosure;
 import org.gradle.api.Action;
 import org.gradle.api.NamedDomainObjectProvider;
 import org.gradle.api.Project;
+import org.gradle.api.Transformer;
 import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.artifacts.ConfigurationContainer;
+import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.ModuleDependency;
-import org.gradle.api.artifacts.dsl.DependencyHandler;
+import org.gradle.api.artifacts.ProjectDependency;
 import org.gradle.api.component.SoftwareComponent;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.plugins.PluginManager;
@@ -30,7 +35,10 @@ import org.gradle.util.GradleVersion;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.Supplier;
@@ -60,6 +68,15 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         this.name = name;
         this.displayName = GUtil.toWords(name) + "s";
         this.dependencies = objects.newInstance(Dependencies.class, project, minimumGradleVersion.orElse(GradleVersion.current().getVersion()).map(GradleRuntimeCompatibility::groovyVersionOf), this);
+
+        // adhoc decoration of the dependencies
+        dependencies.forEach(dependencyBucket -> {
+            GroovyHelper.instance().addNewInstanceMethod(dependencies, dependencyBucket.getName(), new MethodClosure(dependencyBucket, "add"));
+        });
+        GroovyHelper.instance().addNewInstanceMethod(dependencies, "platform", new MethodClosure(dependencies.getPlatform(), "modify"));
+        GroovyHelper.instance().addNewInstanceMethod(dependencies, "enforcedPlatform", new MethodClosure(dependencies.getEnforcedPlatform(), "modify"));
+        GroovyHelper.instance().addNewInstanceMethod(dependencies, "testFixtures", new MethodClosure(dependencies.getTestFixtures(), "modify"));
+
         this.pluginUnderTestMetadataTask = registerPluginUnderTestMetadataTask(tasks, pluginUnderTestMetadataTaskName(name), displayName);
         this.testTasks = objects.newInstance(TestTaskView.class, testTaskActions, providers.provider(new FinalizeComponentCallable<>()).orElse(getTestTaskCollection()));
         this.finalizeActions.add(new TestSuiteSourceSetExtendsFromTestedSourceSetIfPresentRule());
@@ -217,22 +234,18 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         action.execute(dependencies);
     }
 
-    protected abstract static class Dependencies implements GradlePluginDevelopmentTestSuiteDependencies {
+    protected abstract static class Dependencies implements GradlePluginDevelopmentTestSuiteDependencies, Iterable<GradlePluginDevelopmentDependencyBucket> {
         private final PluginManager pluginManager;
         private final Provider<String> defaultGroovyVersion;
-        private final DependencyFactory factory;
+        private final DependencyFactory dependencyFactory;
         private final Supplier<NamedDomainObjectProvider<Configuration>> pluginUnderTestMetadataSupplier;
-        private final GradlePluginDevelopmentDependencyBucket implementation;
-        private final GradlePluginDevelopmentDependencyBucket compileOnly;
-        private final GradlePluginDevelopmentDependencyBucket runtimeOnly;
-        private final GradlePluginDevelopmentDependencyBucket annotationProcessor;
-        private final GradlePluginDevelopmentDependencyBucket pluginUnderTestMetadata;
-
-        @Inject
-        protected abstract ConfigurationContainer getConfigurations();
-
-        @Inject
-        protected abstract DependencyHandler getDependencies();
+        private final Project project;
+        private final Map<String, GradlePluginDevelopmentDependencyBucket> dependencyBuckets = new LinkedHashMap<>();
+        private final GradlePluginDevelopmentDependencyModifiers.DependencyModifier platformDependencyModifier;
+        private final GradlePluginDevelopmentDependencyModifiers.DependencyModifier enforcedPlatformDependencyModifier;
+        private final GradlePluginDevelopmentDependencyModifiers.DependencyModifier testFixturesDependencyModifier;
+        private final Transformer<Dependency, String> localOrRemoteGradleTestKit;
+        private final Transformer<Dependency, String> localOrRemoteGradleApi;
 
         private NamedDomainObjectProvider<Configuration> pluginUnderTestMetadata() {
             return pluginUnderTestMetadataSupplier.get();
@@ -242,52 +255,88 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         public Dependencies(Project project, Provider<String> defaultGroovyVersion, GradlePluginDevelopmentTestSuite testSuite) {
             this.pluginManager = project.getPluginManager();
             this.defaultGroovyVersion = defaultGroovyVersion;
-            this.factory = DependencyFactory.forProject(project);
+            this.dependencyFactory = DependencyFactory.forProject(project);
+            this.localOrRemoteGradleTestKit = new LocalOrRemoteVersionTransformer<>(dependencyFactory::localGradleTestKit, dependencyFactory::gradleTestKit);
+            this.localOrRemoteGradleApi = new LocalOrRemoteVersionTransformer<>(dependencyFactory::localGradleApi, dependencyFactory::gradleApi);
             this.pluginUnderTestMetadataSupplier = new PluginUnderTestMetadataConfigurationSupplier(project, testSuite);
             project.afterEvaluate(__ -> pluginUnderTestMetadataSupplier.get()); // for now
             DependencyBucketFactory bucketFactory = new DependencyBucketFactory(project, testSuite.getSourceSet());
-            this.implementation = bucketFactory.create("implementation");
-            this.compileOnly = bucketFactory.create("compileOnly");
-            this.runtimeOnly = bucketFactory.create("runtimeOnly");
-            this.annotationProcessor = bucketFactory.create("annotationProcessor");
-            this.pluginUnderTestMetadata = bucketFactory.create("pluginUnderTestMetadata");
+            this.platformDependencyModifier = new PlatformDependencyModifier(project);
+            this.enforcedPlatformDependencyModifier = new EnforcedPlatformDependencyModifier(project);
+            this.testFixturesDependencyModifier = new TestFixturesDependencyModifier(project);
+            this.project = project;
+            add(bucketFactory.create("implementation"));
+            add(bucketFactory.create("compileOnly"));
+            add(bucketFactory.create("runtimeOnly"));
+            add(bucketFactory.create("annotationProcessor"));
+            add(bucketFactory.create("pluginUnderTestMetadata"));
+            add(bucketFactory.create("pluginUnderTest"));
+        }
+
+        private void add(GradlePluginDevelopmentDependencyBucket dependencyBucket) {
+            dependencyBuckets.put(dependencyBucket.getName(), dependencyBucket);
         }
 
         @Override
         public void implementation(Object notation) {
-            addDependency(implementation, notation);
+            addDependency(getImplementation(), notation);
         }
 
         @Override
         public void implementation(Object notation, Action<? super ModuleDependency> action) {
-            implementation.add((ModuleDependency) factory.create(notation), action);
+            getImplementation().add((ModuleDependency) dependencyFactory.create(notation), action);
+        }
+
+        @Override
+        public GradlePluginDevelopmentDependencyBucket getImplementation() {
+            return dependencyBuckets.get("implementation");
         }
 
         @Override
         public void compileOnly(Object notation) {
-            addDependency(compileOnly, notation);
+            addDependency(getCompileOnly(), notation);
+        }
+
+        @Override
+        public GradlePluginDevelopmentDependencyBucket getCompileOnly() {
+            return dependencyBuckets.get("compileOnly");
         }
 
         @Override
         public void runtimeOnly(Object notation) {
-            addDependency(runtimeOnly, notation);
+            addDependency(getRuntimeOnly(), notation);
+        }
+
+        @Override
+        public GradlePluginDevelopmentDependencyBucket getRuntimeOnly() {
+            return dependencyBuckets.get("runtimeOnly");
         }
 
         @Override
         public void annotationProcessor(Object notation) {
-            addDependency(annotationProcessor, notation);
+            addDependency(getAnnotationProcessor(), notation);
+        }
+
+        @Override
+        public GradlePluginDevelopmentDependencyBucket getAnnotationProcessor() {
+            return dependencyBuckets.get("annotationProcessor");
         }
 
         @Override
         public void pluginUnderTestMetadata(Object notation) {
-            addDependency(pluginUnderTestMetadata, notation);
+            addDependency(dependencyBuckets.get("pluginUnderTestMetadata"), notation);
+        }
+
+        @Override
+        public GradlePluginDevelopmentDependencyBucket getPluginUnderTest() {
+            return dependencyBuckets.get("pluginUnderTest");
         }
 
         private void addDependency(GradlePluginDevelopmentDependencyBucket bucket, Object notation) {
             if (notation instanceof Provider) {
-                bucket.add(((Provider<?>) notation).map(factory::create));
+                bucket.add(((Provider<?>) notation).map(dependencyFactory::create));
             } else {
-                bucket.add(factory.create(notation));
+                bucket.add(dependencyFactory.create(notation));
             }
         }
 
@@ -297,13 +346,52 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         }
 
         @Override
-        public Object testFixtures(Object notation) {
-            return getDependencies().testFixtures(notation);
+        public ModuleDependency testFixtures(Object notation) {
+            if (notation instanceof CharSequence) {
+                return getTestFixtures().modify((CharSequence) notation);
+            } else if (notation instanceof ModuleDependency) {
+                return getTestFixtures().modify((ModuleDependency) notation);
+            } else if (notation instanceof Project) {
+                return getTestFixtures().modify(project);
+            }
+            throw new UnsupportedOperationException();
         }
 
         @Override
-        public Object platform(Object notation) {
-            return getDependencies().platform(notation);
+        public GradlePluginDevelopmentDependencyModifiers.DependencyModifier getTestFixtures() {
+            return testFixturesDependencyModifier;
+        }
+
+        @Override
+        public ModuleDependency platform(Object notation) {
+            if (notation instanceof CharSequence) {
+                return getPlatform().modify((CharSequence) notation);
+            } else if (notation instanceof ModuleDependency) {
+                return getPlatform().modify((ModuleDependency) notation);
+            } else if (notation instanceof Project) {
+                return getPlatform().modify(project);
+            }
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public GradlePluginDevelopmentDependencyModifiers.DependencyModifier getPlatform() {
+            return platformDependencyModifier;
+        }
+
+        @Override
+        public GradlePluginDevelopmentDependencyModifiers.DependencyModifier getEnforcedPlatform() {
+            return enforcedPlatformDependencyModifier;
+        }
+
+        @Override
+        public ProjectDependency project(String projectPath) {
+            return dependencyFactory.create(project.project(projectPath));
+        }
+
+        @Override
+        public ProjectDependency project() {
+            return dependencyFactory.create(project);
         }
 
         @Override
@@ -314,37 +402,42 @@ public abstract class GradlePluginDevelopmentTestSuiteInternal implements Gradle
         @Override
         public Object spockFramework(String version) {
             pluginManager.apply("groovy-base"); // Spock framework imply Groovy implementation language
-            return factory.spockFramework(version);
+            return dependencyFactory.spockFramework(version);
         }
 
         @Override
         public Object gradleFixtures() {
-            return factory.gradleFixtures();
+            return dependencyFactory.gradleFixtures();
         }
 
         @Override
         public Object gradleTestKit() {
-            return factory.localGradleTestKit();
+            return dependencyFactory.localGradleTestKit();
         }
 
         @Override
         public Object gradleTestKit(String version) {
-            return factory.gradleTestKit(version);
+            return localOrRemoteGradleTestKit.transform(version);
         }
 
         @Override
         public Object groovy() {
-            return defaultGroovyVersion.map(factory::groovy);
+            return defaultGroovyVersion.map(dependencyFactory::groovy);
         }
 
         @Override
         public Object groovy(String version) {
-            return factory.groovy(version);
+            return dependencyFactory.groovy(version);
         }
 
         @Override
         public Object gradleApi(String version) {
-            return factory.gradleApi(version);
+            return localOrRemoteGradleApi.transform(version);
+        }
+
+        @Override
+        public Iterator<GradlePluginDevelopmentDependencyBucket> iterator() {
+            return dependencyBuckets.values().iterator();
         }
     }
 
