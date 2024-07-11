@@ -14,7 +14,8 @@ import org.gradle.api.plugins.AppliedPlugin;
 import static dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension.compatibility;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
 
-public abstract class GradlePluginDevelopmentUnitTestingPlugin implements Plugin<Project> {
+// TODO(2.0): Make this class "private"
+public abstract /*final*/ class GradlePluginDevelopmentUnitTestingPlugin implements Plugin<Project> {
     private static final String TEST_NAME = "test";
     private static final GradlePluginDevelopmentTestSuiteRegistrationAction TEST_RULE = new GradlePluginDevelopmentTestSuiteRegistrationAction(TEST_NAME);
 

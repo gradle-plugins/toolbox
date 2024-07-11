@@ -35,7 +35,8 @@ import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopment
 import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.registerLanguageExtension;
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.gradlePlugin;
 
-public class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
+// TODO(2.0): Make this class "private" and abstract
+public /*final*/ class GroovyGradlePluginDevelopmentPlugin implements Plugin<Project> {
     private static final String PLUGIN_ID = "dev.gradleplugins.groovy-gradle-plugin";
 
     @Override

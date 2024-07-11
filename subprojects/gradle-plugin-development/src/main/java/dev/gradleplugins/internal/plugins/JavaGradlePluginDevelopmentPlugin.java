@@ -22,7 +22,8 @@ import org.gradle.api.Project;
 
 import static dev.gradleplugins.internal.plugins.AbstractGradlePluginDevelopmentPlugin.*;
 
-public class JavaGradlePluginDevelopmentPlugin implements Plugin<Project> {
+// TODO(2.0): Make this class "private" and abstract
+public /*final*/ class JavaGradlePluginDevelopmentPlugin implements Plugin<Project> {
     private static final String PLUGIN_ID = "dev.gradleplugins.java-gradle-plugin";
 
     @Override

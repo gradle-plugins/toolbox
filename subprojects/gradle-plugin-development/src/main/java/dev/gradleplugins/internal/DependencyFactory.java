@@ -87,6 +87,32 @@ public final class DependencyFactory {
         return (ExternalModuleDependency) dependencies.platform(create("org.spockframework:spock-bom:" + version));
     }
 
+    public ExternalModuleDependency gradlePlugin(String notation) {
+        assert notation != null : "'notation' must not be null";
+
+        // Parsing <plugin-id>[:<version>]
+        String pluginId = null;
+        String version = null;
+        {
+            int index = notation.indexOf(':');
+            if (index == -1) {
+                pluginId = notation;
+            } else if (notation.indexOf(':', index + 1) != -1) {
+                throw new RuntimeException("Invalid Gradle plugin notation, please use '<plugin-id>' or '<plugin-id>:<version>'.");
+            } else {
+                pluginId = notation.substring(0, index);
+                version = notation.substring(index + 1);
+            }
+        }
+
+        // Dependency
+        if (version == null) {
+            return (ExternalModuleDependency) dependencies.create(pluginId + ":" + pluginId + ".gradle.plugin");
+        } else {
+            return (ExternalModuleDependency) dependencies.create(pluginId + ":" + pluginId + ".gradle.plugin:" + version);
+        }
+    }
+
     public static DependencyFactory forProject(Project project) {
         return new DependencyFactory(project.getDependencies());
     }

@@ -21,7 +21,8 @@ import java.util.function.Function;
 
 import static dev.gradleplugins.internal.util.GradlePluginDevelopmentUtils.sourceSets;
 
-public abstract class GradlePluginDevelopmentPlugin implements Plugin<Object> {
+// TODO(2.0): Make this class "private"
+public abstract /*final*/ class GradlePluginDevelopmentPlugin implements Plugin<Object> {
     private static final Logger LOGGER = Logging.getLogger(GradlePluginDevelopmentPlugin.class);
 
     @Override
