@@ -103,6 +103,7 @@ test {
         runtimeOnly 'org.junit.vintage:junit-vintage-engine'
         implementation "org.hamcrest:hamcrest:2.2"
         implementation "org.mockito:mockito-core:4.2.0"
+        implementation 'dev.gradleplugins:hamcrest-gradle'
     }
     testTasks.configureEach { useJUnitPlatform() }
 }
@@ -126,6 +127,7 @@ functionalTest {
         runtimeOnly "org.junit.vintage:junit-vintage-engine:latest.release"
         implementation "org.hamcrest:hamcrest:2.2"
         implementation "dev.gradleplugins:gradle-build-script"
+        implementation 'dev.gradleplugins:hamcrest-gradle'
 
         // Force local fixtures
         // TODO: Maybe look into dependency substitution

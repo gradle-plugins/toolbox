@@ -8,6 +8,8 @@ import org.gradle.util.GradleVersion
 import spock.lang.Unroll
 import spock.util.environment.Jvm
 
+import static dev.gradleplugins.hamcrest.gradle.GradleProviderMatchers.PropertyTarget.onProperty
+import static dev.gradleplugins.hamcrest.gradle.GradleProviderMatchers.forChangesDisallowed
 import static org.junit.Assume.assumeFalse
 import static org.junit.Assume.assumeTrue
 
@@ -214,7 +216,7 @@ abstract class AbstractGradlePluginDevelopmentExtensionFunctionalTest extends Ab
         expect:
         fails('help')
         failure.assertHasDescription("A problem occurred configuring root project 'gradle-plugin'.")
-        failure.assertHasCause("The value for property 'minimumGradleVersion' cannot be changed any further.")
+        failure.assertThatCause(forChangesDisallowed(onProperty("minimumGradleVersion")))
     }
 
     def "can generate Javadoc Jar"() {

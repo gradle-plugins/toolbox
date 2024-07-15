@@ -22,7 +22,9 @@ import static dev.gradleplugins.buildscript.syntax.Syntax.groovyDsl;
 import static dev.gradleplugins.buildscript.syntax.Syntax.literal;
 import static dev.gradleplugins.fixtures.runnerkit.BuildResultMatchers.hasFailureCause;
 import static dev.gradleplugins.fixtures.runnerkit.BuildResultMatchers.hasFailureDescription;
+import static dev.gradleplugins.hamcrest.gradle.GradleProviderMatchers.PropertyTarget.onProperty;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static dev.gradleplugins.hamcrest.gradle.GradleProviderMatchers.forChangesDisallowed;
 
 class GradlePluginDevelopmentFunctionalTestingFunctionalTests {
     @TempDir(cleanup = CleanupMode.ON_SUCCESS)
@@ -84,7 +86,7 @@ class GradlePluginDevelopmentFunctionalTestingFunctionalTests {
 
         BuildResult result = runner.withTasks("verify").buildAndFail();
         assertThat(result, hasFailureDescription("A problem occurred configuring root project 'gradle-plugin'."));
-        assertThat(result, hasFailureCause("The value for test suite 'functionalTest' property 'sourceSet' is final and cannot be changed any further."));
+        assertThat(result, hasFailureCause(forChangesDisallowed(onProperty("sourceSet"))));
     }
 
     @Test
@@ -98,7 +100,7 @@ class GradlePluginDevelopmentFunctionalTestingFunctionalTests {
 
         BuildResult result = runner.withTasks("verify").buildAndFail();
         assertThat(result, hasFailureDescription("A problem occurred configuring root project 'gradle-plugin'."));
-        assertThat(result, hasFailureCause("The value for test suite 'functionalTest' property 'testedSourceSet' cannot be changed any further."));
+        assertThat(result, hasFailureCause(forChangesDisallowed(onProperty("testedSourceSet"))));
     }
 
     @Test
@@ -112,7 +114,7 @@ class GradlePluginDevelopmentFunctionalTestingFunctionalTests {
 
         BuildResult result = runner.withTasks("verify").buildAndFail();
         assertThat(result, hasFailureDescription("A problem occurred configuring root project 'gradle-plugin'."));
-        assertThat(result, hasFailureCause("The value for test suite 'functionalTest' property 'testingStrategies' is final and cannot be changed any further."));
+        assertThat(result, hasFailureCause(forChangesDisallowed(onProperty("testingStrategies"))));
     }
 
     @Test

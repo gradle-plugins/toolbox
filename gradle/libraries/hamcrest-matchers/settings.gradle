@@ -1,0 +1,23 @@
+import org.gradle.api.initialization.resolve.RepositoriesMode
+
+include 'hamcrest-gradle'
+
+rootProject.name = 'hamcrest-matchers'
+
+gradle.allprojects {
+    group = 'dev.gradleplugins'
+
+    pluginManager.withPlugin('java-base') {
+        java {
+            sourceCompatibility = JavaVersion.VERSION_1_8
+            targetCompatibility = JavaVersion.VERSION_1_8
+        }
+    }
+}
+
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+    }
+    repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
+}

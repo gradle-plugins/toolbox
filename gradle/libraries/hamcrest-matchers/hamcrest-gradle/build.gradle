@@ -1,0 +1,9 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    def hamcrestVersion = 'latest.release'
+    api "org.hamcrest:hamcrest:${hamcrestVersion}"
+    compileOnly "dev.gradleplugins:gradle-api:${gradle.gradleVersion}"
+}

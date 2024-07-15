@@ -7,12 +7,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static dev.gradleplugins.ProjectMatchers.*;
+import static dev.gradleplugins.ProjectMatchers.coordinate;
+import static dev.gradleplugins.ProjectMatchers.extensions;
+import static dev.gradleplugins.ProjectMatchers.hasPlugin;
+import static dev.gradleplugins.ProjectMatchers.named;
+import static dev.gradleplugins.ProjectMatchers.publicType;
+import static dev.gradleplugins.hamcrest.gradle.GradleProviderMatchers.PropertyTarget.ofOwner;
+import static dev.gradleplugins.hamcrest.gradle.GradleProviderMatchers.forChangesDisallowed;
 import static dev.gradleplugins.internal.plugins.GradlePluginDevelopmentUnitTestingPlugin.test;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasItem;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class GradlePluginDevelopmentUnitTestingPluginIntegrationTest {
     private final Project project = ProjectBuilder.builder().build();
@@ -48,7 +55,7 @@ class GradlePluginDevelopmentUnitTestingPluginIntegrationTest {
         @Test
         void disallowChangesToSourceSetProperty() {
             final Throwable ex = assertThrows(RuntimeException.class, () -> subject().getSourceSet().set((SourceSet) null));
-            assertEquals("The value for test suite 'test' property 'sourceSet' cannot be changed any further.", ex.getMessage());
+            assertThat(ex.getMessage(), forChangesDisallowed(ofOwner("test suite 'test'").property("sourceSet")));
         }
 
         @Test // https://github.com/gradle-plugins/toolbox/issues/65
