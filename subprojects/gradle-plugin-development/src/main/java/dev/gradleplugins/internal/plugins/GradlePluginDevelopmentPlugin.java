@@ -37,10 +37,12 @@ public abstract /*final*/ class GradlePluginDevelopmentPlugin implements Plugin<
     }
 
     private void doApply(Project project) {
+        project.getPluginManager().apply("gradlepluginsdev.rules.gradle-distribution-repositories");
         project.getPluginManager().apply("gradlepluginsdev.rules.project-extensions");
     }
 
     private void doApply(Settings settings) {
+        settings.getPluginManager().apply("gradlepluginsdev.rules.gradle-distribution-repositories");
         settings.getPluginManager().apply("gradlepluginsdev.rules.settings-repositories-extension");
         settings.getGradle().addBuildListener(new BuildAdapter() {
             @Override

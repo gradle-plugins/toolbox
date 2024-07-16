@@ -2,6 +2,7 @@ package dev.gradleplugins;
 
 import org.gradle.api.Action;
 import org.gradle.api.artifacts.dsl.RepositoryHandler;
+import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.plugins.ExtensionAware;
 
@@ -27,6 +28,20 @@ public interface GradlePluginDevelopmentRepositoryExtension {
      * @return the Gradle Plugin Development repository instance added to the repository handler.
      */
     MavenArtifactRepository gradlePluginDevelopment(Action<? super MavenArtifactRepository> action);
+
+    /**
+     * Adds a Gradle Distributions repository containing the Gradle API/TestKit.
+     *
+     * @return the Gradle Distributions repository instance added to the repository handler.
+     */
+    ArtifactRepository gradleDistributions();
+
+    /**
+     * Adds a Gradle Distributions Snapshots repository containing the Gradle API/TestKit.
+     *
+     * @return the Gradle Distributions Snapshots repository instance added to the repository handler.
+     */
+    ArtifactRepository gradleDistributionsSnapshots();
 
     /**
      * Returns {@link RepositoryHandler} extension methods.

@@ -12,6 +12,7 @@ import javax.inject.Inject;
 
     @Override
     public void apply(Project project) {
+        project.getPluginManager().apply("gradlepluginsdev.rules.gradle-distribution-repositories");
         project.getPluginManager().apply("gradlepluginsdev.rules.gradle-jvm-compatibilities");
         project.getPluginManager().apply("gradlepluginsdev.rules.project-extensions");
         project.getPluginManager().apply("gradlepluginsdev.rules.gradle-plugin-compatibility-extension");
