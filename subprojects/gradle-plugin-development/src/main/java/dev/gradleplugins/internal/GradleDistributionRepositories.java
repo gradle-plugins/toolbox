@@ -428,13 +428,138 @@ public final class GradleDistributionRepositories {
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
                             }
-                        } else if (gradleJar.getName().getClassifier().equals("javadoc")) {
-                            throw new UnsupportedOperationException("Javadoc generation not supported");
                         } else if (gradleJar.getName().getClassifier().equals("sources")) {
-                            throw new UnsupportedOperationException("Sources generation not supported");
+                            try {
+                                Files.write(workingDirectory.resolve("build.gradle"), Arrays.asList(
+                                        "buildscript {",
+                                        "	dependencies {",
+                                        "		classpath 'io.github.http-builder-ng:http-builder-ng-core:1.0.4'",
+                                        "	}",
+                                        "	repositories {",
+                                        "		mavenCentral()",
+                                        "	}",
+                                        "}",
+                                        "",
+                                        "apply plugin: 'java'",
+                                        "import groovyx.net.http.HttpBuilder",
+                                        "import groovyx.net.http.optional.Download",
+                                        "tasks.create('download') {",
+                                        "	ext.outputFile = file(\"gradle-src-" + gradleJar.getGradleVersion() + ".zip\")",
+                                        "	outputs.file(outputFile)",
+                                        "	inputs.property('gradleVersion', gradle.gradleVersion)",
+                                        "	doFirst {",
+                                        "		File file = HttpBuilder.configure {",
+                                        // TODO: Use the right distributions link
+                                        "			request.uri = \"https://services.gradle.org/distributions/gradle-" + gradleJar.getGradleVersion() + "-src.zip\"",
+                                        "			request.headers.put('User-Agent', 'gradle-api-extractor');",
+                                        "		}.get {",
+                                        "			Download.toFile(delegate, outputFile)",
+                                        "		}",
+                                        "	}",
+                                        "}",
+                                        "tasks.create('generate', Zip) {",
+                                        "	dependsOn(tasks.download)",
+                                        "	from({zipTree(tasks.download.outputFile).matching { include('*/subprojects/*/src/*/**/*.java', '*/subprojects/*/src/*/**/*.groovy', '*/subprojects/*/src/*/**/*.kt').exclude('buildSrc/**/*') } }) {",
+                                        "		eachFile {",
+                                        "			relativePath = new RelativePath(relativePath.file, relativePath.segments.drop(6))",
+                                        "		}",
+                                        "		includeEmptyDirs = false",
+                                        "	}",
+                                        "	baseName = 'gradle'",
+                                        "	version = '" + gradleJar.getGradleVersion() + "'",
+                                        "	extension = 'jar'",
+                                        "	classifier = 'src'",
+                                        "}"
+                                ));
+                                Files.createFile(workingDirectory.resolve("settings.gradle"));
+
+                                final GradleConnector connector = GradleConnector.newConnector();
+                                connector.useGradleVersion("6.5"); // doesn't need to be align with requested
+                                connector.useGradleUserHomeDir(getParameters().getGradleUserHomeDirectory().getAsFile().get());
+                                connector.forProjectDirectory(workingDirectory.toFile());
+
+                                withOutput(workingDirectory.resolve("output.txt"), outStream -> {
+                                    try (ProjectConnection connection = connector.connect()) {
+                                        final BuildLauncher launcher = connection.newBuild().forTasks("generate");
+                                        launcher.setStandardOutput(outStream);
+                                        launcher.setStandardError(outStream);
+                                        launcher.run();
+                                    }
+                                });
+
+                                File jarFile = outputs.file(gradleJar.getName());
+                                File generatedJarFile = workingDirectory.resolve("build/distributions/gradle-" + gradleJar.getGradleVersion() + "-src.jar").toFile();
+                                Files.copy(generatedJarFile.toPath(), jarFile.toPath());
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        } else if (gradleJar.getName().getClassifier().equals("javadoc")) {
+                            try {
+                                Files.write(workingDirectory.resolve("build.gradle"), Arrays.asList(
+                                        "buildscript {",
+                                        "	dependencies {",
+                                        "		classpath 'io.github.http-builder-ng:http-builder-ng-core:1.0.4'",
+                                        "	}",
+                                        "	repositories {",
+                                        "		mavenCentral()",
+                                        "	}",
+                                        "}",
+                                        "",
+                                        "apply plugin: 'java'",
+                                        "import groovyx.net.http.HttpBuilder",
+                                        "import groovyx.net.http.optional.Download",
+                                        "tasks.create('download') {",
+                                        "	ext.outputFile = file(\"gradle-javadoc-" + gradleJar.getGradleVersion() + ".zip\")",
+                                        "	outputs.file(outputFile)",
+                                        "	inputs.property('gradleVersion', gradle.gradleVersion)",
+                                        "	doFirst {",
+                                        "		File file = HttpBuilder.configure {",
+                                        // TODO: Use the right distributions link
+                                        "			request.uri = \"https://services.gradle.org/distributions/gradle-" + gradleJar.getGradleVersion() + "-all.zip\"",
+                                        "			request.headers.put('User-Agent', 'gradle-api-extractor');",
+                                        "		}.get {",
+                                        "			Download.toFile(delegate, outputFile)",
+                                        "		}",
+                                        "	}",
+                                        "}",
+                                        "tasks.create('generate', Zip) {",
+                                        "	dependsOn(tasks.download)",
+                                        "	from({zipTree(tasks.download.outputFile).matching { include('*/docs/javadoc/**/*') } }) {",
+                                        "		eachFile {",
+                                        "			relativePath = new RelativePath(relativePath.file, relativePath.segments.drop(3))",
+                                        "		}",
+                                        "		includeEmptyDirs = false",
+                                        "	}",
+                                        "	baseName = 'gradle'",
+                                        "	version = '" + gradleJar.getGradleVersion() + "'",
+                                        "	extension = 'jar'",
+                                        "	classifier = 'javadoc'",
+                                        "}"
+                                ));
+                                Files.createFile(workingDirectory.resolve("settings.gradle"));
+
+                                final GradleConnector connector = GradleConnector.newConnector();
+                                connector.useGradleVersion("6.5"); // doesn't need to be align with requested
+                                connector.useGradleUserHomeDir(getParameters().getGradleUserHomeDirectory().getAsFile().get());
+                                connector.forProjectDirectory(workingDirectory.toFile());
+
+                                withOutput(workingDirectory.resolve("output.txt"), outStream -> {
+                                    try (ProjectConnection connection = connector.connect()) {
+                                        final BuildLauncher launcher = connection.newBuild().forTasks("generate");
+                                        launcher.setStandardOutput(outStream);
+                                        launcher.setStandardError(outStream);
+                                        launcher.run();
+                                    }
+                                });
+
+                                File jarFile = outputs.file(gradleJar.getName());
+                                File generatedJarFile = workingDirectory.resolve("build/distributions/gradle-" + gradleJar.getGradleVersion() + "-javadoc.jar").toFile();
+                                Files.copy(generatedJarFile.toPath(), jarFile.toPath());
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
                         }
                     });
-
                 });
             }
 
