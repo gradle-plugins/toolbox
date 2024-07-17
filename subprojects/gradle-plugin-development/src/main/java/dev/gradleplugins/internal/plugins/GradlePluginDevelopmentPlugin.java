@@ -38,6 +38,7 @@ public abstract /*final*/ class GradlePluginDevelopmentPlugin implements Plugin<
 
     private void doApply(Project project) {
         project.getPluginManager().apply("gradlepluginsdev.rules.project-extensions");
+        project.getPluginManager().apply("gradlepluginsdev.rules.gradle-runtime-compatibilities-extension");
     }
 
     private void doApply(Settings settings) {
