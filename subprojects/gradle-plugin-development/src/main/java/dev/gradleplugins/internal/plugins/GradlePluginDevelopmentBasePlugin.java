@@ -15,6 +15,7 @@ import javax.inject.Inject;
         project.getPluginManager().apply("gradlepluginsdev.rules.gradle-jvm-compatibilities");
         project.getPluginManager().apply("gradlepluginsdev.rules.project-extensions");
         project.getPluginManager().apply("gradlepluginsdev.rules.gradle-plugin-compatibility-extension");
+        project.getPluginManager().apply("gradlepluginsdev.rules.gradle-runtime-compatibilities-extension");
         project.getPluginManager().apply("gradlepluginsdev.rules.gradle-plugin-api-extension");
         project.getPluginManager().apply("gradlepluginsdev.rules.gradle-plugin-dependencies");
         whenPluginApplied("java-gradle-plugin", new RemoveGradleApiProjectDependency()).execute(project);

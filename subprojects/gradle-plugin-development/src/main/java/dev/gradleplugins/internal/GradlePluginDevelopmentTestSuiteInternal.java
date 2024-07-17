@@ -5,7 +5,7 @@ import dev.gradleplugins.GradlePluginDevelopmentDependencyModifiers;
 import dev.gradleplugins.GradlePluginDevelopmentTestSuite;
 import dev.gradleplugins.GradlePluginDevelopmentTestSuiteDependencies;
 import dev.gradleplugins.GradlePluginTestingStrategyFactory;
-import dev.gradleplugins.GradleRuntimeCompatibility;
+import dev.gradleplugins.internal.util.GradleRuntimeCompatibility;
 import dev.gradleplugins.TaskView;
 import dev.gradleplugins.internal.runtime.dsl.GroovyHelper;
 import dev.gradleplugins.internal.util.LocalOrRemoteVersionTransformer;

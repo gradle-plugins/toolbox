@@ -3,7 +3,7 @@ package dev.gradleplugins;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import static dev.gradleplugins.GradleRuntimeCompatibility.lastMinorReleaseOf;
+import static dev.gradleplugins.internal.util.GradleRuntimeCompatibility.lastMinorReleaseOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 

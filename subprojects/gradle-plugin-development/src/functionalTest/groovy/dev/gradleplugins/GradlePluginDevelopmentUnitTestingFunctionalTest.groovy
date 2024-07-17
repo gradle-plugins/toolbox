@@ -85,7 +85,6 @@ abstract class AbstractGradlePluginDevelopmentUnitTestingFunctionalTest extends 
                 mavenCentral()
             }
             
-            import static ${GradleRuntimeCompatibility.canonicalName}.groovyVersionOf
             import ${GradleVersion.canonicalName}
             
             test {

@@ -1,6 +1,6 @@
 package dev.gradleplugins.internal.rules;
 
-import dev.gradleplugins.GradleRuntimeCompatibility;
+import dev.gradleplugins.internal.util.GradleRuntimeCompatibility;
 import dev.gradleplugins.internal.GradleCompatibilities;
 import dev.gradleplugins.internal.JvmCompatibilities;
 import org.gradle.api.Action;
