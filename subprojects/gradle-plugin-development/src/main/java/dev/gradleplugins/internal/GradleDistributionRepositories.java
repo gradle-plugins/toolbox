@@ -1,5 +1,6 @@
 package dev.gradleplugins.internal;
 
+import dev.gradleplugins.GradleRuntimeCompatibility;
 import dev.gradleplugins.internal.util.MinimumDependencyResolutionManagement;
 import org.gradle.api.Action;
 import org.gradle.api.ActionConfiguration;
@@ -47,7 +48,6 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -65,7 +65,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static dev.gradleplugins.internal.util.MinimumDependencyResolutionManagement.dependencyResolutionManagement;
+import static dev.gradleplugins.GradleRuntimeCompatibility.groovyVersionOf;
+import static dev.gradleplugins.GradleRuntimeCompatibility.kotlinVersionOf;
 import static dev.gradleplugins.internal.util.MinimumDependencyResolutionManagement.dependencyResolutionManagement;
 import static dev.gradleplugins.internal.util.OnceAction.once;
 
@@ -217,7 +218,8 @@ public final class GradleDistributionRepositories {
         }
     }
 
-    public static void writeModuleFile(File moduleFile, Filenames names, ModuleGroupIdentifier group, ModuleVersionIdentifier id) {
+    // TODO: Add support for old Gradle API jars
+    private static void writeModuleFile(File moduleFile, Filenames names, ModuleGroupIdentifier group, ModuleVersionIdentifier id) {
         moduleFile.getParentFile().mkdirs();
         try (PrintStream out = new PrintStream(moduleFile)) {
             out.println("{");
@@ -228,11 +230,6 @@ public final class GradleDistributionRepositories {
             out.println("    \"version\": \"" + id.getVersion() + "\",");
             out.println("    \"attributes\": {");
             out.println("      \"org.gradle.status\": \"release\"");
-            out.println("    }");
-            out.println("  },");
-            out.println("  \"createdBy\": {");
-            out.println("    \"gradle\": {");
-            out.println("      \"version\": \"6.8.1\"");
             out.println("    }");
             out.println("  },");
             out.println("  \"variants\": [");
@@ -250,7 +247,7 @@ public final class GradleDistributionRepositories {
             out.println("          \"group\": \"org.codehaus.groovy\",");
             out.println("          \"module\": \"groovy\",");
             out.println("          \"version\": {");
-            out.println("            \"requires\": \"3.0.21\"");
+            out.println("            \"requires\": \"" + groovyVersionOf(id.getVersion()) + "\"");
             out.println("          }");
             out.println("        }");
             out.println("      ],");
@@ -275,7 +272,7 @@ public final class GradleDistributionRepositories {
             out.println("          \"group\": \"org.codehaus.groovy\",");
             out.println("          \"module\": \"groovy-all\",");
             out.println("          \"version\": {");
-            out.println("            \"requires\": \"3.0.21\"");
+            out.println("            \"requires\": \"" + groovyVersionOf(id.getVersion()) + "\"");
             out.println("          },");
             out.println("          \"thirdPartyCompatibility\": {");
             out.println("            \"artifactSelector\": {");
@@ -284,13 +281,15 @@ public final class GradleDistributionRepositories {
             out.println("              \"extension\": \"pom\"");
             out.println("            }");
             out.println("          }");
-            out.println("        },");
-            out.println("        {");
-            out.println("          \"group\": \"org.jetbrains.kotlin\",");
-            out.println("          \"module\": \"kotlin-stdlib\",");
-            out.println("          \"version\": {");
-            out.println("            \"requires\": \"1.9.23\"");
-            out.println("          }");
+            if (kotlinVersionOf(id.getVersion()).isPresent()) {
+                out.println("        },");
+                out.println("        {");
+                out.println("          \"group\": \"org.jetbrains.kotlin\",");
+                out.println("          \"module\": \"kotlin-stdlib\",");
+                out.println("          \"version\": {");
+                out.println("            \"requires\": \"" + kotlinVersionOf(id.getVersion()).get() + "\"");
+                out.println("          }");
+            }
             out.println("        }");
             out.println("      ],");
             out.println("      \"files\": [");
@@ -426,8 +425,7 @@ public final class GradleDistributionRepositories {
                                 File jarFile = outputs.file(gradleJar.getName());
                                 File generatedJarFile = getParameters().getGradleUserHomeDirectory().file("caches/" + gradleJar.getGradleVersion() + "/generated-gradle-jars/" + gradleJar.getName()).map(FileSystemLocation::getAsFile).get();
                                 Files.copy(generatedJarFile.toPath(), jarFile.toPath());
-                            } catch (
-                                    IOException e) {
+                            } catch (IOException e) {
                                 throw new RuntimeException(e);
                             }
                         } else if (gradleJar.getName().getClassifier().equals("javadoc")) {
