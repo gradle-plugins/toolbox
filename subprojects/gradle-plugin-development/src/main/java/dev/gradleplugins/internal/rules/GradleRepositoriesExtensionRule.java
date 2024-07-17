@@ -14,9 +14,8 @@ import org.gradle.api.artifacts.dsl.RepositoryHandler;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.initialization.Settings;
-import org.gradle.api.logging.Logger;
-import org.gradle.api.logging.Logging;
 import org.gradle.api.plugins.ExtensionAware;
+import org.gradle.api.plugins.PluginAware;
 import org.gradle.api.reflect.HasPublicType;
 import org.gradle.api.reflect.TypeOf;
 import org.gradle.internal.Actions;
@@ -27,32 +26,31 @@ import java.util.function.Supplier;
 import static dev.gradleplugins.internal.util.DoNothingAction.doNothing;
 import static dev.gradleplugins.internal.util.MinimumDependencyResolutionManagement.dependencyResolutionManagement;
 
-/*private*/ final class RepositoriesExtensionRules {
-    private static final Logger LOGGER = Logging.getLogger(RepositoriesExtensionRules.class);
+/*private*/ abstract /*final*/ class GradleRepositoriesExtensionRule implements Plugin<PluginAware> {
+    @Inject
+    public GradleRepositoriesExtensionRule() {}
 
-    private RepositoriesExtensionRules() {}
-
-    /*private*/ static abstract /*final*/ class ForProject implements Plugin<Project> {
-        @Inject
-        public ForProject() {}
-
-        public void apply(Project project) {
-            decorate(project.getRepositories(), () -> project.getExtensions().getByType(GradleDistributionRepositories.Factory.class));
+    @Override
+    public void apply(PluginAware target) {
+        if (target instanceof Project) {
+            applyTo((Project) target);
+        } else if (target instanceof Settings) {
+            applyTo((Settings) target);
+        } else {
+            throw new UnsupportedOperationException();
         }
     }
 
-    /*private*/ static abstract /*final*/ class ForSettings implements Plugin<Settings> {
-        @Inject
-        public ForSettings() {}
+    private void applyTo(Project project) {
+        decorate(project.getRepositories(), () -> project.getExtensions().getByType(GradleDistributionRepositories.Factory.class));
+    }
 
-        @Override
-        public void apply(Settings settings) {
-            dependencyResolutionManagement(settings, it -> {
-                it.repositories(repositories -> {
-                    decorate(repositories, () -> settings.getExtensions().getByType(GradleDistributionRepositories.Factory.class));
-                });
+    private void applyTo(Settings settings) {
+        dependencyResolutionManagement(settings, it -> {
+            it.repositories(repositories -> {
+                decorate(repositories, () -> settings.getExtensions().getByType(GradleDistributionRepositories.Factory.class));
             });
-        }
+        });
     }
 
     private static void decorate(RepositoryHandler repositories, Supplier<GradleDistributionRepositories.Factory>
