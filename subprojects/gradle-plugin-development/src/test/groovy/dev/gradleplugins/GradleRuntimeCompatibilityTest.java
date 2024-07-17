@@ -3,7 +3,7 @@ package dev.gradleplugins;
 import org.gradle.api.JavaVersion;
 import org.junit.jupiter.api.Test;
 
-import static dev.gradleplugins.GradleRuntimeCompatibility.*;
+import static dev.gradleplugins.internal.util.GradleRuntimeCompatibility.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class GradleRuntimeCompatibilityTest {

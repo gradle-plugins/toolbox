@@ -17,7 +17,7 @@
 package dev.gradleplugins.internal.plugins;
 
 import dev.gradleplugins.GradlePluginDevelopmentCompatibilityExtension;
-import dev.gradleplugins.GradleRuntimeCompatibility;
+import dev.gradleplugins.internal.util.GradleRuntimeCompatibility;
 import dev.gradleplugins.GroovyGradlePluginDevelopmentExtension;
 import dev.gradleplugins.internal.DeferredRepositoryFactory;
 import dev.gradleplugins.internal.DependencyBucketFactory;

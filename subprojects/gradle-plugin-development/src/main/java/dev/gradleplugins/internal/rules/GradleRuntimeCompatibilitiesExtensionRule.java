@@ -1,7 +1,7 @@
 package dev.gradleplugins.internal.rules;
 
 import dev.gradleplugins.GradleRuntimeCompatibilitiesExtension;
-import dev.gradleplugins.GradleRuntimeCompatibility;
+import dev.gradleplugins.internal.util.GradleRuntimeCompatibility;
 import org.gradle.api.JavaVersion;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
