@@ -1,6 +1,7 @@
 package dev.gradleplugins;
 
 import org.gradle.api.JavaVersion;
+import org.gradle.api.Project;
 import org.gradle.api.provider.Provider;
 import org.gradle.util.GradleVersion;
 
@@ -59,4 +60,16 @@ public interface GradleRuntimeCompatibilitiesExtension {
      * @return the latest minor version for the specified version, never null
      */
     Provider<GradleVersion> lastMinorReleaseOf(Object gradleVersion);
+
+    /**
+     * Returns the extension for this project.
+     * The user must apply one of the following plugins: {@literal dev.gradleplugins.gradle-plugin-base} or {@literal dev.gradleplugins.gradle-plugin-development}.
+     *
+     * @param project  the project to get the extension
+     * @return the extension, never null
+     */
+    static GradleRuntimeCompatibilitiesExtension forProject(Project project) {
+        assert project != null : "'project' must not be null";
+        return project.getExtensions().getByType(GradleRuntimeCompatibilitiesExtension.class);
+    }
 }
