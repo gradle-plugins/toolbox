@@ -132,6 +132,7 @@ public final class GradleRuntimeCompatibility {
             default:
                 LOGGER.warn(String.format("Unknown Groovy version for Gradle '%s', please open an issue on https://github.com/gradle-plugins/toolbox. Assuming value of the latest known version.", gradleVersion.toString()));
             case "8.10":
+            case "8.11":
                 return "3.0.22";
         }
     }
@@ -307,10 +308,12 @@ public final class GradleRuntimeCompatibility {
                 return Optional.of("1.9.22");
             case "8.9":
                 return Optional.of("1.9.23");
-            default:
-                LOGGER.warn(String.format("Unknown Kotlin version for Gradle '%s', please open an issue on https://github.com/gradle-plugins/toolbox. Assuming value of the latest known version.", gradleVersion.toString()));
             case "8.10":
                 return Optional.of("1.9.24");
+            default:
+                LOGGER.warn(String.format("Unknown Kotlin version for Gradle '%s', please open an issue on https://github.com/gradle-plugins/toolbox. Assuming value of the latest known version.", gradleVersion.toString()));
+            case "8.11":
+                return Optional.of("2.0.20");
         }
     }
 
@@ -365,6 +368,7 @@ public final class GradleRuntimeCompatibility {
             case "8.1": return "8.1.1";
             case "8.2": return "8.2.1";
             case "8.10": return "8.10.2";
+            case "8.11": return "8.11.1";
             default:
                 if (gradleVersion.getPatch() == 0) {
                     return String.format("%d.%d%s", gradleVersion.getMajor(), gradleVersion.getMinor(), gradleVersion.getQualifier() == null ? "" : "-" + gradleVersion.getQualifier());
@@ -395,7 +399,7 @@ public final class GradleRuntimeCompatibility {
             case 5: return "5.6.4";
             case 6: return "6.9.4";
             case 7: return "7.6.4";
-            case 8: return "8.10.2";
+            case 8: return "8.11.1";
             default:
                 throw new IllegalArgumentException(String.format("Unknown Gradle version, please open an issue on https://github.com/gradle-plugins/toolbox.", gradleVersion));
         }
