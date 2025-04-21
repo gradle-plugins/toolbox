@@ -158,6 +158,7 @@ class GradleRuntimeCompatibilityLastPatchedVersionOfTests {
             "8.11.1             | 8.11.1",
             "8.12               | 8.12.1",
             "8.12.1             | 8.12.1",
+            "8.13               | 8.13",
     })
     void checkLastPatchedGradleVersion(String validGradleVersion, String expectedLastPatchedGradleVersion) {
         assertThat(lastPatchedVersionOf(validGradleVersion), equalTo(expectedLastPatchedGradleVersion));

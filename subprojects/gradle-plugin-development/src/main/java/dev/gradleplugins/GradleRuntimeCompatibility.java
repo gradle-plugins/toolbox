@@ -134,6 +134,7 @@ public final class GradleRuntimeCompatibility {
             case "8.10":
             case "8.11":
             case "8.12":
+            case "8.13":
                 return "3.0.22";
         }
     }
@@ -316,6 +317,7 @@ public final class GradleRuntimeCompatibility {
             default:
                 LOGGER.warn(String.format("Unknown Kotlin version for Gradle '%s', please open an issue on https://github.com/gradle-plugins/toolbox. Assuming value of the latest known version.", gradleVersion.toString()));
             case "8.12":
+            case "8.13":
                 return Optional.of("2.0.21");
         }
     }
@@ -403,7 +405,7 @@ public final class GradleRuntimeCompatibility {
             case 5: return "5.6.4";
             case 6: return "6.9.4";
             case 7: return "7.6.4";
-            case 8: return "8.12.1";
+            case 8: return "8.13";
             default:
                 throw new IllegalArgumentException(String.format("Unknown Gradle version, please open an issue on https://github.com/gradle-plugins/toolbox.", gradleVersion));
         }
