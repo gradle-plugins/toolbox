@@ -1,6 +1,7 @@
 package dev.gradleplugins.internal.rules;
 
 import dev.gradleplugins.GradlePluginDevelopmentRepositoryExtension;
+import dev.gradleplugins.internal.GradleDistributionRepositories;
 import dev.gradleplugins.internal.runtime.dsl.GroovyHelper;
 import dev.gradleplugins.internal.util.ClosureWrappedConfigureAction;
 import groovy.lang.Closure;
@@ -10,65 +11,67 @@ import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.dsl.RepositoryHandler;
+import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.initialization.Settings;
-import org.gradle.api.logging.Logger;
-import org.gradle.api.logging.Logging;
 import org.gradle.api.plugins.ExtensionAware;
+import org.gradle.api.plugins.PluginAware;
 import org.gradle.api.reflect.HasPublicType;
 import org.gradle.api.reflect.TypeOf;
 import org.gradle.internal.Actions;
 
 import javax.inject.Inject;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.util.function.Supplier;
 
-/*private*/ final class RepositoriesExtensionRules {
-    private static final Logger LOGGER = Logging.getLogger(RepositoriesExtensionRules.class);
+import static dev.gradleplugins.internal.util.DoNothingAction.doNothing;
+import static dev.gradleplugins.internal.util.MinimumDependencyResolutionManagement.dependencyResolutionManagement;
 
-    private RepositoriesExtensionRules() {}
+/*private*/ abstract /*final*/ class GradleRepositoriesExtensionRule implements Plugin<PluginAware> {
+    @Inject
+    public GradleRepositoriesExtensionRule() {}
 
-    /*private*/ static abstract /*final*/ class ForProject implements Plugin<Project> {
-        @Inject
-        public ForProject() {}
-
-        public void apply(Project project) {
-            decorate(project.getRepositories());
+    @Override
+    public void apply(PluginAware target) {
+        if (target instanceof Project) {
+            applyTo((Project) target);
+        } else if (target instanceof Settings) {
+            applyTo((Settings) target);
+        } else {
+            throw new UnsupportedOperationException();
         }
     }
 
-    /*private*/ static abstract /*final*/ class ForSettings implements Plugin<Settings> {
-        @Inject
-        public ForSettings() {}
-
-        @Override
-        public void apply(Settings settings) {
-            try {
-                Method Settings__getDependencyResolutionManagement = settings.getClass().getDeclaredMethod("getDependencyResolutionManagement");
-                Object dependencyResolutionManagement = Settings__getDependencyResolutionManagement.invoke(settings);
-                Method DependencyResolutionManagement__getRepositories = dependencyResolutionManagement.getClass().getDeclaredMethod("getRepositories");
-                RepositoryHandler repositories = (RepositoryHandler) DependencyResolutionManagement__getRepositories.invoke(dependencyResolutionManagement);
-
-                decorate(repositories);
-            } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-                // ignore, lower Gradle
-            }
-        }
+    private void applyTo(Project project) {
+        decorate(project.getRepositories(), () -> project.getExtensions().getByType(GradleDistributionRepositories.Factory.class));
     }
 
-    private static void decorate(RepositoryHandler repositories) {
-        final GradlePluginDevelopmentRepositoryExtension extension = new DefaultGradlePluginDevelopmentRepositoryExtension(repositories);
+    private void applyTo(Settings settings) {
+        dependencyResolutionManagement(settings, it -> {
+            it.repositories(repositories -> {
+                decorate(repositories, () -> settings.getExtensions().getByType(GradleDistributionRepositories.Factory.class));
+            });
+        });
+    }
+
+    private static void decorate(RepositoryHandler repositories, Supplier<GradleDistributionRepositories.Factory>
+            factory) {
+        final GradlePluginDevelopmentRepositoryExtension extension = new DefaultGradlePluginDevelopmentRepositoryExtension(repositories, factory);
         ((ExtensionAware) repositories).getExtensions().add("gradlePluginDevelopment", extension);
 
         GroovyHelper.instance().addNewInstanceMethod(repositories, "gradlePluginDevelopment", new MethodClosure(extension, "gradlePluginDevelopment"));
+        GroovyHelper.instance().addNewInstanceMethod(repositories, "gradleDistributions", new MethodClosure(extension, "gradleDistributions"));
+        GroovyHelper.instance().addNewInstanceMethod(repositories, "gradleDistributionsSnapshots", new MethodClosure(extension, "gradleDistributionsSnapshots"));
     }
 
+    // NOTE: The class MUST NOT BE a Gradle type because of the Groovy method injection
     private static final class DefaultGradlePluginDevelopmentRepositoryExtension implements GradlePluginDevelopmentRepositoryExtension, HasPublicType {
         private final RepositoryHandler repositories;
+        private final Supplier<GradleDistributionRepositories.Factory> factory;
 
         @Inject
-        public DefaultGradlePluginDevelopmentRepositoryExtension(RepositoryHandler repositories) {
+        public DefaultGradlePluginDevelopmentRepositoryExtension(RepositoryHandler repositories, Supplier<GradleDistributionRepositories.Factory> factory) {
             this.repositories = repositories;
+            this.factory = factory;
         }
 
         @Override
@@ -95,6 +98,16 @@ import java.lang.reflect.Method;
 
         public MavenArtifactRepository gradlePluginDevelopment(@DelegatesTo(MavenArtifactRepository.class) @SuppressWarnings("rawtypes") Closure action) {
             return gradlePluginDevelopment(new ClosureWrappedConfigureAction<>(action));
+        }
+
+        @Override
+        public ArtifactRepository gradleDistributions() {
+            return factory.get().gradleDistributions(doNothing());
+        }
+
+        @Override
+        public ArtifactRepository gradleDistributionsSnapshots() {
+            return factory.get().gradleDistributionsSnapshots(doNothing());
         }
 
         @Override

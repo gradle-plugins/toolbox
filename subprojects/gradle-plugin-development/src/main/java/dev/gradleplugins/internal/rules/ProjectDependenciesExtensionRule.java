@@ -37,6 +37,7 @@ import javax.inject.Inject;
         GroovyHelper.instance().addNewInstanceMethod(dependencies, "gradlePlugin", new MethodClosure(extension, "gradlePlugin"));
     }
 
+    // NOTE: The class MUST NOT BE a Gradle type because of the Groovy method injection
     private static final class DefaultGradlePluginDevelopmentDependencyExtension implements GradlePluginDevelopmentDependencyExtension, HasPublicType {
         private final DependencyFactory factory;
         private final Transformer<Dependency, String> gradleApiTransformer;
